@@ -1,0 +1,18 @@
+<package format="2">
+  <name>autoware_mini</name>
+  <version>1.0.0</version>
+  <description>Minimalistic python based autonomy software</description>
+  <license>Closed-Source</license>
+  <author email="edgar.sepp@ut.ee">Edgar Sepp</author>
+  <maintainer email="adl@ut.ee">Autonomous Driving Lab</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>rviz</exec_depend>
+
+  <exec_depend>novatel_oem7_driver</exec_depend>
+  <exec_depend>pacmod3</exec_depend>
+  <exec_depend>ssc_pm_lexus</exec_depend>
+
+</package>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+   <arg name="coordinate_system"    default="lest97_tartu" doc="{lest97, mgrs}" />
+
+   <node pkg="autoware_mini" type="localizer.py" name="gnss_localizer" output="screen" >
+      <param name="coordinate_system"     value="$(arg coordinate_system)" />
+   </node>
+
+
+</launch>
