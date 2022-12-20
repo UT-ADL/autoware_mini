@@ -33,11 +33,12 @@ class Localizer:
     def inspva_callback(self, msg):
 
         stamp = msg.header.stamp
-        # TODO - get undulation from bestpos to calculate msl height
+        # TODO - get undulation from BESTPOS to calculate msl height
         height = msg.height
         # transform lat lon coordinates according to created transformer
         coords = self.coord_tranformer.transform(msg.latitude, msg.longitude)
         velocity = np.sqrt(msg.north_velocity * msg.north_velocity + msg.east_velocity + msg.east_velocity)
+        # get IMU angular speeds for Current velocity!
         
         # Publish 
         self.publish_current_pose(stamp, coords, height)
@@ -52,7 +53,7 @@ class Localizer:
         pose_msg.header.stamp = stamp
         pose_msg.header.frame_id = "map"
 
-        # TODO might need to swap x and y
+        # TODO might need to swap x and y - or in callback (data)
         pose_msg.pose.position.x = coords[0]
         pose_msg.pose.position.y = coords[1]
         pose_msg.pose.position.z = height
