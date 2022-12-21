@@ -7,7 +7,6 @@ import rospy
 import message_filters
 
 from geometry_msgs.msg import PoseStamped, TwistStamped
-from std_msgs.msg import String
 
 
 class WaypointSaver:

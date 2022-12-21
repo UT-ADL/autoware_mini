@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import numpy as np
-import math
 from pyproj import CRS, Transformer
 
 import rospy
@@ -38,20 +37,20 @@ class Localizer:
             # flattening of GRS-80  ellipsoid
             f = 1 / 298.257222101
             er = (2.0 * f) - (f * f)
-            e = math.sqrt(er)
+            e = np.sqrt(er)
 
             # 2 standard parallels of lest_97
-            B1 = 58.0 * (math.pi / 180)
-            B2 = (59.0 + 20.0 / 60.0) * (math.pi / 180)
+            B1 = 58.0 * (np.pi / 180)
+            B2 = (59.0 + 20.0 / 60.0) * (np.pi / 180)
 
             # calculate constant
-            m1 = math.cos(B1) / math.sqrt(1.0 - er * math.pow(math.sin(B1), 2))
-            m2 = math.cos(B2) / math.sqrt(1.0 - er * math.pow(math.sin(B2), 2))
+            m1 = np.cos(B1) / np.sqrt(1.0 - er * np.power(np.sin(B1), 2))
+            m2 = np.cos(B2) / np.sqrt(1.0 - er * np.power(np.sin(B2), 2))
             
-            t1 = math.sqrt(((1.0 - math.sin(B1)) / (1.0 + math.sin(B1))) * math.pow((1.0 + e * math.sin(B1)) / (1.0 - e * math.sin(B1)), e))
-            t2 = math.sqrt(((1.0 - math.sin(B2)) / (1.0 + math.sin(B2))) * math.pow((1.0 + e * math.sin(B2)) / (1.0 - e * math.sin(B2)), e))
+            t1 = np.sqrt(((1.0 - np.sin(B1)) / (1.0 + np.sin(B1))) * np.power((1.0 + e * np.sin(B1)) / (1.0 - e * np.sin(B1)), e))
+            t2 = np.sqrt(((1.0 - np.sin(B2)) / (1.0 + np.sin(B2))) * np.power((1.0 + e * np.sin(B2)) / (1.0 - e * np.sin(B2)), e))
 
-            self.convergence_const = (math.log(m1) - math.log(m2)) / (math.log(t1) - math.log(t2))
+            self.convergence_const = (np.log(m1) - np.log(m2)) / (np.log(t1) - np.log(t2))
             self.refernece_meridian = 24.0
 
         # Subscribers
@@ -156,9 +155,9 @@ def calculate_velocity(x_vel, y_vel):
 def convert_angles_to_orientation(roll, pitch, yaw):
     
     # convert angles to radians
-    roll = math.radians(roll)
-    pitch = math.radians(pitch)
-    yaw = math.radians(yaw)
+    roll = np.radians(roll)
+    pitch = np.radians(pitch)
+    yaw = np.radians(yaw)
 
     roll, pitch, yaw = convertAzimuthToENU(roll, pitch, yaw)
     orientation = get_quaternion_from_euler(roll, pitch, yaw)
@@ -171,13 +170,13 @@ def convertAzimuthToENU(roll, pitch, yaw):
     # These transforms are taken from gpsins_localizer_nodelet.cpp
 
     # Convert from Azimuth (CW from North) to ENU (CCW from East)
-    yaw = -yaw + math.pi/2
+    yaw = -yaw + np.pi/2
 
     # Clamp within 0 to 2 pi
-    if yaw > 2 * math.pi:
-        yaw = yaw - 2 * math.pi
+    if yaw > 2 * np.pi:
+        yaw = yaw - 2 * np.pi
     elif yaw < 0:
-        yaw += 2 * math.pi
+        yaw += 2 * np.pi
     
     # Novatel GPS uses different vehicle body frame (y forward, x right, z up)
     pitch = -pitch
