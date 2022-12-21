@@ -24,7 +24,7 @@ class WaypointSaver:
 
         rospy.init_node('waypoint_saver', anonymous=True)
 
-        # create empty waypoints file and write title line (append mode)
+        # write column names to waypoints file (append mode)
         with open('/tmp/' + self.file_name, 'a') as f:
             f.write('wp_id, x, y, z, yaw, velocity, change_flag\n')
 
@@ -44,8 +44,6 @@ class WaypointSaver:
         z = current_pose.pose.position.z
         v = current_velocity.twist.linear.x
 
-        # TODO - create markers for rviz
-
         self.write_to_waypoint_file(x, y, z, v)
 
 
@@ -62,6 +60,9 @@ class WaypointSaver:
             with open('/tmp/' + self.file_name, 'a') as f:
                 writer = csv.writer(f)
                 writer.writerow(row)
+
+            # TODO - create markers for rviz
+            # location written_x,y,z and pose is towards the current wp / or use yaw from current pose - needs to be calculated! 
 
             self.written_x = x
             self.written_y = y

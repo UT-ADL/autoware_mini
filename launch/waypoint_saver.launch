@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <launch>
 
-   <arg name="interval"    default="1.0" doc="Distance between recorded waypoints" />
+   <arg name="interval"    default="1.0"           doc="Distance between recorded waypoints" />
+   <arg name="file_name"   default="waypoints.csv" doc="will be recorded into /tmp folder" />
 
    <node pkg="autoware_mini" type="waypoint_saver.py" name="waypoint_saver" output="screen" >
       <param name="interval"     value="$(arg interval)" />
+      <param name="file_name"    value="$(arg file_name)" />
    </node> 
 
 </launch>
