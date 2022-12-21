@@ -18,7 +18,7 @@ class Localizer:
 
         # Parameters
         # Options: lest97, mgrs
-        self.coordinat_system = rospy.get_param("~coordinat_system", 'lest97')
+        self.coordinate_system = rospy.get_param("~coordinate_system", 'lest97')
         self.use_msl_height = rospy.get_param("~use_msl_height", True)
 
         rospy.init_node('gnss_localizer', anonymous=True)
@@ -27,9 +27,32 @@ class Localizer:
         self.undulation = 0.0
 
         # initialize coordinate_transformer
-        if self.coordinat_system == 'lest97':
+        if self.coordinate_system == 'lest97':
             # Create transformer from gnss to lest97 coordinate system
-            self.coord_tranformer = Transformer.from_crs(CRS.from_epsg(4326), CRS.from_epsg(3301))
+            crs_wgs84 = CRS.from_epsg(4326)
+            crs_lest97 = CRS.from_epsg(3301)
+            self.coord_tranformer = Transformer.from_crs(crs_wgs84, crs_lest97)
+
+            # Stuff necessary to calc meridian convergence
+
+            # flattening of GRS-80  ellipsoid
+            f = 1 / 298.257222101
+            er = (2.0 * f) - (f * f)
+            e = math.sqrt(er)
+
+            # 2 standard parallels of lest_97
+            B1 = 58.0 * (math.pi / 180)
+            B2 = (59.0 + 20.0 / 60.0) * (math.pi / 180)
+
+            # calculate constant
+            m1 = math.cos(B1) / math.sqrt(1.0 - er * math.pow(math.sin(B1), 2))
+            m2 = math.cos(B2) / math.sqrt(1.0 - er * math.pow(math.sin(B2), 2))
+            
+            t1 = math.sqrt(((1.0 - math.sin(B1)) / (1.0 + math.sin(B1))) * math.pow((1.0 + e * math.sin(B1)) / (1.0 - e * math.sin(B1)), e))
+            t2 = math.sqrt(((1.0 - math.sin(B2)) / (1.0 + math.sin(B2))) * math.pow((1.0 + e * math.sin(B2)) / (1.0 - e * math.sin(B2)), e))
+
+            self.convergence_const = (math.log(m1) - math.log(m2)) / (math.log(t1) - math.log(t2))
+            self.refernece_meridian = 24.0
 
         # Subscribers
         if self.use_msl_height == True:
@@ -38,7 +61,6 @@ class Localizer:
         self.inspva_sub = message_filters.Subscriber('/novatel/oem7/inspva', INSPVA)
         self.imu_sub = message_filters.Subscriber('/gps/imu', Imu)
         
-
         # Sync 2 main source topics in callback
         ts = message_filters.ApproximateTimeSynchronizer([self.inspva_sub, self.imu_sub], queue_size=10, slop=0.005)
         ts.registerCallback(self.data_callback)
@@ -59,41 +81,52 @@ class Localizer:
 
         # transform lat lon coordinates according to created transformer
         coords = self.coord_tranformer.transform(inspva_msg.latitude, inspva_msg.longitude)
+        # TODO - Remove tartu specific adjustments
+        # swap x and y coordinates
+        pos_x = coords[1] - 650000
+        pos_y = coords[0] - 6465000
         # calculate velocity
         velocity = calculate_velocity(inspva_msg.east_velocity, inspva_msg.north_velocity)
+        azimuth = inspva_msg.azimuth
+
+        # TODO - correct the azimuth divergence. Raw azimuth from WGS84 - pointing along meridian
+        # That is not correct azimuth for Lest97 system - needs to be corrected with respect to standard meridian and calculated divergence!
+        # https://github.com/kimollivier/convergence
+        if self.coordinate_system == "lest97":
+            azimuth -= self.convergence_const * (inspva_msg.longitude - self.refernece_meridian)
+
         # angles from GNSS (degrees) need to be converted to orientation (quaternion) in map frame
-        orientation = convert_angles_to_orientation(inspva_msg.roll, inspva_msg.pitch, inspva_msg.azimuth)
+        orientation = convert_angles_to_orientation(inspva_msg.roll, inspva_msg.pitch, azimuth)
 
         # get IMU angular speeds for Current velocity!
-        
+        ang_vel_x = imu_msg.angular_velocity.x
+        ang_vel_y = imu_msg.angular_velocity.y
+        ang_vel_z = imu_msg.angular_velocity.z
+
         # Publish 
-        self.publish_current_pose(stamp, coords, height, orientation)
-        self.publish_current_velocity(stamp, velocity)
+        self.publish_current_pose(stamp, pos_x, pos_y, height, orientation)
+        self.publish_current_velocity(stamp, velocity, ang_vel_x, ang_vel_y, ang_vel_z)
 
     def bestpos_callback(self, bestpos_msg):
         self.undulation = bestpos_msg.undulation
         print(self.undulation)
 
 
-    def publish_current_pose(self, stamp, coords, height, orientation):
+    def publish_current_pose(self, stamp, pos_x, pos_y, height, orientation):
 
-        # Create and fill current_pose message
         pose_msg = PoseStamped()
         
         pose_msg.header.stamp = stamp
         pose_msg.header.frame_id = "map"
 
-        # NB! x and y are swapped!
-        pose_msg.pose.position.x = coords[1]
-        pose_msg.pose.position.y = coords[0]
+        pose_msg.pose.position.x = pos_x
+        pose_msg.pose.position.y = pos_y
         pose_msg.pose.position.z = height
-
         pose_msg.pose.orientation = orientation
 
         self.current_pose_pub.publish(pose_msg)
 
-
-    def publish_current_velocity(self, stamp, velocity):
+    def publish_current_velocity(self, stamp, velocity, ang_vel_x, ang_vel_y, ang_vel_z):
         
         vel_msg = TwistStamped()
 
@@ -104,9 +137,9 @@ class Localizer:
         vel_msg.twist.linear.y = 0.0;
         vel_msg.twist.linear.z = 0.0;
 
-        # vel_msg.twist.angular.x = imu_msg->angular_velocity.x;
-        # vel_msg.twist.angular.y = imu_msg->angular_velocity.y;
-        # vel_msg.twist.angular.z = imu_msg->angular_velocity.z;
+        vel_msg.twist.angular.x = ang_vel_x
+        vel_msg.twist.angular.y = ang_vel_y
+        vel_msg.twist.angular.z = ang_vel_z
 
         self.current_velocity_pub.publish(vel_msg)
 
