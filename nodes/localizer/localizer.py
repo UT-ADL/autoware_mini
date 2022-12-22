@@ -20,8 +20,6 @@ class Localizer:
         self.coordinate_system = rospy.get_param("~coordinate_system", 'lest97')
         self.use_msl_height = rospy.get_param("~use_msl_height", True)
 
-        rospy.init_node('gnss_localizer', anonymous=True)
-
         # store undulation value from bestpos message
         self.undulation = 0.0
 
@@ -206,5 +204,6 @@ def get_quaternion_from_euler(roll, pitch, yaw):
     return orientation
 
 if __name__ == '__main__':
+    rospy.init_node('gnss_localizer', anonymous=True, log_level=rospy.INFO)
     node = Localizer()
     node.run()
