@@ -1,15 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import numpy as np
 from pyproj import CRS, Transformer
 
 import rospy
 import message_filters
+from tf2_ros import TransformBroadcaster
 
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
 from sensor_msgs.msg import Imu
-from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion
-
+from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion, TransformStamped
 
 
 class Localizer:
@@ -25,36 +25,11 @@ class Localizer:
 
         # initialize coordinate_transformer
         if self.coordinate_system == 'lest97':
-            # Create transformer from gnss to lest97 coordinate system
-            crs_wgs84 = CRS.from_epsg(4326)
-            crs_lest97 = CRS.from_epsg(3301)
-            self.coord_tranformer = Transformer.from_crs(crs_wgs84, crs_lest97)
-
-            # Stuff necessary to calc meridian convergence
-
-            # flattening of GRS-80  ellipsoid
-            f = 1 / 298.257222101
-            er = (2.0 * f) - (f * f)
-            e = np.sqrt(er)
-
-            # 2 standard parallels of lest_97
-            B1 = 58.0 * (np.pi / 180)
-            B2 = (59.0 + 20.0 / 60.0) * (np.pi / 180)
-
-            # calculate constant
-            m1 = np.cos(B1) / np.sqrt(1.0 - er * np.power(np.sin(B1), 2))
-            m2 = np.cos(B2) / np.sqrt(1.0 - er * np.power(np.sin(B2), 2))
-            
-            t1 = np.sqrt(((1.0 - np.sin(B1)) / (1.0 + np.sin(B1))) * np.power((1.0 + e * np.sin(B1)) / (1.0 - e * np.sin(B1)), e))
-            t2 = np.sqrt(((1.0 - np.sin(B2)) / (1.0 + np.sin(B2))) * np.power((1.0 + e * np.sin(B2)) / (1.0 - e * np.sin(B2)), e))
-
-            self.convergence_const = (np.log(m1) - np.log(m2)) / (np.log(t1) - np.log(t2))
-            self.refernece_meridian = 24.0
+            self.coord_transformer = WGS84ToLest97Transformer()
 
         # Subscribers
-        if self.use_msl_height == True:
+        if self.use_msl_height:
             self.bestpos_sub = rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback)
-
         self.inspva_sub = message_filters.Subscriber('/novatel/oem7/inspva', INSPVA)
         self.imu_sub = message_filters.Subscriber('/gps/imu', Imu)
         
@@ -66,31 +41,30 @@ class Localizer:
         self.current_pose_pub = rospy.Publisher('/current_pose', PoseStamped, queue_size=10)
         self.current_velocity_pub = rospy.Publisher('/current_velocity', TwistStamped, queue_size=10)
 
+        # output localizer settings to console
+        rospy.loginfo("Localizer - coordinate_system: %s ", self.coordinate_system)
+        rospy.loginfo("Localizer - use_msl_height: %s ", str(self.use_msl_height))
+
 
     def data_callback(self, inspva_msg, imu_msg):
 
         stamp = inspva_msg.header.stamp
 
-        # inspva_msg contains ellipsoid height if msl hight is wanted then undulation is subtracted
+        # inspva_msg contains ellipsoid height if msl (mean sea level) height is wanted then undulation is subtracted
         height = inspva_msg.height
         if self.use_msl_height == True:
             height -= self.undulation
 
         # transform lat lon coordinates according to created transformer
-        coords = self.coord_tranformer.transform(inspva_msg.latitude, inspva_msg.longitude)
+        coords = self.coord_transformer.transform(inspva_msg.latitude, inspva_msg.longitude)
+        azimuth = self.coord_transformer.azimuth_correction(inspva_msg.longitude, inspva_msg.azimuth)
+
         # TODO - Remove tartu specific adjustments
-        # swap x and y coordinates
+        # x and y coordinates are swapped in lest97 coordinate system
         pos_x = coords[1] - 650000
         pos_y = coords[0] - 6465000
         # calculate velocity
         velocity = calculate_velocity(inspva_msg.east_velocity, inspva_msg.north_velocity)
-        azimuth = inspva_msg.azimuth
-
-        # TODO - correct the azimuth divergence. Raw azimuth from WGS84 - pointing along meridian
-        # That is not correct azimuth for Lest97 system - needs to be corrected with respect to standard meridian and calculated divergence!
-        # https://github.com/kimollivier/convergence
-        if self.coordinate_system == "lest97":
-            azimuth -= self.convergence_const * (inspva_msg.longitude - self.refernece_meridian)
 
         # angles from GNSS (degrees) need to be converted to orientation (quaternion) in map frame
         orientation = convert_angles_to_orientation(inspva_msg.roll, inspva_msg.pitch, azimuth)
@@ -103,10 +77,10 @@ class Localizer:
         # Publish 
         self.publish_current_pose(stamp, pos_x, pos_y, height, orientation)
         self.publish_current_velocity(stamp, velocity, ang_vel_x, ang_vel_y, ang_vel_z)
+        self.publish_map_to_baselink_tf(stamp, pos_x, pos_y, height, orientation)
 
     def bestpos_callback(self, bestpos_msg):
         self.undulation = bestpos_msg.undulation
-        print(self.undulation)
 
 
     def publish_current_pose(self, stamp, pos_x, pos_y, height, orientation):
@@ -123,6 +97,7 @@ class Localizer:
 
         self.current_pose_pub.publish(pose_msg)
 
+
     def publish_current_velocity(self, stamp, velocity, ang_vel_x, ang_vel_y, ang_vel_z):
         
         vel_msg = TwistStamped()
@@ -130,9 +105,9 @@ class Localizer:
         vel_msg.header.stamp = stamp
         vel_msg.header.frame_id = "base_link"
 
-        vel_msg.twist.linear.x = velocity;
-        vel_msg.twist.linear.y = 0.0;
-        vel_msg.twist.linear.z = 0.0;
+        vel_msg.twist.linear.x = velocity
+        vel_msg.twist.linear.y = 0.0
+        vel_msg.twist.linear.z = 0.0
 
         vel_msg.twist.angular.x = ang_vel_x
         vel_msg.twist.angular.y = ang_vel_y
@@ -141,12 +116,66 @@ class Localizer:
         self.current_velocity_pub.publish(vel_msg)
 
 
+    def publish_map_to_baselink_tf(self, stamp, pos_x, pos_y, height, orientation):
+            
+        br = tf2_ros.TransformBroadcaster()
+        t = TransformStamped()
+
+        t.header.stamp = stamp
+        t.header.frame_id = "map"
+        t.child_frame_id = "base_link"
+
+        t.transform.translation.x = pos_x
+        t.transform.translation.y = pos_y
+        t.transform.translation.z = height
+        t.transform.rotation = orientation
+
+        br.sendTransform(t)
+
+
     def run(self):
         rospy.spin()
 
 
-def calculate_velocity(x_vel, y_vel):
+class WGS84ToLest97Transformer:
 
+    def __init__(self):
+        self.crs_wgs84 = CRS.from_epsg(4326)
+        self.crs_lest97 = CRS.from_epsg(3301)
+        self.transformer = Transformer.from_crs(self.crs_wgs84, self.crs_lest97)
+
+        # TODO - replace with more general solution, like pyproj get_factors.meridian_convergence
+        # Stuff necessary to calc meridian convergence
+        # flattening of GRS-80  ellipsoid
+        f = 1 / 298.257222101
+        er = (2.0 * f) - (f * f)
+        e = np.sqrt(er)
+
+        # 2 standard parallels of lest_97
+        B1 = 58.0 * (np.pi / 180)
+        B2 = (59.0 + 20.0 / 60.0) * (np.pi / 180)
+
+        # calculate constant
+        m1 = np.cos(B1) / np.sqrt(1.0 - er * np.power(np.sin(B1), 2))
+        m2 = np.cos(B2) / np.sqrt(1.0 - er * np.power(np.sin(B2), 2))
+        
+        t1 = np.sqrt(((1.0 - np.sin(B1)) / (1.0 + np.sin(B1))) * np.power((1.0 + e * np.sin(B1)) / (1.0 - e * np.sin(B1)), e))
+        t2 = np.sqrt(((1.0 - np.sin(B2)) / (1.0 + np.sin(B2))) * np.power((1.0 + e * np.sin(B2)) / (1.0 - e * np.sin(B2)), e))
+
+        self.convergence_const = (np.log(m1) - np.log(m2)) / (np.log(t1) - np.log(t2))
+        self.refernece_meridian = 24.0
+
+    def transform(self, lat, lon):
+        return self.transformer.transform(lat, lon)
+
+    def azimuth_correction(self, lon, azimuth):
+        #print("correction  : ", (self.convergence_const * (lon - self.refernece_meridian)))
+        return azimuth - (self.convergence_const * (lon - self.refernece_meridian))
+
+
+# Helper functions
+
+def calculate_velocity(x_vel, y_vel):
     return np.sqrt(y_vel * y_vel + x_vel * x_vel)
 
 
