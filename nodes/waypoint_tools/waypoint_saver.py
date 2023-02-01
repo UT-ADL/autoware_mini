@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import numpy as np
 import csv
@@ -24,7 +24,7 @@ class WaypointSaver:
 
         # write column names to waypoints file (append mode)
         with open('/tmp/' + self.file_name, 'a') as f:
-            f.write('wp_id, x, y, z, yaw, velocity, change_flag\n')
+            f.write('wp_id, x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag\n')
 
         # Subscribers
         self.current_pose_sub = message_filters.Subscriber('/current_pose', PoseStamped)
@@ -63,8 +63,8 @@ class WaypointSaver:
 
     def write_to_waypoint_file(self, x, y, z, v):
         
-        # wp_id, x, y, z, yaw, velocity, change_flag
-        row = [self.wp_id, x, y, z, 0, v, 0]
+        # wp_id, x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag
+        row = [self.wp_id, x, y, z, 0, v, 0, 0, 0, 0, 0]
 
         with open('/tmp/' + self.file_name, 'a') as f:
             writer = csv.writer(f)

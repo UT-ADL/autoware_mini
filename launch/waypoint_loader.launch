@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+   <arg name="waypoints_file"   default="/home/edgar/workspaces/autoware_ut/src/autoware_ut/maps/tartu/paths/delta_pocket_exit.csv" />
+
+   <node pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" >
+      <param name="waypoints_file"  value="$(arg waypoints_file)" />
+   </node> 
+
+</launch>
