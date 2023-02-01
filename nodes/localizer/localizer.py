@@ -19,13 +19,14 @@ class Localizer:
         # Options: lest97, mgrs
         self.coordinate_system = rospy.get_param("~coordinate_system", 'lest97')
         self.use_msl_height = rospy.get_param("~use_msl_height", True)
+        self.use_custom_origin = rospy.get_param("~use_custom_origin", False)
 
         # store undulation value from bestpos message
         self.undulation = 0.0
 
         # initialize coordinate_transformer
         if self.coordinate_system == 'lest97':
-            self.coord_transformer = WGS84ToLest97Transformer()
+            self.coord_transformer = WGS84ToLest97Transformer(self.use_custom_origin)
 
         # Subscribers
         if self.use_msl_height:
@@ -44,6 +45,7 @@ class Localizer:
         # output localizer settings to console
         rospy.loginfo("Localizer - coordinate_system: %s ", self.coordinate_system)
         rospy.loginfo("Localizer - use_msl_height: %s ", str(self.use_msl_height))
+        rospy.loginfo("Localizer - use_custom_origin: %s ", str(self.use_custom_origin))
 
 
     def data_callback(self, inspva_msg, imu_msg):
@@ -56,14 +58,9 @@ class Localizer:
             height -= self.undulation
 
         # transform lat lon coordinates according to created transformer
-        coords = self.coord_transformer.transform(inspva_msg.latitude, inspva_msg.longitude)
+        pos_x, pos_y = self.coord_transformer.transform(inspva_msg.latitude, inspva_msg.longitude)
         azimuth = self.coord_transformer.azimuth_correction(inspva_msg.longitude, inspva_msg.azimuth)
 
-        # TODO - Remove tartu specific adjustments
-        # x and y coordinates are swapped in lest97 coordinate system
-        pos_x = coords[1] - 650000
-        pos_y = coords[0] - 6465000
-        # calculate velocity
         velocity = calculate_velocity(inspva_msg.east_velocity, inspva_msg.north_velocity)
 
         # angles from GNSS (degrees) need to be converted to orientation (quaternion) in map frame
@@ -118,7 +115,7 @@ class Localizer:
 
     def publish_map_to_baselink_tf(self, stamp, pos_x, pos_y, height, orientation):
             
-        br = tf2_ros.TransformBroadcaster()
+        br = TransformBroadcaster()
         t = TransformStamped()
 
         t.header.stamp = stamp
@@ -139,10 +136,16 @@ class Localizer:
 
 class WGS84ToLest97Transformer:
 
-    def __init__(self):
+    def __init__(self, use_custom_origin, lest97_shift_x=6465000, lest97_shift_y=650000):
+        
+        self.use_custom_origin = use_custom_origin
+        self.lest97_shift_x = lest97_shift_x
+        self.lest97_shift_y = lest97_shift_y
+
         self.crs_wgs84 = CRS.from_epsg(4326)
         self.crs_lest97 = CRS.from_epsg(3301)
         self.transformer = Transformer.from_crs(self.crs_wgs84, self.crs_lest97)
+
 
         # TODO - replace with more general solution, like pyproj get_factors.meridian_convergence
         # Stuff necessary to calc meridian convergence
@@ -166,7 +169,17 @@ class WGS84ToLest97Transformer:
         self.refernece_meridian = 24.0
 
     def transform(self, lat, lon):
-        return self.transformer.transform(lat, lon)
+        coords = self.transformer.transform(lat, lon)
+        
+        if self.use_custom_origin:
+            northing = coords[0] - self.lest97_shift_x
+            easting = coords[1] - self.lest97_shift_y
+        else:
+            northing = coords[0]
+            easting = coords[1]
+
+        # return fist easting, then northing to match x and y in ROS map frame
+        return easting, northing
 
     def azimuth_correction(self, lon, azimuth):
         #print("correction  : ", (self.convergence_const * (lon - self.refernece_meridian)))

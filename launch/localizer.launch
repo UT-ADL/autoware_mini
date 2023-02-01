@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <launch>
 
-   <arg name="coordinate_system"    default="lest97"  doc="{lest97, mgrs}" />
-   <arg name="use_msl_height"       default="True"    doc="msl - Mean Sea Level height or ellipsoid height." />
+   <arg name="coordinate_system"       default="lest97"  doc="{lest97, mgrs}" />
+   <arg name="use_msl_height"          default="True"    doc="msl - Mean Sea Level height or ellipsoid height." />
+   <arg name="use_custom_origin"       default="False"   doc="" />
+   <arg name="use_location_as_origin"  default="False"   doc="Not implemeted yet" />
 
    <node pkg="autoware_mini" type="localizer.py" name="gnss_localizer" output="screen" >
       <param name="coordinate_system"     value="$(arg coordinate_system)" />
