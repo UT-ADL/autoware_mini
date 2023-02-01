@@ -5,6 +5,7 @@ from pyproj import CRS, Transformer
 
 import rospy
 import message_filters
+import tf
 from tf2_ros import TransformBroadcaster
 
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
@@ -200,7 +201,8 @@ def convert_angles_to_orientation(roll, pitch, yaw):
     yaw = np.radians(yaw)
 
     roll, pitch, yaw = convertAzimuthToENU(roll, pitch, yaw)
-    orientation = get_quaternion_from_euler(roll, pitch, yaw)
+    q = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+    orientation = Quaternion(q[0], q[1], q[2], q[3])
 
     return orientation
 
@@ -223,27 +225,6 @@ def convertAzimuthToENU(roll, pitch, yaw):
 
     return roll, pitch, yaw
 
-
-def get_quaternion_from_euler(roll, pitch, yaw):
-    """
-    Convert an Euler angle to a quaternion.
-
-    Input
-    :param roll: The roll (rotation around x-axis) angle in radians.
-    :param pitch: The pitch (rotation around y-axis) angle in radians.
-    :param yaw: The yaw (rotation around z-axis) angle in radians.
-
-    Output
-    :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
-    """
-    qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-    qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
-    qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
-    qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-    
-    orientation = Quaternion(qx, qy, qz, qw)
-
-    return orientation
 
 if __name__ == '__main__':
     rospy.init_node('gnss_localizer', anonymous=True, log_level=rospy.INFO)
