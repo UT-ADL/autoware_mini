@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
-from pyproj import CRS, Transformer
+from pyproj import CRS, Transformer, Proj
+import time
 
 import rospy
 import message_filters
@@ -11,6 +12,10 @@ from tf2_ros import TransformBroadcaster
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion, TransformStamped
+
+from lanelet2.io import Origin
+from lanelet2.core import GPSPoint
+from lanelet2.projection import UtmProjector
 
 
 class Localizer:
@@ -30,6 +35,11 @@ class Localizer:
             self.coord_transformer = WGS84ToLest97Transformer(self.use_custom_origin)
         elif self.coordinate_system == 'utm':
             self.coord_transformer = WGS84ToUTMTransformer(self.use_custom_origin)
+        elif self.coordinate_system == 'lanelet':
+            self.coord_transformer = WGS84ToUTMLaneletTransformer(self.use_custom_origin)
+        else:
+            rospy.logerr('Coordinate system %s not supported', self.coordinate_system)
+            exit(1)
 
         # Subscribers
         if self.use_msl_height:
@@ -61,8 +71,11 @@ class Localizer:
             height -= self.undulation
 
         # transform lat lon coordinates according to created transformer
-        pos_x, pos_y = self.coord_transformer.transform(inspva_msg.latitude, inspva_msg.longitude)
-        azimuth = self.coord_transformer.azimuth_correction(inspva_msg.longitude, inspva_msg.azimuth)
+        start_time = time.time()
+        # pyproj has also 3D transformation then ellipsoidal height is needed. Currently only lanelet2 transfromer uses height
+        pos_x, pos_y = self.coord_transformer.transform(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height)
+        azimuth = self.coord_transformer.azimuth_correction(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.azimuth)
+        print("--- %s hz ---" % (1/(time.time() - start_time)))
 
         velocity = calculate_velocity(inspva_msg.east_velocity, inspva_msg.north_velocity)
 
@@ -174,7 +187,7 @@ class WGS84ToLest97Transformer:
         self.convergence_const = (np.log(m1) - np.log(m2)) / (np.log(t1) - np.log(t2))
         self.refernece_meridian = 24.0
 
-    def transform(self, lat, lon):
+    def transform(self, lat, lon, height):
         coords = self.transformer.transform(lat, lon)
         
         # axes: northing, easting
@@ -188,8 +201,10 @@ class WGS84ToLest97Transformer:
         # return fist easting, then northing to match x and y in ROS map frame
         return easting, northing
 
-    def azimuth_correction(self, lon, azimuth):
-        #print("correction  : ", (self.convergence_const * (lon - self.refernece_meridian)))
+    def azimuth_correction(self, lat, lon, azimuth):
+        # TODO - replace with more general solution, like pyproj get_factors.meridian_convergence
+        # print("correction  : ", (self.convergence_const * (lon - self.refernece_meridian)))
+        # print(Proj("EPSG:3301").get_factors(lat, lon))
         return azimuth - (self.convergence_const * (lon - self.refernece_meridian))
 
 class WGS84ToUTMTransformer:
@@ -197,21 +212,21 @@ class WGS84ToUTMTransformer:
     # https://epsg.io/32635
     # axes: easting, northing
 
-    def __init__(self, use_custom_origin, origin_x=58.384565, origin_y=26.725676):
+    def __init__(self, use_custom_origin, origin_x=58.385345, origin_y=26.726272, origin_h=54.03):
         
         self.use_custom_origin = use_custom_origin
         self.origin_x = origin_x
         self.origin_y = origin_y
+        self.origin_h = origin_h # ellipsoid height
 
         self.crs_wgs84 = CRS.from_epsg(4326)
         self.crs_utm = CRS.from_epsg(32635)
         self.transformer = Transformer.from_crs(self.crs_wgs84, self.crs_utm)
 
         # transform origin from WGS84 to UTM
-        self.origin_x, self.origin_y = self.transform(self.origin_x, self.origin_y)
-        print(self.origin_x, self.origin_y)
+        self.origin_x, self.origin_y = self.transform(self.origin_x, self.origin_y, 40.0)
 
-    def transform(self, lat, lon):
+    def transform(self, lat, lon, height):
         coords = self.transformer.transform(lat, lon)
         
         if self.use_custom_origin:
@@ -221,13 +236,42 @@ class WGS84ToUTMTransformer:
             northing = coords[1]
             easting = coords[0]
 
+        print(easting, northing)
         # return fist easting, then northing to match x and y in ROS map frame
         return easting, northing
 
-    def azimuth_correction(self, lon, azimuth):
+    def azimuth_correction(self, lat, lon, azimuth):
         # TODO - implement azimuth correction for UTM
         return azimuth
 
+class WGS84ToUTMLaneletTransformer:
+
+    def __init__(self, use_custom_origin, origin_x=58.385345, origin_y=26.726272, origin_h=34.5):
+        
+        self.use_custom_origin = use_custom_origin
+        self.origin_x = origin_x
+        self.origin_y = origin_y
+        self.origin_h = origin_h # ellipsoid height
+
+        origin = Origin(self.origin_x, self.origin_y)
+        self.transformer = UtmProjector(origin, False, True)
+
+        # transform and print origin coords
+        origin_utm = self.transformer.forward(GPSPoint(self.origin_x, self.origin_y, self.origin_h))
+        print(origin_utm.x, origin_utm.y, origin_utm.z)
+
+    def transform(self, lat, lon, height):
+
+        gpspoint = GPSPoint(lat, lon, height)
+        utmpoint = self.transformer.forward(gpspoint)
+
+        print(utmpoint.x, utmpoint.y, utmpoint.z)
+
+        return utmpoint.x, utmpoint.y
+        
+    def azimuth_correction(self, lat, lon, azimuth):
+        # TODO - implement azimuth correction for UTM
+        return azimuth
 
 # Helper functions
 
