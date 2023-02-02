@@ -28,6 +28,8 @@ class Localizer:
         # initialize coordinate_transformer
         if self.coordinate_system == 'lest97':
             self.coord_transformer = WGS84ToLest97Transformer(self.use_custom_origin)
+        elif self.coordinate_system == 'utm':
+            self.coord_transformer = WGS84ToUTMTransformer(self.use_custom_origin)
 
         # Subscribers
         if self.use_msl_height:
@@ -136,12 +138,15 @@ class Localizer:
 
 
 class WGS84ToLest97Transformer:
+    
+    # https://epsg.io/3301
+    # axes: northing, easting
 
-    def __init__(self, use_custom_origin, lest97_shift_x=6465000, lest97_shift_y=650000):
+    def __init__(self, use_custom_origin, origin_x=6465000, origin_y=650000):
         
         self.use_custom_origin = use_custom_origin
-        self.lest97_shift_x = lest97_shift_x
-        self.lest97_shift_y = lest97_shift_y
+        self.origin_x = origin_x
+        self.origin_y = origin_y
 
         self.crs_wgs84 = CRS.from_epsg(4326)
         self.crs_lest97 = CRS.from_epsg(3301)
@@ -172,9 +177,10 @@ class WGS84ToLest97Transformer:
     def transform(self, lat, lon):
         coords = self.transformer.transform(lat, lon)
         
+        # axes: northing, easting
         if self.use_custom_origin:
-            northing = coords[0] - self.lest97_shift_x
-            easting = coords[1] - self.lest97_shift_y
+            northing = coords[0] - self.origin_x
+            easting = coords[1] - self.origin_y
         else:
             northing = coords[0]
             easting = coords[1]
@@ -185,6 +191,42 @@ class WGS84ToLest97Transformer:
     def azimuth_correction(self, lon, azimuth):
         #print("correction  : ", (self.convergence_const * (lon - self.refernece_meridian)))
         return azimuth - (self.convergence_const * (lon - self.refernece_meridian))
+
+class WGS84ToUTMTransformer:
+
+    # https://epsg.io/32635
+    # axes: easting, northing
+
+    def __init__(self, use_custom_origin, origin_x=58.384565, origin_y=26.725676):
+        
+        self.use_custom_origin = use_custom_origin
+        self.origin_x = origin_x
+        self.origin_y = origin_y
+
+        self.crs_wgs84 = CRS.from_epsg(4326)
+        self.crs_utm = CRS.from_epsg(32635)
+        self.transformer = Transformer.from_crs(self.crs_wgs84, self.crs_utm)
+
+        # transform origin from WGS84 to UTM
+        self.origin_x, self.origin_y = self.transform(self.origin_x, self.origin_y)
+        print(self.origin_x, self.origin_y)
+
+    def transform(self, lat, lon):
+        coords = self.transformer.transform(lat, lon)
+        
+        if self.use_custom_origin:
+            northing = coords[1] - self.origin_y
+            easting = coords[0] - self.origin_x
+        else:
+            northing = coords[1]
+            easting = coords[0]
+
+        # return fist easting, then northing to match x and y in ROS map frame
+        return easting, northing
+
+    def azimuth_correction(self, lon, azimuth):
+        # TODO - implement azimuth correction for UTM
+        return azimuth
 
 
 # Helper functions
@@ -210,7 +252,6 @@ def convert_angles_to_orientation(roll, pitch, yaw):
 def convertAzimuthToENU(roll, pitch, yaw):
 
     # These transforms are taken from gpsins_localizer_nodelet.cpp
-
     # Convert from Azimuth (CW from North) to ENU (CCW from East)
     yaw = -yaw + np.pi/2
 
