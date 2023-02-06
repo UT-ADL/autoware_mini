@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+   <arg name="coordinate_transformer"  default="lest97"      doc="lest97, utm" />
+   <arg name="use_msl_height"          default="True"     doc="msl - Mean Sea Level height or ellipsoid height." />
+   <arg name="use_custom_origin"       default="True"     doc="does not influence lanelet projector - origin is used anyway!" />
+
+   <node pkg="autoware_mini" type="novatel_localizer.py" name="novatel_localizer" output="screen" >
+      <param name="coordinate_transformer"   value="$(arg coordinate_transformer)" />
+      <param name="use_msl_height"           value="$(arg use_msl_height)" />
+      <param name="use_custom_origin"        value="$(arg use_custom_origin)" />
+   </node>
+
+</launch>
