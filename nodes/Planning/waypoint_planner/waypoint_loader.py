@@ -11,7 +11,7 @@ class WaypointLoader:
     def __init__(self):
 
         # Parameters
-        self.waypoints_file = rospy.get_param("~waypoints_file", None) # add check if none then error loading waypoint file
+        self.waypoints_file = rospy.get_param("~waypoints_file")
 
         # Publishers
         self.waypoints_pub = rospy.Publisher('/based/lane_waypoints_raw', LaneArray, queue_size=1, latch=True)

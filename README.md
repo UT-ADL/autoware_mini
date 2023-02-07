@@ -11,6 +11,7 @@ Minimalistic python based autonomy software.
 * Creates `map` to `base_link` transfom
 
 ##### Parameters
+
 * `coordinate_transformer` - into which cartesian coordinate frame he WGS84 latitude and longitude are converted to
   * `utm` - Universal Transvrse Mercator projection. Origin point is hardcoded in transformer and is also used to define the UTM zone
   * `lest97` - Estonian national coordinae sytem - [read more](https://epsg.io/3301)
@@ -18,6 +19,7 @@ Minimalistic python based autonomy software.
 * `use_custom_origin` - weather to subtract the origin coordinates from tranformed coordinates or not. If we don't subtract the coordinates the values are too big and cause visualization problems for Rviz.
 
 ##### Subscribes
+
 | Topic | Type | Comment |
 | --- | --- | --- |
 | `/novatel/oem7/inspva` | [novatel_oem7_msgs/INSPVA](https://docs.novatel.com/OEM7/Content/SPAN_Logs/INSPVA.htm) | Used fileds: header.stamp, latitude, longitude, height, roll, pitch, azimuth, east_velocity, north_velocity |
@@ -40,8 +42,32 @@ Minimalistic python based autonomy software.
 ### waypoint_planner
 
 #### waypoint_saver
-* will record waypoint files with columns:
-`'wp_id, x, y, z, yaw, velocity, change_flag`
+
+Records waypoints from `/current_pose` topic using specified interval between points.
+
+##### Parameters
+
+* `interval` - distance between waypoints in meters (default: 1.0 m).
+* `file_name` - output file name where to save waypoints (default: /tmp/waypoints.csv).
+
+##### Subscribes
+
+| Topic | Type | Comment |
+| --- | --- | --- |
+| `/current_pose` | [geometry_msgs/PoseStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html) | |
+| `/current_velocity` | [geometry_msgs/TwistStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html) |  |
+
+##### Output
+
+Will record waypoint file with the following columns:
+
+`wp_id, x, y, z, yaw, velocity, change_flag`
+
+* `wp_id` - waypoint id automatically incremented
+* `x`, `y`, `z` - coordinates from `/current_pose` message
+* `yaw` - Orientation from `/current_pose` converted into heading angle
+* `velocity` - speed from `/current_velocity`
+* `/change_flag` - currently populated with `0`
 
 #### waypoint_loader
 * imports waypoints from csv files that must contain the following data: 
