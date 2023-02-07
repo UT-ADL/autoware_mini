@@ -67,7 +67,7 @@ class WaypointSaver:
         # convert quaternion to euler angles
         quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
         euler = tf.transformations.euler_from_quaternion(quaternion)
-        yaw = math.degrees(euler[2])  # from x axis: cw up to 180, ccw down to -180 degrees
+        yaw = math.degrees(euler[2])  # from x axis: ccw up to 180, cw down to -180 degrees
 
         # convert yaw to heading from y axis (north) and cw from 0 up to 360
         if yaw < 0:

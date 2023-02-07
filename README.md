@@ -70,9 +70,22 @@ Will record waypoint file with the following columns:
 * `/change_flag` - currently populated with `0`
 
 #### waypoint_loader
-* imports waypoints from csv files that must contain the following data: 
-`wp_id, x, y, z, yaw, velocity, change_flag`
- 
+
+* Loads waypoints from the waypoint file - csv file with the following columns
+```wp_id, x, y, z, yaw, velocity, change_flag``` 
+* Has no subscribers
+
+##### Parameters
+* `waypoints_file` - input waypoints file (full path)
+* `output_frame` - default: `map`
+* `publish_markers` - will publish waypoint markers to Rviz 
+
+##### Publishes
+| Topic | Type | Comment |
+| --- | --- | --- |
+| `/waypoints` | autoware_msgs/Lane | Array of waypoints `autoware_msgs/Waypoint` |
+| `/waypoint_markers` | visualization_msgs/MarkerArray | waypoint pose, velocity labels and path |
+
 
 ## Control
 
