@@ -4,13 +4,13 @@ Minimalistic python based autonomy software.
 
 ## Localization
 
-### novatel_localizer
+### novatel_oem7_localizer
 
 * Takes in Novatel ROS topics provided by [NovAtel Oem7 ROS driver](http://wiki.ros.org/novatel_oem7_driver) and converts the coordinates to specified cartesian coordinate frame.
 * Adjusts the azimuth angle taking into consideration meridian convergence
 * Creates `map` to `base_link` transfom
 
-##### Parameters
+###### Parameters
 
 * `coordinate_transformer` - into which cartesian coordinate frame he WGS84 latitude and longitude are converted to
   * `utm` - Universal Transvrse Mercator projection. Origin point is hardcoded in transformer and is also used to define the UTM zone
@@ -18,7 +18,7 @@ Minimalistic python based autonomy software.
 * `use_msl_height` - if true mean sea level height is used, otherwise WGS84 systemuses ellipsoidal height.
 * `use_custom_origin` - weather to subtract the origin coordinates from tranformed coordinates or not. If we don't subtract the coordinates the values are too big and cause visualization problems for Rviz.
 
-##### Subscribes
+###### Subscribes
 
 | Topic | Type | Comment |
 | --- | --- | --- |
@@ -26,7 +26,7 @@ Minimalistic python based autonomy software.
 | `/novatel/oem7/bestpos` | [novatel_oem7_msgs/BESTPOS](http://docs.ros.org/en/jade/api/novatel_msgs/html/msg/BESTPOS.html)  | undulation (difference between ellipsoid and mean sea level - geoid - height) |
 | `/gps/imu` | [sensor_msgs/Imu](http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/Imu.html) | angular_velocity.x, angular_velocity.y, angular_velocity.z |
 
-##### Publishes
+###### Publishes
 
 | Topic | Type | Comment |
 | --- | --- | --- |
@@ -35,7 +35,7 @@ Minimalistic python based autonomy software.
 | `/tf` | tf2_msgs/TFMessage | `map` to `base_link` transform |
 
 
-## Detetcion
+## Detection
 
 ## Planning
 
@@ -45,19 +45,19 @@ Minimalistic python based autonomy software.
 
 Records waypoints from `/current_pose` topic using specified interval between points.
 
-##### Parameters
+###### Parameters
 
 * `interval` - distance between waypoints in meters (default: 1.0 m).
 * `file_name` - output file name where to save waypoints (default: /tmp/waypoints.csv).
 
-##### Subscribes
+###### Subscribes
 
 | Topic | Type | Comment |
 | --- | --- | --- |
 | `/current_pose` | [geometry_msgs/PoseStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html) | |
 | `/current_velocity` | [geometry_msgs/TwistStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html) |  |
 
-##### Output
+###### Output
 
 Will record waypoint file with the following columns:
 
@@ -75,12 +75,12 @@ Will record waypoint file with the following columns:
 ```wp_id, x, y, z, yaw, velocity, change_flag``` 
 * Has no subscribers
 
-##### Parameters
+###### Parameters
 * `waypoints_file` - input waypoints file (full path)
 * `output_frame` - default: `map`
 * `publish_markers` - will publish waypoint markers to Rviz 
 
-##### Publishes
+###### Publishes
 | Topic | Type | Comment |
 | --- | --- | --- |
 | `/waypoints` | autoware_msgs/Lane | Array of waypoints `autoware_msgs/Waypoint` |
