@@ -178,6 +178,6 @@ def convertAzimuthToENU(roll, pitch, yaw):
 
 
 if __name__ == '__main__':
-    rospy.init_node('novatel_oem7_localizer', anonymous=True, log_level=rospy.INFO)
+    rospy.init_node('novatel_oem7_localizer', log_level=rospy.INFO)
     node = NovatelOem7Localizer()
     node.run()

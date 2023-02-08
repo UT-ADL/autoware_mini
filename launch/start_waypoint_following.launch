@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="waypoints_file"          default="/home/edgar/workspaces/autoware_ut/src/autoware_ut/maps/tartu/paths/erm_wp_parking_and_straight.csv" />
+    <arg name="coordinate_transformer"  default="lest97" />
+    <arg name="launch_rviz"             default="true" />
+
+    <arg name="use_localizer"           default="true" />
+    <arg name="use_tf"                  default="true" />
+
+     <!-- localizer -->
+    <include if="$(arg use_localizer)" file="$(find autoware_mini)/launch/novatel_oem7_localizer.launch" >
+        <arg name="coordinate_transformer" value="$(arg coordinate_transformer)" />
+    </include>
+
+    <!-- simulated localization -->
+
+
+    <include file="$(find autoware_mini)/launch/waypoint_loader.launch" >
+        <arg name="waypoints_file"  value="$(arg waypoints_file)" />
+    </include>
+
+    <include file="$(find autoware_mini)/launch/waypoint_follower.launch" />
+
+    <!-- TRANSFORMS -->
+    <include if="$(arg use_tf)" file="$(find vehicle_platform)/launch/sensors/tf.launch" />
+
+    <!-- Rviz -->
+    <node if="$(arg launch_rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
+
+
+</launch>

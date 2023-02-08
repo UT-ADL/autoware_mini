@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+   <arg name="waypoint_topic"       default="/waypoints"      doc="topic with waypoints" />
+
+   <node pkg="autoware_mini" type="waypoint_follower.py" name="waypoint_follower" output="screen" >
+      <param name="waypoint_topic"      value="$(arg waypoint_topic)" />
+   </node>
+
+</launch>
