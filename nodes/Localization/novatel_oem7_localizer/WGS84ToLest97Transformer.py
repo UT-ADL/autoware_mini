@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import math
-from pyproj import CRS, Transformer
+from pyproj import CRS, Transformer, Proj
 
 class WGS84ToLest97Transformer:
     
@@ -14,12 +14,15 @@ class WGS84ToLest97Transformer:
         self.origin_x = origin_x
         self.origin_y = origin_y
 
+        # for Lest97 coordinate system
+        self.reference_meridian = 24.0
+
         self.crs_wgs84 = CRS.from_epsg(4326)
         self.crs_lest97 = CRS.from_epsg(3301)
         self.transformer = Transformer.from_crs(self.crs_wgs84, self.crs_lest97)
 
+        # Similar solution: https://gis.stackexchange.com/questions/116823/calculating-grid-convergence-for-lambert-conformal-conic
 
-        # TODO - replace with more general solution, like pyproj get_factors.meridian_convergence
         # Stuff necessary to calc meridian convergence
         # flattening of GRS-80  ellipsoid
         f = 1 / 298.257222101
@@ -38,7 +41,7 @@ class WGS84ToLest97Transformer:
         t2 = math.sqrt(((1.0 - math.sin(B2)) / (1.0 + math.sin(B2))) * ((1.0 + e * math.sin(B2)) / (1.0 - e * math.sin(B2))) ** e)
 
         self.convergence_const = (math.log(m1) - math.log(m2)) / (math.log(t1) - math.log(t2))
-        self.reference_meridian = 24.0
+
 
     def transform_lat_lon(self, lat, lon, height):
         coords = self.transformer.transform(lat, lon)
@@ -56,6 +59,15 @@ class WGS84ToLest97Transformer:
 
     def correct_azimuth(self, lat, lon, azimuth):
         # TODO - replace with more general solution, like pyproj get_factors.meridian_convergence
-        # print("correction  : ", (self.convergence_const * (lon - self.reference_meridian)))
-        # print(Proj("EPSG:3301").get_factors(lat, lon))
+        # print("correction_long : %f" % (self.convergence_const * (lon - self.reference_meridian)))
+        
+        # calculate grid convergence - problem might be that lest97 has cone as projection surface
+        #a = math.tan(math.radians(lon - 24.0))
+        #b = math.sin(math.radians(lat))
+        #correction = math.degrees(math.atan(a * b))
+        #print("correction_utm  : %f" % correction)
+
+        # calculate meridian convergence
+        # print("correction_getf : %f" % Proj(self.crs_lest97).get_factors(lon, lat).meridian_convergence)
+
         return azimuth - (self.convergence_const * (lon - self.reference_meridian))
