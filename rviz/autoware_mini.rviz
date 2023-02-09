@@ -82,8 +82,6 @@ Visualization Manager:
               Value: true
             interfacea_link3:
               Value: true
-            lexus_model:
-              Value: false
             lidar:
               Value: false
             lidar_center:
@@ -105,8 +103,6 @@ Visualization Manager:
                 base_footprint:
                   {}
                 imu:
-                  {}
-                lexus_model:
                   {}
                 lidar_center:
                   camera_fl:
@@ -165,6 +161,14 @@ Visualization Manager:
         Waypoint pose: true
       Queue Size: 100
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /pure_pursuit_rviz
+      Name: pure_pursuit
+      Namespaces:
+        Lookahead distance: true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -202,11 +206,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 72.36871337890625
+      Scale: 8.784629821777344
       Target Frame: base_link
       Value: TopDownOrtho (rviz)
-      X: 0.5032978057861328
-      Y: -0.09661334753036499
+      X: 10.92867660522461
+      Y: 5.307783126831055
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:
