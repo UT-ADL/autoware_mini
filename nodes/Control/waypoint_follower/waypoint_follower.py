@@ -17,7 +17,7 @@ class WaypointFollower:
 
         # Parameters
         self.waypoint_topic = rospy.get_param("~waypoint_topic", "/waypoints")
-        self.planning_time = rospy.get_param("~planning_time", 3.0)
+        self.planning_time = rospy.get_param("~planning_time", 2.0)
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
         self.min_lookahead_distance = rospy.get_param("~min_lookahead_distance", 5.5)
 
@@ -91,17 +91,15 @@ class WaypointFollower:
 
             # calculate heading from current pose
             self.current_heading = get_heading_from_orientation(current_pose.orientation)
-            heading1, heading2 = get_heading_from_two_poses(current_pose.position, lookahead_wp.pose.pose.position)
-            print("DEBUG - current heading: %f, lookahead heading1: %f, lookahead heading2: %f" % (self.current_heading, heading1, heading2))
-
-            self.lookahead_heading = heading1
+            self.lookahead_heading = get_heading_from_two_poses(current_pose.position, lookahead_wp.pose.pose.position)
+            print("DEBUG - current heading: %f, lookahead heading: %f" % (self.current_heading, self.lookahead_heading))
             # TODO is it correct? - For example: How it will handle the case of 2.0 and 358.0 degrees?
             alpha = self.lookahead_heading - self.current_heading
       
             # calc curvature (lookahead distance, current pose, lookahead point)
             curvature = 2 * math.sin(alpha) / self.lookahead_distance
             self.steering_angle = math.atan(self.wheel_base * curvature)
-            print("DEBUG - curvature: %f, steering angle (deg): %f" % (curvature, math.degrees(self.steering_angle)))
+            print("DEBUG - curvature: %f, steering angle: %f" % (curvature, self.steering_angle))
 
             # TODO limit steering angle before output
 
@@ -164,14 +162,11 @@ class WaypointFollower:
         rospy.spin()
 
 def get_heading_from_two_poses(pose1, pose2):
-    # TODO check if this is correct - atan2. Empirical seemed ok.
-    heading1 = math.atan2(pose2.y - pose1.y, pose2.x - pose1.x)
-    heading2 = math.atan((pose2.y - pose1.y) / (pose2.x - pose1.x))
-
-    heading1 = convert_heading_to_360(math.degrees(heading1))
-    heading2 = convert_heading_to_360(math.degrees(heading2))
-
-    return heading1, heading2
+    # calc heading from two poses
+    heading = math.atan2(pose2.y - pose1.y, pose2.x - pose1.x)
+    heading = convert_heading_to_360(math.degrees(heading))
+    
+    return heading
 
 
 def get_heading_from_orientation(orientation):
