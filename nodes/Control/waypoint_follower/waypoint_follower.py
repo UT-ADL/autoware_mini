@@ -7,8 +7,8 @@ import message_filters
 import numpy as np
 from sklearn.neighbors import KDTree
 
-from autoware_msgs.msg import Lane
-from geometry_msgs.msg import PoseStamped,TwistStamped
+from autoware_msgs.msg import Lane, VehicleCmd
+from geometry_msgs.msg import PoseStamped,TwistStamped, Pose
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 
@@ -17,8 +17,9 @@ class WaypointFollower:
 
         # Parameters
         self.waypoint_topic = rospy.get_param("~waypoint_topic", "/waypoints")
-        self.planning_time = rospy.get_param("~planning_time", 2.0)
+        self.planning_time = rospy.get_param("~planning_time", 3.0)
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
+        self.min_lookahead_distance = rospy.get_param("~min_lookahead_distance", 5.5)
 
         # Variables - init
         self.nearest_wp_distance = 0.0
@@ -38,6 +39,7 @@ class WaypointFollower:
 
         # Publishers
         self.pure_pursuit_rviz_pub = rospy.Publisher('/pure_pursuit_rviz', MarkerArray, queue_size=10)
+        self.vehicle_command_pub = rospy.Publisher('/vehicle_cmd', VehicleCmd, queue_size=10)
 
 
         # init also PurePursuit
@@ -65,41 +67,56 @@ class WaypointFollower:
         # get nearest waypoint distance and idx - make sure waypoints are loaded
         # or create / init this whole callback after waypoints are loaded - to skip the check here! 
         if self.waypoint_tree is not None:
-            self.nearest_wp_distance, self.nearest_wp_idx = self.waypoint_tree.query([[current_pose.position.x, current_pose.position.y]], 1)
-            print("DEBUG - nearest waypoint: d, idx: %f, %i" % (self.nearest_wp_distance, self.nearest_wp_idx))
+            
+            # --------------------------------------------
+            # PURE PURSUIT  - will be moved to separate file
+            # --------------------------------------------
 
-            # calc lookahead distance (velocity dependent), get point idx and extract coordinates
+            self.nearest_wp_distance, self.nearest_wp_idx = self.waypoint_tree.query([[current_pose.position.x, current_pose.position.y]], 1)
+
+            # calc lookahead distance (velocity dependent)
             self.lookahead_distance = self.current_velocity * self.planning_time
-            print("DEBUG - lookahead distance: %f" % self.lookahead_distance)
+            if self.lookahead_distance < self.min_lookahead_distance:
+                self.lookahead_distance = self.min_lookahead_distance
+            
             # TODO assume 1m distance between waypoints - currently OK, but need make it more universal (add 5 - point in front of the car)
-            lookahead_wp_idx = self.nearest_wp_idx + math.floor(self.lookahead_distance + 5)
+            lookahead_wp_idx = self.nearest_wp_idx + math.floor(self.lookahead_distance)
             
             if lookahead_wp_idx > self.last_wp_idx:
                 lookahead_wp_idx = self.last_wp_idx
-
-            print("DEBUG - lookahead waypoint idx: %i" % lookahead_wp_idx)
             lookahead_wp = self.waypoints[int(lookahead_wp_idx)]
+
+            self.target_velocity = lookahead_wp.twist.twist.linear.x
+
 
             # calculate heading from current pose
             self.current_heading = get_heading_from_orientation(current_pose.orientation)
-            self.lookahead_heading = get_heading_from_two_poses(current_pose.position, lookahead_wp.pose.pose.position)
+            heading1, heading2 = get_heading_from_two_poses(current_pose.position, lookahead_wp.pose.pose.position)
+            print("DEBUG - current heading: %f, lookahead heading1: %f, lookahead heading2: %f" % (self.current_heading, heading1, heading2))
 
+            self.lookahead_heading = heading1
+            # TODO is it correct? - For example: How it will handle the case of 2.0 and 358.0 degrees?
             alpha = self.lookahead_heading - self.current_heading
-            print("DEBUG - alpha: %f" % (alpha))
-
+      
             # calc curvature (lookahead distance, current pose, lookahead point)
-            self.steer_output = math.atan((2 * self.wheel_base * math.sin(alpha)) / self.lookahead_distance)
-            print("DEBUG - steer output: %f" % (self.steer_output))
+            curvature = 2 * math.sin(alpha) / self.lookahead_distance
+            self.steering_angle = math.atan(self.wheel_base * curvature)
+            print("DEBUG - curvature: %f, steering angle (deg): %f" % (curvature, math.degrees(self.steering_angle)))
 
-            # limit steer output to -1.0 to 1.0?
+            # TODO limit steering angle before output
 
+            self.publish_vehicle_command(self.target_velocity, self.steering_angle)
             # publish lookahead distance (and arc) to rviz
             self.publish_pure_pursuit_rviz(current_pose, lookahead_wp.pose.pose, alpha)
-
             # publish also debug output to another topic (e.g. /waypoint_follower/debug) - lateral error
-            # publish control commands (will be published 50Hz as current_pose and current_velocity are published 50Hz)
-            
 
+    def publish_vehicle_command(self, velocity, steering_angle):
+        vehicle_cmd = VehicleCmd()
+        vehicle_cmd.header.stamp = rospy.Time.now()
+        vehicle_cmd.header.frame_id = "/map"
+        vehicle_cmd.ctrl_cmd.linear_velocity = velocity
+        vehicle_cmd.ctrl_cmd.steering_angle = steering_angle
+        self.vehicle_command_pub.publish(vehicle_cmd)
 
     def publish_pure_pursuit_rviz(self, current_pose, lookahead_pose, alpha):
         
@@ -119,6 +136,13 @@ class WaypointFollower:
         marker_array.markers.append(marker)
 
         # label of angle alpha
+        # calculate average position of current pose and lookahead point
+        # TODO check if this is correct
+        average_pose = Pose()
+        average_pose.position.x = (current_pose.position.x + lookahead_pose.position.x) / 2
+        average_pose.position.y = (current_pose.position.y + lookahead_pose.position.y) / 2
+        average_pose.position.z = (current_pose.position.z + lookahead_pose.position.z) / 2
+
         marker_text = Marker()
         marker_text.header.frame_id = "/map"
         marker_text.header.stamp = rospy.Time.now()
@@ -126,10 +150,10 @@ class WaypointFollower:
         marker_text.id = 1
         marker_text.type = Marker.TEXT_VIEW_FACING
         marker_text.action = Marker.ADD
-        marker_text.pose = lookahead_pose
-        marker_text.scale.z = 2.0
+        marker_text.pose = average_pose
+        marker_text.scale.z = 1.0
         marker_text.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)
-        marker_text.text = str(round(alpha,3))
+        marker_text.text = str(round(alpha,2))
         marker_array.markers.append(marker_text)
 
         self.pure_pursuit_rviz_pub.publish(marker_array)
@@ -141,11 +165,13 @@ class WaypointFollower:
 
 def get_heading_from_two_poses(pose1, pose2):
     # TODO check if this is correct - atan2. Empirical seemed ok.
-    heading = math.atan2(pose2.y - pose1.y, pose2.x - pose1.x)
+    heading1 = math.atan2(pose2.y - pose1.y, pose2.x - pose1.x)
+    heading2 = math.atan((pose2.y - pose1.y) / (pose2.x - pose1.x))
 
-    heading = convert_heading_to_360(math.degrees(heading))
+    heading1 = convert_heading_to_360(math.degrees(heading1))
+    heading2 = convert_heading_to_360(math.degrees(heading2))
 
-    return heading
+    return heading1, heading2
 
 
 def get_heading_from_orientation(orientation):

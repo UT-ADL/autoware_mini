@@ -88,8 +88,6 @@ Visualization Manager:
               Value: true
             lidar_front/os_sensor:
               Value: true
-            map:
-              Value: true
             radar_fc:
               Value: true
           Marker Scale: 1.5
@@ -98,31 +96,7 @@ Visualization Manager:
           Show Axes: true
           Show Names: true
           Tree:
-            map:
-              base_link:
-                base_footprint:
-                  {}
-                imu:
-                  {}
-                lidar_center:
-                  camera_fl:
-                    {}
-                  camera_fr:
-                    {}
-                  interfacea_link0:
-                    {}
-                  interfacea_link1:
-                    {}
-                  interfacea_link2:
-                    {}
-                  interfacea_link3:
-                    {}
-                  lidar:
-                    {}
-                  lidar_front/os_sensor:
-                    {}
-                radar_fc:
-                  {}
+            {}
           Update Interval: 0
           Value: true
       Enabled: true
@@ -161,12 +135,12 @@ Visualization Manager:
         Waypoint pose: true
       Queue Size: 100
       Value: true
-    - Class: rviz/Marker
+    - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /pure_pursuit_rviz
-      Name: pure_pursuit
+      Name: Pure_pursuit
       Namespaces:
-        Lookahead distance: true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
