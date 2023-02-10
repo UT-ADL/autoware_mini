@@ -35,7 +35,7 @@ class BicycleSimulation:
         self.vehicle_cmd_sub = rospy.Subscriber('vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
 
         # visualization of the bicycle model
-        self.vehicle_markers_pub = rospy.Publisher('vehicle_markers', MarkerArray, queue_size=10)
+        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=10)
 
     def initialpose_callback(self, msg):
         # extract position
@@ -52,10 +52,10 @@ class BicycleSimulation:
         self.velocity = msg.ctrl_cmd.linear_velocity
         self.steering_angle = msg.ctrl_cmd.steering_angle
 
-    def update_vehicle_state(self, delta_t):
+    def update_model_state(self, delta_t):
         # compute change according to bicycle model equations
-        x_dot = self.velocity * math.cos(self.heading_angle + self.steering_angle)
-        y_dot = self.velocity * math.sin(self.heading_angle + self.steering_angle)
+        x_dot = self.velocity * math.cos(self.heading_angle)
+        y_dot = self.velocity * math.sin(self.heading_angle)
         heading_angle_dot = self.velocity * math.tan(self.steering_angle) / self.wheel_base
 
         # implment the change taking into account the update rate
@@ -69,14 +69,14 @@ class BicycleSimulation:
         delta_t = 1. / self.publish_rate
 
         while not rospy.is_shutdown():
-            # update vehicle state
-            self.update_vehicle_state(delta_t)
+            # update model state
+            self.update_model_state(delta_t)
 
             # publish localization messages and visualization markers
             stamp = rospy.Time.now()
             self.publish_current_pose(stamp)
             self.publish_current_velocity(stamp)
-            self.publish_vehicle_markers(stamp)
+            self.publish_bicycle_markers(stamp)
 
             rate.sleep()
 
@@ -118,7 +118,7 @@ class BicycleSimulation:
 
         self.current_velocity_pub.publish(vel_msg)
 
-    def publish_vehicle_markers(self, stamp):
+    def publish_bicycle_markers(self, stamp):
 
         marker_array = MarkerArray()
 
@@ -128,10 +128,10 @@ class BicycleSimulation:
         marker.type = marker.LINE_LIST
         marker.action = marker.ADD
         marker.id = 0
-        marker.scale.x = 0.5
+        marker.scale.x = 0.2
         marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.8)
 
-        # the location of the marker is vehicle pose
+        # the location of the marker is current pose
         marker.pose.position.x = self.x
         marker.pose.position.y = self.y
         x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, self.heading_angle)
@@ -140,16 +140,42 @@ class BicycleSimulation:
         marker.pose.orientation.z = z
         marker.pose.orientation.w = w
 
-        # draw first line in forward direction of length of wheel base
+        # draw wheel base
         marker.points.append(Point(0, 0, 0))
         marker.points.append(Point(self.wheel_base, 0, 0))
-        # draw second line in steering angle direction
-        marker.points.append(Point(self.wheel_base + math.cos(self.steering_angle), math.sin(self.steering_angle), 0))
-        marker.points.append(Point(self.wheel_base - math.cos(self.steering_angle), -math.sin(self.steering_angle), 0))
 
         marker_array.markers.append(marker)
 
-        self.vehicle_markers_pub.publish(marker_array)
+        marker = Marker()
+        marker.header.frame_id = "map"
+        marker.header.stamp = stamp
+        marker.type = marker.LINE_LIST
+        marker.action = marker.ADD
+        marker.id = 1
+        marker.scale.x = 0.4
+        marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.8)
+
+        # the location of the marker is current pose
+        marker.pose.position.x = self.x
+        marker.pose.position.y = self.y
+        marker.pose.orientation.x = x
+        marker.pose.orientation.y = y
+        marker.pose.orientation.z = z
+        marker.pose.orientation.w = w
+
+        wheel_length = 0.4
+
+        # draw rear wheel
+        marker.points.append(Point(-wheel_length, 0, 0))
+        marker.points.append(Point(wheel_length, 0, 0))
+
+        # draw front wheel
+        marker.points.append(Point(self.wheel_base + wheel_length * math.cos(self.steering_angle), wheel_length * math.sin(self.steering_angle), 0))
+        marker.points.append(Point(self.wheel_base - wheel_length * math.cos(self.steering_angle), -wheel_length * math.sin(self.steering_angle), 0))
+
+        marker_array.markers.append(marker)
+
+        self.bicycle_markers_pub.publish(marker_array)
 
 if __name__ == '__main__':
     rospy.init_node('bicycle_simulation', log_level=rospy.INFO)
