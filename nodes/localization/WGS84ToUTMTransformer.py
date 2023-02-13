@@ -33,6 +33,6 @@ class WGS84ToUTMTransformer:
         b = math.sin(math.radians(lat))
         correction = math.degrees(math.atan(a * b))
 
-        # TODO compare with CA = (λ - λCM) × sin φ
+        # TODO compare with CA = (Lambda - LambdaCM) * sin Theta
 
         return azimuth - correction

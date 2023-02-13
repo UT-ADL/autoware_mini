@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 import math
 import rospy
@@ -68,7 +68,7 @@ class NovatelOem7Localizer:
 
         # inspva_msg contains ellipsoid height if msl (mean sea level) height is wanted then undulation is subtracted
         height = inspva_msg.height
-        if self.use_msl_height == True:
+        if self.use_msl_height:
             height -= self.undulation
 
         # get IMU angular speeds for /current_velocity topic
