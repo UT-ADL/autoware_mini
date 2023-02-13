@@ -140,7 +140,16 @@ Visualization Manager:
       Marker Topic: /pure_pursuit_rviz
       Name: Pure_pursuit
       Namespaces:
-        {}
+        Angle alpha: true
+        Lookahead distance: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /bicycle_markers
+      Name: MarkerArray
+      Namespaces:
+        "": true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -180,11 +189,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 8.784629821777344
+      Scale: 18.61096954345703
       Target Frame: base_link
       Value: TopDownOrtho (rviz)
-      X: 10.92867660522461
-      Y: 5.307783126831055
+      X: 10801.609375
+      Y: 11242.9921875
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:

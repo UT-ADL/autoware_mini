@@ -131,7 +131,7 @@ class WaypointLoader:
         marker.action = marker.ADD
         marker.id = 0
         marker.scale.x = 0.5
-        marker.color = ColorRGBA(0.0, 0.0, 1.0, 0.6)
+        marker.color = ColorRGBA(0.4, 10, 1.0, 0.4)
         for i, waypoint in enumerate(waypoints):
             marker.points.append(waypoint.pose.pose.position)
         marker_array.markers.append(marker)

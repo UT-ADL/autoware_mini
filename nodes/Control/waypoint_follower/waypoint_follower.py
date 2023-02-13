@@ -92,14 +92,10 @@ class WaypointFollower:
             # calculate heading from current pose
             self.current_heading = get_heading_from_orientation(current_pose.orientation)
             self.lookahead_heading = get_heading_from_two_poses(current_pose.position, lookahead_wp.pose.pose.position)
-            print("DEBUG - current heading: %f, lookahead heading: %f" % (self.current_heading, self.lookahead_heading))
-            # TODO is it correct? - For example: How it will handle the case of 2.0 and 358.0 degrees?
-            alpha = self.lookahead_heading - self.current_heading
+            alpha = self.current_heading - self.lookahead_heading
       
-            # calc curvature (lookahead distance, current pose, lookahead point)
             curvature = 2 * math.sin(alpha) / self.lookahead_distance
             self.steering_angle = math.atan(self.wheel_base * curvature)
-            print("DEBUG - curvature: %f, steering angle: %f" % (curvature, self.steering_angle))
 
             # TODO limit steering angle before output
 
@@ -164,7 +160,7 @@ class WaypointFollower:
 def get_heading_from_two_poses(pose1, pose2):
     # calc heading from two poses
     heading = math.atan2(pose2.y - pose1.y, pose2.x - pose1.x)
-    heading = convert_heading_to_360(math.degrees(heading))
+    heading = convert_heading_to_360(heading)
     
     return heading
 
@@ -173,7 +169,8 @@ def get_heading_from_orientation(orientation):
     # convert quaternion to euler angles
     quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
     euler = tf.transformations.euler_from_quaternion(quaternion)
-    yaw = math.degrees(euler[2])  # from x axis: ccw up to 180, cw down to -180 degrees
+    # TODO not to convert into degres, but to use radians
+    yaw = euler[2]  # from x axis: ccw up to 180, cw down to -180 degrees
 
     heading = convert_heading_to_360(yaw)
 
@@ -181,13 +178,14 @@ def get_heading_from_orientation(orientation):
 
 
 def convert_heading_to_360(yaw):
+    # TODO use also radians
     # convert yaw to heading from y axis (north) and cw from 0 up to 360
     if yaw < 0:
-        heading = abs(yaw) + 90
+        heading = abs(yaw) + math.pi/2
     else:
-        heading = 90 - yaw
+        heading = math.pi/2 - yaw
         if heading < 0:
-            heading += 360
+            heading += 2 * math.pi
 
     return heading
 
