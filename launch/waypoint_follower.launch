@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <launch>
 
-   <arg name="waypoint_topic"       default="/waypoints"      doc="topic with waypoints" />
+    <arg name="waypoint_topic"      default="/waypoints"    doc="topic with waypoints" />
+    <arg name="follower"            default="pure_pursuit"  doc="pure_pursuit, stanley" />
 
-   <node pkg="autoware_mini" type="waypoint_follower.py" name="waypoint_follower" output="screen" >
-      <param name="waypoint_topic"      value="$(arg waypoint_topic)" />
-   </node>
+    <node pkg="autoware_mini" type="waypoint_follower.py" name="waypoint_follower" output="screen" >
+        <param name="waypoint_topic"    value="$(arg waypoint_topic)" />
+        <param name="follower"          value="$(arg follower)" />
+    </node>
 
 </launch>

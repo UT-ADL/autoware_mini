@@ -19,8 +19,8 @@ class WaypointLoader:
         self.publish_markers = rospy.get_param("~publish_markers", True)
 
         # Publishers
-        self.waypoints_pub = rospy.Publisher('/waypoints', Lane, queue_size=1, latch=True)
-        self.waypoints_markers_pub = rospy.Publisher('/waypoint_markers', MarkerArray, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('waypoints', Lane, queue_size=1, latch=True)
+        self.waypoints_markers_pub = rospy.Publisher('waypoint_markers', MarkerArray, queue_size=1, latch=True)
 
         # loginfo and processing
         rospy.loginfo("waypoint_loader - loading waypoints from file: %s ", self.waypoints_file)

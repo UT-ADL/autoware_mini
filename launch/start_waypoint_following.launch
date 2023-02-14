@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="waypoints_file"          default="/home/edgar/workspaces/autoware_ut/src/autoware_ut/maps/tartu/paths/erm_wp_parking_and_straight.csv" />
+    <arg name="waypoints_file"          default="/tmp/waypoints.csv" />
     <arg name="coordinate_transformer"  default="lest97" />
+    <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
     <arg name="launch_rviz"             default="true" />
 
     <arg name="use_localizer"           default="true" />
@@ -20,7 +21,9 @@
         <arg name="waypoints_file"  value="$(arg waypoints_file)" />
     </include>
 
-    <include file="$(find autoware_mini)/launch/waypoint_follower.launch" />
+    <include file="$(find autoware_mini)/launch/waypoint_follower.launch" >
+        <arg name="follower"        value="$(arg follower)" />
+    </include>
 
     <!-- TRANSFORMS -->
     <include if="$(arg use_tf)" file="$(find vehicle_platform)/launch/sensors/tf.launch" />

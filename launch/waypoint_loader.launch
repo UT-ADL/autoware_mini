@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <launch>
 
-   <arg name="waypoints_file"    default="/tmp/waypoints.csv" />
-   <arg name="output_frame"      default="map" />
-   <arg name="publish_markers"   default="true" />
-   <arg name="launch_rviz"       default="false" />
+    <arg name="waypoints_file"    default="/tmp/waypoints.csv" />
+    <arg name="output_frame"      default="map" />
+    <arg name="publish_markers"   default="true" />
+    <arg name="launch_rviz"       default="false" />
 
-   <node pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" >
-      <param name="waypoints_file"  value="$(arg waypoints_file)" />
-   </node>
+    <node pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" >
+        <param name="waypoints_file"  value="$(arg waypoints_file)" />
+    </node>
 
-   <node if="$(arg launch_rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
+    <node if="$(arg launch_rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
 
 </launch>
