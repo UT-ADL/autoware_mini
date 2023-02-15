@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /System1/TF1
-        - /waypoint_loader markers1/Namespaces1
+        - /Waypoint markers1/Namespaces1
       Splitter Ratio: 0.7117646932601929
     Tree Height: 912
   - Class: rviz/Selection
@@ -88,6 +88,8 @@ Visualization Manager:
               Value: true
             lidar_front/os_sensor:
               Value: true
+            map:
+              Value: true
             radar_fc:
               Value: true
           Marker Scale: 1.5
@@ -96,7 +98,31 @@ Visualization Manager:
           Show Axes: true
           Show Names: true
           Tree:
-            {}
+            map:
+              base_link:
+                base_footprint:
+                  {}
+                imu:
+                  {}
+                lidar_center:
+                  camera_fl:
+                    {}
+                  camera_fr:
+                    {}
+                  interfacea_link0:
+                    {}
+                  interfacea_link1:
+                    {}
+                  interfacea_link2:
+                    {}
+                  interfacea_link3:
+                    {}
+                  lidar:
+                    {}
+                  lidar_front/os_sensor:
+                    {}
+                radar_fc:
+                  {}
           Update Interval: 0
           Value: true
       Enabled: true
@@ -128,7 +154,7 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /waypoint_markers
-      Name: waypoint_loader markers
+      Name: Waypoint markers
       Namespaces:
         Path: true
         Velocity lables: true
@@ -137,19 +163,19 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /pure_pursuit_rviz
-      Name: Pure_pursuit
+      Marker Topic: /bicycle_markers
+      Name: Bicycle markers
       Namespaces:
-        Angle alpha: true
-        Lookahead distance: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /bicycle_markers
+      Marker Topic: /follower_markers
       Name: MarkerArray
       Namespaces:
-        "": true
+        heading_error: true
+        nearest_wp distance: true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -189,11 +215,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 18.61096954345703
+      Scale: 81.2728042602539
       Target Frame: base_link
       Value: TopDownOrtho (rviz)
-      X: 10801.609375
-      Y: 11242.9921875
+      X: 2.5196468830108643
+      Y: 0.42236852645874023
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:

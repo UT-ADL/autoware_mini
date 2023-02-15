@@ -21,6 +21,7 @@
         <arg name="waypoints_file"  value="$(arg waypoints_file)" />
     </include>
 
+
     <include file="$(find autoware_mini)/launch/waypoint_follower.launch" >
         <arg name="follower"        value="$(arg follower)" />
     </include>
