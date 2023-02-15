@@ -18,14 +18,17 @@ class WaypointLoader:
         self.output_frame = rospy.get_param("~output_frame", "map")
         self.publish_markers = rospy.get_param("~publish_markers", True)
 
+        # Internal params
+        self.wp_id = 0
+
         # Publishers
-        self.waypoints_pub = rospy.Publisher('waypoints', Lane, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
         self.waypoints_markers_pub = rospy.Publisher('waypoint_markers', MarkerArray, queue_size=1, latch=True)
 
         # loginfo and processing
         rospy.loginfo("waypoint_loader - loading waypoints from file: %s ", self.waypoints_file)
         self.waypoints = self.load_waypoints(self.waypoints_file)
-        self.publish_waypoints(self.waypoints)
+        self.publish_waypoints()
 
         if self.publish_markers:
             self.publish_waypoints_markers(self.waypoints)
@@ -45,46 +48,41 @@ class WaypointLoader:
             for row in reader:
                 # create waypoint
                 waypoint = Waypoint()
-                # 0      1  2  3  4    5         6          
-                # wp_id, x, y, z, yaw, velocity, change_flag
+                # 0  1  2  3    4         5            6              7           8          9
+                # x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag
                 # set waypoint values
-                waypoint.gid = int(row[0])
-                waypoint.pose.pose.position.x = float(row[1])
-                waypoint.pose.pose.position.y = float(row[2])
-                waypoint.pose.pose.position.z = float(row[3])
-                waypoint.twist.twist.linear.x = float(row[5]) / 3.6 # convert to m/s
+                waypoint.gid = self.wp_id
+                waypoint.pose.pose.position.x = float(row[0])
+                waypoint.pose.pose.position.y = float(row[1])
+                waypoint.pose.pose.position.z = float(row[2])
 
                 # convert yaw (contains heading in waypoints file) to quaternion
-                q = self.get_quaternion_from_heading(float(row[4]))
+                q = tf.transformations.quaternion_from_euler(0, 0, math.radians(float(row[3])))
                 waypoint.pose.pose.orientation.x = q[0]
                 waypoint.pose.pose.orientation.y = q[1]
                 waypoint.pose.pose.orientation.z = q[2]
                 waypoint.pose.pose.orientation.w = q[3]
 
+                waypoint.twist.twist.linear.x = float(row[4])  # convert to m/s
+
                 # set waypoint flags
-                waypoint.change_flag = int(row[6])
+                waypoint.change_flag = int(row[5])
+                waypoint.wpstate.steering_state = int(row[6])
+                waypoint.wpstate.accel_state = int(row[7])
+                waypoint.wpstate.stop_state = int(row[8])
+                waypoint.wpstate.event_state = int(row[9])
 
                 waypoints.append(waypoint)
 
+                self.wp_id += 1
+
         return waypoints
 
-    def get_quaternion_from_heading(self, heading):
-        # transform heading from (north y-axis: cw in deg up to 360) to (x-axis: ccw up to 180, cw down to -180 degrees)
-        # will correct for cw down to -180 degrees
-        yaw = 90 - heading
-        # correct for 2nd ccw sector
-        if yaw < -180:
-            yaw = -(yaw + 360)
-
-        quaternion = tf.transformations.quaternion_from_euler(0, 0, math.radians(yaw))
-
-        return quaternion
-
-    def publish_waypoints(self, waypoints):
+    def publish_waypoints(self):
         lane = Lane()
         lane.header.frame_id = self.output_frame
         lane.header.stamp = rospy.Time.now()
-        lane.waypoints = waypoints
+        lane.waypoints = self.waypoints
         self.waypoints_pub.publish(lane)
 
     # Waypoints visualization in RVIZ
@@ -93,6 +91,15 @@ class WaypointLoader:
 
         # Pose arrows
         for i, waypoint in enumerate(waypoints):
+
+            # color the arrows based on the waypoint steering_flag (blinker)
+            if waypoint.wpstate.steering_state == 1:
+                color = ColorRGBA(1.0, 0.0, 0.0, 1.0)
+            elif waypoint.wpstate.steering_state == 2:
+                color = ColorRGBA(0.0, 0.0, 1.0, 1.0)
+            else:
+                color = ColorRGBA(0.0, 1.0, 0.0, 1.0)
+
             marker = Marker()
             marker.header.frame_id = self.output_frame
             marker.header.stamp = rospy.Time.now()
@@ -104,7 +111,7 @@ class WaypointLoader:
             marker.scale.x = 0.4
             marker.scale.y = 0.1
             marker.scale.z = 0.1
-            marker.color = ColorRGBA(0.0, 1.0, 0.0, 1.0)
+            marker.color = color
             marker_array.markers.append(marker)
 
         # velocity labels

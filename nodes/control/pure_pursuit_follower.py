@@ -18,7 +18,6 @@ class PurePursuitFollower:
     def __init__(self):
 
         # Parameters
-        self.waypoint_topic = rospy.get_param("~waypoint_topic", "waypoints")
         self.planning_time = rospy.get_param("~planning_time", 2.0)
         self.min_lookahead_distance = rospy.get_param("~min_lookahead_distance", 5.5)
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
@@ -33,7 +32,7 @@ class PurePursuitFollower:
 
 
         # Subscribers
-        self.waypoints_sub = rospy.Subscriber('/waypoints', Lane, self.waypoints_callback)
+        self.waypoints_sub = rospy.Subscriber('/path', Lane, self.waypoints_callback)
         self.current_pose_sub = message_filters.Subscriber('/current_pose', PoseStamped)
         self.current_velocity_sub = message_filters.Subscriber('/current_velocity', TwistStamped)
         ts = message_filters.TimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10)

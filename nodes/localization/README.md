@@ -6,7 +6,7 @@
 * Adjusts the azimuth angle taking into consideration meridian convergence
 * Creates `map` to `base_link` transfom
 
-###### Parameters
+##### Parameters
 
 * `coordinate_transformer` - into which cartesian coordinate frame he WGS84 latitude and longitude are converted to
   * `utm` - Universal Transvrse Mercator projection. Origin point is hardcoded in transformer and is also used to define the UTM zone
@@ -14,7 +14,7 @@
 * `use_msl_height` - if true mean sea level height is used, otherwise WGS84 systemuses ellipsoidal height.
 * `use_custom_origin` - weather to subtract the origin coordinates from tranformed coordinates or not. If we don't subtract the coordinates the values are too big and cause visualization problems for Rviz.
 
-###### Subscribes
+##### Subscribes
 
 | Topic | Type | Comment |
 | --- | --- | --- |
@@ -22,7 +22,7 @@
 | `/novatel/oem7/bestpos` | [novatel_oem7_msgs/BESTPOS](http://docs.ros.org/en/jade/api/novatel_msgs/html/msg/BESTPOS.html)  | undulation (difference between ellipsoid and mean sea level - geoid - height) |
 | `/gps/imu` | [sensor_msgs/Imu](http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/Imu.html) | angular_velocity.x, angular_velocity.y, angular_velocity.z |
 
-###### Publishes
+##### Publishes
 
 | Topic | Type | Comment |
 | --- | --- | --- |
