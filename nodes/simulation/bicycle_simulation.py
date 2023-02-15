@@ -63,7 +63,12 @@ class BicycleSimulation:
         self.y += y_dot * delta_t
         self.heading_angle += heading_angle_dot * delta_t
 
-    def publisher(self):
+    def run(self):
+        # start separate thread for spinning subcribers
+        t = threading.Thread(target=rospy.spin)
+        t.daemon = True # make sure Ctrl+C works
+        t.start()
+
         # publish localization at fixed rate
         rate = rospy.Rate(self.publish_rate)
         delta_t = 1. / self.publish_rate
@@ -79,12 +84,6 @@ class BicycleSimulation:
             self.publish_bicycle_markers(stamp)
 
             rate.sleep()
-
-    def run(self):
-        # start separate thread for publishing
-        threading.Thread(target=self.publisher).start()
-        # keep the main thread for subscribers
-        rospy.spin()
 
     def publish_current_pose(self, stamp):
 
