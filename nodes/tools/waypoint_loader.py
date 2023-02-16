@@ -6,7 +6,7 @@ import csv
 import tf
 import math
 
-from autoware_msgs.msg import Lane, Waypoint
+from autoware_msgs.msg import LaneArray, Lane, Waypoint
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 
@@ -22,7 +22,7 @@ class WaypointLoader:
         self.wp_id = 0
 
         # Publishers
-        self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('path', LaneArray, queue_size=1, latch=True)
         self.waypoints_markers_pub = rospy.Publisher('waypoint_markers', MarkerArray, queue_size=1, latch=True)
 
         # loginfo and processing
@@ -79,11 +79,15 @@ class WaypointLoader:
         return waypoints
 
     def publish_waypoints(self):
+        path = LaneArray()
         lane = Lane()
+        
         lane.header.frame_id = self.output_frame
         lane.header.stamp = rospy.Time.now()
         lane.waypoints = self.waypoints
-        self.waypoints_pub.publish(lane)
+        path.lanes.append(lane)
+
+        self.waypoints_pub.publish(path)
 
     # Waypoints visualization in RVIZ
     def publish_waypoints_markers(self, waypoints):

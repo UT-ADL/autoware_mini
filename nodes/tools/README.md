@@ -53,5 +53,5 @@ Will record waypoint file with the following columns:
 
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `/path` | `autoware_msgs/Lane` | Array of waypoints `autoware_msgs/Waypoint` |
+| `/path` | `autoware_msgs/LaneArray` | Lane.waypoints contains an array of waypoints `autoware_msgs/Waypoint` |
 | `/waypoint_markers` | `visualization_msgs/MarkerArray` | Includes markers for waypoint pose, velocity labels and path |

@@ -11,7 +11,7 @@ from sklearn.neighbors import KDTree
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
 from std_msgs.msg import ColorRGBA
-from autoware_msgs.msg import Lane, VehicleCmd
+from autoware_msgs.msg import LaneArray, VehicleCmd
 
 
 class StanleyFollower:
@@ -31,7 +31,7 @@ class StanleyFollower:
         self.r = 0
 
         # Subscribers
-        self.waypoints_sub = rospy.Subscriber('/path', Lane, self.waypoints_callback)
+        self.path_sub = rospy.Subscriber('/path', LaneArray, self.path_callback)
         self.current_pose_sub = message_filters.Subscriber('/current_pose', PoseStamped)
         self.current_velocity_sub = message_filters.Subscriber('/current_velocity', TwistStamped)
         ts = message_filters.TimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10)
@@ -44,8 +44,8 @@ class StanleyFollower:
         # output information to console
         rospy.loginfo("stanley_follower - initiliazed")
 
-    def waypoints_callback(self, waypoints_msg):
-        self.waypoints = waypoints_msg.waypoints
+    def path_callback(self, path_msg):
+        self.waypoints = path_msg.lanes[0].waypoints
         self.last_wp_idx = len(self.waypoints) - 1
 
         # create kd-tree for nearest neighbor search
