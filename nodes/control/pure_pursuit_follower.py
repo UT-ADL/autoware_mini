@@ -29,7 +29,8 @@ class PurePursuitFollower:
         self.waypoints = None
         self.last_wp_idx = 0
         self.target_velocity = 0.0
-
+        self.l = 0
+        self.r = 0
 
         # Subscribers
         self.waypoints_sub = rospy.Subscriber('/path', Lane, self.waypoints_callback)
@@ -40,7 +41,7 @@ class PurePursuitFollower:
 
         # Publishers TODO / publish to same topic as Stanley: "follower_markers"
         self.pure_pursuit_rviz_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
-        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=10)
+        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
 
         # output information to console
         rospy.loginfo("pure_pursuit_follower - initiliazed")
@@ -64,6 +65,17 @@ class PurePursuitFollower:
 
         self.nearest_wp_distance, self.nearest_wp_idx = self.waypoint_tree.query([[self.current_pose.position.x, self.current_pose.position.y]], 1)
 
+        # get blinker information from nearest waypoint
+        if self.waypoints[int(self.nearest_wp_idx)].wpstate.steering_state == 1:    # left
+            self.l = 1
+            self.r = 0
+        elif self.waypoints[int(self.nearest_wp_idx)].wpstate.steering_state == 2:  # right
+            self.l = 0
+            self.r = 1
+        else:                                                                       # straight (no blinkers)
+            self.l = 0
+            self.r = 0
+            
         # calc lookahead distance (velocity dependent)
         self.lookahead_distance = self.current_velocity * self.planning_time
         if self.lookahead_distance < self.min_lookahead_distance:
@@ -97,8 +109,11 @@ class PurePursuitFollower:
         vehicle_cmd = VehicleCmd()
         vehicle_cmd.header.stamp = rospy.Time.now()
         vehicle_cmd.header.frame_id = "/map"
+        # blinkers
+        vehicle_cmd.lamp_cmd.l = self.l
+        vehicle_cmd.lamp_cmd.r = self.r
+        # velocity and steering
         vehicle_cmd.ctrl_cmd.linear_velocity = self.target_velocity
-        # TODO
         vehicle_cmd.ctrl_cmd.linear_acceleration = 0.0
         vehicle_cmd.ctrl_cmd.steering_angle = self.steering_angle
         self.vehicle_command_pub.publish(vehicle_cmd)
@@ -117,7 +132,7 @@ class PurePursuitFollower:
         marker.type = Marker.LINE_STRIP
         marker.action = Marker.ADD
         marker.scale.x = 0.1
-        marker.color = ColorRGBA(1.0, 0.0, 0.0, 1.0)
+        marker.color = ColorRGBA(1.0, 0.0, 1.0, 1.0)
         marker.points = ([current_pose.position, lookahead_pose.position])
         marker_array.markers.append(marker)
 

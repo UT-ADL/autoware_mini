@@ -21,11 +21,14 @@ class StanleyFollower:
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
 
         # Variables - init
+        self.k = 1.0                    # gain for cross track error
         self.current_velocity = 0.0
         self.waypoint_tree = None
         self.waypoints = None
         self.last_wp_idx = 0
         self.target_velocity = 0.0
+        self.l = 0
+        self.r = 0
 
         # Subscribers
         self.waypoints_sub = rospy.Subscriber('/path', Lane, self.waypoints_callback)
@@ -36,7 +39,7 @@ class StanleyFollower:
 
         # Publishers
         self.stanley_rviz_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
-        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=10)
+        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
 
         # output information to console
         rospy.loginfo("stanley_follower - initiliazed")
@@ -65,28 +68,32 @@ class StanleyFollower:
         self.front_wheel_pose = self.get_front_wheel_pose()
         self.front_wheel_heading = self.get_heading_from_pose(self.front_wheel_pose)
         
-        # TODO calc cross track error and heading (do not use orientation of nearest waypoint - might not be available)
+        # TODO calc cross track error and heading
         self.cross_track_error, self.track_heading, self.nearest_wp = self.calc_cross_track_error_and_heading(self.front_wheel_pose)
-        print("DEBUG - cross_track_error: %f, track_heading: %f" % (self.cross_track_error, math.degrees(self.track_heading)))
+
+        # get blinker information from nearest waypoint
+        if self.nearest_wp.wpstate.steering_state == 1:     # left
+            self.l = 1
+            self.r = 0
+        elif self.nearest_wp.wpstate.steering_state == 2:   # right
+            self.l = 0
+            self.r = 1
+        else:                                               # straight (no blinkers)
+            self.l = 0
+            self.r = 0
 
         # find heading error
         self.heading_error = self.track_heading - self.current_heading
-        print("DEBUG - heading error: %f" % math.degrees(self.heading_error))
 
-        self.min_path_yaw = math.atan2(self.nearest_wp.pose.pose.position.y - self.front_wheel_pose.position.y , self.nearest_wp.pose.pose.position.x - self.front_wheel_pose.position.x)
-        self.cross_yaw_error = self.min_path_yaw - self.current_heading
-        print("DEBUG - cross yaw error: %f" % math.degrees(self.cross_yaw_error))
+        # TODO not actually used - cte already has +/- information?
+        # self.min_path_yaw = math.atan2(self.nearest_wp.pose.pose.position.y - self.front_wheel_pose.position.y , self.nearest_wp.pose.pose.position.x - self.front_wheel_pose.position.x)
+        # self.cross_yaw_error = self.min_path_yaw - self.current_heading
 
         # calc delta error
-        self.k = 1.0
-        self.delta_error = math.atan(self.k * self.cross_track_error / self.current_velocity + 0.000001)
-        print("DEBUG - delta error: %f" % self.delta_error)
-
-        # calc steering angle
+        self.delta_error = math.atan(self.k * self.cross_track_error / self.current_velocity + 0.00001)
         self.steering_angle = self.heading_error + self.delta_error
-        print("DEBUG - steering angle: %f" % self.steering_angle)
 
-        # # TODO limit steering angle before output
+        # TODO limit steering angle before output
 
         self.target_velocity = self.nearest_wp.twist.twist.linear.x
 
@@ -99,8 +106,11 @@ class StanleyFollower:
         vehicle_cmd = VehicleCmd()
         vehicle_cmd.header.stamp = rospy.Time.now()
         vehicle_cmd.header.frame_id = "/map"
+        # blinkers
+        vehicle_cmd.lamp_cmd.l = self.l
+        vehicle_cmd.lamp_cmd.r = self.r
+        # velocity and steering
         vehicle_cmd.ctrl_cmd.linear_velocity = self.target_velocity
-        # TODO
         vehicle_cmd.ctrl_cmd.linear_acceleration = 0.0
         vehicle_cmd.ctrl_cmd.steering_angle = self.steering_angle
         self.vehicle_command_pub.publish(vehicle_cmd)
@@ -119,7 +129,7 @@ class StanleyFollower:
         marker.type = Marker.LINE_STRIP
         marker.action = Marker.ADD
         marker.scale.x = 0.1
-        marker.color = ColorRGBA(1.0, 0.0, 0.0, 1.0)
+        marker.color = ColorRGBA(1.0, 0.0, 1.0, 1.0)
         marker.points = ([front_pose.position, nearest_wp_pose.position])
         marker_array.markers.append(marker)
 

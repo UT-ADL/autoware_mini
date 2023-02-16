@@ -63,7 +63,7 @@ class WaypointLoader:
                 waypoint.pose.pose.orientation.z = q[2]
                 waypoint.pose.pose.orientation.w = q[3]
 
-                waypoint.twist.twist.linear.x = float(row[4])  # convert to m/s
+                waypoint.twist.twist.linear.x = float(row[4])
 
                 # set waypoint flags
                 waypoint.change_flag = int(row[5])
@@ -93,12 +93,12 @@ class WaypointLoader:
         for i, waypoint in enumerate(waypoints):
 
             # color the arrows based on the waypoint steering_flag (blinker)
-            if waypoint.wpstate.steering_state == 1:
+            if waypoint.wpstate.steering_state == 1:    # left
                 color = ColorRGBA(1.0, 0.0, 0.0, 1.0)
-            elif waypoint.wpstate.steering_state == 2:
+            elif waypoint.wpstate.steering_state == 2:  # right
                 color = ColorRGBA(0.0, 0.0, 1.0, 1.0)
             else:
-                color = ColorRGBA(0.0, 1.0, 0.0, 1.0)
+                color = ColorRGBA(0.0, 1.0, 0.0, 1.0)   # straight
 
             marker = Marker()
             marker.header.frame_id = self.output_frame
