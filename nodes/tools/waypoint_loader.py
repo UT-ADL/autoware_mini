@@ -119,7 +119,7 @@ class WaypointLoader:
             marker = Marker()
             marker.header.frame_id = self.output_frame
             marker.header.stamp = rospy.Time.now()
-            marker.ns = "Velocity lables"
+            marker.ns = "Velocity label"
             marker.id = i
             marker.type = marker.TEXT_VIEW_FACING
             marker.action = marker.ADD

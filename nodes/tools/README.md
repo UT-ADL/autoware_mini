@@ -17,6 +17,12 @@ Records waypoints, speed, yaw and blinker information and writes to csv file.
 | `/current_velocity` | [geometry_msgs/TwistStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html) | velocity |
 | `/pacmod/parsed_tx/turn_rpt` | `pacmod_msgs.msg/SystemRptInt` | blinker information |
 
+##### Publishes
+
+| Topic | Type | Comment |
+| --- | --- | --- |
+| `/waypoint_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |
+
 ##### Output
 
 Will record waypoint file with the following columns:
@@ -44,7 +50,8 @@ Will record waypoint file with the following columns:
 * `publish_markers` - will publish waypoint markers to Rviz 
 
 ##### Publishes
+
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `/path` | autoware_msgs/Lane | Array of waypoints `autoware_msgs/Waypoint` |
-| `/waypoint_markers` | visualization_msgs/MarkerArray | waypoint pose, velocity labels and path |
+| `/path` | `autoware_msgs/Lane` | Array of waypoints `autoware_msgs/Waypoint` |
+| `/waypoint_markers` | `visualization_msgs/MarkerArray` | Includes markers for waypoint pose, velocity labels and path |

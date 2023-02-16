@@ -6,7 +6,7 @@ import rospy
 import message_filters
 import tf
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import Marker, MarkerArray
 from pacmod_msgs.msg import SystemRptInt
 from std_msgs.msg import ColorRGBA
 
@@ -22,6 +22,7 @@ class WaypointSaver:
         self.written_y = 0  # last y coordinate written into text file, kept to calculate distance interval
         self.wp_id = 0  # waypoint index
         self.turn_signal = 0
+        self.marker_array = MarkerArray()
 
         # open file in append mode and write the header row
         self.waypoint_file = open(self.file_name, 'a')
@@ -38,7 +39,7 @@ class WaypointSaver:
         ts.registerCallback(self.data_callback)
 
         # Publishers
-        self.waypoint_marker_pub = rospy.Publisher('waypoint_saver_markers', Marker, queue_size=10)
+        self.waypoint_marker_pub = rospy.Publisher('waypoint_markers', MarkerArray, queue_size=1)
 
         # loginfo
         rospy.loginfo("waypoint_saver - interval: %i m", self.interval)
@@ -102,20 +103,35 @@ class WaypointSaver:
         else:
             color = ColorRGBA(0.0, 1.0, 0.0, 1.0)
 
+        # marker representing pose
         marker = Marker()
         marker.id = self.wp_id
         marker.header.frame_id = current_pose.header.frame_id
         marker.frame_locked = True
         marker.header.stamp = current_pose.header.stamp
-
+        marker.ns = "Waypoint pose"
         marker.scale = Vector3(x=0.5, y=0.1, z=0.1)
         marker.color = color
         marker.pose = current_pose.pose
         marker.type = marker.ARROW
-        marker.action = Marker.ADD
+        marker.action = marker.ADD
+        self.marker_array.markers.append(marker)
 
-        # publish only one marker - currently not collected into array!
-        self.waypoint_marker_pub.publish(marker)
+        # marker representing velocity label
+        marker_label = Marker()
+        marker_label.header.frame_id = current_pose.header.frame_id
+        marker_label.header.stamp = current_pose.header.stamp
+        marker_label.ns = "Velocity label"
+        marker_label.id = self.wp_id
+        marker_label.type = marker_label.TEXT_VIEW_FACING
+        marker_label.action = marker_label.ADD
+        marker_label.pose = current_pose.pose
+        marker_label.scale.z = 0.5
+        marker_label.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)
+        marker_label.text = str(round(v * 3.6, 1))
+        self.marker_array.markers.append(marker_label)
+
+        self.waypoint_marker_pub.publish(self.marker_array)
 
 
     def run(self):
