@@ -23,8 +23,6 @@ class PurePursuitFollower:
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
 
         # Variables - init
-        self.lookahead_distance = 0.0
-        self.current_velocity = 0.0
         self.waypoint_tree = None
         self.waypoints = None
         self.last_wp_idx = 0
@@ -60,47 +58,45 @@ class PurePursuitFollower:
         if self.waypoint_tree is None:
             return
 
-        self.current_pose = current_pose_msg.pose
-        self.current_velocity = current_velocity_msg.twist.linear.x
+        current_pose = current_pose_msg.pose
+        current_velocity = current_velocity_msg.twist.linear.x
 
-        self.nearest_wp_distance, self.nearest_wp_idx = self.waypoint_tree.query([[self.current_pose.position.x, self.current_pose.position.y]], 1)
+        d, nearest_wp_idx = self.waypoint_tree.query([[current_pose.position.x, current_pose.position.y]], 1)
+        nearest_wp = self.waypoints[int(nearest_wp_idx)]
 
-        # get blinker information from nearest waypoint
-        if self.waypoints[int(self.nearest_wp_idx)].wpstate.steering_state == 1:    # left
-            self.l = 1
-            self.r = 0
-        elif self.waypoints[int(self.nearest_wp_idx)].wpstate.steering_state == 2:  # right
-            self.l = 0
-            self.r = 1
-        else:                                                                       # straight (no blinkers)
-            self.l = 0
-            self.r = 0
-            
         # calc lookahead distance (velocity dependent)
-        self.lookahead_distance = self.current_velocity * self.planning_time
-        if self.lookahead_distance < self.min_lookahead_distance:
-            self.lookahead_distance = self.min_lookahead_distance
+        lookahead_distance = current_velocity * self.planning_time
+        if lookahead_distance < self.min_lookahead_distance:
+            lookahead_distance = self.min_lookahead_distance
         
         # TODO assume 1m distance between waypoints - currently OK, but need to make it more universal
-        lookahead_wp_idx = self.nearest_wp_idx + math.floor(self.lookahead_distance)
+        lookahead_wp_idx = int(nearest_wp_idx) + math.floor(lookahead_distance)
 
         if lookahead_wp_idx > self.last_wp_idx:
             lookahead_wp_idx = self.last_wp_idx
         lookahead_wp = self.waypoints[int(lookahead_wp_idx)]
 
-        # set target velocity taken from lookahead point
-        self.target_velocity = lookahead_wp.twist.twist.linear.x
-
         # find current pose heading
-        quaternion = (self.current_pose.orientation.x, self.current_pose.orientation.y, self.current_pose.orientation.z, self.current_pose.orientation.w)
-        _, _, self.current_heading = tf.transformations.euler_from_quaternion(quaternion)
-        self.lookahead_heading = get_heading_from_two_positions(self.current_pose.position, lookahead_wp.pose.pose.position)
-        alpha = self.lookahead_heading - self.current_heading
+        quaternion = (current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w)
+        _, _, current_heading = tf.transformations.euler_from_quaternion(quaternion)
+        lookahead_heading = get_heading_from_two_positions(current_pose.position, lookahead_wp.pose.pose.position)
+        alpha = lookahead_heading - current_heading
 
-        curvature = 2 * math.sin(alpha) / self.lookahead_distance
+        curvature = 2 * math.sin(alpha) / lookahead_distance
         self.steering_angle = math.atan(self.wheel_base * curvature)
 
-        self.publish_pure_pursuit_rviz(self.current_pose, lookahead_wp.pose.pose, alpha)
+        # TODO - add limits to steering angle
+
+        # calc cross track error - used only for debug output
+        cross_track_error = self.calc_cross_track_error(current_pose, int(nearest_wp_idx))
+        print("cross track error: %f, %f" % (cross_track_error, d))
+
+
+        # get blinker information from nearest waypoint and target velocity from lookahead waypoint
+        self.l, self.r = self.get_blinker_state(nearest_wp.wpstate.steering_state)
+        self.target_velocity = lookahead_wp.twist.twist.linear.x
+
+        self.publish_pure_pursuit_rviz(current_pose, lookahead_wp.pose.pose, alpha)
         # publish also debug output to another topic (e.g. /waypoint_follower/debug) - lateral error
         self.publish_vehicle_command()
 
@@ -157,9 +153,57 @@ class PurePursuitFollower:
 
         self.pure_pursuit_rviz_pub.publish(marker_array)
 
+
+    def get_blinker_state(self, steering_state):
+
+        if steering_state == 1:     # left
+            return 1, 0
+        elif steering_state == 2:   # right
+            return 0, 1
+        else:                       # straight (no blinkers)
+            return 0, 0
+
+    def calc_cross_track_error(self, current_pose, nearest_wp_idx):
+
+        x_ego = current_pose.position.x
+        y_ego = current_pose.position.y
+        cte = 0.0
+
+        # find nearest wp distance and id
+        idx = nearest_wp_idx
+
+        x_nearest = self.waypoints[idx].pose.pose.position.x
+        y_nearest = self.waypoints[idx].pose.pose.position.y
+
+        # calc based on forward point
+        if idx < self.last_wp_idx:
+            x_front = self.waypoints[idx+1].pose.pose.position.x
+            y_front = self.waypoints[idx+1].pose.pose.position.y
+            cte_front = calc_dist_from_track(x_ego, y_ego, x_nearest, y_nearest, x_front, y_front)
+            cte = cte_front
+
+        # calc based on backward point
+        if idx > 0:
+            x_back = self.waypoints[idx-1].pose.pose.position.x
+            y_back = self.waypoints[idx-1].pose.pose.position.y
+            cte_back = calc_dist_from_track(x_ego, y_ego, x_back, y_back, x_nearest, y_nearest)
+            # select smaller error
+            if abs(cte_back) < abs(cte):
+                cte = cte_back
+
+        return cte
+
     def run(self):
         rospy.spin()
 
+
+def calc_dist_from_track(x_ego, y_ego, x1, y1, x2, y2):
+    # calc distance from track
+    # https://robotics.stackexchange.com/questions/22989/what-is-wrong-with-my-stanley-controller-for-car-steering-control
+
+    numerator = (x2 - x1) * (y1 - y_ego) - (x1 - x_ego) * (y2 - y1)
+    denominator = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    return numerator / denominator
 
 def get_heading_from_two_positions(position1, position2):
     # calc heading from two positions

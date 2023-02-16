@@ -9,6 +9,10 @@
     <arg name="use_localizer"           default="true" />
     <arg name="use_tf"                  default="true" />
 
+    <arg name="planning_time"           default="2.0"           doc="pure_pursuit - lookahead distance depends on that" />
+    <arg name="min_lookahead_distance"  default="6.0"           doc="pure_pursuit - min lookahead distance" />
+    <arg name="cte_gain"                default="2.0"           doc="stanley - gain for cross_track_error, higher value prioritizes cte" />
+
      <!-- localizer -->
     <include if="$(arg use_localizer)" file="$(find autoware_mini)/launch/novatel_oem7_localizer.launch" >
         <arg name="coordinate_transformer" value="$(arg coordinate_transformer)" />
@@ -23,7 +27,10 @@
 
 
     <include file="$(find autoware_mini)/launch/waypoint_follower.launch" >
-        <arg name="follower"        value="$(arg follower)" />
+        <arg name="follower"                value="$(arg follower)" />
+        <arg name="planning_time"           value="$(arg planning_time)" />
+        <arg name="min_lookahead_distance"  value="$(arg min_lookahead_distance)" />
+        <arg name="cte_gain"                value="$(arg cte_gain)" />
     </include>
 
     <!-- TRANSFORMS -->

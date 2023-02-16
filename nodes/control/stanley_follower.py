@@ -19,10 +19,9 @@ class StanleyFollower:
 
          # Parameters
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
+        self.cte_gain = rospy.get_param("~cte_gain", 2.0) # gain for cross track error
 
         # Variables - init
-        self.k = 1.0                    # gain for cross track error
-        self.current_velocity = 0.0
         self.waypoint_tree = None
         self.waypoints = None
         self.last_wp_idx = 0
@@ -42,7 +41,10 @@ class StanleyFollower:
         self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
 
         # output information to console
+        rospy.loginfo("stanley_follower - wheel_base: " + str(self.wheel_base))
+        rospy.loginfo("stanley_follower - cte_gain: " + str(self.cte_gain))
         rospy.loginfo("stanley_follower - initiliazed")
+
 
     def path_callback(self, path_msg):
         self.waypoints = path_msg.lanes[0].waypoints
@@ -59,7 +61,7 @@ class StanleyFollower:
             return
 
         self.current_pose = current_pose_msg.pose
-        self.current_velocity = current_velocity_msg.twist.linear.x
+        current_velocity = current_velocity_msg.twist.linear.x
 
         quaternion = (self.current_pose.orientation.x, self.current_pose.orientation.y, self.current_pose.orientation.z, self.current_pose.orientation.w)
         _, _, self.current_heading = tf.transformations.euler_from_quaternion(quaternion)
@@ -68,19 +70,8 @@ class StanleyFollower:
         self.front_wheel_pose = self.get_front_wheel_pose()
         self.front_wheel_heading = self.get_heading_from_pose(self.front_wheel_pose)
         
-        # TODO calc cross track error and heading
+        # calc cross track error and heading
         self.cross_track_error, self.track_heading, self.nearest_wp = self.calc_cross_track_error_and_heading(self.front_wheel_pose)
-
-        # get blinker information from nearest waypoint
-        if self.nearest_wp.wpstate.steering_state == 1:     # left
-            self.l = 1
-            self.r = 0
-        elif self.nearest_wp.wpstate.steering_state == 2:   # right
-            self.l = 0
-            self.r = 1
-        else:                                               # straight (no blinkers)
-            self.l = 0
-            self.r = 0
 
         # find heading error
         self.heading_error = self.track_heading - self.current_heading
@@ -90,15 +81,17 @@ class StanleyFollower:
         # self.cross_yaw_error = self.min_path_yaw - self.current_heading
 
         # calc delta error
-        self.delta_error = math.atan(self.k * self.cross_track_error / self.current_velocity + 0.00001)
+        self.delta_error = math.atan(self.cte_gain * self.cross_track_error / (current_velocity + 0.00001))
         self.steering_angle = self.heading_error + self.delta_error
 
         # TODO limit steering angle before output
 
+        # get blinker information and target_velocity
+        self.l, self.r = self.get_blinker_state(self.nearest_wp.wpstate.steering_state)
         self.target_velocity = self.nearest_wp.twist.twist.linear.x
 
         self.publish_stanley_rviz(self.front_wheel_pose, self.nearest_wp.pose.pose, self.heading_error)
-        # publish also debug output to another topic (e.g. /waypoint_follower/debug) - lateral error
+        # TODO publish also debug output to another topic (e.g. /waypoint_follower/debug) - lateral error
         self.publish_vehicle_command()
 
 
@@ -168,6 +161,15 @@ class StanleyFollower:
         pose.orientation = self.current_pose.orientation
 
         return pose
+
+    def get_blinker_state(self, steering_state):
+
+        if steering_state == 1:     # left
+            return 1, 0
+        elif steering_state == 2:   # right
+            return 0, 1
+        else:                       # straight (no blinkers)
+            return 0, 0
 
     def calc_cross_track_error_and_heading(self, front_wheel_pose):
 
