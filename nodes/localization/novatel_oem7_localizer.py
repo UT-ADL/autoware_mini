@@ -2,12 +2,10 @@
 
 import math
 import rospy
-import message_filters
 import tf
 from tf2_ros import TransformBroadcaster
 
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
-from sensor_msgs.msg import Imu
 from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion, TransformStamped
 
 
@@ -36,12 +34,7 @@ class NovatelOem7Localizer:
         # Subscribers
         if self.use_msl_height:
             self.bestpos_sub = rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback)
-        self.inspva_sub = message_filters.Subscriber('/novatel/oem7/inspva', INSPVA)
-        self.imu_sub = message_filters.Subscriber('/gps/imu', Imu)
-        
-        # Sync 2 main source topics in callback
-        ts = message_filters.ApproximateTimeSynchronizer([self.inspva_sub, self.imu_sub], queue_size=10, slop=0.005)
-        ts.registerCallback(self.data_callback)
+        self.inspva_sub = rospy.Subscriber('/novatel/oem7/inspva', INSPVA, self.inspva_callback)
 
         # Publishers
         self.current_pose_pub = rospy.Publisher('/current_pose', PoseStamped, queue_size=1)
@@ -53,7 +46,7 @@ class NovatelOem7Localizer:
         rospy.loginfo("novatel_oem7_localizer - use_custom_origin: %s ", str(self.use_custom_origin))
 
 
-    def data_callback(self, inspva_msg, imu_msg):
+    def inspva_callback(self, inspva_msg):
 
         stamp = inspva_msg.header.stamp
 
@@ -71,14 +64,9 @@ class NovatelOem7Localizer:
         if self.use_msl_height:
             height -= self.undulation
 
-        # get IMU angular speeds for /current_velocity topic
-        ang_vel_x = imu_msg.angular_velocity.x
-        ang_vel_y = imu_msg.angular_velocity.y
-        ang_vel_z = imu_msg.angular_velocity.z
-
         # Publish 
         self.publish_current_pose(stamp, x, y, height, orientation)
-        self.publish_current_velocity(stamp, velocity, ang_vel_x, ang_vel_y, ang_vel_z)
+        self.publish_current_velocity(stamp, velocity)
         self.publish_map_to_baselink_tf(stamp, x, y, height, orientation)
 
     def bestpos_callback(self, bestpos_msg):
@@ -100,20 +88,13 @@ class NovatelOem7Localizer:
         self.current_pose_pub.publish(pose_msg)
 
 
-    def publish_current_velocity(self, stamp, velocity, ang_vel_x, ang_vel_y, ang_vel_z):
+    def publish_current_velocity(self, stamp, velocity):
         
         vel_msg = TwistStamped()
 
         vel_msg.header.stamp = stamp
         vel_msg.header.frame_id = "base_link"
-
         vel_msg.twist.linear.x = velocity
-        vel_msg.twist.linear.y = 0.0
-        vel_msg.twist.linear.z = 0.0
-
-        vel_msg.twist.angular.x = ang_vel_x
-        vel_msg.twist.angular.y = ang_vel_y
-        vel_msg.twist.angular.z = ang_vel_z
 
         self.current_velocity_pub.publish(vel_msg)
 

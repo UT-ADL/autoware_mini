@@ -20,7 +20,7 @@
 | --- | --- | --- |
 | `/novatel/oem7/inspva` | [novatel_oem7_msgs/INSPVA](https://docs.novatel.com/OEM7/Content/SPAN_Logs/INSPVA.htm) | Used fileds: header.stamp, latitude, longitude, height, roll, pitch, azimuth, east_velocity, north_velocity |
 | `/novatel/oem7/bestpos` | [novatel_oem7_msgs/BESTPOS](http://docs.ros.org/en/jade/api/novatel_msgs/html/msg/BESTPOS.html)  | undulation (difference between ellipsoid and mean sea level - geoid - height) |
-| `/gps/imu` | [sensor_msgs/Imu](http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/Imu.html) | angular_velocity.x, angular_velocity.y, angular_velocity.z |
+
 
 ##### Publishes
 
