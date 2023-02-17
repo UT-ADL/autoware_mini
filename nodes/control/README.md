@@ -16,7 +16,7 @@ The implementation is based from the blog post [Three Methods of Vehicle Lateral
 
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `/path` | `autoware_msgs/Lane` | topic for waypoints |
+| `path` | `autoware_msgs/LaneArray` | topic for waypoints |
 | `/current_pose` | [geometry_msgs/PoseStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html) | current location and orientation of the car in `map` frame |
 | `/current_velocity` | [geometry_msgs/TwistStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html) | velocity of the car |
 
@@ -28,6 +28,11 @@ The implementation is based from the blog post [Three Methods of Vehicle Lateral
 | `/follower_markers` | `visualization_msgs/MarkerArray` | follower specific visualization topic that helps to understand some basic internal workings |
 | `/follower_debugging` | TODO! | TODO: lateral error, compute time? |
 
+##### Output to `/vehicle_cmd`
+* `ctrl_cmd/linear_velocity` - taken from **lookahead** point
+* `ctrl_cmd/linear_acceleration` - currently constant 0.0 is used
+* `ctrl_cmd/steering_angle` - calculated using pure_pursuit algorithm
+* `lamp_cmd/l` and `lamp_cmd/r` - blinker commands for left and right blinker (1 - on, 0 - off)
 
 ## stanley_follower
 
@@ -40,7 +45,7 @@ The implementation is based from the blog post [Three Methods of Vehicle Lateral
 
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `/path` | `autoware_msgs/Lane` | topic for waypoints |
+| `/path` | `autoware_msgs/LaneArray` | topic for waypoints |
 | `/current_pose` | [geometry_msgs/PoseStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html) | current location and orientation of the car in `map` frame |
 | `/current_velocity` | [geometry_msgs/TwistStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html) | velocity of the car |
 
@@ -51,3 +56,9 @@ The implementation is based from the blog post [Three Methods of Vehicle Lateral
 | `/vehicle_cmd` | `autoware_msgs/VehicleCmd` | Main result from the follower is steering_angle, it publishes also linear_velocity and linear_acceleration, but these are not the outputs from pure_pursuit itself.  It also reads blinker information from waypoints and adds that to command message. |
 | `/follower_markers` | `visualization_msgs/MarkerArray` | follower specific visualization topic that helps to understand some basic internal workings |
 | `/follower_debugging` | TODO! | TODO: lateral error, compute time? |
+
+##### Output to `/vehicle_cmd`
+* `ctrl_cmd/linear_velocity` - taken from **nearest** point
+* `ctrl_cmd/linear_acceleration` - currently constant 0.0 is used
+* `ctrl_cmd/steering_angle` - calculated using stanley algorithm
+* `lamp_cmd/l` and `lamp_cmd/r` - blinker commands for left and right blinker (1 - on, 0 - off)

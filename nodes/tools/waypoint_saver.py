@@ -24,14 +24,20 @@ class WaypointSaver:
         self.turn_signal = 0
         self.marker_array = MarkerArray()
 
+        # convert from turn_rpt to wpstate/steering_state        
+        # 0 - right turn      STR_RIGHT=2
+        # 1 - straight        STR_STRAIGHT=3
+        # 2 - left turn       STR_LEFT=1
+        self.TURN_RPT_TO_WPSTATE_MAP = {0: 2, 1: 3, 2: 1}
+
         # open file in append mode and write the header row
         self.waypoint_file = open(self.file_name, 'a')
         self.writer = csv.writer(self.waypoint_file)
         self.writer.writerow(['x', 'y', 'z', 'yaw', 'velocity', 'change_flag', 'steering_flag', 'accel_flag', 'stop_flag', 'event_flag'])
 
         # Subscribers
-        self.current_pose_sub = message_filters.Subscriber('/current_pose', PoseStamped)
-        self.current_velocity_sub = message_filters.Subscriber('/current_velocity', TwistStamped)
+        self.current_pose_sub = message_filters.Subscriber('current_pose', PoseStamped)
+        self.current_velocity_sub = message_filters.Subscriber('current_velocity', TwistStamped)
         self.turn_rpt_sub = rospy.Subscriber('/pacmod/parsed_tx/turn_rpt', SystemRptInt, self.turn_rpt_callback)
 
         # Sync 2 source topics in callback
@@ -39,7 +45,7 @@ class WaypointSaver:
         ts.registerCallback(self.data_callback)
 
         # Publishers
-        self.waypoint_marker_pub = rospy.Publisher('waypoint_markers', MarkerArray, queue_size=1)
+        self.waypoint_marker_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1)
 
         # loginfo
         rospy.loginfo("waypoint_saver - interval: %i m", self.interval)
@@ -47,15 +53,7 @@ class WaypointSaver:
 
 
     def turn_rpt_callback(self, turn_rpt_msg):
-        
-        # turn_rpt message    convert to wpstate/steering_state
-        # 0 - right turn      STR_RIGHT=2
-        # 1 - straight        STR_STRAIGHT=3
-        # 2 - left turn       STR_LEFT=1
-
-        # convert from turn_rpt to wpstate/steering_state
-        turn_rpt_to_wpstate = {0: 2, 1: 3, 2: 1}
-        self.turn_signal = turn_rpt_to_wpstate[turn_rpt_msg.output]
+        self.turn_signal = self.TURN_RPT_TO_WPSTATE_MAP[turn_rpt_msg.output]
 
     def data_callback(self, current_pose, current_velocity):
         
@@ -65,9 +63,9 @@ class WaypointSaver:
         # distance between current and last written waypoint coordinates
         distance = math.sqrt((self.written_x - x) ** 2 + (self.written_y - y) ** 2)
 
-        if distance > self.interval:
+        if distance >= self.interval:
             # calculate current_heading
-            current_heading = self.get_current_heading(current_pose.pose.orientation)
+            current_heading = get_current_heading_degrees(current_pose.pose.orientation)
             blinker = self.turn_signal
             # write data to waypoints.csv file
             self.write_to_waypoint_file(x, y, current_pose.pose.position.z, current_heading, current_velocity.twist.linear.x, blinker)
@@ -80,13 +78,6 @@ class WaypointSaver:
 
             # increment wp_id
             self.wp_id += 1
-
-    def get_current_heading(self, orientation):
-        # convert quaternion to euler angles
-        quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
-        _, _, yaw = tf.transformations.euler_from_quaternion(quaternion)
-
-        return math.degrees(yaw)
 
     def write_to_waypoint_file(self, x, y, z, yaw, v, blinker):
         
@@ -136,6 +127,14 @@ class WaypointSaver:
 
     def run(self):
         rospy.spin()
+
+def get_current_heading_degrees(orientation):
+    # convert quaternion to euler angles
+    quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
+    _, _, yaw = tf.transformations.euler_from_quaternion(quaternion)
+
+    return math.degrees(yaw)
+
 
 if __name__ == '__main__':
     rospy.init_node('waypoint_saver', log_level=rospy.INFO)

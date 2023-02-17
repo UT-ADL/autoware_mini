@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /System1/TF1
-        - /Waypoint markers1/Namespaces1
+        - /Path markers1/Namespaces1
       Splitter Ratio: 0.555084764957428
     Tree Height: 912
   - Class: rviz/Selection
@@ -64,11 +64,9 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: false
-            lidar_front/os_imu:
+            base_link:
               Value: true
-            lidar_front/os_lidar:
-              Value: true
-            lidar_front/os_sensor:
+            map:
               Value: true
           Marker Scale: 1.5
           Name: TF
@@ -76,7 +74,9 @@ Visualization Manager:
           Show Axes: true
           Show Names: true
           Tree:
-            {}
+            map:
+              base_link:
+                {}
           Update Interval: 0
           Value: true
       Enabled: true
@@ -99,10 +99,9 @@ Visualization Manager:
       Visual Enabled: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /waypoint_markers
-      Name: Waypoint markers
+      Marker Topic: /path_markers
+      Name: Path markers
       Namespaces:
-        Path: true
         Velocity label: true
         Waypoint pose: true
       Queue Size: 100
@@ -160,11 +159,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 6.5370869636535645
+      Scale: 35.19825744628906
       Target Frame: base_link
       Value: TopDownOrtho (rviz)
-      X: 10834.4794921875
-      Y: 11238.884765625
+      X: 0
+      Y: 0
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:
@@ -186,5 +185,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1865
-  X: 2113
-  Y: 171
+  X: 2100
+  Y: 120

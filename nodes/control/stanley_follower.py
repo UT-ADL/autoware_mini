@@ -3,7 +3,6 @@
 import rospy
 import tf
 import math
-import rospy
 import message_filters
 import numpy as np
 from sklearn.neighbors import KDTree
@@ -24,15 +23,13 @@ class StanleyFollower:
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
+        self.path_frame = None
         self.last_wp_idx = 0
-        self.target_velocity = 0.0
-        self.l = 0
-        self.r = 0
 
         # Subscribers
-        self.path_sub = rospy.Subscriber('/path', LaneArray, self.path_callback)
-        self.current_pose_sub = message_filters.Subscriber('/current_pose', PoseStamped)
-        self.current_velocity_sub = message_filters.Subscriber('/current_velocity', TwistStamped)
+        self.path_sub = rospy.Subscriber('path', LaneArray, self.path_callback)
+        self.current_pose_sub = message_filters.Subscriber('current_pose', PoseStamped)
+        self.current_velocity_sub = message_filters.Subscriber('current_velocity', TwistStamped)
         ts = message_filters.TimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10)
         ts.registerCallback(self.current_status_callback)
 
@@ -47,6 +44,7 @@ class StanleyFollower:
 
 
     def path_callback(self, path_msg):
+        self.path_frame = path_msg.lanes[0].header.frame_id
         self.waypoints = path_msg.lanes[0].waypoints
         self.last_wp_idx = len(self.waypoints) - 1
 
@@ -67,45 +65,40 @@ class StanleyFollower:
         _, _, self.current_heading = tf.transformations.euler_from_quaternion(quaternion)
         
         # Find pose for the front wheel
-        self.front_wheel_pose = self.get_front_wheel_pose()
-        self.front_wheel_heading = self.get_heading_from_pose(self.front_wheel_pose)
+        front_wheel_pose = self.get_front_wheel_pose()
         
-        # calc cross track error and heading
-        self.cross_track_error, self.track_heading, self.nearest_wp = self.calc_cross_track_error_and_heading(self.front_wheel_pose)
-
-        # find heading error
-        self.heading_error = self.track_heading - self.current_heading
+        # calc cross track error and and track heading
+        cross_track_error, track_heading, nearest_wp = self.calc_cross_track_error_and_heading(front_wheel_pose)
+        heading_error = track_heading - self.current_heading
 
         # TODO not actually used - cte already has +/- information?
-        # self.min_path_yaw = math.atan2(self.nearest_wp.pose.pose.position.y - self.front_wheel_pose.position.y , self.nearest_wp.pose.pose.position.x - self.front_wheel_pose.position.x)
+        # self.min_path_yaw = math.atan2(nearest_wp.pose.pose.position.y - front_wheel_pose.position.y , nearest_wp.pose.pose.position.x - front_wheel_pose.position.x)
         # self.cross_yaw_error = self.min_path_yaw - self.current_heading
 
-        # calc delta error
-        self.delta_error = math.atan(self.cte_gain * self.cross_track_error / (current_velocity + 0.00001))
-        self.steering_angle = self.heading_error + self.delta_error
+        delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.00001))
+        steering_angle = heading_error + delta_error
 
         # TODO limit steering angle before output
 
         # get blinker information and target_velocity
-        self.l, self.r = self.get_blinker_state(self.nearest_wp.wpstate.steering_state)
-        self.target_velocity = self.nearest_wp.twist.twist.linear.x
+        left_blinker, right_blinker  = self.get_blinker_state(nearest_wp.wpstate.steering_state)
+        target_velocity = nearest_wp.twist.twist.linear.x
 
-        self.publish_stanley_rviz(self.front_wheel_pose, self.nearest_wp.pose.pose, self.heading_error)
+        self.publish_vehicle_command(steering_angle, target_velocity, left_blinker, right_blinker)
+        self.publish_stanley_rviz(front_wheel_pose, nearest_wp.pose.pose, heading_error)
         # TODO publish also debug output to another topic (e.g. /waypoint_follower/debug) - lateral error
-        self.publish_vehicle_command()
 
-
-    def publish_vehicle_command(self):
+    def publish_vehicle_command(self, steering_angle, target_velocity, left_blinker, right_blinker):
         vehicle_cmd = VehicleCmd()
         vehicle_cmd.header.stamp = rospy.Time.now()
-        vehicle_cmd.header.frame_id = "/map"
+        vehicle_cmd.header.frame_id = self.path_frame
         # blinkers
-        vehicle_cmd.lamp_cmd.l = self.l
-        vehicle_cmd.lamp_cmd.r = self.r
+        vehicle_cmd.lamp_cmd.l = left_blinker 
+        vehicle_cmd.lamp_cmd.r = right_blinker 
         # velocity and steering
-        vehicle_cmd.ctrl_cmd.linear_velocity = self.target_velocity
+        vehicle_cmd.ctrl_cmd.linear_velocity = target_velocity
         vehicle_cmd.ctrl_cmd.linear_acceleration = 0.0
-        vehicle_cmd.ctrl_cmd.steering_angle = self.steering_angle
+        vehicle_cmd.ctrl_cmd.steering_angle = steering_angle
         self.vehicle_command_pub.publish(vehicle_cmd)
 
 
@@ -115,7 +108,7 @@ class StanleyFollower:
 
         # draws a line between current pose and nearest_wp point
         marker = Marker()
-        marker.header.frame_id = "/map"
+        marker.header.frame_id = self.path_frame
         marker.header.stamp = rospy.Time.now()
         marker.ns = "nearest_wp distance"
         marker.id = 0
@@ -133,7 +126,7 @@ class StanleyFollower:
         average_pose.position.z = (front_pose.position.z + nearest_wp_pose.position.z) / 2
 
         marker_text = Marker()
-        marker_text.header.frame_id = "/map"
+        marker_text.header.frame_id = self.path_frame
         marker_text.header.stamp = rospy.Time.now()
         marker_text.ns = "heading_error"
         marker_text.id = 1
@@ -179,27 +172,35 @@ class StanleyFollower:
         cte = 0.0
 
         # find nearest wp distance and id
-        d, idx = self.waypoint_tree.query([[self.front_wheel_pose.position.x, self.front_wheel_pose.position.y]], 1)
+        d, idx = self.waypoint_tree.query([[x_ego, y_ego]], 1)
         idx = int(idx)
 
         x_nearest = self.waypoints[idx].pose.pose.position.x
         y_nearest = self.waypoints[idx].pose.pose.position.y
+
+        # in case of last wp, calc based on backward point
+        if idx > 0:
+            x_back = self.waypoints[idx-1].pose.pose.position.x
+            y_back = self.waypoints[idx-1].pose.pose.position.y
+
+            cte_back = calc_dist_from_track(x_ego, y_ego, x_back, y_back, x_nearest, y_nearest)
+            heading_back = math.atan2(y_nearest - y_back, x_nearest - x_back)
+
+            cte = cte_back
+            heading = heading_back
 
         # calc based on forward point
         if idx < self.last_wp_idx:
             x_front = self.waypoints[idx+1].pose.pose.position.x
             y_front = self.waypoints[idx+1].pose.pose.position.y
 
-            cte = calc_dist_from_track(x_ego, y_ego, x_nearest, y_nearest, x_front, y_front)
-            heading = math.atan2(y_front - y_nearest, x_front - x_nearest)
+            cte_front = calc_dist_from_track(x_ego, y_ego, x_nearest, y_nearest, x_front, y_front)
+            heading_front = math.atan2(y_front - y_nearest, x_front - x_nearest)
 
-        # in case of last wp, calc based on backward point
-        else:
-            x_back = self.waypoints[idx-1].pose.pose.position.x
-            y_back = self.waypoints[idx-1].pose.pose.position.y
-
-            cte = calc_dist_from_track(x_ego, y_ego, x_back, y_back, x_nearest, y_nearest)
-            heading = math.atan2(y_nearest - y_back, x_nearest - x_back)
+            # select smaller cte, but prefer heading using forward point
+            if abs(cte_front) < abs(cte):
+                cte = cte_front
+            heading = heading_front
 
         nearest_wp = self.waypoints[idx]
 

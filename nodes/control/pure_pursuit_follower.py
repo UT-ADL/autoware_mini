@@ -3,7 +3,6 @@
 import rospy
 import tf
 import math
-import rospy
 import message_filters
 import numpy as np
 from sklearn.neighbors import KDTree
@@ -25,19 +24,17 @@ class PurePursuitFollower:
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
+        self.path_frame = None
         self.last_wp_idx = 0
-        self.target_velocity = 0.0
-        self.l = 0
-        self.r = 0
 
         # Subscribers
-        self.path_sub = rospy.Subscriber('/path', LaneArray, self.path_callback)
-        self.current_pose_sub = message_filters.Subscriber('/current_pose', PoseStamped)
-        self.current_velocity_sub = message_filters.Subscriber('/current_velocity', TwistStamped)
+        self.path_sub = rospy.Subscriber('path', LaneArray, self.path_callback)
+        self.current_pose_sub = message_filters.Subscriber('current_pose', PoseStamped)
+        self.current_velocity_sub = message_filters.Subscriber('current_velocity', TwistStamped)
         ts = message_filters.TimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10)
         ts.registerCallback(self.current_status_callback)
 
-        # Publishers TODO / publish to same topic as Stanley: "follower_markers"
+        # Publishers
         self.pure_pursuit_rviz_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
         self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
 
@@ -45,6 +42,7 @@ class PurePursuitFollower:
         rospy.loginfo("pure_pursuit_follower - initiliazed")
 
     def path_callback(self, path_msg):
+        self.path_frame = path_msg.lanes[0].header.frame_id
         self.waypoints = path_msg.lanes[0].waypoints
         self.last_wp_idx = len(self.waypoints) - 1
 
@@ -61,7 +59,7 @@ class PurePursuitFollower:
         current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
 
-        d, nearest_wp_idx = self.waypoint_tree.query([[current_pose.position.x, current_pose.position.y]], 1)
+        _, nearest_wp_idx = self.waypoint_tree.query([[current_pose.position.x, current_pose.position.y]], 1)
         nearest_wp = self.waypoints[int(nearest_wp_idx)]
 
         # calc lookahead distance (velocity dependent)
@@ -70,11 +68,11 @@ class PurePursuitFollower:
             lookahead_distance = self.min_lookahead_distance
         
         # TODO assume 1m distance between waypoints - currently OK, but need to make it more universal
-        lookahead_wp_idx = int(nearest_wp_idx) + math.floor(lookahead_distance)
+        lookahead_wp_idx = int(nearest_wp_idx) + int(lookahead_distance)
 
         if lookahead_wp_idx > self.last_wp_idx:
             lookahead_wp_idx = self.last_wp_idx
-        lookahead_wp = self.waypoints[int(lookahead_wp_idx)]
+        lookahead_wp = self.waypoints[lookahead_wp_idx]
 
         # find current pose heading
         quaternion = (current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w)
@@ -83,35 +81,33 @@ class PurePursuitFollower:
         alpha = lookahead_heading - current_heading
 
         curvature = 2 * math.sin(alpha) / lookahead_distance
-        self.steering_angle = math.atan(self.wheel_base * curvature)
+        steering_angle = math.atan(self.wheel_base * curvature)
 
         # TODO - add limits to steering angle
 
         # calc cross track error - used only for debug output
         cross_track_error = self.calc_cross_track_error(current_pose, int(nearest_wp_idx))
-        print("cross track error: %f, %f" % (cross_track_error, d))
-
 
         # get blinker information from nearest waypoint and target velocity from lookahead waypoint
-        self.l, self.r = self.get_blinker_state(nearest_wp.wpstate.steering_state)
-        self.target_velocity = lookahead_wp.twist.twist.linear.x
+        left_blinker, right_blinker = self.get_blinker_state(nearest_wp.wpstate.steering_state)
+        target_velocity = lookahead_wp.twist.twist.linear.x
 
+        self.publish_vehicle_command(steering_angle, target_velocity, left_blinker, right_blinker)
         self.publish_pure_pursuit_rviz(current_pose, lookahead_wp.pose.pose, alpha)
         # publish also debug output to another topic (e.g. /waypoint_follower/debug) - lateral error
-        self.publish_vehicle_command()
 
 
-    def publish_vehicle_command(self):
+    def publish_vehicle_command(self, steering_angle, target_velocity, left_blinker, right_blinker):
         vehicle_cmd = VehicleCmd()
         vehicle_cmd.header.stamp = rospy.Time.now()
-        vehicle_cmd.header.frame_id = "/map"
+        vehicle_cmd.header.frame_id =  self.path_frame
         # blinkers
-        vehicle_cmd.lamp_cmd.l = self.l
-        vehicle_cmd.lamp_cmd.r = self.r
+        vehicle_cmd.lamp_cmd.l = left_blinker
+        vehicle_cmd.lamp_cmd.r = right_blinker
         # velocity and steering
-        vehicle_cmd.ctrl_cmd.linear_velocity = self.target_velocity
+        vehicle_cmd.ctrl_cmd.linear_velocity = target_velocity
         vehicle_cmd.ctrl_cmd.linear_acceleration = 0.0
-        vehicle_cmd.ctrl_cmd.steering_angle = self.steering_angle
+        vehicle_cmd.ctrl_cmd.steering_angle = steering_angle
         self.vehicle_command_pub.publish(vehicle_cmd)
 
 
@@ -121,7 +117,7 @@ class PurePursuitFollower:
 
         # draws a line between current pose and lookahead point
         marker = Marker()
-        marker.header.frame_id = "/map"
+        marker.header.frame_id =  self.path_frame
         marker.header.stamp = rospy.Time.now()
         marker.ns = "Lookahead distance"
         marker.id = 0
@@ -139,7 +135,7 @@ class PurePursuitFollower:
         average_pose.position.z = (current_pose.position.z + lookahead_pose.position.z) / 2
 
         marker_text = Marker()
-        marker_text.header.frame_id = "/map"
+        marker_text.header.frame_id =  self.path_frame
         marker_text.header.stamp = rospy.Time.now()
         marker_text.ns = "Angle alpha"
         marker_text.id = 1
@@ -175,21 +171,21 @@ class PurePursuitFollower:
         x_nearest = self.waypoints[idx].pose.pose.position.x
         y_nearest = self.waypoints[idx].pose.pose.position.y
 
-        # calc based on forward point
-        if idx < self.last_wp_idx:
-            x_front = self.waypoints[idx+1].pose.pose.position.x
-            y_front = self.waypoints[idx+1].pose.pose.position.y
-            cte_front = calc_dist_from_track(x_ego, y_ego, x_nearest, y_nearest, x_front, y_front)
-            cte = cte_front
-
         # calc based on backward point
         if idx > 0:
             x_back = self.waypoints[idx-1].pose.pose.position.x
             y_back = self.waypoints[idx-1].pose.pose.position.y
             cte_back = calc_dist_from_track(x_ego, y_ego, x_back, y_back, x_nearest, y_nearest)
-            # select smaller error
-            if abs(cte_back) < abs(cte):
-                cte = cte_back
+            cte = cte_back
+        
+        # calc based on forward point
+        if idx < self.last_wp_idx:
+            x_front = self.waypoints[idx+1].pose.pose.position.x
+            y_front = self.waypoints[idx+1].pose.pose.position.y
+            cte_front = calc_dist_from_track(x_ego, y_ego, x_nearest, y_nearest, x_front, y_front)
+            # select smaller one
+            if abs(cte_front) < abs(cte):
+                cte = cte_front
 
         return cte
 
@@ -206,10 +202,7 @@ def calc_dist_from_track(x_ego, y_ego, x1, y1, x2, y2):
     return numerator / denominator
 
 def get_heading_from_two_positions(position1, position2):
-    # calc heading from two positions
-    heading = math.atan2(position2.y - position1.y, position2.x - position1.x)
-
-    return heading
+    return math.atan2(position2.y - position1.y, position2.x - position1.x)
 
 
 if __name__ == '__main__':

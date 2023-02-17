@@ -37,8 +37,8 @@ class NovatelOem7Localizer:
         self.inspva_sub = rospy.Subscriber('/novatel/oem7/inspva', INSPVA, self.inspva_callback)
 
         # Publishers
-        self.current_pose_pub = rospy.Publisher('/current_pose', PoseStamped, queue_size=1)
-        self.current_velocity_pub = rospy.Publisher('/current_velocity', TwistStamped, queue_size=1)
+        self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
+        self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
 
         # output localizer settings to console
         rospy.loginfo("novatel_oem7_localizer - coordinate_transformer: %s ", str(self.coordinate_transformer))
@@ -134,10 +134,11 @@ def convert_angles_to_orientation(roll, pitch, yaw):
     yaw = math.radians(yaw)
 
     roll, pitch, yaw = convertAzimuthToENU(roll, pitch, yaw)
-    q = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
-    orientation = Quaternion(q[0], q[1], q[2], q[3])
+#    q = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+#    orientation = Quaternion(q[0], q[1], q[2], q[3])
 
-    return orientation
+    x, y, z, w = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+    return Quaternion(x, y, z, w)
 
 
 def convertAzimuthToENU(roll, pitch, yaw):

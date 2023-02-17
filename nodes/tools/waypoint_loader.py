@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import rospy
 import csv
 import tf
@@ -18,26 +17,15 @@ class WaypointLoader:
         self.output_frame = rospy.get_param("~output_frame", "map")
         self.publish_markers = rospy.get_param("~publish_markers", True)
 
-        # Internal params
-        self.wp_id = 0
-
         # Publishers
         self.waypoints_pub = rospy.Publisher('path', LaneArray, queue_size=1, latch=True)
-        self.waypoints_markers_pub = rospy.Publisher('waypoint_markers', MarkerArray, queue_size=1, latch=True)
-
-        # loginfo and processing
-        rospy.loginfo("waypoint_loader - loading waypoints from file: %s ", self.waypoints_file)
-        self.waypoints = self.load_waypoints(self.waypoints_file)
-        self.publish_waypoints()
-
-        if self.publish_markers:
-            self.publish_waypoints_markers(self.waypoints)
-
-        rospy.loginfo("waypoint_loader - waypoints are published ")
+        self.waypoints_markers_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1, latch=True)
 
 
     def load_waypoints(self, waypoints_file):
         
+        wp_id = 0
+
         # load waypoints from file
         with open(waypoints_file, 'r') as f:
             reader = csv.reader(f)
@@ -51,17 +39,17 @@ class WaypointLoader:
                 # 0  1  2  3    4         5            6              7           8          9
                 # x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag
                 # set waypoint values
-                waypoint.gid = self.wp_id
+                waypoint.gid = wp_id
                 waypoint.pose.pose.position.x = float(row[0])
                 waypoint.pose.pose.position.y = float(row[1])
                 waypoint.pose.pose.position.z = float(row[2])
 
                 # convert yaw (contains heading in waypoints file) to quaternion
-                q = tf.transformations.quaternion_from_euler(0, 0, math.radians(float(row[3])))
-                waypoint.pose.pose.orientation.x = q[0]
-                waypoint.pose.pose.orientation.y = q[1]
-                waypoint.pose.pose.orientation.z = q[2]
-                waypoint.pose.pose.orientation.w = q[3]
+                x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, math.radians(float(row[3])))
+                waypoint.pose.pose.orientation.x = x
+                waypoint.pose.pose.orientation.y = y
+                waypoint.pose.pose.orientation.z = z
+                waypoint.pose.pose.orientation.w = w
 
                 waypoint.twist.twist.linear.x = float(row[4])
 
@@ -74,7 +62,7 @@ class WaypointLoader:
 
                 waypoints.append(waypoint)
 
-                self.wp_id += 1
+                wp_id += 1
 
         return waypoints
 
@@ -143,7 +131,7 @@ class WaypointLoader:
         marker.id = 0
         marker.scale.x = 0.5
         marker.color = ColorRGBA(0.4, 10, 1.0, 0.4)
-        for i, waypoint in enumerate(waypoints):
+        for waypoint in waypoints:
             marker.points.append(waypoint.pose.pose.position)
         marker_array.markers.append(marker)
 
@@ -152,8 +140,17 @@ class WaypointLoader:
 
 
     def run(self):
+
+        rospy.loginfo("waypoint_loader - loading waypoints from file: %s ", self.waypoints_file)
+        self.waypoints = self.load_waypoints(self.waypoints_file)
+        self.publish_waypoints()
+
+        if self.publish_markers:
+            self.publish_waypoints_markers(self.waypoints)
+
+        rospy.loginfo("waypoint_loader - waypoints are published ")
+
         rospy.spin()
-        
 
 if __name__ == '__main__':
     rospy.init_node('waypoint_loader', log_level=rospy.INFO)
