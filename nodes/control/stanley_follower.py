@@ -9,7 +9,7 @@ from sklearn.neighbors import KDTree
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
-from std_msgs.msg import ColorRGBA
+from std_msgs.msg import ColorRGBA, Float32MultiArray
 from autoware_msgs.msg import LaneArray, VehicleCmd
 
 
@@ -36,6 +36,7 @@ class StanleyFollower:
         # Publishers
         self.stanley_rviz_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
         self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
+        self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
 
         # output information to console
         rospy.loginfo("stanley_follower - wheel_base: " + str(self.wheel_base))
@@ -58,18 +59,21 @@ class StanleyFollower:
         if self.waypoint_tree is None:
             return
 
-        self.current_pose = current_pose_msg.pose
+        # start timer
+        start_time = rospy.get_time()
+
+        current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
 
-        quaternion = (self.current_pose.orientation.x, self.current_pose.orientation.y, self.current_pose.orientation.z, self.current_pose.orientation.w)
-        _, _, self.current_heading = tf.transformations.euler_from_quaternion(quaternion)
+        quaternion = (current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w)
+        _, _, current_heading = tf.transformations.euler_from_quaternion(quaternion)
         
         # Find pose for the front wheel
-        front_wheel_pose = self.get_front_wheel_pose()
+        front_wheel_pose = self.get_front_wheel_pose(current_pose, current_heading)
         
         # calc cross track error and and track heading
         cross_track_error, track_heading, nearest_wp = self.calc_cross_track_error_and_heading(front_wheel_pose)
-        heading_error = track_heading - self.current_heading
+        heading_error = track_heading - current_heading
 
         # TODO not actually used - cte already has +/- information?
         # self.min_path_yaw = math.atan2(nearest_wp.pose.pose.position.y - front_wheel_pose.position.y , nearest_wp.pose.pose.position.x - front_wheel_pose.position.x)
@@ -84,9 +88,13 @@ class StanleyFollower:
         left_blinker, right_blinker  = self.get_blinker_state(nearest_wp.wpstate.steering_state)
         target_velocity = nearest_wp.twist.twist.linear.x
 
+        # Publish
         self.publish_vehicle_command(steering_angle, target_velocity, left_blinker, right_blinker)
         self.publish_stanley_rviz(front_wheel_pose, nearest_wp.pose.pose, heading_error)
-        # TODO publish also debug output to another topic (e.g. /waypoint_follower/debug) - lateral error
+
+        compute_time = rospy.get_time() - start_time
+        self.follower_debug_pub.publish(Float32MultiArray(data=[compute_time, cross_track_error]))
+
 
     def publish_vehicle_command(self, steering_angle, target_velocity, left_blinker, right_blinker):
         vehicle_cmd = VehicleCmd()
@@ -145,13 +153,13 @@ class StanleyFollower:
         _, _, heading = tf.transformations.euler_from_quaternion(quaternion)
         return heading
 
-    def get_front_wheel_pose(self):
+    def get_front_wheel_pose(self, current_pose, current_heading):
         
         pose = Pose()
-        pose.position.x = self.current_pose.position.x + self.wheel_base * math.cos(self.current_heading)
-        pose.position.y = self.current_pose.position.y + self.wheel_base * math.sin(self.current_heading)
-        pose.position.z = self.current_pose.position.z
-        pose.orientation = self.current_pose.orientation
+        pose.position.x = current_pose.position.x + self.wheel_base * math.cos(current_heading)
+        pose.position.y = current_pose.position.y + self.wheel_base * math.sin(current_heading)
+        pose.position.z = current_pose.position.z
+        pose.orientation = current_pose.orientation
 
         return pose
 

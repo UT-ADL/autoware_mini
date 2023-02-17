@@ -9,7 +9,7 @@ from sklearn.neighbors import KDTree
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
-from std_msgs.msg import ColorRGBA
+from std_msgs.msg import ColorRGBA, Float32MultiArray
 from autoware_msgs.msg import LaneArray, VehicleCmd
 
 
@@ -18,7 +18,7 @@ class PurePursuitFollower:
 
         # Parameters
         self.planning_time = rospy.get_param("~planning_time", 2.0)
-        self.min_lookahead_distance = rospy.get_param("~min_lookahead_distance", 5.5)
+        self.min_lookahead_distance = rospy.get_param("~min_lookahead_distance", 6.0)
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
 
         # Variables - init
@@ -37,8 +37,12 @@ class PurePursuitFollower:
         # Publishers
         self.pure_pursuit_rviz_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
         self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
+        self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
 
         # output information to console
+        rospy.loginfo("pure_pursuit_follower - planning_time: " + str(self.planning_time))
+        rospy.loginfo("pure_pursuit_follower - min_lookahead_distance: " + str(self.min_lookahead_distance))
+        rospy.loginfo("pure_pursuit_follower - wheel_base: " + str(self.wheel_base))
         rospy.loginfo("pure_pursuit_follower - initiliazed")
 
     def path_callback(self, path_msg):
@@ -55,6 +59,9 @@ class PurePursuitFollower:
 
         if self.waypoint_tree is None:
             return
+
+        # timer start
+        start_time = rospy.get_time()
 
         current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
@@ -92,9 +99,12 @@ class PurePursuitFollower:
         left_blinker, right_blinker = self.get_blinker_state(nearest_wp.wpstate.steering_state)
         target_velocity = lookahead_wp.twist.twist.linear.x
 
+        # Publish
         self.publish_vehicle_command(steering_angle, target_velocity, left_blinker, right_blinker)
         self.publish_pure_pursuit_rviz(current_pose, lookahead_wp.pose.pose, alpha)
-        # publish also debug output to another topic (e.g. /waypoint_follower/debug) - lateral error
+
+        compute_time = rospy.get_time() - start_time
+        self.follower_debug_pub.publish(Float32MultiArray(data=[compute_time, cross_track_error]))
 
 
     def publish_vehicle_command(self, steering_angle, target_velocity, left_blinker, right_blinker):
