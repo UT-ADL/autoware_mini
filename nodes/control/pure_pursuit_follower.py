@@ -85,9 +85,9 @@ class PurePursuitFollower:
         quaternion = (current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w)
         _, _, current_heading = tf.transformations.euler_from_quaternion(quaternion)
         lookahead_heading = get_heading_from_two_positions(current_pose.position, lookahead_wp.pose.pose.position)
-        alpha = lookahead_heading - current_heading
+        heading_error = lookahead_heading - current_heading
 
-        curvature = 2 * math.sin(alpha) / lookahead_distance
+        curvature = 2 * math.sin(heading_error) / lookahead_distance
         steering_angle = math.atan(self.wheel_base * curvature)
 
         # TODO - add limits to steering angle
@@ -101,10 +101,10 @@ class PurePursuitFollower:
 
         # Publish
         self.publish_vehicle_command(steering_angle, target_velocity, left_blinker, right_blinker)
-        self.publish_pure_pursuit_rviz(current_pose, lookahead_wp.pose.pose, alpha)
+        self.publish_pure_pursuit_rviz(current_pose, lookahead_wp.pose.pose, heading_error)
 
         compute_time = rospy.get_time() - start_time
-        self.follower_debug_pub.publish(Float32MultiArray(data=[compute_time, cross_track_error]))
+        self.follower_debug_pub.publish(Float32MultiArray(data=[compute_time, cross_track_error, heading_error]))
 
 
     def publish_vehicle_command(self, steering_angle, target_velocity, left_blinker, right_blinker):
@@ -121,7 +121,7 @@ class PurePursuitFollower:
         self.vehicle_command_pub.publish(vehicle_cmd)
 
 
-    def publish_pure_pursuit_rviz(self, current_pose, lookahead_pose, alpha):
+    def publish_pure_pursuit_rviz(self, current_pose, lookahead_pose, heading_error):
         
         marker_array = MarkerArray()
 
@@ -138,7 +138,7 @@ class PurePursuitFollower:
         marker.points = ([current_pose.position, lookahead_pose.position])
         marker_array.markers.append(marker)
 
-        # label of angle alpha
+        # label of angle heading_error
         average_pose = Pose()
         average_pose.position.x = (current_pose.position.x + lookahead_pose.position.x) / 2
         average_pose.position.y = (current_pose.position.y + lookahead_pose.position.y) / 2
@@ -147,14 +147,14 @@ class PurePursuitFollower:
         marker_text = Marker()
         marker_text.header.frame_id =  self.path_frame
         marker_text.header.stamp = rospy.Time.now()
-        marker_text.ns = "Angle alpha"
+        marker_text.ns = "Heading error"
         marker_text.id = 1
         marker_text.type = Marker.TEXT_VIEW_FACING
         marker_text.action = Marker.ADD
         marker_text.pose = average_pose
         marker_text.scale.z = 0.6
         marker_text.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)
-        marker_text.text = str(round(math.degrees(alpha),1))
+        marker_text.text = str(round(math.degrees(heading_error),1))
         marker_array.markers.append(marker_text)
 
         self.pure_pursuit_rviz_pub.publish(marker_array)

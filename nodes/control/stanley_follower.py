@@ -79,7 +79,7 @@ class StanleyFollower:
         # self.min_path_yaw = math.atan2(nearest_wp.pose.pose.position.y - front_wheel_pose.position.y , nearest_wp.pose.pose.position.x - front_wheel_pose.position.x)
         # self.cross_yaw_error = self.min_path_yaw - self.current_heading
 
-        delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.00001))
+        delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))
         steering_angle = heading_error + delta_error
 
         # TODO limit steering angle before output
@@ -93,7 +93,7 @@ class StanleyFollower:
         self.publish_stanley_rviz(front_wheel_pose, nearest_wp.pose.pose, heading_error)
 
         compute_time = rospy.get_time() - start_time
-        self.follower_debug_pub.publish(Float32MultiArray(data=[compute_time, cross_track_error]))
+        self.follower_debug_pub.publish(Float32MultiArray(data=[compute_time, cross_track_error, heading_error, delta_error]))
 
 
     def publish_vehicle_command(self, steering_angle, target_velocity, left_blinker, right_blinker):
@@ -226,7 +226,6 @@ def calc_dist_from_track(x_ego, y_ego, x1, y1, x2, y2):
     numerator = (x2 - x1) * (y1 - y_ego) - (x1 - x_ego) * (y2 - y1)
     denominator = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     return numerator / denominator
-
 
 
 if __name__ == '__main__':
