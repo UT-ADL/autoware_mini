@@ -90,8 +90,6 @@ class PurePursuitFollower:
         curvature = 2 * math.sin(heading_error) / lookahead_distance
         steering_angle = math.atan(self.wheel_base * curvature)
 
-        # TODO - add limits to steering angle
-
         # calc cross track error - used only for debug output
         cross_track_error = self.calc_cross_track_error(current_pose, int(nearest_wp_idx))
 
@@ -138,7 +136,7 @@ class PurePursuitFollower:
         marker.points = ([current_pose.position, lookahead_pose.position])
         marker_array.markers.append(marker)
 
-        # label of angle heading_error
+        # label heading_error
         average_pose = Pose()
         average_pose.position.x = (current_pose.position.x + lookahead_pose.position.x) / 2
         average_pose.position.y = (current_pose.position.y + lookahead_pose.position.y) / 2

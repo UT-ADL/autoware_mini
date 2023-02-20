@@ -82,8 +82,6 @@ class StanleyFollower:
         delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))
         steering_angle = heading_error + delta_error
 
-        # TODO limit steering angle before output
-
         # get blinker information and target_velocity
         left_blinker, right_blinker  = self.get_blinker_state(nearest_wp.wpstate.steering_state)
         target_velocity = nearest_wp.twist.twist.linear.x
