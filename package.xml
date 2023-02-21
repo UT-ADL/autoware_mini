@@ -9,8 +9,22 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <exec_depend>rospy</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>message_filters</exec_depend>
+  <exec_depend>lanelet2</exec_depend>
   <exec_depend>rviz</exec_depend>
 
+  <exec_depend>python-numpy</exec_depend>
+  <exec_depend>python-sklearn</exec_depend>
+  <exec_depend>python-pyproj</exec_depend>
+
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>autoware_msgs</exec_depend>
+  <exec_depend>automotive_platform_msgs</exec_depend>
+  <exec_depend>automotive_navigation_msgs</exec_depend>
   <exec_depend>novatel_oem7_msgs</exec_depend>
 
 </package>
