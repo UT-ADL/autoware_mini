@@ -43,7 +43,7 @@ class PurePursuitFollower:
         rospy.loginfo("pure_pursuit_follower - planning_time: " + str(self.planning_time))
         rospy.loginfo("pure_pursuit_follower - min_lookahead_distance: " + str(self.min_lookahead_distance))
         rospy.loginfo("pure_pursuit_follower - wheel_base: " + str(self.wheel_base))
-        rospy.loginfo("pure_pursuit_follower - initiliazed")
+        rospy.loginfo("pure_pursuit_follower - initialized")
 
     def path_callback(self, path_msg):
         self.path_frame = path_msg.lanes[0].header.frame_id

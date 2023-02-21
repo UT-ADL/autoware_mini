@@ -14,12 +14,14 @@
   <exec_depend>message_filters</exec_depend>
   <exec_depend>lanelet2</exec_depend>
   <exec_depend>rviz</exec_depend>
+  <exec_depend>joy</exec_depend>
 
   <exec_depend>python-numpy</exec_depend>
   <exec_depend>python-sklearn</exec_depend>
   <exec_depend>python-pyproj</exec_depend>
 
   <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>visualization_msgs</exec_depend>
   <exec_depend>autoware_msgs</exec_depend>

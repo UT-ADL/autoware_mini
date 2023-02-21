@@ -38,6 +38,10 @@
     <!-- SSC interface -->
     <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true"/>
 
+    <!-- Engage button panel -->
+    <node pkg="autoware_mini" type="button_panel.py" name="button_panel" output="screen" required="true"/>
+    <node pkg="joy" type="joy_node" name="joy" />
+
     <!-- Vehicle platform -->
     <include file="$(find vehicle_platform)/launch/platform.launch" >
         <arg name="use_tf"          value="$(arg use_tf)" />

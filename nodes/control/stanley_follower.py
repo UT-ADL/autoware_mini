@@ -41,7 +41,7 @@ class StanleyFollower:
         # output information to console
         rospy.loginfo("stanley_follower - wheel_base: " + str(self.wheel_base))
         rospy.loginfo("stanley_follower - cte_gain: " + str(self.cte_gain))
-        rospy.loginfo("stanley_follower - initiliazed")
+        rospy.loginfo("stanley_follower - initialized")
 
 
     def path_callback(self, path_msg):
