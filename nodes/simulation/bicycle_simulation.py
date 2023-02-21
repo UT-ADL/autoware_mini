@@ -5,8 +5,9 @@ import math
 
 import rospy
 import tf
+from tf2_ros import TransformBroadcaster
 
-from geometry_msgs.msg import PoseStamped, TwistStamped, PoseWithCovarianceStamped, Point
+from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Point
 from autoware_msgs.msg import VehicleCmd
 
 from visualization_msgs.msg import MarkerArray, Marker
@@ -29,6 +30,7 @@ class BicycleSimulation:
         # localization publishers
         self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
         self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
+        self.base_link_to_map_tf = TransformBroadcaster()
 
         # initial position and vehicle command from outside
         self.initialpose_sub = rospy.Subscriber('initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
@@ -79,11 +81,31 @@ class BicycleSimulation:
 
             # publish localization messages and visualization markers
             stamp = rospy.Time.now()
+            self.publish_base_link_to_map_tf(stamp)
             self.publish_current_pose(stamp)
             self.publish_current_velocity(stamp)
             self.publish_bicycle_markers(stamp)
 
             rate.sleep()
+
+    def publish_base_link_to_map_tf(self, stamp):
+            
+        t = TransformStamped()
+
+        t.header.stamp = stamp
+        t.header.frame_id = "map"
+        t.child_frame_id = "base_link"
+
+        t.transform.translation.x = self.x
+        t.transform.translation.y = self.y
+
+        x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, self.heading_angle)
+        t.transform.rotation.x = x
+        t.transform.rotation.y = y
+        t.transform.rotation.z = z
+        t.transform.rotation.w = w
+
+        self.base_link_to_map_tf.sendTransform(t)
 
     def publish_current_pose(self, stamp):
 

@@ -134,9 +134,6 @@ def convert_angles_to_orientation(roll, pitch, yaw):
     yaw = math.radians(yaw)
 
     roll, pitch, yaw = convertAzimuthToENU(roll, pitch, yaw)
-#    q = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
-#    orientation = Quaternion(q[0], q[1], q[2], q[3])
-
     x, y, z, w = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
     return Quaternion(x, y, z, w)
 

@@ -18,7 +18,7 @@ class StanleyFollower:
 
          # Parameters
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
-        self.cte_gain = rospy.get_param("~cte_gain", 2.0) # gain for cross track error
+        self.cte_gain = rospy.get_param("~cte_gain", 1.0)       # gain for cross track error
 
         # Variables - init
         self.waypoint_tree = None
