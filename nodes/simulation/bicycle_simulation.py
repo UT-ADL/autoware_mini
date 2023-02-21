@@ -7,7 +7,7 @@ import rospy
 import tf
 from tf2_ros import TransformBroadcaster
 
-from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Point
+from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Quaternion, Point
 from autoware_msgs.msg import VehicleCmd
 
 from visualization_msgs.msg import MarkerArray, Marker
@@ -26,6 +26,7 @@ class BicycleSimulation:
         self.velocity = 0
         self.heading_angle = 0
         self.steering_angle = 0
+        self.orientation = Quaternion(0, 0, 0, 0)
 
         # localization publishers
         self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
@@ -65,6 +66,10 @@ class BicycleSimulation:
         self.y += y_dot * delta_t
         self.heading_angle += heading_angle_dot * delta_t
 
+        # create quaternion from heading angle to be used later in tf and pose and marker messages
+        x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, self.heading_angle)
+        self.orientation = Quaternion(x, y, z, w)
+
     def run(self):
         # start separate thread for spinning subcribers
         t = threading.Thread(target=rospy.spin)
@@ -98,12 +103,7 @@ class BicycleSimulation:
 
         t.transform.translation.x = self.x
         t.transform.translation.y = self.y
-
-        x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, self.heading_angle)
-        t.transform.rotation.x = x
-        t.transform.rotation.y = y
-        t.transform.rotation.z = z
-        t.transform.rotation.w = w
+        t.transform.rotation = self.orientation
 
         self.base_link_to_map_tf.sendTransform(t)
 
@@ -117,12 +117,7 @@ class BicycleSimulation:
         pose_msg.pose.position.x = self.x
         pose_msg.pose.position.y = self.y
         pose_msg.pose.position.z = 0
-
-        x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, self.heading_angle)
-        pose_msg.pose.orientation.x = x
-        pose_msg.pose.orientation.y = y
-        pose_msg.pose.orientation.z = z
-        pose_msg.pose.orientation.w = w
+        pose_msg.pose.orientation = self.orientation
 
         self.current_pose_pub.publish(pose_msg)
 
@@ -155,11 +150,7 @@ class BicycleSimulation:
         # the location of the marker is current pose
         marker.pose.position.x = self.x
         marker.pose.position.y = self.y
-        x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, self.heading_angle)
-        marker.pose.orientation.x = x
-        marker.pose.orientation.y = y
-        marker.pose.orientation.z = z
-        marker.pose.orientation.w = w
+        marker.pose.orientation = self.orientation
 
         # draw wheel base
         marker.points.append(Point(0, 0, 0))
@@ -179,10 +170,7 @@ class BicycleSimulation:
         # the location of the marker is current pose
         marker.pose.position.x = self.x
         marker.pose.position.y = self.y
-        marker.pose.orientation.x = x
-        marker.pose.orientation.y = y
-        marker.pose.orientation.z = z
-        marker.pose.orientation.w = w
+        marker.pose.orientation = self.orientation
 
         wheel_length = 0.4
 
