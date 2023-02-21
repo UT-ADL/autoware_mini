@@ -11,24 +11,24 @@
 
 
     <!-- Waypoint_loader -->
-    <node pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" >
+    <node pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
         <param name="waypoints_file"  value="$(find autoware_mini)/data/$(arg waypoints_file)" />
     </node>
 
     <!-- Follower -->
-    <node if="$(eval arg('follower')=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" >
+    <node if="$(eval arg('follower')=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" required="true">
         <param name="planning_time"          value="$(arg planning_time)" />
         <param name="min_lookahead_distance" value="$(arg min_lookahead_distance)" />
     </node>
 
-    <node if="$(eval arg('follower')=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" >
+    <node if="$(eval arg('follower')=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" required="true">
         <param name="cte_gain"               value="$(arg cte_gain)" />
     </node>
 
     <!-- Bicycle_model simulator -->
-    <node pkg="autoware_mini" type="bicycle_simulation.py" name="bicycle_simulation" output="screen" />
+    <node pkg="autoware_mini" type="bicycle_simulation.py" name="bicycle_simulation" output="screen" required="true"/>
 
     <!-- Rviz -->
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true"/>
 
 </launch>
