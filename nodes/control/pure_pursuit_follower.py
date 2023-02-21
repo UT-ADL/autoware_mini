@@ -51,7 +51,7 @@ class PurePursuitFollower:
         self.last_wp_idx = len(self.waypoints) - 1
 
         # create kd-tree for nearest neighbor search
-        waypoints_xy = np.array([[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.waypoints])
+        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
         self.waypoint_tree = KDTree(waypoints_xy)
 
 
@@ -66,8 +66,9 @@ class PurePursuitFollower:
         current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
 
-        _, nearest_wp_idx = self.waypoint_tree.query([[current_pose.position.x, current_pose.position.y]], 1)
-        nearest_wp = self.waypoints[int(nearest_wp_idx)]
+        _, idx = self.waypoint_tree.query([(current_pose.position.x, current_pose.position.y)], 1)
+        nearest_wp_idx = idx[0][0]
+        nearest_wp = self.waypoints[nearest_wp_idx]
 
         # calc lookahead distance (velocity dependent)
         lookahead_distance = current_velocity * self.planning_time
@@ -75,7 +76,7 @@ class PurePursuitFollower:
             lookahead_distance = self.min_lookahead_distance
         
         # TODO assume 1m distance between waypoints - currently OK, but need to make it more universal
-        lookahead_wp_idx = int(nearest_wp_idx) + int(lookahead_distance)
+        lookahead_wp_idx = nearest_wp_idx + int(lookahead_distance)
 
         if lookahead_wp_idx > self.last_wp_idx:
             lookahead_wp_idx = self.last_wp_idx
@@ -91,7 +92,7 @@ class PurePursuitFollower:
         steering_angle = math.atan(self.wheel_base * curvature)
 
         # calc cross track error - used only for debug output
-        cross_track_error = self.calc_cross_track_error(current_pose, int(nearest_wp_idx))
+        cross_track_error = self.calc_cross_track_error(current_pose, nearest_wp_idx)
 
         # get blinker information from nearest waypoint and target velocity from lookahead waypoint
         left_blinker, right_blinker = self.get_blinker_state(nearest_wp.wpstate.steering_state)

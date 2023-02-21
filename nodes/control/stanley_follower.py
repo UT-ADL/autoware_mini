@@ -50,7 +50,7 @@ class StanleyFollower:
         self.last_wp_idx = len(self.waypoints) - 1
 
         # create kd-tree for nearest neighbor search
-        waypoints_xy = np.array([[w.pose.pose.position.x, w.pose.pose.position.y] for w in self.waypoints])
+        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
         self.waypoint_tree = KDTree(waypoints_xy)
 
 
@@ -178,8 +178,8 @@ class StanleyFollower:
         cte = 0.0
 
         # find nearest wp distance and id
-        d, idx = self.waypoint_tree.query([[x_ego, y_ego]], 1)
-        idx = int(idx)
+        d, idx = self.waypoint_tree.query([(x_ego, y_ego)], 1)
+        idx = idx[0][0]
 
         x_nearest = self.waypoints[idx].pose.pose.position.x
         y_nearest = self.waypoints[idx].pose.pose.position.y
