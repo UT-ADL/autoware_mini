@@ -13,15 +13,15 @@ Records waypoints, speed, yaw and blinker information and writes to csv file.
 
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `/current_pose` | [geometry_msgs/PoseStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html) | waypoint coordinates and yaw |
-| `/current_velocity` | [geometry_msgs/TwistStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html) | velocity |
+| `current_pose` | [geometry_msgs/PoseStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html) | waypoint coordinates and yaw |
+| `current_velocity` | [geometry_msgs/TwistStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html) | velocity |
 | `/pacmod/parsed_tx/turn_rpt` | `pacmod_msgs.msg/SystemRptInt` | blinker information |
 
 ##### Publishes
 
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `/waypoint_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |
+| `path_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |
 
 ##### Output
 
@@ -30,9 +30,9 @@ Will record waypoint file with the following columns:
 ```wp_id, x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag```
 
 * `wp_id` - waypoint id automatically incremented
-* `x`, `y`, `z` - coordinates from `/current_pose` message
-* `yaw` - Orientation from `/current_pose` converted into heading angle
-* `velocity` - speed from `/current_velocity`
+* `x`, `y`, `z` - coordinates from `current_pose` message
+* `yaw` - Orientation from `current_pose` message and converted into yaw
+* `velocity` - speed from `current_velocity` message
 * `steering_flag` - used for blinker information. Inside the code there is also a remapping.
 * Other fields are currently not used by `waypoint_saver`
 
@@ -53,5 +53,5 @@ Will record waypoint file with the following columns:
 
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `/path` | `autoware_msgs/LaneArray` | Lane.waypoints contains an array of waypoints `autoware_msgs/Waypoint` |
-| `/waypoint_markers` | `visualization_msgs/MarkerArray` | Includes markers for waypoint pose, velocity labels and path |
+| `path` | `autoware_msgs/LaneArray` | Lane contains an array of waypoints `autoware_msgs/Waypoint` |
+| `path_markers` | `visualization_msgs/MarkerArray` | Includes markers for waypoint pose, velocity labels and path |

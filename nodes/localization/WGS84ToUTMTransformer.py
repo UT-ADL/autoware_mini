@@ -14,10 +14,7 @@ class WGS84ToUTMTransformer:
         self.central_meridian = (origin_lon // 6.0) * 6.0 + 3.0
 
         # UtmProjector(Origin, useOffset, throwInPaddingArea)
-        if use_custom_origin:
-            self.transformer = UtmProjector(self.origin, True, False)
-        else:
-            self.transformer = UtmProjector(self.origin, False, False)
+        self.transformer = UtmProjector(self.origin, use_custom_origin, False)
 
     def transform_lat_lon(self, lat, lon, height):
         gps_point = GPSPoint(lat, lon, height)

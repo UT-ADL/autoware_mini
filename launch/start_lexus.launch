@@ -2,22 +2,28 @@
 <launch>
 
     <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
+    <arg name="coordinate_transformer"  default="lest97"        doc="lest97, utm"/>
     <arg name="waypoints_file"          default="wp_erm_two_turns.csv" />
-    <arg name="coordinate_transformer"  default="lest97" />
-    <arg name="launch_rviz"             default="true" />
-
+    
     <arg name="use_tf"                  default="true" />
-
+    <arg name="use_lexus_model"         default="true" />
+    <arg name="use_gnss"                default="true" />
+    <arg name="use_dbw"                 default="true" />
+    
     <arg name="planning_time"           default="2.0"           doc="pure_pursuit - lookahead distance depends on that" />
     <arg name="min_lookahead_distance"  default="6.0"           doc="pure_pursuit - min lookahead distance" />
-    <arg name="cte_gain"                default="1.0"           doc="stanley - gain for cross_track_error, higher value prioritizes cte" />
+    <arg name="cte_gain"                default="1.0"           doc="stanley - gain for cross_track_error (cte), higher value prioritizes cte" />
+    
 
+    <!-- localizer -->
+    <include file="$(find autoware_mini)/launch/novatel_oem7_localizer.launch" >
+        <arg name="coordinate_transformer" value="$(arg coordinate_transformer)" />
+    </include>
 
     <!-- Waypoint_loader -->
     <node pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" >
         <param name="waypoints_file"  value="$(find autoware_mini)/data/$(arg waypoints_file)" />
     </node>
-
 
     <!-- Follower -->
     <node if="$(eval arg('follower')=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" >
@@ -29,10 +35,19 @@
         <param name="cte_gain"               value="$(arg cte_gain)" />
     </node>
 
-    <!-- Bicycle_model simulator -->
-    <node pkg="autoware_mini" type="bicycle_simulation.py" name="bicycle_simulation" output="screen" />
+    <!-- SSC interface -->
+    <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" />
+
+    <!-- Vehicle platform -->
+    <include file="$(find vehicle_platform)/launch/platform.launch" >
+        <arg name="use_tf"          value="$(arg use_tf)" />
+        <arg name="use_lexus_model" value="$(arg use_lexus_model)" />
+        <arg name="use_gnss"        value="$(arg use_gnss)" />
+        <arg name="use_dbw"         value="$(arg use_dbw)" />
+    </include>
 
     <!-- Rviz -->
     <node if="$(arg launch_rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
+
 
 </launch>
