@@ -10,7 +10,7 @@ from sklearn.neighbors import KDTree
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
 from std_msgs.msg import ColorRGBA, Float32MultiArray
-from autoware_msgs.msg import LaneArray, VehicleCmd
+from autoware_msgs.msg import LaneArray, VehicleCmd, WaypointState
 
 
 class StanleyFollower:
@@ -163,11 +163,13 @@ class StanleyFollower:
 
     def get_blinker_state(self, steering_state):
 
-        if steering_state == 1:     # left
+        if steering_state == WaypointState.STR_LEFT:
             return 1, 0
-        elif steering_state == 2:   # right
+        elif steering_state == WaypointState.STR_RIGHT:
             return 0, 1
-        else:                       # straight (no blinkers)
+        elif steering_state == WaypointState.STR_STRAIGHT:
+            return 0, 0
+        else:
             return 0, 0
 
     def calc_cross_track_error_and_heading(self, front_wheel_pose):

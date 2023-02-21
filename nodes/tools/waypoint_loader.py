@@ -5,7 +5,7 @@ import csv
 import tf
 import math
 
-from autoware_msgs.msg import LaneArray, Lane, Waypoint
+from autoware_msgs.msg import LaneArray, Lane, Waypoint, WaypointState
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 
@@ -85,12 +85,12 @@ class WaypointLoader:
         for i, waypoint in enumerate(waypoints):
 
             # color the arrows based on the waypoint steering_flag (blinker)
-            if waypoint.wpstate.steering_state == 1:    # left
+            if waypoint.wpstate.steering_state == WaypointState.STR_LEFT:
                 color = ColorRGBA(1.0, 0.0, 0.0, 1.0)
-            elif waypoint.wpstate.steering_state == 2:  # right
+            elif waypoint.wpstate.steering_state == WaypointState.STR_RIGHT:
                 color = ColorRGBA(0.0, 0.0, 1.0, 1.0)
             else:
-                color = ColorRGBA(0.0, 1.0, 0.0, 1.0)   # straight
+                color = ColorRGBA(0.0, 1.0, 0.0, 1.0)
 
             marker = Marker()
             marker.header.frame_id = self.output_frame
