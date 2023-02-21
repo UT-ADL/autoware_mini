@@ -8,7 +8,7 @@ import tf
 from tf2_ros import TransformBroadcaster
 
 from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Quaternion, Point
-from autoware_msgs.msg import VehicleCmd
+from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
 
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
@@ -26,12 +26,14 @@ class BicycleSimulation:
         self.velocity = 0
         self.heading_angle = 0
         self.steering_angle = 0
-        self.orientation = Quaternion(0, 0, 0, 0)
+        self.orientation = Quaternion(0, 0, 0, 1)
+        self.blinkers = 0
 
         # localization publishers
         self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
         self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
-        self.base_link_to_map_tf = TransformBroadcaster()
+        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=10)
+        self.br = TransformBroadcaster()
 
         # initial position and vehicle command from outside
         self.initialpose_sub = rospy.Subscriber('initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
@@ -54,6 +56,16 @@ class BicycleSimulation:
         # new velocity and steering angle take effect instantaneously
         self.velocity = msg.ctrl_cmd.linear_velocity
         self.steering_angle = msg.ctrl_cmd.steering_angle
+
+        # remember blinkers, just to be able to publish status
+        if msg.lamp_cmd.l == 1 and msg.lamp_cmd.r == 1:
+            self.blinkers = VehicleStatus.LAMP_HAZARD
+        elif msg.lamp_cmd.l == 1:
+            self.blinkers = VehicleStatus.LAMP_LEFT
+        elif msg.lamp_cmd.r == 1:
+            self.blinkers = VehicleStatus.LAMP_RIGHT
+        else:
+            self.blinkers = 0
 
     def update_model_state(self, delta_t):
         # compute change according to bicycle model equations
@@ -89,6 +101,7 @@ class BicycleSimulation:
             self.publish_base_link_to_map_tf(stamp)
             self.publish_current_pose(stamp)
             self.publish_current_velocity(stamp)
+            self.publish_vehicle_status(stamp)
             self.publish_bicycle_markers(stamp)
 
             rate.sleep()
@@ -105,7 +118,7 @@ class BicycleSimulation:
         t.transform.translation.y = self.y
         t.transform.rotation = self.orientation
 
-        self.base_link_to_map_tf.sendTransform(t)
+        self.br.sendTransform(t)
 
     def publish_current_pose(self, stamp):
 
@@ -133,6 +146,23 @@ class BicycleSimulation:
         vel_msg.twist.linear.z = 0.0
 
         self.current_velocity_pub.publish(vel_msg)
+
+
+    def publish_vehicle_status(self, stamp):
+        
+        status_msg = VehicleStatus()
+
+        status_msg.header.stamp = stamp
+        status_msg.header.frame_id = "base_link"
+
+        status_msg.drivemode = VehicleStatus.MODE_AUTO
+        status_msg.steeringmode = VehicleStatus.MODE_AUTO
+        status_msg.current_gear.gear = Gear.DRIVE
+        status_msg.speed = self.velocity * 3.6
+        status_msg.angle = self.steering_angle
+        status_msg.lamp = self.blinkers
+
+        self.vehicle_status_pub.publish(status_msg)
 
     def publish_bicycle_markers(self, stamp):
 
