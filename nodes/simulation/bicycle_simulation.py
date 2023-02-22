@@ -36,7 +36,7 @@ class BicycleSimulation:
         self.br = TransformBroadcaster()
 
         # initial position and vehicle command from outside
-        self.initialpose_sub = rospy.Subscriber('initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
+        self.initialpose_sub = rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
         self.vehicle_cmd_sub = rospy.Subscriber('vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
 
         # visualization of the bicycle model
