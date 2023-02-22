@@ -3,9 +3,10 @@
 import rospy
 import math
 import message_filters
-import helpers
 import numpy as np
 from sklearn.neighbors import KDTree
+
+from helpers import get_heading_from_pose_orientation, get_blinker_state
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
@@ -64,7 +65,7 @@ class StanleyFollower:
         current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
 
-        current_heading = helpers.get_heading_from_pose_orientation(current_pose)
+        current_heading = get_heading_from_pose_orientation(current_pose)
         
         # Find pose for the front wheel
         front_wheel_pose = self.get_front_wheel_pose(current_pose, current_heading)
@@ -76,7 +77,7 @@ class StanleyFollower:
         steering_angle = heading_error + delta_error
 
         # get blinker information and target_velocity
-        left_blinker, right_blinker  = helpers.get_blinker_state(nearest_wp.wpstate.steering_state)
+        left_blinker, right_blinker  = get_blinker_state(nearest_wp.wpstate.steering_state)
         target_velocity = nearest_wp.twist.twist.linear.x
 
         # Publish
