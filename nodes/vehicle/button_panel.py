@@ -12,6 +12,8 @@ class ButtonPanelNode:
         self.marker_id = 0
         self.time_engage = 0
 
+        self.cooldown = rospy.get_param("cooldown", 2.0)
+
         self.engage_pub = rospy.Publisher("engage", Bool, queue_size=10)
         self.marker_pub = rospy.Publisher("log/markers", Marker, queue_size=10)
 
@@ -27,7 +29,7 @@ class ButtonPanelNode:
     def joy_callback(self, msg):
         rospy.logdebug("button_panel - got joy (%d, %d, %d, %d, %d, %d)", msg.buttons[0], msg.buttons[1], msg.buttons[2], msg.buttons[3], msg.buttons[4], msg.buttons[5])
         if msg.buttons[0] == 1:
-            if rospy.get_time() - self.time_engage > 2.:
+            if rospy.get_time() - self.time_engage > self.cooldown:
                 self.engage_pub.publish(Bool(data=True))
                 self.time_engage = rospy.get_time()
                 rospy.logdebug("button_panel - published engage")

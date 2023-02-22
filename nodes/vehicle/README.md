@@ -43,3 +43,28 @@ A Python ROS node for interfacing with Autoware's SSC.
 | `/ssc/turn_signal_command` | `automotive_platform_msgs/TurnSignalCommand` | Turn signal command to SSC. |
 | `/ssc/gear_select` | `automotive_platform_msgs/GearCommand` | Gear commands to SSC. |
 | `vehicle_status` | `autoware_msgs/VehicleStatus` | Status information from SSC. |
+
+## button_panel
+
+Reacts to engage button in the car. Also logs marker button presses.
+
+
+## Parameters
+
+| Name              | Type  | Default | Description |
+|-------------------|-------|---------|-------------|
+| cooldown          | float |   `2.0` | Cooldown period (in seconds) after pressing the engage button. Prevents infinitely delaying the engage by pressing the button repeatedly. |
+
+#### Subscribed Topics
+
+| Name           | Type                      | Description |
+|----------------|---------------------------|-------------|
+| current_pose   | geometry_msgs/PoseStamped | The current pose of the vehicle. Used to set the pose of markers. |
+| joy            | sensor_msgs/Joy            | The joystick input for button presses. |
+
+#### Published Topics
+
+| Name              | Type                | Description |
+|-------------------|---------------------|-------------|
+| engage            | std_msgs/Bool       | Sends a signal to engage the autonomy. |
+| log/markers       | visualization_msgs/Marker | Marker messages to log a button press. |
