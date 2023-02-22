@@ -6,7 +6,8 @@ import message_filters
 import numpy as np
 from sklearn.neighbors import KDTree
 
-from helpers import get_heading_from_pose_orientation, get_blinker_state
+from helpers import get_heading_from_pose_orientation, get_blinker_state, get_cross_track_error, get_front_wheel_pose,\
+    get_heading_between_two_poses
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
@@ -68,21 +69,28 @@ class StanleyFollower:
         current_heading = get_heading_from_pose_orientation(current_pose)
         
         # Find pose for the front wheel
-        front_wheel_pose = self.get_front_wheel_pose(current_pose, current_heading)
+        front_wheel_pose = get_front_wheel_pose(current_pose, current_heading, self.wheel_base)
         
-        # calc errors and steering angle
-        cross_track_error, track_heading, nearest_wp = self.calc_cross_track_error_and_heading(front_wheel_pose)
+        # find two closest points on track to calculate track heading and cross track error
+        _, idx = self.waypoint_tree.query([(front_wheel_pose.position.x, front_wheel_pose.position.y)], 2)
+        sorted = np.sort(idx[0])
+        waypoint1 = self.waypoints[sorted[0]]
+        waypoint2 = self.waypoints[sorted[1]]
+
+        cross_track_error = get_cross_track_error(front_wheel_pose, waypoint1.pose.pose, waypoint2.pose.pose)
+        track_heading = get_heading_between_two_poses(waypoint1.pose.pose, waypoint2.pose.pose)
+
         heading_error = track_heading - current_heading
         delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))
         steering_angle = heading_error + delta_error
 
         # get blinker information and target_velocity
-        left_blinker, right_blinker  = get_blinker_state(nearest_wp.wpstate.steering_state)
-        target_velocity = nearest_wp.twist.twist.linear.x
+        left_blinker, right_blinker  = get_blinker_state(waypoint2.wpstate.steering_state)
+        target_velocity = waypoint2.twist.twist.linear.x
 
         # Publish
         self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
-        self.publish_stanley_markers(stamp, front_wheel_pose, nearest_wp.pose.pose, heading_error)
+        self.publish_stanley_markers(stamp, front_wheel_pose, waypoint2.pose.pose, heading_error)
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):
@@ -137,70 +145,8 @@ class StanleyFollower:
 
         self.stanley_markers_pub.publish(marker_array)
 
-    def get_front_wheel_pose(self, current_pose, current_heading):
-        
-        pose = Pose()
-        pose.position.x = current_pose.position.x + self.wheel_base * math.cos(current_heading)
-        pose.position.y = current_pose.position.y + self.wheel_base * math.sin(current_heading)
-        pose.position.z = current_pose.position.z
-        pose.orientation = current_pose.orientation
-
-        return pose
-
-    def calc_cross_track_error_and_heading(self, front_wheel_pose):
-
-        x_ego = front_wheel_pose.position.x
-        y_ego = front_wheel_pose.position.y
-        heading = 0.0
-        cte = 0.0
-
-        # find nearest wp distance and id
-        d, idx = self.waypoint_tree.query([(x_ego, y_ego)], 1)
-        idx = idx[0][0]
-
-        x_nearest = self.waypoints[idx].pose.pose.position.x
-        y_nearest = self.waypoints[idx].pose.pose.position.y
-
-        # in case of last wp, calc based on backward point
-        if idx > 0:
-            x_back = self.waypoints[idx-1].pose.pose.position.x
-            y_back = self.waypoints[idx-1].pose.pose.position.y
-
-            cte_back = calc_dist_from_track(x_ego, y_ego, x_back, y_back, x_nearest, y_nearest)
-            heading_back = math.atan2(y_nearest - y_back, x_nearest - x_back)
-
-            cte = cte_back
-            heading = heading_back
-
-        # calc based on forward point
-        if idx < self.last_wp_idx:
-            x_front = self.waypoints[idx+1].pose.pose.position.x
-            y_front = self.waypoints[idx+1].pose.pose.position.y
-
-            cte_front = calc_dist_from_track(x_ego, y_ego, x_nearest, y_nearest, x_front, y_front)
-            heading_front = math.atan2(y_front - y_nearest, x_front - x_nearest)
-
-            # select smaller cte, but prefer heading using forward point
-            if abs(cte_front) < abs(cte):
-                cte = cte_front
-            heading = heading_front
-
-        nearest_wp = self.waypoints[idx]
-
-        return cte, heading, nearest_wp
-
-
     def run(self):
         rospy.spin()
-
-
-def calc_dist_from_track(x_ego, y_ego, x1, y1, x2, y2):
-    # calc distance from track
-    # https://robotics.stackexchange.com/questions/22989/what-is-wrong-with-my-stanley-controller-for-car-steering-control
-
-    numerator = (x2 - x1) * (y1 - y_ego) - (x1 - x_ego) * (y2 - y1)
-    denominator = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-    return numerator / denominator
 
 
 if __name__ == '__main__':

@@ -151,47 +151,8 @@ class PurePursuitFollower:
         self.pure_pursuit_markers_pub.publish(marker_array)
 
 
-    def calc_cross_track_error(self, current_pose, nearest_wp_idx):
-
-        x_ego = current_pose.position.x
-        y_ego = current_pose.position.y
-        cte = 0.0
-
-        # find nearest wp distance and id
-        idx = nearest_wp_idx
-
-        x_nearest = self.waypoints[idx].pose.pose.position.x
-        y_nearest = self.waypoints[idx].pose.pose.position.y
-
-        # calc based on backward point
-        if idx > 0:
-            x_back = self.waypoints[idx-1].pose.pose.position.x
-            y_back = self.waypoints[idx-1].pose.pose.position.y
-            cte_back = calc_dist_from_track(x_ego, y_ego, x_back, y_back, x_nearest, y_nearest)
-            cte = cte_back
-        
-        # calc based on forward point
-        if idx < self.last_wp_idx:
-            x_front = self.waypoints[idx+1].pose.pose.position.x
-            y_front = self.waypoints[idx+1].pose.pose.position.y
-            cte_front = calc_dist_from_track(x_ego, y_ego, x_nearest, y_nearest, x_front, y_front)
-            # select smaller one
-            if abs(cte_front) < abs(cte):
-                cte = cte_front
-
-        return cte
-
     def run(self):
         rospy.spin()
-
-
-def calc_dist_from_track(x_ego, y_ego, x1, y1, x2, y2):
-    # calc distance from track
-    # https://robotics.stackexchange.com/questions/22989/what-is-wrong-with-my-stanley-controller-for-car-steering-control
-
-    numerator = (x2 - x1) * (y1 - y_ego) - (x1 - x_ego) * (y2 - y1)
-    denominator = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-    return numerator / denominator
 
 
 if __name__ == '__main__':
