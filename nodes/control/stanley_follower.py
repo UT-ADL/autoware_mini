@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
 import rospy
-import tf
 import math
 import message_filters
+import helpers
 import numpy as np
 from sklearn.neighbors import KDTree
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
 from std_msgs.msg import ColorRGBA, Float32MultiArray
-from autoware_msgs.msg import LaneArray, VehicleCmd, WaypointState
+from autoware_msgs.msg import LaneArray, VehicleCmd
 
 
 class StanleyFollower:
@@ -23,18 +23,17 @@ class StanleyFollower:
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
-        self.path_frame = None
         self.last_wp_idx = 0
 
         # Subscribers
         self.path_sub = rospy.Subscriber('path', LaneArray, self.path_callback)
         self.current_pose_sub = message_filters.Subscriber('current_pose', PoseStamped)
         self.current_velocity_sub = message_filters.Subscriber('current_velocity', TwistStamped)
-        ts = message_filters.TimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10)
+        ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10, slop=0.1)
         ts.registerCallback(self.current_status_callback)
 
         # Publishers
-        self.stanley_rviz_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
+        self.stanley_markers_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
         self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
         self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
 
@@ -45,7 +44,6 @@ class StanleyFollower:
 
 
     def path_callback(self, path_msg):
-        self.path_frame = path_msg.lanes[0].header.frame_id
         self.waypoints = path_msg.lanes[0].waypoints
         self.last_wp_idx = len(self.waypoints) - 1
 
@@ -62,42 +60,37 @@ class StanleyFollower:
         # start timer
         start_time = rospy.get_time()
 
+        stamp = current_pose_msg.header.stamp
         current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
 
-        quaternion = (current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w)
-        _, _, current_heading = tf.transformations.euler_from_quaternion(quaternion)
+        current_heading = helpers.get_heading_from_pose_orientation(current_pose)
         
         # Find pose for the front wheel
         front_wheel_pose = self.get_front_wheel_pose(current_pose, current_heading)
         
-        # calc cross track error and and track heading
+        # calc errors and steering angle
         cross_track_error, track_heading, nearest_wp = self.calc_cross_track_error_and_heading(front_wheel_pose)
         heading_error = track_heading - current_heading
-
-        # TODO not actually used - cte already has +/- information?
-        # self.min_path_yaw = math.atan2(nearest_wp.pose.pose.position.y - front_wheel_pose.position.y , nearest_wp.pose.pose.position.x - front_wheel_pose.position.x)
-        # self.cross_yaw_error = self.min_path_yaw - self.current_heading
-
         delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))
         steering_angle = heading_error + delta_error
 
         # get blinker information and target_velocity
-        left_blinker, right_blinker  = self.get_blinker_state(nearest_wp.wpstate.steering_state)
+        left_blinker, right_blinker  = helpers.get_blinker_state(nearest_wp.wpstate.steering_state)
         target_velocity = nearest_wp.twist.twist.linear.x
 
         # Publish
-        self.publish_vehicle_command(steering_angle, target_velocity, left_blinker, right_blinker)
-        self.publish_stanley_rviz(front_wheel_pose, nearest_wp.pose.pose, heading_error)
+        self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
+        self.publish_stanley_markers(stamp, front_wheel_pose, nearest_wp.pose.pose, heading_error)
 
         compute_time = rospy.get_time() - start_time
         self.follower_debug_pub.publish(Float32MultiArray(data=[compute_time, cross_track_error, heading_error, delta_error]))
 
 
-    def publish_vehicle_command(self, steering_angle, target_velocity, left_blinker, right_blinker):
+    def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):
         vehicle_cmd = VehicleCmd()
-        vehicle_cmd.header.stamp = rospy.Time.now()
-        vehicle_cmd.header.frame_id = self.path_frame
+        vehicle_cmd.header.stamp = stamp
+        vehicle_cmd.header.frame_id = "base_link"
         # blinkers
         vehicle_cmd.lamp_cmd.l = left_blinker 
         vehicle_cmd.lamp_cmd.r = right_blinker 
@@ -108,14 +101,14 @@ class StanleyFollower:
         self.vehicle_command_pub.publish(vehicle_cmd)
 
 
-    def publish_stanley_rviz(self, front_pose, nearest_wp_pose, heading_error):
+    def publish_stanley_markers(self, stamp, front_pose, nearest_wp_pose, heading_error):
         
         marker_array = MarkerArray()
 
         # draws a line between current pose and nearest_wp point
         marker = Marker()
-        marker.header.frame_id = self.path_frame
-        marker.header.stamp = rospy.Time.now()
+        marker.header.frame_id = "map"
+        marker.header.stamp = stamp
         marker.ns = "nearest_wp distance"
         marker.id = 0
         marker.type = Marker.LINE_STRIP
@@ -132,8 +125,8 @@ class StanleyFollower:
         average_pose.position.z = (front_pose.position.z + nearest_wp_pose.position.z) / 2
 
         marker_text = Marker()
-        marker_text.header.frame_id = self.path_frame
-        marker_text.header.stamp = rospy.Time.now()
+        marker_text.header.frame_id = "map"
+        marker_text.header.stamp = stamp
         marker_text.ns = "heading_error"
         marker_text.id = 1
         marker_text.type = Marker.TEXT_VIEW_FACING
@@ -144,12 +137,7 @@ class StanleyFollower:
         marker_text.text = str(round(math.degrees(heading_error),1))
         marker_array.markers.append(marker_text)
 
-        self.stanley_rviz_pub.publish(marker_array)
-
-    def get_heading_from_pose(self, pose):
-        quaternion = (pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
-        _, _, heading = tf.transformations.euler_from_quaternion(quaternion)
-        return heading
+        self.stanley_markers_pub.publish(marker_array)
 
     def get_front_wheel_pose(self, current_pose, current_heading):
         
@@ -160,17 +148,6 @@ class StanleyFollower:
         pose.orientation = current_pose.orientation
 
         return pose
-
-    def get_blinker_state(self, steering_state):
-
-        if steering_state == WaypointState.STR_LEFT:
-            return 1, 0
-        elif steering_state == WaypointState.STR_RIGHT:
-            return 0, 1
-        elif steering_state == WaypointState.STR_STRAIGHT:
-            return 0, 0
-        else:
-            return 0, 0
 
     def calc_cross_track_error_and_heading(self, front_wheel_pose):
 

@@ -21,7 +21,15 @@ class WaypointLoader:
         self.waypoints_pub = rospy.Publisher('path', LaneArray, queue_size=1, latch=True)
         self.waypoints_markers_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1, latch=True)
 
+        rospy.loginfo("waypoint_loader - loading waypoints from file: %s ", self.waypoints_file)
+        self.waypoints = self.load_waypoints(self.waypoints_file)
+        self.publish_waypoints()
 
+        if self.publish_markers:
+            self.publish_waypoints_markers(self.waypoints)
+
+        rospy.loginfo("waypoint_loader - %i waypoints are published " % (len(self.waypoints)))
+        
     def load_waypoints(self, waypoints_file):
         
         wp_id = 0
@@ -67,15 +75,15 @@ class WaypointLoader:
         return waypoints
 
     def publish_waypoints(self):
-        path = LaneArray()
+        lane_array = LaneArray()
         lane = Lane()
         
         lane.header.frame_id = self.output_frame
         lane.header.stamp = rospy.Time.now()
         lane.waypoints = self.waypoints
-        path.lanes.append(lane)
+        lane_array.lanes.append(lane)
 
-        self.waypoints_pub.publish(path)
+        self.waypoints_pub.publish(lane_array)
 
     # Waypoints visualization in RVIZ
     def publish_waypoints_markers(self, waypoints):
@@ -140,16 +148,6 @@ class WaypointLoader:
 
 
     def run(self):
-
-        rospy.loginfo("waypoint_loader - loading waypoints from file: %s ", self.waypoints_file)
-        self.waypoints = self.load_waypoints(self.waypoints_file)
-        self.publish_waypoints()
-
-        if self.publish_markers:
-            self.publish_waypoints_markers(self.waypoints)
-
-        rospy.loginfo("waypoint_loader - waypoints are published ")
-
         rospy.spin()
 
 if __name__ == '__main__':

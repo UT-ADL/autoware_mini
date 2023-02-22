@@ -23,6 +23,16 @@ Minimalistic python based autonomy software.
 
 #### Start simulation mode
 
+```
+roslaunch autoware_mini start_sim.launch
+```
+
+Will launch following nodes:
+* waypoint_loader
+* follower
+* bicycle_simulation
+* rviz
+
 #### Launch in Lexus
 
 #### Use it wit Carla

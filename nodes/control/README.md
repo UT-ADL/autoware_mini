@@ -8,9 +8,9 @@ The implementation is based from the blog post [Three Methods of Vehicle Lateral
 
 ##### Parameters
 
-* `planning_time` - default: 2 s - used to calculate lookahead point distance by multiplying with speed
-* `min_lookahead_distance` - default: 5.5 m - distance from base_link 
-* `wheel_base` - default 2.789 m
+* `planning_time` - used to calculate lookahead point distance by multiplying with speed
+* `min_lookahead_distance` - distance from base_link 
+* `wheel_base`
 
 ##### Subscribes
 
@@ -44,7 +44,7 @@ The implementation is based from the blog post [Three Methods of Vehicle Lateral
 The implementation is based from the blog post [Three Methods of Vehicle Lateral Control: Pure Pursuit, Stanley and MPC](https://www.shuffleai.blog/blog/Three_Methods_of_Vehicle_Lateral_Control.html).
 
 ##### Parameters
-* `wheel_base` - default 2.789 m
+* `wheel_base`
 
 ##### Subscribes
 

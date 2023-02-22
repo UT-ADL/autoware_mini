@@ -42,7 +42,7 @@ class WaypointSaver:
         self.turn_rpt_sub = rospy.Subscriber('vehicle_status', VehicleStatus, self.vehicle_status_callback)
 
         # Sync 2 source topics in callback
-        ts = message_filters.TimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10)
+        ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10, slop=0.1)
         ts.registerCallback(self.data_callback)
 
         # Publishers

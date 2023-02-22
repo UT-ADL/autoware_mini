@@ -6,7 +6,7 @@ Records waypoints, speed, yaw and blinker information and writes to csv file.
 
 ##### Parameters
 
-* `interval` - distance between waypoints in meters (default: 1.0 m).
+* `interval` - distance between recorded waypoints in meters
 * `file_name` - output file name where to save waypoints (default: /tmp/waypoints.csv).
 
 ##### Subscribes

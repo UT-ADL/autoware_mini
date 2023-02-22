@@ -28,6 +28,7 @@
   <exec_depend>automotive_platform_msgs</exec_depend>
   <exec_depend>automotive_navigation_msgs</exec_depend>
   <exec_depend>novatel_oem7_msgs</exec_depend>
+  <exec_depend>vehicle_platform</exec_depend>
 
   <exec_depend>vehicle_platform</exec_depend>
 
