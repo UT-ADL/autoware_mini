@@ -5,7 +5,7 @@ import csv
 import tf
 import math
 
-from autoware_msgs.msg import LaneArray, Lane, Waypoint, WaypointState
+from autoware_msgs.msg import Lane, Waypoint, WaypointState
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 
@@ -18,17 +18,19 @@ class WaypointLoader:
         self.publish_markers = rospy.get_param("~publish_markers", True)
 
         # Publishers
-        self.waypoints_pub = rospy.Publisher('path', LaneArray, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
         self.waypoints_markers_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1, latch=True)
 
-        rospy.loginfo("waypoint_loader - loading waypoints from file: %s ", self.waypoints_file)
         self.waypoints = self.load_waypoints(self.waypoints_file)
         self.publish_waypoints()
 
         if self.publish_markers:
-            self.publish_waypoints_markers(self.waypoints)
+            self.publish_waypoints_markers(self.waypoints)        
 
-        rospy.loginfo("waypoint_loader - %i waypoints are published " % (len(self.waypoints)))
+        if len(self.waypoints) == 0:
+            rospy.logerr("waypoint_loader - no waypoints found in file: %s ", self.waypoints_file)
+        else:
+            rospy.loginfo("waypoint_loader - %i waypoints published from file: %s" % (len(self.waypoints), self.waypoints_file))
         
     def load_waypoints(self, waypoints_file):
         
@@ -42,6 +44,9 @@ class WaypointLoader:
             waypoints = []
 
             for row in reader:
+                # skip empty rows, if no data at all - no waypoints are returned and empty lane is published
+                if not row:
+                    continue
                 # create waypoint
                 waypoint = Waypoint()
                 # 0  1  2  3    4         5            6              7           8          9
@@ -75,15 +80,13 @@ class WaypointLoader:
         return waypoints
 
     def publish_waypoints(self):
-        lane_array = LaneArray()
         lane = Lane()
         
         lane.header.frame_id = self.output_frame
         lane.header.stamp = rospy.Time.now()
         lane.waypoints = self.waypoints
-        lane_array.lanes.append(lane)
-
-        self.waypoints_pub.publish(lane_array)
+        
+        self.waypoints_pub.publish(lane)
 
     # Waypoints visualization in RVIZ
     def publish_waypoints_markers(self, waypoints):

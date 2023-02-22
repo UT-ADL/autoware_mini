@@ -11,7 +11,7 @@ from helpers import get_heading_from_pose_orientation, get_heading_between_two_p
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
 from std_msgs.msg import ColorRGBA
-from autoware_msgs.msg import LaneArray, VehicleCmd
+from autoware_msgs.msg import Lane, VehicleCmd
 
 
 class PurePursuitFollower:
@@ -28,7 +28,7 @@ class PurePursuitFollower:
         self.last_wp_idx = 0
 
         # Subscribers
-        self.path_sub = rospy.Subscriber('path', LaneArray, self.path_callback)
+        self.path_sub = rospy.Subscriber('path', Lane, self.path_callback)
         self.current_pose_sub = message_filters.Subscriber('current_pose', PoseStamped)
         self.current_velocity_sub = message_filters.Subscriber('current_velocity', TwistStamped)
         ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10, slop=0.1)
@@ -45,13 +45,16 @@ class PurePursuitFollower:
         rospy.loginfo("pure_pursuit_follower - initialized")
 
     def path_callback(self, path_msg):
-        self.waypoints = path_msg.lanes[0].waypoints
-        self.last_wp_idx = len(self.waypoints) - 1
-
-        # create kd-tree for nearest neighbor search
-        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
-        self.waypoint_tree = KDTree(waypoints_xy)
-
+        
+        if len(path_msg.waypoints) == 0:
+            rospy.logwarn("pure_pursuit_follower - no waypoints received")
+            return
+        else:
+            self.waypoints = path_msg.waypoints
+            self.last_wp_idx = len(self.waypoints) - 1
+            # create kd-tree for nearest neighbor search
+            waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
+            self.waypoint_tree = KDTree(waypoints_xy)
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
