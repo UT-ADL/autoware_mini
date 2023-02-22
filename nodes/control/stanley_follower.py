@@ -10,7 +10,7 @@ from helpers import get_heading_from_pose_orientation, get_blinker_state
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
-from std_msgs.msg import ColorRGBA, Float32MultiArray
+from std_msgs.msg import ColorRGBA
 from autoware_msgs.msg import LaneArray, VehicleCmd
 
 
@@ -36,7 +36,6 @@ class StanleyFollower:
         # Publishers
         self.stanley_markers_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
         self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
-        self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
 
         # output information to console
         rospy.loginfo("stanley_follower - wheel_base: " + str(self.wheel_base))
@@ -57,9 +56,6 @@ class StanleyFollower:
 
         if self.waypoint_tree is None:
             return
-
-        # start timer
-        start_time = rospy.get_time()
 
         stamp = current_pose_msg.header.stamp
         current_pose = current_pose_msg.pose
@@ -83,9 +79,6 @@ class StanleyFollower:
         # Publish
         self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
         self.publish_stanley_markers(stamp, front_wheel_pose, nearest_wp.pose.pose, heading_error)
-
-        compute_time = rospy.get_time() - start_time
-        self.follower_debug_pub.publish(Float32MultiArray(data=[compute_time, cross_track_error, heading_error, delta_error]))
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):

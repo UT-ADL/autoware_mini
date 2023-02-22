@@ -10,8 +10,8 @@ from helpers import get_heading_from_pose_orientation, get_heading_between_two_p
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
-from std_msgs.msg import ColorRGBA, Float32MultiArray
-from autoware_msgs.msg import LaneArray, VehicleCmd, WaypointState
+from std_msgs.msg import ColorRGBA
+from autoware_msgs.msg import LaneArray, VehicleCmd
 
 
 class PurePursuitFollower:
@@ -37,7 +37,6 @@ class PurePursuitFollower:
         # Publishers
         self.pure_pursuit_markers_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
         self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
-        self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
 
         # output information to console
         rospy.loginfo("pure_pursuit_follower - planning_time: " + str(self.planning_time))
@@ -58,9 +57,6 @@ class PurePursuitFollower:
 
         if self.waypoint_tree is None:
             return
-
-        # timer start
-        start_time = rospy.get_time()
 
         stamp = current_pose_msg.header.stamp
         current_pose = current_pose_msg.pose
@@ -90,9 +86,6 @@ class PurePursuitFollower:
         curvature = 2 * math.sin(heading_error) / lookahead_distance
         steering_angle = math.atan(self.wheel_base * curvature)
 
-        # calc cross track error - used only for debug output
-        cross_track_error = self.calc_cross_track_error(current_pose, nearest_wp_idx)
-
         # get blinker information from nearest waypoint and target velocity from lookahead waypoint
         left_blinker, right_blinker = get_blinker_state(nearest_wp.wpstate.steering_state)
         target_velocity = lookahead_wp.twist.twist.linear.x
@@ -100,9 +93,6 @@ class PurePursuitFollower:
         # Publish
         self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
         self.publish_pure_pursuit_markers(stamp, current_pose, lookahead_wp.pose.pose, heading_error)
-
-        compute_time = rospy.get_time() - start_time
-        self.follower_debug_pub.publish(Float32MultiArray(data=[compute_time, cross_track_error, heading_error]))
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):
