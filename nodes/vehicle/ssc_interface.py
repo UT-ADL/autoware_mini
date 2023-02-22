@@ -62,10 +62,10 @@ class SSCInterface:
         self.ssc_feedbacks_sub.registerCallback(self.ssc_feedbacks_callback)
 
         # initialize SSC command publishers
-        self.speed_mode_pub = rospy.Publisher('ssc/arbitrated_speed_commands', SpeedMode, queue_size=1)
-        self.steer_mode_pub = rospy.Publisher('ssc/arbitrated_steering_commands', SteerMode, queue_size=1)
-        self.turn_signal_pub = rospy.Publisher('ssc/turn_signal_command', TurnSignalCommand, queue_size=1)
-        self.gear_pub = rospy.Publisher('ssc/gear_select', GearCommand, queue_size=1)
+        self.speed_mode_pub = rospy.Publisher('/ssc/arbitrated_speed_commands', SpeedMode, queue_size=1)
+        self.steer_mode_pub = rospy.Publisher('/ssc/arbitrated_steering_commands', SteerMode, queue_size=1)
+        self.turn_signal_pub = rospy.Publisher('/ssc/turn_signal_command', TurnSignalCommand, queue_size=1)
+        self.gear_pub = rospy.Publisher('/ssc/gear_select', GearCommand, queue_size=1)
 
         # initialize vehicle status publisher
         self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1)
