@@ -74,7 +74,7 @@ class PurePursuitFollower:
         if nearest_wp_idx == self.last_wp_idx:
             # stop vehicle if last waypoint is reached
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
-            rospy.logwarn("pure_pursuit_follower - last waypoint reached")
+            rospy.logwarn_throttle(10, "pure_pursuit_follower - last waypoint reached")
             return
 
         # calc lookahead distance (velocity dependent)
@@ -98,7 +98,7 @@ class PurePursuitFollower:
         if d[0][0] > self.lateral_error_limit or heading_angle_difference > self.heading_angle_limit:
             # stop vehicle if cross track error is too large and switch on hazard lights
             self.publish_vehicle_command(stamp, 0.0, 0.0, 1, 1)
-            rospy.logerr("stanley_follower - lateral error or heading angle difference over limit")
+            rospy.logerr_throttle(10, "stanley_follower - lateral error or heading angle difference over limit")
             return
 
         curvature = 2 * math.sin(heading_error) / lookahead_distance

@@ -82,7 +82,7 @@ class StanleyFollower:
         if sorted[1] == self.last_wp_idx:
             # stop vehicle if last waypoint is reached
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
-            rospy.logwarn("stanley_follower - last waypoint reached")
+            rospy.logwarn_throttle(10, "stanley_follower - last waypoint reached")
             return
 
         cross_track_error = get_cross_track_error(front_wheel_pose, waypoint1.pose.pose, waypoint2.pose.pose)
@@ -93,7 +93,7 @@ class StanleyFollower:
         if cross_track_error > self.lateral_error_limit or heading_angle_difference > self.heading_angle_limit:
             # stop vehicle if cross track error is too large and switch on hazard lights
             self.publish_vehicle_command(stamp, 0.0, 0.0, 1, 1)
-            rospy.logerr("stanley_follower - lateral error or heading angle difference over limit")
+            rospy.logerr_throttle(10, "stanley_follower - lateral error or heading angle difference over limit")
             return
 
         delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))

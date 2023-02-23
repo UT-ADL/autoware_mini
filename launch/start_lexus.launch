@@ -4,22 +4,18 @@
     <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
     <arg name="coordinate_transformer"  default="lest97"        doc="lest97, utm"/>
     <arg name="waypoints_file"          default="wp_erm_two_turns.csv" />
-    
-    <arg name="use_tf"                  default="true" />
-    <arg name="use_lexus_model"         default="true" />
-    <arg name="use_gnss"                default="true" />
-    <arg name="use_dbw"                 default="true" />
-    
+        
     <arg name="planning_time"           default="2.0"           doc="pure_pursuit - lookahead distance depends on that" />
     <arg name="min_lookahead_distance"  default="6.0"           doc="pure_pursuit - min lookahead distance" />
     <arg name="cte_gain"                default="1.0"           doc="stanley - gain for cross_track_error (cte), higher value prioritizes cte" />
     
     <!-- Vehicle platform -->
     <include file="$(find vehicle_platform)/launch/platform.launch" >
-        <arg name="use_tf"          value="$(arg use_tf)" />
-        <arg name="use_lexus_model" value="$(arg use_lexus_model)" />
-        <arg name="use_gnss"        value="$(arg use_gnss)" />
-        <arg name="use_dbw"         value="$(arg use_dbw)" />
+        <arg name="use_tf"          value="true" />
+        <arg name="use_lexus_model" value="true" />
+        <arg name="use_gnss"        value="true" />
+        <arg name="use_dbw"         value="true" />
+        <arg name="use_ssc"         value="true" />
     </include>
 
     <group ns="autoware_mini">
@@ -27,11 +23,6 @@
         <!-- localizer -->
         <node pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true">
             <param name="coordinate_transformer" value="$(arg coordinate_transformer)" />
-        </node>
-
-        <!-- Waypoint_loader -->
-        <node pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
-            <param name="waypoints_file"  value="$(find autoware_mini)/data/$(arg waypoints_file)" />
         </node>
 
         <!-- Follower -->
