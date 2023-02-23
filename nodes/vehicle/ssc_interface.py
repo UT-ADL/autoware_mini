@@ -11,7 +11,7 @@ from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
 from automotive_platform_msgs.msg import SpeedMode, SteerMode, TurnSignalCommand, GearCommand,\
      CurvatureFeedback, ThrottleFeedback, BrakeFeedback, GearFeedback, SteeringFeedback, VelocityAccelCov
 from automotive_navigation_msgs.msg import ModuleState
-from pacmod3_msgs.msg import SystemRptInt
+from pacmod_msgs.msg import SystemRptInt
 
 LOW_SPEED_THRESH = 0.01
 
@@ -42,7 +42,7 @@ class SSCInterface:
         self.engage = False
         self.dbw_enabled = False
         self.adaptive_gear_ratio = self.ssc_gear_ratio
-        self.blinkers = SystemRptInt.TURN_NONE
+        self.turn_signals = SystemRptInt.TURN_NONE
         
         # initialize command subscribers
         self.engage_sub = rospy.Subscriber('engage', Bool, self.engage_callback, queue_size=1)
@@ -135,8 +135,8 @@ class SSCInterface:
         header = Header()
         header.stamp = msg.header.stamp
         header.frame_id = 'base_link'
-        self.publish_speed_command(header, desired_mode, desired_speed, self.acceleration_limit, self.deceleration_limit)
-        self.publish_steer_command(header, desired_mode, desired_curvature, self.max_curvature_rate)
+        self.publish_speed_command(header, desired_mode, desired_speed)
+        self.publish_steer_command(header, desired_mode, desired_curvature)
         self.publish_turn_command(header, desired_mode, desired_turn_signal)
         self.publish_gear_command(header, desired_gear)
 
@@ -145,11 +145,20 @@ class SSCInterface:
 
     def timeout_callback(self, event=None):
         if not self.alive and self.engage:
-            rospy.logerr("Did not receive any commands for %d ms", self.command_timeout)
+            rospy.logerr("Did not receive any commands for at least %d ms", self.command_timeout)
             rospy.logerr("Disengaging autonomy until re-enabled")
             self.engage = False
+
+            # send dummy commands to keep SSC alive
+            header = Header()
+            header.stamp = rospy.Time.now()
+            header.frame_id = 'base_link'
+            self.publish_speed_command(header, 0, 0.0)
+            self.publish_steer_command(header, 0, 0.0)
+            self.publish_turn_command(header, 0, TurnSignalCommand.NONE)
+            self.publish_gear_command(header, Gear.NONE)
+
         self.alive = False
-        # TODO: publish commands
 
     def module_states_callback(self, msg):
         if 'veh_controller' in msg.name:
@@ -198,30 +207,29 @@ class SSCInterface:
         vehicle_status.current_gear.gear = gear_msg.current_gear.gear
 
         # turn signals
-        vehicle_status.lamp = TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP[self.blinkers]
+        vehicle_status.lamp = TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP[self.turn_signals]
 
         # publish the status message
         self.vehicle_status_pub.publish(vehicle_status)
 
     def turn_rpt_callback(self, turn_rpt_msg):
-        self.blinkers = turn_rpt_msg.output
+        self.turn_signals = turn_rpt_msg.output
 
-
-    def publish_speed_command(self, header, desired_mode, desired_speed, acceleration_limit, deceleration_limit):
+    def publish_speed_command(self, header, desired_mode, desired_speed):
         # publish speed command
         msg = SpeedMode(header = header)
         msg.mode = desired_mode
         msg.speed = desired_speed
-        msg.acceleration_limit = acceleration_limit
-        msg.deceleration_limit = deceleration_limit
+        msg.acceleration_limit = self.acceleration_limit
+        msg.deceleration_limit = self.deceleration_limit
         self.speed_mode_pub.publish(msg)
 
-    def publish_steer_command(self, header, desired_mode, desired_curvature, max_curvature_rate):
+    def publish_steer_command(self, header, desired_mode, desired_curvature):
         # publish steering command
         msg = SteerMode(header = header)
         msg.mode = desired_mode
         msg.curvature = desired_curvature
-        msg.max_curvature_rate = max_curvature_rate
+        msg.max_curvature_rate = self.max_curvature_rate
         self.steer_mode_pub.publish(msg)
 
     def publish_turn_command(self, header, desired_mode, desired_turn_signal):
