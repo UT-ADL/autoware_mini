@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.neighbors import KDTree
 
 from helpers import get_heading_from_pose_orientation, get_blinker_state, get_cross_track_error, get_front_wheel_pose,\
-    get_heading_between_two_poses
+    get_heading_between_two_poses, get_heading_angle_difference
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
@@ -21,6 +21,8 @@ class StanleyFollower:
          # Parameters
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
         self.cte_gain = rospy.get_param("~cte_gain", 1.0)       # gain for cross track error
+        self.heading_angle_limit = rospy.get_param("~heading_angle_limit", 90.0)
+        self.lateral_error_limit = rospy.get_param("~lateral_error_limit", 2.0)
 
         # Variables - init
         self.waypoint_tree = None
@@ -77,10 +79,23 @@ class StanleyFollower:
         waypoint1 = self.waypoints[sorted[0]]
         waypoint2 = self.waypoints[sorted[1]]
 
+        if sorted[1] == self.last_wp_idx:
+            # stop vehicle if last waypoint is reached
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            rospy.logwarn("stanley_follower - last waypoint reached")
+            return
+
         cross_track_error = get_cross_track_error(front_wheel_pose, waypoint1.pose.pose, waypoint2.pose.pose)
         track_heading = get_heading_between_two_poses(waypoint1.pose.pose, waypoint2.pose.pose)
-
         heading_error = track_heading - current_heading
+        heading_angle_difference = get_heading_angle_difference(heading_error)
+
+        if cross_track_error > self.lateral_error_limit or heading_angle_difference > self.heading_angle_limit:
+            # stop vehicle if cross track error is too large and switch on hazard lights
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 1, 1)
+            rospy.logerr("stanley_follower - lateral error or heading angle difference over limit")
+            return
+
         delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))
         steering_angle = heading_error + delta_error
 

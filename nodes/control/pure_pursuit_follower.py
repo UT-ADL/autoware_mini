@@ -6,7 +6,7 @@ import message_filters
 import numpy as np
 from sklearn.neighbors import KDTree
 
-from helpers import get_heading_from_pose_orientation, get_heading_between_two_poses, get_blinker_state
+from helpers import get_heading_from_pose_orientation, get_heading_between_two_poses, get_blinker_state, get_heading_angle_difference
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
@@ -21,6 +21,8 @@ class PurePursuitFollower:
         self.planning_time = rospy.get_param("~planning_time", 2.0)
         self.min_lookahead_distance = rospy.get_param("~min_lookahead_distance", 6.0)
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
+        self.heading_angle_limit = rospy.get_param("~heading_angle_limit", 90.0)
+        self.lateral_error_limit = rospy.get_param("~lateral_error_limit", 2.0)
 
         # Variables - init
         self.waypoint_tree = None
@@ -65,9 +67,15 @@ class PurePursuitFollower:
         current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
 
-        _, idx = self.waypoint_tree.query([(current_pose.position.x, current_pose.position.y)], 1)
+        d, idx = self.waypoint_tree.query([(current_pose.position.x, current_pose.position.y)], 1)
         nearest_wp_idx = idx[0][0]
         nearest_wp = self.waypoints[nearest_wp_idx]
+
+        if nearest_wp_idx == self.last_wp_idx:
+            # stop vehicle if last waypoint is reached
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            rospy.logwarn("pure_pursuit_follower - last waypoint reached")
+            return
 
         # calc lookahead distance (velocity dependent)
         lookahead_distance = current_velocity * self.planning_time
@@ -85,6 +93,13 @@ class PurePursuitFollower:
         current_heading = get_heading_from_pose_orientation(current_pose)
         lookahead_heading = get_heading_between_two_poses(current_pose, lookahead_wp.pose.pose)
         heading_error = lookahead_heading - current_heading
+        heading_angle_difference = get_heading_angle_difference(heading_error)
+
+        if d[0][0] > self.lateral_error_limit or heading_angle_difference > self.heading_angle_limit:
+            # stop vehicle if cross track error is too large and switch on hazard lights
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 1, 1)
+            rospy.logerr("stanley_follower - lateral error or heading angle difference over limit")
+            return
 
         curvature = 2 * math.sin(heading_error) / lookahead_distance
         steering_angle = math.atan(self.wheel_base * curvature)

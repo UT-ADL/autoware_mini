@@ -87,3 +87,17 @@ def get_front_wheel_pose(pose, heading, wheel_base):
     front_wheel_pose.orientation = pose.orientation
 
     return front_wheel_pose
+
+def get_heading_angle_difference(heading_error):
+    """
+    Get steering difference from heading error
+    TODO... heading_error can be in range of 
+    :param heading_error: heading error in radians
+    :return: steering difference in radians
+    """
+    error_degrees = math.degrees(abs(heading_error))
+
+    if error_degrees < 180:
+        return error_degrees
+    else:
+        return 360 - error_degrees
