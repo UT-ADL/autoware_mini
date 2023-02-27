@@ -98,7 +98,7 @@ class PurePursuitFollower:
         if d[0][0] > self.lateral_error_limit or heading_angle_difference > self.heading_angle_limit:
             # stop vehicle if cross track error is too large and switch on hazard lights
             self.publish_vehicle_command(stamp, 0.0, 0.0, 1, 1)
-            rospy.logerr_throttle(10, "stanley_follower - lateral error or heading angle difference over limit")
+            rospy.logerr_throttle(10, "pure_pursuit_follower - lateral error or heading angle difference over limit")
             return
 
         curvature = 2 * math.sin(heading_error) / lookahead_distance
