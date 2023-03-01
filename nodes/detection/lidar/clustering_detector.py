@@ -24,8 +24,9 @@ class ClusteringDetector:
     def points_callback(self, msg):
         data = numpify(msg)
 
-        # sample random points to reduce processing time
-        data = np.random.choice(data, size=self.sample_size)
+        # downsample random points to reduce processing time
+        if len(data) > self.sample_size:
+            data = np.random.choice(data, size=self.sample_size, replace=False)
 
         # convert point cloud into ndarray, take only xyz coordinates
         points = np.empty((data.shape[0], 3), dtype=np.float32)
