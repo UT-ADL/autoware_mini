@@ -10,10 +10,12 @@ from sensor_msgs.msg import PointCloud2
 
 class ClothGroundRemovalNode:
     def __init__(self):
-        self.min_x = rospy.get_param('min_x', -80.0)
-        self.max_x = rospy.get_param('max_x', 80.0)
-        self.min_y = rospy.get_param('min_y', -80.0)
-        self.max_y = rospy.get_param('max_y', 80.0)
+        self.min_x = rospy.get_param('min_x', -60.0)
+        self.max_x = rospy.get_param('max_x', 60.0)
+        self.min_y = rospy.get_param('min_y', -60.0)
+        self.max_y = rospy.get_param('max_y', 60.0)
+        self.min_z = rospy.get_param('min_y', -2.0)
+        self.max_z = rospy.get_param('max_y', 1.0)
         self.cell_size = rospy.get_param('cell_size', 1.0)
         self.tolerance = rospy.get_param('tolerance', 0.1)
 
@@ -29,13 +31,15 @@ class ClothGroundRemovalNode:
         data = numpify(msg)
         
         # filter out of range points
-        mask = (self.min_x <= data['x']) & (data['x'] < self.max_x) & (self.min_y <= data['y']) & (data['y'] < self.max_y)
-        data_mask = data[mask]
+        filter = (self.min_x <= data['x']) & (data['x'] < self.max_x) \
+               & (self.min_y <= data['y']) & (data['y'] < self.max_y) \
+               & (self.min_z <= data['z']) & (data['z'] < self.max_z)
+        data_filtered = data[filter]
 
         # convert x and y coordinates into indexes
-        xi = ((data_mask['x'] - self.min_x) / self.cell_size).astype(np.integer)
-        yi = ((data_mask['y'] - self.min_y) / self.cell_size).astype(np.integer)
-        zi = data_mask['z']
+        xi = ((data_filtered['x'] - self.min_x) / self.cell_size).astype(np.integer)
+        yi = ((data_filtered['y'] - self.min_y) / self.cell_size).astype(np.integer)
+        zi = data_filtered['z']
 
         # write minimum height for each cell to cols
         # thanks to sorting in descending order,
@@ -46,8 +50,8 @@ class ClothGroundRemovalNode:
 
         # filter out closest points to minimum point up to some tolerance
         ground_mask = (zi <= (self.cols[xi, yi] + self.tolerance))
-        ground_data = data_mask[ground_mask]
-        non_ground_data = data_mask[~ground_mask]
+        ground_data = data_filtered[ground_mask]
+        non_ground_data = data_filtered[~ground_mask]
 
         # publish ground points
         ground_msg = msgify(PointCloud2, ground_data)

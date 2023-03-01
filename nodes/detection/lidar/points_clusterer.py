@@ -11,14 +11,13 @@ from sensor_msgs.msg import PointCloud2
 
 class PointsClusterer:
     def __init__(self):
-        self.sample_size = rospy.get_param('sample_size', 10000)
-        self.cluster_epsilon = rospy.get_param('cluster_epsilon', 0.75)
-        self.cluster_min_size = rospy.get_param('cluster_min_size', 5)
+        self.sample_size = rospy.get_param('sample_size', 50000)
+        self.cluster_epsilon = rospy.get_param('cluster_epsilon', 1.0)
+        self.cluster_min_size = rospy.get_param('cluster_min_size', 10)
 
         self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='ball_tree')
 
         self.points_sub = rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=1024*1024)
-
         self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=1)
 
     def points_callback(self, msg):
