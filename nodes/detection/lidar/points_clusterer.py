@@ -9,11 +9,11 @@ from sklearn.cluster import DBSCAN
 
 from sensor_msgs.msg import PointCloud2
 
-class ClusteringDetector:
+class PointsClusterer:
     def __init__(self):
         self.sample_size = rospy.get_param('sample_size', 10000)
         self.cluster_epsilon = rospy.get_param('cluster_epsilon', 0.75)
-        self.cluster_min_size = rospy.get_param('cluster_min_size', 10)
+        self.cluster_min_size = rospy.get_param('cluster_min_size', 5)
 
         self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='ball_tree')
 
@@ -62,6 +62,6 @@ class ClusteringDetector:
         rospy.spin()
 
 if __name__ == '__main__':
-    rospy.init_node('clustering_detector', log_level=rospy.INFO)
-    node = ClusteringDetector()
+    rospy.init_node('points_clusterer', log_level=rospy.INFO)
+    node = PointsClusterer()
     node.run()
