@@ -5,10 +5,11 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Detection1
         - /Detection1/Lidar center1
         - /Detection1/Lidar center1/Detected objects1
         - /Detection1/Lidar center1/Detected objects1/Namespaces1
+        - /Control1
+        - /Simulation1
       Splitter Ratio: 0.7558823823928833
     Tree Height: 874
   - Class: rviz/Selection
@@ -29,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Points raw center
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -64,25 +65,7 @@ Visualization Manager:
             All Enabled: false
             base_link:
               Value: true
-            camera_fl:
-              Value: true
-            camera_fr:
-              Value: true
-            imu:
-              Value: true
-            lexus_model:
-              Value: true
-            lidar:
-              Value: true
-            lidar_front:
-              Value: true
             map:
-              Value: true
-            radar_fc:
-              Value: true
-            velodyne:
-              Value: true
-            world:
               Value: true
           Marker Scale: 1.5
           Name: TF
@@ -90,24 +73,9 @@ Visualization Manager:
           Show Axes: true
           Show Names: true
           Tree:
-            world:
-              map:
-                base_link:
-                  imu:
-                    {}
-                  lexus_model:
-                    {}
-                  lidar:
-                    camera_fl:
-                      {}
-                    camera_fr:
-                      {}
-                    velodyne:
-                      {}
-                  lidar_front:
-                    {}
-                  radar_fc:
-                    {}
+            map:
+              base_link:
+                {}
           Update Interval: 0
           Value: true
         - Alpha: 1
@@ -120,15 +88,6 @@ Visualization Manager:
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
-            base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            lexus_model:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
           Name: Lexus model
           Robot Description: robot_description
           TF Prefix: ""
@@ -262,10 +221,7 @@ Visualization Manager:
               Marker Topic: /autoware_mini/detection/lidar_center/detected_objects_markers
               Name: Detected objects
               Namespaces:
-                bounding_box: false
-                centroid: true
-                convex_hull: true
-                text: false
+                {}
               Queue Size: 100
               Value: true
           Enabled: true
@@ -279,7 +235,9 @@ Visualization Manager:
           Marker Topic: path_markers
           Name: Path markers
           Namespaces:
-            {}
+            Path: true
+            Velocity label: true
+            Waypoint pose: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -291,7 +249,8 @@ Visualization Manager:
           Marker Topic: follower_markers
           Name: Follower markers
           Namespaces:
-            {}
+            Heading error: true
+            Lookahead distance: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -303,7 +262,7 @@ Visualization Manager:
           Marker Topic: bicycle_markers
           Name: Bicycle markers
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -335,26 +294,21 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz/ThirdPersonFollower
-      Distance: 24.124893188476562
+      Angle: 0
+      Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
-      Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
-      Focal Shape Fixed Size: true
-      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.36979690194129944
-      Target Frame: base_link
-      Value: ThirdPersonFollower (rviz)
-      Yaw: 3.1785738468170166
+      Scale: 8.950140953063965
+      Target Frame: map
+      Value: TopDownOrtho (rviz)
+      X: 10856.3974609375
+      Y: 11247.328125
     Saved: ~
 Window Geometry:
   Displays:

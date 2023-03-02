@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<launch>
+    
+    <arg name="bag_file" default="/home/tambet/2021-01-12-15-57-27_r05_demo_route_mpc.bag" />
+
+    <arg name="use_detection" default="true" />
+    <arg name="use_lidar_center" default="true" />
+    <arg name="use_tf" default="false" />
+
+    <arg name="coordinate_transformer"  default="lest97"        doc="lest97, utm"/>
+
+    <param name="/use_sim_time" value="true" />
+
+    <node pkg="rosbag" type="play" name="player" required="true" args="$(arg bag_file) --clock --queue=1 --loop">
+        <remap from="/tf" to="/bag/tf" if="$(arg use_tf)"/>
+        <remap from="/tf_static" to="/bag/tf_static" if="$(arg use_tf)"/>
+        <remap from="/current_pose" to="/bag/current_pose" if="$(arg use_tf)"/>
+        <remap from="/current_velocity" to="/bag/current_velocity" if="$(arg use_tf)"/>
+    </node>
+
+    <!-- Vehicle platform -->
+    <include file="$(find vehicle_platform)/launch/platform.launch" >
+        <arg name="use_tf"          value="$(arg use_tf)" />
+        <arg name="use_lexus_model" value="true" />
+        <arg name="use_gnss"        value="false" />
+        <arg name="use_dbw"         value="false" />
+        <arg name="use_ssc"         value="false" />
+    </include>
+
+    <group ns="autoware_mini">
+        <!-- localizer -->
+        <node pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true" if="$(arg use_tf)">
+            <param name="coordinate_transformer" value="$(arg coordinate_transformer)" />
+        </node>
+
+        <group ns="detection" if="$(arg use_detection)">
+            <group ns="lidar_center" if="$(arg use_lidar_center)">
+
+                <node type="cloth_ground_removal.py" name="ground_removal" pkg="autoware_mini" output="screen" required="true">
+                    <remap from="points_raw" to="/points_raw_center" />
+                </node>
+
+                <node type="points_clusterer.py" name="points_clusterer" pkg="autoware_mini" output="screen" required="true" />
+
+                <node type="cluster_detector.py" name="cluster_detector" pkg="autoware_mini" output="screen" required="true" />
+
+                <node type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+            </group>
+        </group>
+
+        <!-- Rviz -->
+        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
+
+    </group>
+
+</launch>

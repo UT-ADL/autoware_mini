@@ -14,6 +14,7 @@ from geometry_msgs.msg import Point, Quaternion, Vector3, Point32
 class ClusterDetector:
     def __init__(self):
         self.min_cluster_size = rospy.get_param('min_cluster_size', 5)
+        self.enable_pointcloud = rospy.get_param('enable_pointcloud', False)
         self.enable_convex_hull = rospy.get_param('enable_convex_hull', True)
 
         self.cluster_sub = rospy.Subscriber('points_clustered', PointCloud2, self.cluster_callback, queue_size=1, buff_size=1024*1024)
@@ -63,13 +64,15 @@ class ClusterDetector:
             #object.candidate_trajectories
 
             # create pointcloud
-            object.pointcloud = msgify(PointCloud2, points)
+            if self.enable_pointcloud:
+                object.pointcloud = msgify(PointCloud2, points)
 
             # create convex hull
-            assert len(ndpoints) > 2
-            ndpoints = ndpoints[:, :2]
-            hull_points = ndpoints[ConvexHull(ndpoints).vertices]
-            object.convex_hull.polygon.points = [Point32(x, y, center_z) for x, y in hull_points]
+            if self.enable_convex_hull:
+                assert len(ndpoints) > 2
+                ndpoints = ndpoints[:, :2]
+                hull_points = ndpoints[ConvexHull(ndpoints).vertices]
+                object.convex_hull.polygon.points = [Point32(x, y, center_z) for x, y in hull_points]
 
             objects.objects.append(object)
 

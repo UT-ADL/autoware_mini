@@ -22,7 +22,7 @@ class WaypointSaver:
 
         # Parameters
         self.interval = rospy.get_param("~interval", 1.0)
-        self.file_name = rospy.get_param("~file_name", "/tmp/waypoints.csv")
+        self.waypoints_file = rospy.get_param("~waypoints_file", "/tmp/waypoints.csv")
 
         # Internal params
         self.written_x = 0  # last x coordinate written into text file, kept to calculate distance interval
@@ -32,8 +32,8 @@ class WaypointSaver:
         self.marker_array = MarkerArray()
 
         # open file in append mode and write the header row
-        self.waypoint_file = open(self.file_name, 'a')
-        self.writer = csv.writer(self.waypoint_file)
+        self.file = open(self.waypoints_file, 'w')
+        self.writer = csv.writer(self.file)
         self.writer.writerow(['x', 'y', 'z', 'yaw', 'velocity', 'change_flag', 'steering_flag', 'accel_flag', 'stop_flag', 'event_flag'])
 
         # Subscribers
@@ -50,7 +50,7 @@ class WaypointSaver:
 
         # loginfo
         rospy.loginfo("waypoint_saver - interval: %i m", self.interval)
-        rospy.loginfo("waypoint_saver - save to %s ", str(self.file_name))
+        rospy.loginfo("waypoint_saver - save to %s ", self.waypoints_file)
 
 
     def vehicle_status_callback(self, vehicle_status_msg):
@@ -68,7 +68,7 @@ class WaypointSaver:
             # calculate current_heading
             current_heading = get_current_heading_degrees(current_pose.pose.orientation)
             # write data to waypoints.csv file
-            self.write_to_waypoint_file(x, y, current_pose.pose.position.z, current_heading, current_velocity.twist.linear.x, self.turn_signal)
+            self.write_to_waypoints_file(x, y, current_pose.pose.position.z, current_heading, current_velocity.twist.linear.x, self.turn_signal)
             # create and publish a marker of the waypoint
             self.publish_wp_marker(current_pose, current_velocity.twist.linear.x)
 
@@ -79,7 +79,7 @@ class WaypointSaver:
             # increment wp_id
             self.wp_id += 1
 
-    def write_to_waypoint_file(self, x, y, z, yaw, v, steering_flag):
+    def write_to_waypoints_file(self, x, y, z, yaw, v, steering_flag):
         
         # x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag
         row = [x, y, z, yaw, v, 0, steering_flag, 0, 0, 0]
