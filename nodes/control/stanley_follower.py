@@ -6,9 +6,9 @@ import message_filters
 import numpy as np
 from sklearn.neighbors import KDTree
 
-from helpers import get_heading_from_pose_orientation, get_blinker_state, get_cross_track_error, get_front_wheel_pose,\
-    get_heading_between_two_poses, get_heading_angle_difference
-
+from helpers import get_heading_from_pose_orientation, get_blinker_state, get_heading_between_two_poses, \
+    get_intersection_point, get_point_and_velocty_on_path_within_distance, get_cross_track_error, \
+    get_pose_using_heading_and_distance, get_relative_heading_error
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
 from std_msgs.msg import ColorRGBA
@@ -20,7 +20,7 @@ class StanleyFollower:
 
          # Parameters
         self.wheel_base = rospy.get_param("~wheel_base", 2.789)
-        self.cte_gain = rospy.get_param("~cte_gain", 1.0)       # gain for cross track error
+        self.cte_gain = rospy.get_param("~cte_gain", 0.3)       # gain for cross track error
         self.heading_angle_limit = rospy.get_param("~heading_angle_limit", 90.0)
         self.lateral_error_limit = rospy.get_param("~lateral_error_limit", 2.0)
 
@@ -67,11 +67,10 @@ class StanleyFollower:
         stamp = current_pose_msg.header.stamp
         current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
-
         current_heading = get_heading_from_pose_orientation(current_pose)
         
         # Find pose for the front wheel
-        front_wheel_pose = get_front_wheel_pose(current_pose, current_heading, self.wheel_base)
+        front_wheel_pose = get_pose_using_heading_and_distance(current_pose, current_heading, self.wheel_base)
         
         # find two closest points on track to calculate track heading and cross track error
         _, idx = self.waypoint_tree.query([(front_wheel_pose.position.x, front_wheel_pose.position.y)], 2)
@@ -84,28 +83,32 @@ class StanleyFollower:
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(10, "stanley_follower - last waypoint reached")
             return
-
+        
+        # find closest point on path (line defined by 2 closest waypoints) from front wheel pose
+        nearest_pose = get_intersection_point(front_wheel_pose, waypoint1.pose.pose, waypoint2.pose.pose)
+        # find lookahead pose on path within distance (used for track heading) and take also target_velocity from closest waypoint
+        lookahead_pose, target_velocity = get_point_and_velocty_on_path_within_distance(self.waypoints, self.last_wp_idx, sorted[1], nearest_pose, self.wheel_base)
+        # will give error with +/- depending on the side of the track
         cross_track_error = get_cross_track_error(front_wheel_pose, waypoint1.pose.pose, waypoint2.pose.pose)
-        track_heading = get_heading_between_two_poses(waypoint1.pose.pose, waypoint2.pose.pose)
-        heading_error = track_heading - current_heading
-        heading_angle_difference = get_heading_angle_difference(heading_error)
+        track_heading = get_heading_between_two_poses(nearest_pose, lookahead_pose)
+        heading_error = get_relative_heading_error(track_heading, current_heading)
 
-        if cross_track_error > self.lateral_error_limit or heading_angle_difference > self.heading_angle_limit:
-            # stop vehicle if cross track error is too large and switch on hazard lights
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 1, 1)
+        if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_error)) > self.heading_angle_limit:
+            # stop vehicle if cross track error or heading angle difference is over limit
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
             rospy.logerr_throttle(10, "stanley_follower - lateral error or heading angle difference over limit")
             return
 
+        # calculate steering angle
         delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))
         steering_angle = heading_error + delta_error
 
-        # get blinker information and target_velocity
+        # get blinker information
         left_blinker, right_blinker  = get_blinker_state(waypoint2.wpstate.steering_state)
-        target_velocity = waypoint2.twist.twist.linear.x
 
         # Publish
         self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
-        self.publish_stanley_markers(stamp, front_wheel_pose, waypoint2.pose.pose, heading_error)
+        self.publish_stanley_markers(stamp, front_wheel_pose, nearest_pose, lookahead_pose, heading_error)
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):
@@ -122,7 +125,7 @@ class StanleyFollower:
         self.vehicle_command_pub.publish(vehicle_cmd)
 
 
-    def publish_stanley_markers(self, stamp, front_pose, nearest_wp_pose, heading_error):
+    def publish_stanley_markers(self, stamp, front_pose, nearest_pose, nearest_wp_pose, heading_error):
         
         marker_array = MarkerArray()
 
@@ -136,7 +139,7 @@ class StanleyFollower:
         marker.action = Marker.ADD
         marker.scale.x = 0.1
         marker.color = ColorRGBA(1.0, 0.0, 1.0, 1.0)
-        marker.points = ([front_pose.position, nearest_wp_pose.position])
+        marker.points = ([front_pose.position, nearest_pose.position, nearest_wp_pose.position])
         marker_array.markers.append(marker)
 
         # label of angle alpha

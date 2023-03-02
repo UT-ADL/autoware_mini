@@ -6,7 +6,8 @@ import message_filters
 import numpy as np
 from sklearn.neighbors import KDTree
 
-from helpers import get_heading_from_pose_orientation, get_heading_between_two_poses, get_blinker_state, get_heading_angle_difference
+from helpers import get_heading_from_pose_orientation, get_heading_between_two_poses, get_blinker_state, \
+    get_relative_heading_error, get_point_and_velocty_on_path_within_distance
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
@@ -69,6 +70,7 @@ class PurePursuitFollower:
 
         d, idx = self.waypoint_tree.query([(current_pose.position.x, current_pose.position.y)], 1)
         nearest_wp_idx = idx[0][0]
+        cross_track_error = d[0][0]
         nearest_wp = self.waypoints[nearest_wp_idx]
 
         if nearest_wp_idx == self.last_wp_idx:
@@ -77,40 +79,36 @@ class PurePursuitFollower:
             rospy.logwarn_throttle(10, "pure_pursuit_follower - last waypoint reached")
             return
 
-        # calc lookahead distance (velocity dependent)
+        # calc theoretical lookahead distance (velocity dependent)
         lookahead_distance = current_velocity * self.planning_time
         if lookahead_distance < self.min_lookahead_distance:
             lookahead_distance = self.min_lookahead_distance
         
-        # TODO assume 1m distance between waypoints - currently OK, but need to make it more universal
-        lookahead_wp_idx = nearest_wp_idx + int(lookahead_distance)
+        # lookahead_pose - point on the path within given lookahead distance and extract also target_velocity from the closest waypoint
+        lookahead_pose, target_velocity = get_point_and_velocty_on_path_within_distance(self.waypoints, self.last_wp_idx, nearest_wp_idx, current_pose, lookahead_distance)
 
-        if lookahead_wp_idx > self.last_wp_idx:
-            lookahead_wp_idx = self.last_wp_idx
-        lookahead_wp = self.waypoints[lookahead_wp_idx]
-
-        # find current pose heading
+        # find current_pose heading and heading error
         current_heading = get_heading_from_pose_orientation(current_pose)
-        lookahead_heading = get_heading_between_two_poses(current_pose, lookahead_wp.pose.pose)
+        lookahead_heading = get_heading_between_two_poses(current_pose, lookahead_pose)
         heading_error = lookahead_heading - current_heading
-        heading_angle_difference = get_heading_angle_difference(heading_error)
-
-        if d[0][0] > self.lateral_error_limit or heading_angle_difference > self.heading_angle_limit:
-            # stop vehicle if cross track error is too large and switch on hazard lights
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 1, 1)
+        heading_angle_difference = get_relative_heading_error(lookahead_heading, current_heading)
+    
+        if cross_track_error > self.lateral_error_limit or abs(math.degrees(heading_angle_difference)) > self.heading_angle_limit:
+            # stop vehicle if cross track error or heading angle difference is over limit
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
             rospy.logerr_throttle(10, "pure_pursuit_follower - lateral error or heading angle difference over limit")
             return
-
+    
+        # calculate steering angle
         curvature = 2 * math.sin(heading_error) / lookahead_distance
         steering_angle = math.atan(self.wheel_base * curvature)
 
         # get blinker information from nearest waypoint and target velocity from lookahead waypoint
         left_blinker, right_blinker = get_blinker_state(nearest_wp.wpstate.steering_state)
-        target_velocity = lookahead_wp.twist.twist.linear.x
 
         # Publish
         self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
-        self.publish_pure_pursuit_markers(stamp, current_pose, lookahead_wp.pose.pose, heading_error)
+        self.publish_pure_pursuit_markers(stamp, current_pose, lookahead_pose, heading_angle_difference)
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):
