@@ -7,6 +7,6 @@ pure_pursuit_follower:
 
 stanley_follower:
   wheel_base: 2.789
-  cte_gain: 1.0     # gain for cross track error
+  cte_gain: 0.3     # gain for cross track error
   heading_angle_limit: 90.0
   lateral_error_limit: 2.0

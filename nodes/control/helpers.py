@@ -128,7 +128,6 @@ def get_intersection_point(ego_pose, pose1, pose2):
  
 
     # calculate slope for the first line
-    # TODO handle 0 devision
 
     # no slope - horizontal line
     if (y2 - y1) == 0:
