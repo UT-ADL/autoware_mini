@@ -1,0 +1,19 @@
+detection:
+  lidar_center:
+    ground_removal:
+      min_x: -60.0
+      max_x: 60.0
+      min_y: -60.0
+      max_y: 60.0
+      min_z: -2.0
+      max_z: 1.0
+      cell_size: 1.0
+      tolerance: 0.1
+    points_clusterer:
+      sample_size: 10000
+      cluster_epsilon: 1.0
+      cluster_min_size: 7
+    cluster_detector:
+      min_cluster_size: 5
+      enable_pointcloud: False
+      enable_convex_hull: True

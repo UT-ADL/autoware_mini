@@ -1,0 +1,4 @@
+novatel_oem7_localizer:
+  coordinate_transformer: lest97
+  use_msl_height: True
+  use_custom_origin: True

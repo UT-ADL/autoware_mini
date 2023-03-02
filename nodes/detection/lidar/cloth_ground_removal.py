@@ -10,14 +10,14 @@ from sensor_msgs.msg import PointCloud2
 
 class ClothGroundRemovalNode:
     def __init__(self):
-        self.min_x = rospy.get_param('min_x', -60.0)
-        self.max_x = rospy.get_param('max_x', 60.0)
-        self.min_y = rospy.get_param('min_y', -60.0)
-        self.max_y = rospy.get_param('max_y', 60.0)
-        self.min_z = rospy.get_param('min_y', -2.0)
-        self.max_z = rospy.get_param('max_y', 1.0)
-        self.cell_size = rospy.get_param('cell_size', 1.0)
-        self.tolerance = rospy.get_param('tolerance', 0.1)
+        self.min_x = rospy.get_param('~min_x', -60.0)
+        self.max_x = rospy.get_param('~max_x', 60.0)
+        self.min_y = rospy.get_param('~min_y', -60.0)
+        self.max_y = rospy.get_param('~max_y', 60.0)
+        self.min_z = rospy.get_param('~min_z', -2.0)
+        self.max_z = rospy.get_param('~max_z', 1.0)
+        self.cell_size = rospy.get_param('~cell_size', 1.0)
+        self.tolerance = rospy.get_param('~tolerance', 0.1)
 
         self.width = int(math.ceil((self.max_x - self.min_x) / self.cell_size))
         self.height = int(math.ceil((self.max_y - self.min_y) / self.cell_size))

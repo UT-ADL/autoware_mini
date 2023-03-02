@@ -11,4 +11,6 @@
         </group>
     </group>
 
+    <rosparam command="load" file="$(find autoware_mini)/config/detection.yaml"/>
+
 </launch>

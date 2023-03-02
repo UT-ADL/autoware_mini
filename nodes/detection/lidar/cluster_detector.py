@@ -13,9 +13,9 @@ from geometry_msgs.msg import Point, Quaternion, Vector3, Point32
 
 class ClusterDetector:
     def __init__(self):
-        self.min_cluster_size = rospy.get_param('min_cluster_size', 5)
-        self.enable_pointcloud = rospy.get_param('enable_pointcloud', False)
-        self.enable_convex_hull = rospy.get_param('enable_convex_hull', True)
+        self.min_cluster_size = rospy.get_param('~min_cluster_size', 5)
+        self.enable_pointcloud = rospy.get_param('~enable_pointcloud', False)
+        self.enable_convex_hull = rospy.get_param('~enable_convex_hull', True)
 
         self.cluster_sub = rospy.Subscriber('points_clustered', PointCloud2, self.cluster_callback, queue_size=1, buff_size=1024*1024)
         self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
