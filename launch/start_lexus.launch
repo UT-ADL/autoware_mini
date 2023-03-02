@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
     <arg name="coordinate_transformer"  default="lest97"        doc="lest97, utm"/>
-    <arg name="waypoints_file"          default="wp_erm_two_turns.csv" />
-        
+
+    <arg name="use_detection"           default="false"         doc="use object detection" />
+
+    <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
     <arg name="planning_time"           default="2.0"           doc="pure_pursuit - lookahead distance depends on that" />
     <arg name="min_lookahead_distance"  default="6.0"           doc="pure_pursuit - min lookahead distance" />
     <arg name="cte_gain"                default="1.0"           doc="stanley - gain for cross_track_error (cte), higher value prioritizes cte" />
@@ -20,20 +21,21 @@
 
     <group ns="autoware_mini">
 
-        <!-- localizer -->
-        <node pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true">
-            <param name="coordinate_transformer" value="$(arg coordinate_transformer)" />
-        </node>
+        <!-- Localizer -->
+        <include file="$(find autoware_mini)/launch/localization.launch">
+            <arg name="coordinate_transformer" value="$(arg coordinate_transformer)" />
+        </include>
+
+        <!-- Detection -->
+        <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch" />
 
         <!-- Follower -->
-        <node if="$(eval arg('follower')=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" required="true">
-            <param name="planning_time"          value="$(arg planning_time)" />
-            <param name="min_lookahead_distance" value="$(arg min_lookahead_distance)" />
-        </node>
-
-        <node if="$(eval arg('follower')=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" required="true">
-            <param name="cte_gain"               value="$(arg cte_gain)" />
-        </node>
+        <include file="$(find autoware_mini)/launch/control.launch">
+            <arg name="follower"               value="$(arg follower)" />
+            <arg name="planning_time"          value="$(arg planning_time)" />
+            <arg name="min_lookahead_distance" value="$(arg min_lookahead_distance)" />
+            <arg name="cte_gain"               value="$(arg cte_gain)" />
+        </include>
 
         <!-- SSC interface -->
         <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true"/>

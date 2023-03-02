@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
+        
+    <arg name="planning_time"           default="2.0"           doc="pure_pursuit - lookahead distance depends on that" />
+    <arg name="min_lookahead_distance"  default="6.0"           doc="pure_pursuit - min lookahead distance" />
+    <arg name="cte_gain"                default="1.0"           doc="stanley - gain for cross_track_error (cte), higher value prioritizes cte" />
+    
+    <!-- Follower -->
+    <node if="$(eval arg('follower')=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" required="true">
+        <param name="planning_time"          value="$(arg planning_time)" />
+        <param name="min_lookahead_distance" value="$(arg min_lookahead_distance)" />
+    </node>
+
+    <node if="$(eval arg('follower')=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" required="true">
+        <param name="cte_gain"               value="$(arg cte_gain)" />
+    </node>
+
+</launch>

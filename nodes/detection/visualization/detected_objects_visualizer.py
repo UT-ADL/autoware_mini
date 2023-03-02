@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import math
 import rospy
 
 from autoware_msgs.msg import DetectedObjectArray
@@ -76,7 +77,7 @@ class DetectedObjectsVisualizer:
             marker.pose.position = Point(object.pose.position.x, object.pose.position.y, object.pose.position.z + 1.0)
             marker.scale.z = 0.5
             marker.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)
-            marker.text = "%s (%s)" % (object.label, object.id)
+            marker.text = "%s %d (%d km/h)" % (object.label, object.id, math.sqrt(object.velocity.linear.x**2 + object.velocity.linear.y**2 + object.velocity.linear.z**2) * 3.6)
             markers.markers.append(marker)
 
             new_published_ids.add(object.id)

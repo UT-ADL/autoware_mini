@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="detector"            default="simple"    doc="simple" />
+    <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
+
+    <group ns="detection">
+        <group if="$(arg use_lidar_center)" ns="lidar_center">
+            <include if="$(eval arg('detector')=='simple')" file="$(find autoware_mini)/launch/detection/lidar_simple.launch">
+                <arg name="points_raw_topic" value="/points_raw_center" />
+            </include>
+        </group>
+    </group>
+
+</launch>

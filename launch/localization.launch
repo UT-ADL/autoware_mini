@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="localizer"               default="gnss"          doc="gnss" />
+    <arg name="coordinate_transformer"  default="lest97"        doc="lest97,utm" />
+    
+    <node if="$(eval arg('localizer')=='gnss')" pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true">
+        <param name="coordinate_transformer" value="$(arg coordinate_transformer)" />
+    </node>
+
+</launch>
