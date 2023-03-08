@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.neighbors import KDTree
 
 from helpers import get_heading_from_pose_orientation, get_heading_between_two_poses, get_blinker_state, \
-    get_relative_heading_error, get_point_and_velocty_on_path_within_distance
+    get_relative_heading_error, get_point_on_path_within_distance
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped,TwistStamped
@@ -78,14 +78,14 @@ class PurePursuitFollower:
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(10, "pure_pursuit_follower - last waypoint reached")
             return
-
+        
         # calc theoretical lookahead distance (velocity dependent)
         lookahead_distance = current_velocity * self.planning_time
         if lookahead_distance < self.min_lookahead_distance:
             lookahead_distance = self.min_lookahead_distance
         
         # lookahead_pose - point on the path within given lookahead distance and extract also target_velocity from the closest waypoint
-        lookahead_pose, target_velocity = get_point_and_velocty_on_path_within_distance(self.waypoints, self.last_wp_idx, nearest_wp_idx, current_pose, lookahead_distance)
+        lookahead_pose = get_point_on_path_within_distance(self.waypoints, self.last_wp_idx, nearest_wp_idx, current_pose, lookahead_distance)
 
         # find current_pose heading and heading error
         current_heading = get_heading_from_pose_orientation(current_pose)
@@ -104,6 +104,8 @@ class PurePursuitFollower:
         steering_angle = math.atan(self.wheel_base * curvature)
 
         # get blinker information from nearest waypoint and target velocity from lookahead waypoint
+        _, idx = self.waypoint_tree.query([(lookahead_pose.position.x, lookahead_pose.position.y)], 1)
+        target_velocity = self.waypoints[idx[0][0]].twist.twist.linear.x
         left_blinker, right_blinker = get_blinker_state(nearest_wp.wpstate.steering_state)
 
         # Publish
@@ -126,7 +128,7 @@ class PurePursuitFollower:
 
 
     def publish_pure_pursuit_markers(self, stamp, current_pose, lookahead_pose, heading_error):
-        
+
         marker_array = MarkerArray()
 
         # draws a line between current pose and lookahead point
