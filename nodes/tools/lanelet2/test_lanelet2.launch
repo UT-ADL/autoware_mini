@@ -19,6 +19,9 @@
         <!-- Lanelet2 global planner -->
         <node pkg="autoware_mini" type="lanelet2_global_planner.py" name="lanelet2_global_planner" output="screen" required="true"/>
 
+        <!-- Waypoints / path visualizer -->
+        <node pkg="autoware_mini" type="waypoint_visualizer.py" name="waypoint_visualizer" output="screen" required="true"/>
+
         <!-- Rviz -->
         <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini_sim.rviz" required="true"/>
     </group>

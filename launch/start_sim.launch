@@ -11,6 +11,9 @@
             <param name="waypoints_file" value="$(find autoware_mini)/data/$(arg waypoints_file)" />
         </node>
 
+        <!-- Waypoint_visualizer -->
+        <node pkg="autoware_mini" type="waypoint_visualizer.py" name="waypoint_visualizer" output="screen" required="true"/>
+
         <!-- Follower -->
         <include file="$(find autoware_mini)/launch/control.launch">
             <arg name="follower" value="$(arg follower)" />

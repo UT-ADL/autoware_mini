@@ -18,6 +18,9 @@
         <!-- Localizer -->
         <include file="$(find autoware_mini)/launch/localization.launch" />
 
+        <!-- Waypoint_visualizer -->
+        <node pkg="autoware_mini" type="waypoint_visualizer.py" name="waypoint_visualizer" output="screen" required="true"/>
+
         <!-- Detection -->
         <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch" />
 
