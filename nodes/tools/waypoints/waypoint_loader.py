@@ -5,9 +5,7 @@ import csv
 import tf
 import math
 
-from autoware_msgs.msg import Lane, Waypoint, WaypointState
-from visualization_msgs.msg import MarkerArray, Marker
-from std_msgs.msg import ColorRGBA
+from autoware_msgs.msg import Lane, Waypoint
 
 class WaypointLoader:
     def __init__(self):

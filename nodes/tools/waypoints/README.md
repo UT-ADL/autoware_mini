@@ -38,7 +38,7 @@ Will record waypoint file with the following columns:
 
 ## waypoint_loader
 
-* Loads waypoints from the waypoint file - csv file with the following columns
+* Loads waypoints from the waypoint file (csv file with the following columns) and publishes waypoints to `path` topic.
 
 ```wp_id, x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag```
 
@@ -47,11 +47,19 @@ Will record waypoint file with the following columns:
 ##### Parameters
 * `waypoints_file` - input waypoints file (full path)
 * `output_frame` - default: `map`
-* `publish_markers` - will publish waypoint markers to Rviz 
 
 ##### Publishes
 
 | Topic | Type | Comment |
 | --- | --- | --- |
 | `path` | `autoware_msgs/LaneArray` | Lane contains an array of waypoints `autoware_msgs/Waypoint` |
-| `path_markers` | `visualization_msgs/MarkerArray` | Includes markers for waypoint pose, velocity labels and path |
+
+## waypoint_visualizer
+
+Subscribes to `path` topic and if something is published there then creates visualization topic for rviz. No parameters and no subscribers.
+
+##### Publishes
+
+| Topic | Type | Comment |
+| --- | --- | --- |
+| `path_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |

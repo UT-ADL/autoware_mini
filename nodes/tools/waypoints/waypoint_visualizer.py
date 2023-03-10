@@ -1,20 +1,16 @@
 #!/usr/bin/env python
 
 import rospy
-import csv
-import tf
-import math
-
-from autoware_msgs.msg import Lane, Waypoint, WaypointState
+from autoware_msgs.msg import Lane, WaypointState
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 
 class WaypointVisualizer:
     def __init__(self):
 
-        # Parameters
-        self.output_frame = rospy.get_param("~output_frame", "map")
-        
+        # will be taken from the received path message: lane.header.frame_id
+        self.output_frame = None
+
         # Subscribers
         self.path_sub = rospy.Subscriber('path', Lane, self.waypoints_callback, queue_size=1)
 
@@ -22,6 +18,7 @@ class WaypointVisualizer:
         self.waypoints_markers_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1, latch=True)
 
     def waypoints_callback(self, lane):
+        self.output_frame = lane.header.frame_id
         self.publish_waypoints_markers(lane.waypoints)
 
 
@@ -77,8 +74,8 @@ class WaypointVisualizer:
         marker.type = marker.LINE_STRIP
         marker.action = marker.ADD
         marker.id = 0
-        marker.scale.x = 0.5
-        marker.color = ColorRGBA(0.4, 10, 1.0, 0.4)
+        marker.scale.x = 1.0
+        marker.color = ColorRGBA(0.1, 10, 1.0, 0.4)
         for waypoint in waypoints:
             marker.points.append(waypoint.pose.pose.position)
         marker_array.markers.append(marker)

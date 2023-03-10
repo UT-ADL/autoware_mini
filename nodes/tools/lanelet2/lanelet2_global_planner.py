@@ -11,8 +11,6 @@ from sklearn.neighbors import KDTree
 
 from geometry_msgs.msg import PoseStamped
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
-from visualization_msgs.msg import MarkerArray, Marker
-from std_msgs.msg import ColorRGBA
 
 LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
     "straight": WaypointState.STR_STRAIGHT,
