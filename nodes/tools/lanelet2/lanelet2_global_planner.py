@@ -2,22 +2,31 @@
 
 import rospy
 import lanelet2
+import numpy as np
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 from lanelet2.core import BasicPoint2d
+
+from sklearn.neighbors import KDTree
 
 from geometry_msgs.msg import PoseStamped
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 
+LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
+    "straight": WaypointState.STR_STRAIGHT,
+    "left": WaypointState.STR_LEFT,
+    "right": WaypointState.STR_RIGHT
+}
 
 class Lanelet2GlobalPlanner:
     
     def __init__(self):
 
         # Parameters
-        self.map_file = rospy.get_param("~map_file", "/home/edgar/car/lanelet_maps/Valentina/test_lai_dem.osm")
+        self.map_file = rospy.get_param("~map_file", "/home/edgar/workspaces/autoware_ut/src/autoware_ut/maps/tartu_demo_route/lanelet2/tartu_demo_l_c_wp_dem.osm")
+        self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 3.0)
 
         # Internal variables
         self.start_point = None
@@ -43,7 +52,8 @@ class Lanelet2GlobalPlanner:
 
     def goal_callback(self, msg):
 
-        print("Goal entered!")
+        rospy.loginfo("lanelet2_global_planner - goal point received")
+
         if self.start_point == None:
             # TODO handle if current_pose gets lost at later stage
             rospy.logwarn("lanelet2_global_planner - current_pose not available")
@@ -55,58 +65,68 @@ class Lanelet2GlobalPlanner:
 
         goal_point = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
 
-        # Get nearest lanelet
+        # Get nearest lanelets
         goal_lanelet = self.map.laneletLayer.nearest(goal_point, 1)[0]
-
-        # TESTing
-        # start_point = BasicPoint2d(-529.905, -126.986)
         start_lanelet = self.map.laneletLayer.nearest(self.start_point, 1)[0]
 
-
         graph = lanelet2.routing.RoutingGraph(self.map, self.traffic_rules)
-        route = graph.getRoute(start_lanelet, goal_lanelet)
-        path = route.shortestPath()                                         # lanelet2.routing.LaneletPath
+        # TODO this receives quite often NoneType object, although everything should be fine (sparse waypoints?)
+        route = graph.getRoute(start_lanelet, goal_lanelet, 0, True)                 # lanelet2.routing.Route
+        path = route.shortestPath()                                         # lanelet2.routing.LaneletPath - might be useful for lane change functionality?
         path_no_lane_change = path.getRemainingLane(start_lanelet)          # lanelet2.core.LaneletSequence
 
-        waypoints = self.convert_to_waypoints(path_no_lane_change)
-        self.publish_waypoints(waypoints)
-        self.publish_waypoints_markers(waypoints)
+        waypoints, waypoint_tree = self.convert_to_waypoints(path_no_lane_change)
+        
+        # Check start and goal point distances from centerline and clip the path
+        # TODO add also check for heading error - if too big warn and don't create the path
+        d, start_idx = waypoint_tree.query([(self.start_point.x, self.start_point.y)], 1)
+        if d[0][0] > self.distance_to_centerline_limit:
+            rospy.logwarn("lanelet2_global_planner - start point too far from closest lanelet centerline")
+            return
+        
+        # TODO this hardly happens, if placed too far laneletLayer.nearest won't return the nearest lanelet?
+        d, goal_idx = waypoint_tree.query([(goal_point.x, goal_point.y)], 1)
+        if d[0][0] > self.distance_to_centerline_limit:
+            rospy.logwarn("lanelet2_global_planner - goal point too far from closest lanelet centerline")
+            return
 
+        self.publish_waypoints(waypoints[start_idx[0][0]:goal_idx[0][0]])
+        self.publish_waypoints_markers(waypoints[start_idx[0][0]:goal_idx[0][0]])
+
+        rospy.loginfo("lanelet2_global_planner - shortest path published")
 
     def current_pose_callback(self, msg):
         self.start_point = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
 
+        # TODO add timing, if not available for too long, set current_pose_available to false
+        # use it later in goal_callback to check if current_pose is available
+
 
     def convert_to_waypoints(self, lanelet_sequence):
-
-        # extract centerlines - waypoint coordinates
-        centerlines = [lanelet.centerline for lanelet in lanelet_sequence]
 
         waypoints = []
         wp_id = 0
 
-        # iterate over centerline and create waypoints 
-        for line in centerlines:    # lanelet2.core.ConstLineString3d
-            for point in line:
+        for lanelet in lanelet_sequence:
+            blinker = LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP[lanelet.attributes['turn_direction']]
 
-                # TODO - need to make the path dense
+            for point in lanelet.centerline:
                 waypoint = Waypoint()
-
-                waypoint.gid = wp_id
                 waypoint.pose.pose.position.x = point.x
                 waypoint.pose.pose.position.y = point.y
                 waypoint.pose.pose.position.z = point.z
-
-                # TODO - blinkers
-                waypoint.wpstate.steering_state = 0
-                # TODO - speed - curvature or traffic rules based?
-                waypoint.twist.twist.linear.x = 5
-
+                waypoint.wpstate.steering_state = blinker
+                # TODO: add speeds to lanelets (speed_limit) or use traffic rules. For now, use constant speed
+                # Later curvature based speed adjustment
+                waypoint.twist.twist.linear.x = 10.0
+                waypoints.append(waypoint)
                 wp_id += 1
 
-                waypoints.append(waypoint)
-        
-        return waypoints
+        # build KDTree for nearest neighbour search
+        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in waypoints])
+        waypoint_tree = KDTree(waypoints_xy)
+
+        return waypoints, waypoint_tree
 
 
     def publish_waypoints(self, waypoints):

@@ -15,7 +15,7 @@ class Lanelet2MapLoader:
     def __init__(self):
     
         # Parameters
-        self.map_file = rospy.get_param("~map_file", "/home/edgar/car/lanelet_maps/Valentina//test_lai_dem.osm")
+        self.map_file = rospy.get_param("~map_file", "/home/edgar/workspaces/autoware_ut/src/autoware_ut/maps/tartu_demo_route/lanelet2/tartu_demo_l_c_wp_dem.osm")
 
         # create MarkerArray publisher
         self.markers_pub = rospy.Publisher('lanelet2_map_viz', MarkerArray, queue_size=1, latch=True)
