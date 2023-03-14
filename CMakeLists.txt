@@ -3,3 +3,5 @@ project(autoware_mini)
 
 find_package(catkin REQUIRED)
 catkin_package()
+
+catkin_python_setup()
