@@ -24,7 +24,7 @@ class Lanelet2GlobalPlanner:
 
         # Parameters
         self.map_file = rospy.get_param("~map_file", "/home/edgar/workspaces/autoware_ut/src/autoware_ut/maps/tartu_demo_route/lanelet2/tartu_demo_l_c_wp_dem.osm")
-        self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 3.0)
+        self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 4.0)
 
         # Internal variables
         self.start_point = None
@@ -50,9 +50,12 @@ class Lanelet2GlobalPlanner:
     def goal_callback(self, msg):
 
         rospy.loginfo("lanelet2_global_planner - goal point received")
+        # TODO what to do if goal point received
+        # reset existing path and create new one from current pose - more or less current behavior
+        # or plan from previus goal to new goal and append to existing path
 
         if self.start_point == None:
-            # TODO handle if current_pose gets lost at later stage
+            # TODO handle if current_pose gets lost at later stage - see current_pose_callback
             rospy.logwarn("lanelet2_global_planner - current_pose not available")
             return
         
@@ -78,17 +81,15 @@ class Lanelet2GlobalPlanner:
         # TODO add also check for heading error - if too big warn and don't create the path
         d, start_idx = waypoint_tree.query([(self.start_point.x, self.start_point.y)], 1)
         if d[0][0] > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - start point too far from closest lanelet centerline")
+            rospy.logwarn("lanelet2_global_planner - start point too far from closest lanelet centerline waypoint")
             return
         
-        # TODO this hardly happens, if placed too far laneletLayer.nearest won't return the nearest lanelet?
         d, goal_idx = waypoint_tree.query([(goal_point.x, goal_point.y)], 1)
         if d[0][0] > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - goal point too far from closest lanelet centerline")
+            rospy.logwarn("lanelet2_global_planner - goal point too far from closest lanelet centerline waypoint")
             return
 
         self.publish_waypoints(waypoints[start_idx[0][0]:goal_idx[0][0]])
-
         rospy.loginfo("lanelet2_global_planner - shortest path published")
 
     def current_pose_callback(self, msg):
@@ -105,7 +106,11 @@ class Lanelet2GlobalPlanner:
         for lanelet in lanelet_sequence:
             blinker = LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP[lanelet.attributes['turn_direction']]
 
-            for point in lanelet.centerline:
+            # loop over centerline points use enumerate to get index
+            for idx, point in enumerate(lanelet.centerline):
+                if idx == 0:
+                    # skip first point on every lanelet, because it is the same as the last point of the previous lanelet
+                    continue
                 waypoint = Waypoint()
                 waypoint.pose.pose.position.x = point.x
                 waypoint.pose.pose.position.y = point.y
@@ -113,7 +118,7 @@ class Lanelet2GlobalPlanner:
                 waypoint.wpstate.steering_state = blinker
                 # TODO: add speeds to lanelets (speed_limit) or use traffic rules. For now, use constant speed
                 # Later curvature based speed adjustment
-                waypoint.twist.twist.linear.x = 10.0
+                waypoint.twist.twist.linear.x = 4.0
                 waypoints.append(waypoint)
                 wp_id += 1
 

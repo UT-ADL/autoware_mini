@@ -9,6 +9,8 @@ GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.4)
 BLUE = ColorRGBA(0.0, 0.0, 1.0, 0.4)
 YELLOW = ColorRGBA(1.0, 1.0, 0.0, 0.4)
 ORANGE = ColorRGBA(1.0, 0.5, 0.0, 0.4)
+WHITE = ColorRGBA(1.0, 1.0, 1.0, 0.4)
+CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.1)
 
 
 
@@ -29,9 +31,9 @@ def draw_lanelets(map):
         if lanelet.attributes["subtype"] == "road":
         
             # Create markers for the left, right boundary and centerline
-            left_boundary_marker = linestring_to_marker(lanelet.leftBound, "Left boundary", lanelet.id, BLUE, 0.2, stamp)
-            right_boundary_marker = linestring_to_marker(lanelet.rightBound, "Right boundary", lanelet.id, GREY, 0.2, stamp)
-            centerline_marker = linestring_to_marker(lanelet.centerline, "Centerline", lanelet.id, YELLOW, 0.1, stamp)
+            left_boundary_marker = linestring_to_marker(lanelet.leftBound, "Left boundary", lanelet.id, YELLOW, 0.05, stamp)
+            right_boundary_marker = linestring_to_marker(lanelet.rightBound, "Right boundary", lanelet.id, WHITE, 0.05, stamp)
+            centerline_marker = linestring_to_marker(lanelet.centerline, "Centerline", lanelet.id, CYAN, 1.5, stamp)
 
             # Add the markers to the MarkerArray
             marker_array.markers.append(left_boundary_marker)

@@ -74,7 +74,7 @@ class WaypointVisualizer:
         marker.type = marker.LINE_STRIP
         marker.action = marker.ADD
         marker.id = 0
-        marker.scale.x = 1.0
+        marker.scale.x = 1.5
         marker.color = ColorRGBA(0.1, 10, 1.0, 0.4)
         for waypoint in waypoints:
             marker.points.append(waypoint.pose.pose.position)
