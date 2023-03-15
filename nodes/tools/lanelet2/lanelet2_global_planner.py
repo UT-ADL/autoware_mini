@@ -11,6 +11,7 @@ from sklearn.neighbors import KDTree
 
 from geometry_msgs.msg import PoseStamped
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
+from std_msgs.msg import Bool
 
 LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
     "straight": WaypointState.STR_STRAIGHT,
@@ -39,6 +40,7 @@ class Lanelet2GlobalPlanner:
         #self.sub = rospy.Subscriber('lanelet_map_bin', MapBin, self.map_callback, queue_size=1)
         self.sub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, self.goal_callback, queue_size=1)
         self.sub = rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
+        self.sub = rospy.Subscriber('cancel_global_path', Bool, self.cancel_global_path_callback, queue_size=1)
 
         #Publishers
         self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
@@ -98,6 +100,10 @@ class Lanelet2GlobalPlanner:
         # TODO add timing, if not available for too long, set current_pose_available to false
         # use it later in goal_callback to check if current_pose is available
 
+    def cancel_global_path_callback(self, msg):
+        if msg.data:
+            rospy.logwarn("lanelet2_global_planner - cancel path")
+            self.publish_waypoints([])
 
     def convert_to_waypoints(self, lanelet_sequence):
         waypoints = []

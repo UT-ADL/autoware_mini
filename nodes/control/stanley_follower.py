@@ -49,7 +49,10 @@ class StanleyFollower:
     def path_callback(self, path_msg):
 
         if len(path_msg.waypoints) == 0:
-            rospy.logwarn("stanley_follower - no waypoints received")
+            # if path is cancelled and empty waypoints received
+            self.waypoint_tree = None
+            self.waypoints = None
+            self.last_wp_idx = 0
             return
         else:
             self.waypoints = path_msg.waypoints
@@ -60,8 +63,10 @@ class StanleyFollower:
 
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
-
         if self.waypoint_tree is None:
+            # if no waypoints received yet or global_path cancelled, stop the vehicle
+            self.publish_vehicle_command(rospy.Time.now(), 0.0, 0.0, 0, 0)
+            rospy.logwarn_throttle(30, "stanley_follower - no waypoints received or path cancelled, stopping!")
             return
 
         stamp = current_pose_msg.header.stamp

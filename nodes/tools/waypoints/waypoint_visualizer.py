@@ -26,59 +26,67 @@ class WaypointVisualizer:
     def publish_waypoints_markers(self, waypoints):
         marker_array = MarkerArray()
 
-        # Pose arrows
-        for i, waypoint in enumerate(waypoints):
+        if len(waypoints) == 0:
+            # create marker_array to delete all visualization markers
+            marker = Marker()
+            marker.header.frame_id = self.output_frame
+            marker.action = Marker.DELETEALL
+            marker_array.markers.append(marker)
 
-            # color the arrows based on the waypoint steering_flag (blinker)
-            if waypoint.wpstate.steering_state == WaypointState.STR_LEFT:
-                color = ColorRGBA(1.0, 0.0, 0.0, 1.0)
-            elif waypoint.wpstate.steering_state == WaypointState.STR_RIGHT:
-                color = ColorRGBA(0.0, 0.0, 1.0, 1.0)
-            else:
-                color = ColorRGBA(0.0, 1.0, 0.0, 1.0)
+        else:
+            # Pose arrows
+            for i, waypoint in enumerate(waypoints):
 
+                # color the arrows based on the waypoint steering_flag (blinker)
+                if waypoint.wpstate.steering_state == WaypointState.STR_LEFT:
+                    color = ColorRGBA(1.0, 0.0, 0.0, 1.0)
+                elif waypoint.wpstate.steering_state == WaypointState.STR_RIGHT:
+                    color = ColorRGBA(0.0, 0.0, 1.0, 1.0)
+                else:
+                    color = ColorRGBA(0.0, 1.0, 0.0, 1.0)
+
+                marker = Marker()
+                marker.header.frame_id = self.output_frame
+                marker.header.stamp = rospy.Time.now()
+                marker.ns = "Waypoint pose"
+                marker.id = i
+                marker.type = marker.ARROW
+                marker.action = marker.ADD
+                marker.pose = waypoint.pose.pose
+                marker.scale.x = 0.4
+                marker.scale.y = 0.1
+                marker.scale.z = 0.1
+                marker.color = color
+                marker_array.markers.append(marker)
+
+            # velocity labels
+            for i, waypoint in enumerate(waypoints):
+                marker = Marker()
+                marker.header.frame_id = self.output_frame
+                marker.header.stamp = rospy.Time.now()
+                marker.ns = "Velocity label"
+                marker.id = i
+                marker.type = marker.TEXT_VIEW_FACING
+                marker.action = marker.ADD
+                marker.pose = waypoint.pose.pose
+                marker.scale.z = 0.5
+                marker.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)
+                marker.text = str(round(waypoint.twist.twist.linear.x * 3.6, 1))
+                marker_array.markers.append(marker)
+
+            # line strips
             marker = Marker()
             marker.header.frame_id = self.output_frame
             marker.header.stamp = rospy.Time.now()
-            marker.ns = "Waypoint pose"
-            marker.id = i
-            marker.type = marker.ARROW
+            marker.ns = "Path"
+            marker.type = marker.LINE_STRIP
             marker.action = marker.ADD
-            marker.pose = waypoint.pose.pose
-            marker.scale.x = 0.4
-            marker.scale.y = 0.1
-            marker.scale.z = 0.1
-            marker.color = color
+            marker.id = 0
+            marker.scale.x = 1.5
+            marker.color = ColorRGBA(0.1, 10, 1.0, 0.4)
+            for waypoint in waypoints:
+                marker.points.append(waypoint.pose.pose.position)
             marker_array.markers.append(marker)
-
-        # velocity labels
-        for i, waypoint in enumerate(waypoints):
-            marker = Marker()
-            marker.header.frame_id = self.output_frame
-            marker.header.stamp = rospy.Time.now()
-            marker.ns = "Velocity label"
-            marker.id = i
-            marker.type = marker.TEXT_VIEW_FACING
-            marker.action = marker.ADD
-            marker.pose = waypoint.pose.pose
-            marker.scale.z = 0.5
-            marker.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)
-            marker.text = str(round(waypoint.twist.twist.linear.x * 3.6, 1))
-            marker_array.markers.append(marker)
-
-        # line strips
-        marker = Marker()
-        marker.header.frame_id = self.output_frame
-        marker.header.stamp = rospy.Time.now()
-        marker.ns = "Path"
-        marker.type = marker.LINE_STRIP
-        marker.action = marker.ADD
-        marker.id = 0
-        marker.scale.x = 1.5
-        marker.color = ColorRGBA(0.1, 10, 1.0, 0.4)
-        for waypoint in waypoints:
-            marker.points.append(waypoint.pose.pose.position)
-        marker_array.markers.append(marker)
 
         # publish markers
         self.waypoints_markers_pub.publish(marker_array)
