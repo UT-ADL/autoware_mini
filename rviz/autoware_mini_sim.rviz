@@ -8,7 +8,6 @@ Panels:
         - /Detection1/Lidar center1
         - /Detection1/Lidar center1/Detected objects1
         - /Detection1/Lidar center1/Detected objects1/Namespaces1
-        - /Control1
         - /Simulation1
       Splitter Ratio: 0.7558823823928833
     Tree Height: 865
@@ -103,9 +102,7 @@ Visualization Manager:
           Marker Topic: /autoware_mini/lanelet2_map_viz
           Name: Lanelet2 map
           Namespaces:
-            Centerline: true
-            Left boundary: true
-            Right boundary: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -249,19 +246,37 @@ Visualization Manager:
           Marker Topic: path_markers
           Name: Path markers
           Namespaces:
-            {}
+            Path: true
+            Velocity label: true
+            Waypoint pose: true
           Queue Size: 100
           Value: true
       Enabled: true
       Name: Planning
     - Class: rviz/Group
       Displays:
+        - Alpha: 1
+          Axes Length: 1
+          Axes Radius: 0.10000000149011612
+          Class: rviz/Pose
+          Color: 255; 25; 0
+          Enabled: false
+          Head Length: 0.8999999761581421
+          Head Radius: 0.30000001192092896
+          Name: Current pose
+          Shaft Length: 2
+          Shaft Radius: 0.10000000149011612
+          Shape: Arrow
+          Topic: /autoware_mini/current_pose
+          Unreliable: false
+          Value: false
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: follower_markers
           Name: Follower markers
           Namespaces:
-            {}
+            Heading error: true
+            Lookahead line: true
           Queue Size: 100
           Value: true
       Enabled: true
