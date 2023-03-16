@@ -181,7 +181,6 @@ def get_point_on_path_within_distance(waypoints, last_idx, front_wp_idx, start_p
     """
 
     point = Point()
-    last_reached = False
 
     i = front_wp_idx
     d = get_distance_between_two_points(start_point, waypoints[i].pose.pose.position)
@@ -189,21 +188,13 @@ def get_point_on_path_within_distance(waypoints, last_idx, front_wp_idx, start_p
         i += 1
         d += get_distance_between_two_points(waypoints[i-1].pose.pose.position, waypoints[i].pose.pose.position)
         if i == last_idx:
-            last_reached = True
             break
 
-    if last_reached:
-        # send last point on path as the point
-        point.x = waypoints[i].pose.pose.position.x
-        point.y = waypoints[i].pose.pose.position.y
-        point.z = waypoints[i].pose.pose.position.z
-        return point
-    else:
-        # Find point orientation and distance difference and correct along path backwards
-        end_orientation =  get_heading_between_two_points(waypoints[i].pose.pose.position, waypoints[i - 1].pose.pose.position)
-        dx = (distance - d) * math.cos(end_orientation)
-        dy = (distance - d) * math.sin(end_orientation)
-        point.x = waypoints[i].pose.pose.position.x - dx
-        point.y = waypoints[i].pose.pose.position.y - dy
-        point.z = waypoints[i].pose.pose.position.z
-        return point
+    # Find point orientation and distance difference and correct along path backwards
+    end_orientation =  get_heading_between_two_points(waypoints[i].pose.pose.position, waypoints[i - 1].pose.pose.position)
+    dx = (distance - d) * math.cos(end_orientation)
+    dy = (distance - d) * math.sin(end_orientation)
+    point.x = waypoints[i].pose.pose.position.x - dx
+    point.y = waypoints[i].pose.pose.position.y - dy
+    point.z = waypoints[i].pose.pose.position.z
+    return point
