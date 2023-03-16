@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="max_speed"   default="30"/>
+
+    <group ns="vehicle">
+    
+        <!-- SSC interface -->
+        <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true">
+            <param name="max_speed" value="$(arg max_speed)"/>
+        </node>
+
+        <!-- Engage button panel -->
+        <node pkg="autoware_mini" type="button_panel.py" name="button_panel" output="screen" required="true"/>
+        <node pkg="joy" type="joy_node" name="joy" />
+
+    </group>
+
+    <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml"/>
+
+</launch>

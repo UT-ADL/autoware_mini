@@ -1,0 +1,15 @@
+vehicle:
+  ssc_interface:
+    use_adaptive_gear_ratio: True
+    enable_reverse_motion: False
+    command_timeout: 200
+    wheel_base: 2.789
+    ssc_gear_ratio: 16.135
+    acceleration_limit: 1.0
+    deceleration_limit: 1.0
+    max_curvature_rate: 0.15
+    agr_coef_a: 15.713
+    agr_coef_b: 0.053
+    agr_coef_c: 0.042
+  button_panel:
+    cooldown: 2.0
