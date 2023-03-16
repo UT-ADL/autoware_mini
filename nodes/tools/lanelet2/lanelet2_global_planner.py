@@ -24,11 +24,13 @@ class Lanelet2GlobalPlanner:
     def __init__(self):
 
         # Parameters
-        self.map_file = rospy.get_param("~map_file", "/home/edgar/workspaces/autoware_ut/src/autoware_ut/maps/tartu_demo_route/lanelet2/tartu_demo_l_c_wp_dem.osm")
-        self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 4.0)
+        self.map_file = rospy.get_param("~lanelet2_map")
+        self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
 
         # Internal variables
-        self.start_point = None
+        self.current_location = None
+        self.goal_point = None
+        self.waypoints = []
         self.map = None
         self.output_frame = "map"
 
@@ -51,59 +53,65 @@ class Lanelet2GlobalPlanner:
 
     def goal_callback(self, msg):
 
-        rospy.loginfo("lanelet2_global_planner - goal point received")
-        # TODO what to do if goal point received
-        # reset existing path and create new one from current pose - more or less current behavior
-        # or plan from previus goal to new goal and append to existing path
-
-        if self.start_point == None:
+        if self.current_location == None:
             # TODO handle if current_pose gets lost at later stage - see current_pose_callback
             rospy.logwarn("lanelet2_global_planner - current_pose not available")
             return
-        
+
         if self.map == None:
             rospy.logwarn("lanelet2_global_planner - lanelet2 map not available")
             return
 
-        goal_point = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
+        # if there is already a goal, use it as start point
+        start_point = self.goal_point if self.goal_point else self.current_location
+        new_goal = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
 
         # Get nearest lanelets
-        goal_lanelet = self.map.laneletLayer.nearest(goal_point, 1)[0]
-        start_lanelet = self.map.laneletLayer.nearest(self.start_point, 1)[0]
+        goal_lanelet = self.map.laneletLayer.nearest(new_goal, 1)[0]
+        start_lanelet = self.map.laneletLayer.nearest(start_point, 1)[0]
 
         graph = lanelet2.routing.RoutingGraph(self.map, self.traffic_rules)
-        # TODO this receives quite often NoneType object, although everything should be fine (sparse waypoints?)
-        route = graph.getRoute(start_lanelet, goal_lanelet, 0, True)                 # lanelet2.routing.Route
+        route = graph.getRoute(start_lanelet, goal_lanelet, 0, True)        # lanelet2.routing.Route
+        if route == None:
+            rospy.logwarn("lanelet2_global_planner - no route found, try new goal!")
+            return
+        
         path = route.shortestPath()                                         # lanelet2.routing.LaneletPath - might be useful for lane change functionality?
         path_no_lane_change = path.getRemainingLane(start_lanelet)          # lanelet2.core.LaneletSequence
+        new_waypoints, new_waypoint_tree = self.convert_to_waypoints(path_no_lane_change)
 
-        waypoints, waypoint_tree = self.convert_to_waypoints(path_no_lane_change)
-        
         # Check start and goal point distances from centerline and clip the path
-        # TODO add also check for heading error - if too big warn and don't create the path
-        d, start_idx = waypoint_tree.query([(self.start_point.x, self.start_point.y)], 1)
+        d, start_idx = new_waypoint_tree.query([(start_point.x, start_point.y)], 1)
         if d[0][0] > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - start point too far from closest lanelet centerline waypoint")
+            new_waypoints = None
+            new_waypoint_tree = None
+            rospy.logwarn("lanelet2_global_planner - start point too far from centerline")
             return
         
-        d, goal_idx = waypoint_tree.query([(goal_point.x, goal_point.y)], 1)
+        d, goal_idx = new_waypoint_tree.query([(new_goal.x, new_goal.y)], 1)
         if d[0][0] > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - goal point too far from closest lanelet centerline waypoint")
+            new_waypoints = None
+            new_waypoint_tree = None
+            rospy.logwarn("lanelet2_global_planner - goal point too far from centerline")
             return
 
-        self.publish_waypoints(waypoints[start_idx[0][0]:goal_idx[0][0]])
-        rospy.loginfo("lanelet2_global_planner - shortest path published")
+        # update goal point and add new waypoints to the existing ones
+        self.goal_point = new_goal
+        self.waypoints += new_waypoints[start_idx[0][0]:goal_idx[0][0]]
+
+        self.publish_waypoints(self.waypoints)
+        rospy.loginfo("lanelet2_global_planner - path published")
+
 
     def current_pose_callback(self, msg):
-        self.start_point = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
-
-        # TODO add timing, if not available for too long, set current_pose_available to false
-        # use it later in goal_callback to check if current_pose is available
+        self.current_location = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
 
     def cancel_global_path_callback(self, msg):
         if msg.data:
-            rospy.logwarn("lanelet2_global_planner - cancel path")
-            self.publish_waypoints([])
+            self.waypoints = []
+            self.goal_point = None
+            self.publish_waypoints(self.waypoints)
+            rospy.logwarn("lanelet2_global_planner - global path cancelled!")
 
     def convert_to_waypoints(self, lanelet_sequence):
         waypoints = []
