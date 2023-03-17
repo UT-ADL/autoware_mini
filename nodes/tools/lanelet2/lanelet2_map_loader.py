@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from lanelet2_map_visualizer import draw_lanelets
+from lanelet2_map_visualizer import visualize_lanelet2_map
 import lanelet2
 from lanelet2.io import Origin, loadRobust
 from lanelet2.projection import UtmProjector
@@ -27,9 +27,6 @@ class Lanelet2MapLoader:
         if len(errors) > 0:
             rospy.logwarn("lanelet2_map_loader - Errors while loading map")
             # TODO: errors could be printed, parsed or summarized somehow (counted)
-        
-        
-        rospy.loginfo("lanelet2_map_loader - map loaded with %i lanelets and %i regulatory elements" % (len(map.laneletLayer), len(map.regulatoryElementLayer)))
 
         # TODO: not supported in python? Convert the Lanelet2 map to a MapBin message
         # map_msg = MapBin()
@@ -39,10 +36,11 @@ class Lanelet2MapLoader:
         # map_pub.publish(map_msg)
         # rospy.loginfo("lanelet2_map_loader - Published MapBin message to the 'lanelet_map_bin' topic")
 
-        # Test drawing the lanelets
-        markers = draw_lanelets(map)
-        self.markers_pub.publish(markers)
+        # Visualize the Lanelet2 map
+        marker_array = visualize_lanelet2_map(map)
+        self.markers_pub.publish(marker_array)
 
+        rospy.loginfo("lanelet2_map_loader - map loaded with %i lanelets and %i regulatory elements" % (len(map.laneletLayer), len(map.regulatoryElementLayer)))
 
     def run(self):
         rospy.spin()
