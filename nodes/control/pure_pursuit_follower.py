@@ -69,7 +69,7 @@ class PurePursuitFollower:
         if self.waypoint_tree is None:
             # if no waypoints received yet or global_path cancelled, stop the vehicle
             self.publish_vehicle_command(rospy.Time.now(), 0.0, 0.0, 0, 0)
-            rospy.logwarn_throttle(30, "stanley_follower - no waypoints received or path cancelled, stopping!")
+            rospy.logwarn_throttle(30, "pure_pursuit_follower - no waypoints received or path cancelled, stopping!")
             return
 
         if self.publish_debug_info:
