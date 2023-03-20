@@ -18,7 +18,7 @@ class Lanelet2MapLoader:
         self.map_file = rospy.get_param("~lanelet2_map")
 
         # create MarkerArray publisher
-        self.markers_pub = rospy.Publisher('lanelet2_map_viz', MarkerArray, queue_size=1, latch=True)
+        self.markers_pub = rospy.Publisher('lanelet2_map_markers', MarkerArray, queue_size=1, latch=True)
 
         # Load the map using Lanelet2
         projector = UtmProjector(Origin(58.385345, 26.726272))
@@ -40,7 +40,8 @@ class Lanelet2MapLoader:
         marker_array = visualize_lanelet2_map(map)
         self.markers_pub.publish(marker_array)
 
-        rospy.loginfo("lanelet2_map_loader - map loaded with %i lanelets and %i regulatory elements" % (len(map.laneletLayer), len(map.regulatoryElementLayer)))
+        rospy.loginfo("lanelet2_map_loader - map loaded with %i lanelets and %i regulatory elements from file: %s" % 
+                      (len(map.laneletLayer), len(map.regulatoryElementLayer), str(self.map_file)))
 
     def run(self):
         rospy.spin()

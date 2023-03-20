@@ -2,42 +2,31 @@
 <launch>
 
     <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
-    <arg name="use_waypoints"           default="true"  doc="if true map is still loaded, but lanelet2_global_planner is not available" />
-
+    <arg name="planner"                 default="waypoints"     doc="waypoints, lanelet2" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map"            default="tartu_demo_l_c_wp.osm" />
     
 
-    <group ns="autoware_mini">
 
-        <!-- Waypoint_loader -->
-        <node if="$(arg use_waypoints)" pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
-            <param name="waypoints_file" value="$(find autoware_mini)/data/$(arg waypoints_file)" />
-        </node>
+    <!-- Planner -->
+    <include file="$(find autoware_mini)/launch/planning.launch">
+        <arg name="planner"         value="$(arg planner)" />
+        <arg name="waypoints_file"  value="$(arg waypoints_file)" />
+        <arg name="lanelet2_map"    value="$(arg lanelet2_map)" />
+    </include>
 
-        <!-- Waypoint_visualizer - necessary also for visualizing path from global planner-->
-        <node pkg="autoware_mini" type="waypoint_visualizer.py" name="waypoint_visualizer" output="screen" required="true"/>
+    <!-- Follower -->
+    <include file="$(find autoware_mini)/launch/control.launch">
+        <arg name="follower" value="$(arg follower)" />
+    </include>
 
-        <!-- Lanelet2 map loader -->
-        <node pkg="autoware_mini" type="lanelet2_map_loader.py" name="lanelet2_map_loader" output="screen" required="true">
-            <param name="lanelet2_map" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map)" />
-        </node>
+    <!-- Bicycle_model simulator -->
+    <include file="$(find autoware_mini)/launch/simulation.launch" />
 
-        <!-- Lanelet2 global planner -->
-        <node unless="$(arg use_waypoints)" pkg="autoware_mini" type="lanelet2_global_planner.py" name="lanelet2_global_planner" output="screen" required="true">
-            <param name="lanelet2_map" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map)" />
-        </node>
+    <!-- Rviz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini_sim.rviz" required="true" >
+        <remap from="/move_base_simple/goal" to="/goalpose" />
+    </node>
 
-        <!-- Follower -->
-        <include file="$(find autoware_mini)/launch/control.launch">
-            <arg name="follower" value="$(arg follower)" />
-        </include>
-
-        <!-- Bicycle_model simulator -->
-        <node pkg="autoware_mini" type="bicycle_simulation.py" name="bicycle_simulation" output="screen" required="true"/>
-
-        <!-- Rviz -->
-        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini_sim.rviz" required="true"/>
-    </group>
 
 </launch>

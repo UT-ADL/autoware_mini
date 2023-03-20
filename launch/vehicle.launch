@@ -3,9 +3,14 @@
     <arg name="max_speed"   default="30"/>
 
     <group ns="vehicle">
-    
+
+        <!-- Remap topics -->
+        <remap from="/vehicle/current_pose"     to="/localization/current_pose" />
+        <remap from="/vehicle/vehicle_cmd"      to="/control/vehicle_cmd" />
+
+
         <!-- SSC interface -->
-        <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true">
+        <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true" >
             <param name="max_speed" value="$(arg max_speed)"/>
         </node>
 
@@ -13,8 +18,8 @@
         <node pkg="autoware_mini" type="button_panel.py" name="button_panel" output="screen" required="true"/>
         <node pkg="joy" type="joy_node" name="joy" />
 
-    </group>
+        <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />
 
-    <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml"/>
+    </group>
 
 </launch>

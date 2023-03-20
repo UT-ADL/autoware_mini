@@ -2,12 +2,22 @@
 <launch>
 
     <arg name="follower"    default="pure_pursuit"  doc="pure_pursuit, stanley" />
-        
-    <!-- Follower -->
-    <node if="$(eval arg('follower')=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" required="true" />
+    
+    <group ns="control">
 
-    <node if="$(eval arg('follower')=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" required="true" />
+        <!-- Remap topics -->
+        <remap from="/control/current_pose"     to="/localization/current_pose" />
+        <remap from="/control/current_velocity" to="/localization/current_velocity" />
+        <remap from="/control/path"             to="/planning/path" />
 
-    <rosparam command="load" file="$(find autoware_mini)/config/control.yaml"/>
+
+        <!-- Follower -->
+        <node if="$(eval arg('follower')=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" required="true" />
+
+        <node if="$(eval arg('follower')=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" required="true" />
+
+        <rosparam command="load" file="$(find autoware_mini)/config/control.yaml"/>
+
+    </group>
 
 </launch>

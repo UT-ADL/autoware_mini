@@ -8,6 +8,7 @@ Panels:
         - /Detection1/Lidar center1
         - /Detection1/Lidar center1/Detected objects1
         - /Detection1/Lidar center1/Detected objects1/Namespaces1
+        - /Planning1/Path markers1
         - /Simulation1
       Splitter Ratio: 0.7558823823928833
     Tree Height: 865
@@ -99,10 +100,13 @@ Visualization Manager:
       Displays:
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /autoware_mini/lanelet2_map_viz
+          Marker Topic: planning/lanelet2_map_markers
           Name: Lanelet2 map
           Namespaces:
-            {}
+            Centerline: true
+            Left boundary: true
+            Right boundary: true
+            Traffic lights: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -166,7 +170,7 @@ Visualization Manager:
               Size (Pixels): 3
               Size (m): 0.10000000149011612
               Style: Flat Squares
-              Topic: /autoware_mini/detection/lidar_center/points_ground
+              Topic: detection/lidar_center/points_ground
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
@@ -194,7 +198,7 @@ Visualization Manager:
               Size (Pixels): 3
               Size (m): 0.10000000149011612
               Style: Flat Squares
-              Topic: /autoware_mini/detection/lidar_center/points_no_ground
+              Topic: detection/lidar_center/points_no_ground
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
@@ -222,14 +226,14 @@ Visualization Manager:
               Size (Pixels): 3
               Size (m): 0.10000000149011612
               Style: Flat Squares
-              Topic: /autoware_mini/detection/lidar_center/points_clustered
+              Topic: detection/lidar_center/points_clustered
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
               Value: false
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /autoware_mini/detection/lidar_center/detected_objects_markers
+              Marker Topic: detection/lidar_center/detected_objects_markers
               Name: Detected objects
               Namespaces:
                 {}
@@ -243,7 +247,7 @@ Visualization Manager:
       Displays:
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: path_markers
+          Marker Topic: planning/path_markers
           Name: Path markers
           Namespaces:
             Path: true
@@ -255,6 +259,18 @@ Visualization Manager:
       Name: Planning
     - Class: rviz/Group
       Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: control/follower_markers
+          Name: Follower markers
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: Control
+    - Class: rviz/Group
+      Displays:
         - Alpha: 1
           Axes Length: 1
           Axes Radius: 0.10000000149011612
@@ -263,29 +279,16 @@ Visualization Manager:
           Enabled: false
           Head Length: 0.8999999761581421
           Head Radius: 0.30000001192092896
-          Name: Current pose
+          Name: Current pose sim
           Shaft Length: 2
           Shaft Radius: 0.10000000149011612
           Shape: Arrow
-          Topic: /autoware_mini/current_pose
+          Topic: localization/current_pose
           Unreliable: false
           Value: false
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: follower_markers
-          Name: Follower markers
-          Namespaces:
-            Heading error: true
-            Lookahead line: true
-          Queue Size: 100
-          Value: true
-      Enabled: true
-      Name: Control
-    - Class: rviz/Group
-      Displays:
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: bicycle_markers
+          Marker Topic: /simulation/bicycle_markers
           Name: Bicycle markers
           Namespaces:
             "": true
@@ -330,11 +333,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 8.950140953063965
+      Scale: 10
       Target Frame: map
       Value: TopDownOrtho (rviz)
-      X: 10856.3974609375
-      Y: 11247.328125
+      X: 0
+      Y: 0
     Saved: ~
 Window Geometry:
   Displays:
