@@ -41,9 +41,6 @@
     </include>
 
     <!-- Rviz -->
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" >
-        <remap from="/goalpose" to="/move_base_simple/goal" />
-    </node>
-
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
 
 </launch>

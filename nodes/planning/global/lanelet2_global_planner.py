@@ -40,7 +40,7 @@ class Lanelet2GlobalPlanner:
         
         #Subscribers
         #self.sub = rospy.Subscriber('lanelet_map_bin', MapBin, self.map_callback, queue_size=1)
-        self.sub = rospy.Subscriber('/goalpose', PoseStamped, self.goal_callback, queue_size=1)
+        self.sub = rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
         self.sub = rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
         self.sub = rospy.Subscriber('cancel_global_path', Bool, self.cancel_global_path_callback, queue_size=1)
 

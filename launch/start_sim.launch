@@ -24,9 +24,6 @@
     <include file="$(find autoware_mini)/launch/simulation.launch" />
 
     <!-- Rviz -->
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini_sim.rviz" required="true" >
-        <remap from="/move_base_simple/goal" to="/goalpose" />
-    </node>
-
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini_sim.rviz" required="true" />
 
 </launch>

@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <launch>
 
-
     <group ns="simulation">
 
         <!-- Remap topics -->
