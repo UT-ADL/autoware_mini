@@ -18,6 +18,7 @@ BLUE80P = ColorRGBA(0.0, 0.0, 1.0, 0.8)
 class ClusterDetector:
     def __init__(self):
         self.min_cluster_size = rospy.get_param('~min_cluster_size', 5)
+        self.bounding_box_type = rospy.get_param('~bounding_box_type', 'axis_aligned')
         self.enable_pointcloud = rospy.get_param('~enable_pointcloud', False)
         self.enable_convex_hull = rospy.get_param('~enable_convex_hull', True)
 
@@ -46,11 +47,24 @@ class ClusterDetector:
             points2d[:, 0] = points['x']
             points2d[:, 1] = points['y']
 
-            # calculate minimum area bounding box
-            (center_x, center_y), (dim_x, dim_y), heading_angle = cv2.minAreaRect(points2d)
+            if self.bounding_box_type == 'axis_aligned':
+                # calculate axis-aligned bounding box
+                maxs = np.max(points2d, axis=0)
+                mins = np.min(points2d, axis=0)
+                center_x, center_y = (maxs + mins) / 2.0
+                dim_x, dim_y = maxs - mins
 
-            # calculate quaternion for heading angle
-            qx, qy, qz, qw = quaternion_from_euler(0.0, 0.0, math.radians(heading_angle))
+                # always pointing forward
+                qx = qy = qz = 0.0
+                qw = 1.0
+            elif self.bounding_box_type == 'min_area':
+                # calculate minimum area bounding box
+                (center_x, center_y), (dim_x, dim_y), heading_angle = cv2.minAreaRect(points2d)
+
+                # calculate quaternion for heading angle
+                qx, qy, qz, qw = quaternion_from_euler(0.0, 0.0, math.radians(heading_angle))
+            else:
+                assert False, "wrong bounding_box_type: " + self.bounding_box_type
 
             # calculate height and vertical position
             max_z = np.max(points['z'])

@@ -17,8 +17,8 @@ class ButtonPanelNode:
         self.engage_pub = rospy.Publisher("engage", Bool, queue_size=10)
         self.marker_pub = rospy.Publisher("log/markers", Marker, queue_size=10)
 
-        self.pose_sub = rospy.Subscriber("current_pose", PoseStamped, self.pose_callback)
-        self.joy_sub = rospy.Subscriber("joy", Joy, self.joy_callback)
+        rospy.Subscriber("current_pose", PoseStamped, self.pose_callback)
+        rospy.Subscriber("joy", Joy, self.joy_callback)
 
         rospy.loginfo("button_panel - node started")
 
