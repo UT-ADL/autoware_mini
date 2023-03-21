@@ -43,8 +43,10 @@ class ClusterDetector:
             ndpoints[:, 2] = points['z']
 
             # calculate centroid and dimensions
-            center_x, center_y, center_z = np.mean(ndpoints, axis=0)
-            dim_x, dim_y, dim_z = np.max(ndpoints, axis=0) - np.min(ndpoints, axis=0)
+            maxs = np.max(ndpoints, axis=0)
+            mins = np.min(ndpoints, axis=0)
+            center_x, center_y, center_z = (maxs + mins) / 2.0
+            dim_x, dim_y, dim_z = maxs - mins
 
             # create DetectedObject
             object = DetectedObject(header=header)
