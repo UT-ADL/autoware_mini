@@ -37,8 +37,8 @@ class ClothGroundRemovalNode:
         data_filtered = data[filter]
 
         # convert x and y coordinates into indexes
-        xi = ((data_filtered['x'] - self.min_x) / self.cell_size).astype(np.integer)
-        yi = ((data_filtered['y'] - self.min_y) / self.cell_size).astype(np.integer)
+        xi = ((data_filtered['x'] - self.min_x) / self.cell_size).astype(np.int32)
+        yi = ((data_filtered['y'] - self.min_y) / self.cell_size).astype(np.int32)
         zi = data_filtered['z']
 
         # write minimum height for each cell to cols
