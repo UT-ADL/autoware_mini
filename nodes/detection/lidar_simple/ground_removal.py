@@ -8,7 +8,7 @@ import numpy as np
 from ros_numpy import numpify, msgify
 from sensor_msgs.msg import PointCloud2
 
-class ClothGroundRemovalNode:
+class GroundRemovalNode:
     def __init__(self):
         self.min_x = rospy.get_param('~min_x', -60.0)
         self.max_x = rospy.get_param('~max_x', 60.0)
@@ -69,6 +69,6 @@ class ClothGroundRemovalNode:
         rospy.spin()
 
 if __name__ == '__main__':
-    rospy.init_node('cloth_ground_removal', log_level=rospy.INFO)
-    node = ClothGroundRemovalNode()
+    rospy.init_node('ground_removal', log_level=rospy.INFO)
+    node = GroundRemovalNode()
     node.run()

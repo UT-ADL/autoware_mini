@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <node type="cloth_ground_removal.py" name="ground_removal" pkg="autoware_mini" output="screen" required="true" />
+    <node type="ground_removal.py" name="ground_removal" pkg="autoware_mini" output="screen" required="true" />
     <node type="points_clusterer.py" name="points_clusterer" pkg="autoware_mini" output="screen" required="true" />
     <node type="cluster_detector.py" name="cluster_detector" pkg="autoware_mini" output="screen" required="true" />
     <node type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />

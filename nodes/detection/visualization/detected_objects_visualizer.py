@@ -5,7 +5,7 @@ import rospy
 
 from autoware_msgs.msg import DetectedObjectArray
 from visualization_msgs.msg import MarkerArray, Marker
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, Quaternion
 from std_msgs.msg import Header, ColorRGBA
 
 class DetectedObjectsVisualizer:
@@ -62,7 +62,8 @@ class DetectedObjectsVisualizer:
                 marker.id = object.id
                 marker.type = marker.LINE_STRIP
                 marker.action = marker.ADD
-                marker.pose = object.pose
+                marker.pose.position = object.pose.position
+                marker.pose.orientation = Quaternion(0, 0, 0, 1)
                 marker.scale.x = 0.1
                 marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.8)
                 marker.points = [Point(p.x - object.pose.position.x, p.y - object.pose.position.y, p.z - object.pose.position.z) for p in object.convex_hull.polygon.points]
