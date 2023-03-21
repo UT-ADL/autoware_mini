@@ -17,7 +17,6 @@
         <arg name="use_ssc"         value="true" />
     </include>
 
-
     <!-- Localizer -->
     <include file="$(find autoware_mini)/launch/localization.launch" />
 

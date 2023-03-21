@@ -27,17 +27,13 @@
         <arg name="use_ssc"         value="false" />
     </include>
 
-    <group ns="autoware_mini">
+    <!-- Localization -->
+    <include if="$(arg use_tf)" file="$(find autoware_mini)/launch/localization.launch" />
 
-        <!-- Localization -->
-        <include if="$(arg use_tf)" file="$(find autoware_mini)/launch/localization.launch" />
+    <!-- Detection -->
+    <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch" />
 
-        <!-- Detection -->
-        <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch" />
-
-        <!-- Rviz -->
-        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
-
-    </group>
+    <!-- Rviz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
 
 </launch>

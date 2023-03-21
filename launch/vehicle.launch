@@ -5,8 +5,8 @@
     <group ns="vehicle">
 
         <!-- Remap topics -->
-        <remap from="/vehicle/current_pose"     to="/localization/current_pose" />
-        <remap from="/vehicle/vehicle_cmd"      to="/control/vehicle_cmd" />
+        <remap from="current_pose"     to="/localization/current_pose" />
+        <remap from="vehicle_cmd"      to="/control/vehicle_cmd" />
 
 
         <!-- SSC interface -->

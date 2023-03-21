@@ -5,10 +5,10 @@
     <group ns="simulation">
 
         <!-- Remap topics -->
-        <remap from="/simulation/current_pose"      to="/localization/current_pose" />
-        <remap from="/simulation/current_velocity"  to="/localization/current_velocity" />
-        <remap from="/simulation/vehicle_cmd"       to="/control/vehicle_cmd" />
-        <remap from="/simulation/vehicle_status"    to="/vehicle/vehicle_status" />
+        <remap from="current_pose"      to="/localization/current_pose" />
+        <remap from="current_velocity"  to="/localization/current_velocity" />
+        <remap from="vehicle_cmd"       to="/control/vehicle_cmd" />
+        <remap from="vehicle_status"    to="/vehicle/vehicle_status" />
 
         <!-- Bicycle_model simulator -->
         <node pkg="autoware_mini" type="bicycle_simulation.py" name="bicycle_simulation" output="screen" required="true" />

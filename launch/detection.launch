@@ -5,12 +5,11 @@
 
     <group ns="detection">
         <group if="$(arg use_lidar_center)" ns="lidar_center">
-            <include if="$(eval arg('detector')=='simple')" file="$(find autoware_mini)/launch/detection/lidar_simple.launch">
-                <arg name="points_raw_topic" value="/points_raw_center" />
-            </include>
+            <remap from="points_raw" to="/points_raw_center" />
+            <include if="$(eval arg('detector')=='simple')" file="$(find autoware_mini)/launch/detection/lidar_simple.launch" />
         </group>
-    </group>
 
-    <rosparam command="load" file="$(find autoware_mini)/config/detection.yaml"/>
+        <rosparam command="load" file="$(find autoware_mini)/config/detection.yaml"/>
+    </group>
 
 </launch>

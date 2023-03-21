@@ -3,7 +3,7 @@
 
     <arg name="waypoints_file"   default="waypoints_erm.csv"  doc="full path with filename" />
 
-    <group ns="autoware_mini">
+    <group ns="planning">
 	    <!-- Waypoint_loader -->
 	    <node pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
 	        <param name="waypoints_file"  value="$(find autoware_mini)/data/$(arg waypoints_file)" />

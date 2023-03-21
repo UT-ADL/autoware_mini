@@ -6,9 +6,9 @@
     <group ns="control">
 
         <!-- Remap topics -->
-        <remap from="/control/current_pose"     to="/localization/current_pose" />
-        <remap from="/control/current_velocity" to="/localization/current_velocity" />
-        <remap from="/control/path"             to="/planning/path" />
+        <remap from="current_pose"     to="/localization/current_pose" />
+        <remap from="current_velocity" to="/localization/current_velocity" />
+        <remap from="path"             to="/planning/path" />
 
 
         <!-- Follower -->
