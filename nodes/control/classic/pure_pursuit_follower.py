@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.neighbors import KDTree
 
 from helpers import get_heading_from_pose_orientation, get_heading_between_two_points, get_blinker_state, \
-    get_relative_heading_error, get_point_on_path_within_distance, get_intersection_point, \
+    get_relative_heading_error, get_point_on_path_within_distance, get_closest_point, \
     get_cross_track_error
 
 from visualization_msgs.msg import MarkerArray, Marker
@@ -57,12 +57,13 @@ class PurePursuitFollower:
             self.waypoints = None
             self.last_wp_idx = 0
             return
-        else:
-            self.waypoints = path_msg.waypoints
-            self.last_wp_idx = len(self.waypoints) - 1
-            # create kd-tree for nearest neighbor search
-            waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
-            self.waypoint_tree = KDTree(waypoints_xy)
+
+        self.waypoints = path_msg.waypoints
+        self.last_wp_idx = len(self.waypoints) - 1
+        # create kd-tree for nearest neighbor search
+        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
+        self.waypoint_tree = KDTree(waypoints_xy)
+
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
@@ -89,7 +90,7 @@ class PurePursuitFollower:
             return
 
         # get nearest point on path from base_link
-        nearest_point = get_intersection_point(current_pose, self.waypoints[back_wp_idx].pose.pose, self.waypoints[front_wp_idx].pose.pose)
+        nearest_point = get_closest_point(current_pose.position, self.waypoints[back_wp_idx].pose.pose.position, self.waypoints[front_wp_idx].pose.pose.position)
         
         # calc lookahead distance (velocity * planning_time)
         lookahead_distance = current_velocity * self.planning_time
@@ -105,9 +106,9 @@ class PurePursuitFollower:
         current_heading = get_heading_from_pose_orientation(current_pose)
         lookahead_heading = get_heading_between_two_points(current_pose.position, lookahead_point)
         heading_error = lookahead_heading - current_heading
-        
+
         heading_angle_difference = get_relative_heading_error(lookahead_heading, current_heading)
-        
+
         if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_angle_difference)) > self.heading_angle_limit:
             # stop vehicle if cross track error or heading angle difference is over limit
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
@@ -132,8 +133,8 @@ class PurePursuitFollower:
     def find_two_nearest_waypoint_idx(self, x, y):
         _, idx = self.waypoint_tree.query([(x, y)], 2)
         # sort to get them in ascending order - follow along path
-        sorted = np.sort(idx[0])
-        return sorted[0], sorted[1]
+        idx[0].sort()
+        return idx[0][0], idx[0][1]
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):

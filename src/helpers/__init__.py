@@ -1,6 +1,5 @@
-import tf
 import math
-
+from tf.transformations import euler_from_quaternion
 from autoware_msgs.msg import WaypointState
 from geometry_msgs.msg import Pose, Point
 
@@ -13,7 +12,7 @@ def get_heading_from_pose_orientation(pose):
     """
 
     quaternion = (pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
-    _, _, heading = tf.transformations.euler_from_quaternion(quaternion)
+    _, _, heading = euler_from_quaternion(quaternion)
 
     return heading
 
@@ -107,24 +106,25 @@ def get_relative_heading_error(path_heading, current_heading):
     return err
 
 
-def get_intersection_point(ego_pose, pose1, pose2):
+def get_closest_point(ego_point, point1, point2):
     """
-    Calculates intersection point of two lines. One line is given by two points,
+    Calculates closest point on path. Constructs one line that is given by two points and
     the other line is given by a point and is known to be perpendicular to the first line.
+    Closest point is the intersection of these lines.
     :param ego_pose: Pose
     :param pose2: Pose backward
     :param pose3: Pose forward
     :return: Point
     """
     # ego_pose (front wheel)
-    x_ego = ego_pose.position.x
-    y_ego = ego_pose.position.y
-    z = ego_pose.position.z
+    x_ego = ego_point.x
+    y_ego = ego_point.y
+    z = ego_point.z
     # extract x and y from poses
-    x1 = pose1.position.x
-    y1 = pose1.position.y
-    x2 = pose2.position.x
-    y2 = pose2.position.y
+    x1 = point1.x
+    y1 = point1.y
+    x2 = point2.x
+    y2 = point2.y
  
 
     # calculate slope for the first line
@@ -146,10 +146,7 @@ def get_intersection_point(ego_pose, pose1, pose2):
         y = m * (x - x1) + y1
 
     # return x and y in Pose
-    point = Point()
-    point.x = x
-    point.y = y
-    point.z = z
+    point = Point(x=x, y=y, z=z)
     
     return point
 

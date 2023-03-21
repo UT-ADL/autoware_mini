@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.neighbors import KDTree
 
 from helpers import get_heading_from_pose_orientation, get_blinker_state, get_heading_between_two_points, \
-    get_intersection_point, get_point_on_path_within_distance, get_cross_track_error, \
+    get_closest_point, get_point_on_path_within_distance, get_cross_track_error, \
     get_pose_using_heading_and_distance, get_relative_heading_error
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
@@ -55,12 +55,12 @@ class StanleyFollower:
             self.waypoints = None
             self.last_wp_idx = 0
             return
-        else:
-            self.waypoints = path_msg.waypoints
-            self.last_wp_idx = len(self.waypoints) - 1
-            # create kd-tree for nearest neighbor search
-            waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
-            self.waypoint_tree = KDTree(waypoints_xy)
+
+        self.waypoints = path_msg.waypoints
+        self.last_wp_idx = len(self.waypoints) - 1
+        # create kd-tree for nearest neighbor search
+        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
+        self.waypoint_tree = KDTree(waypoints_xy)
 
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
@@ -92,7 +92,7 @@ class StanleyFollower:
             rospy.logwarn_throttle(10, "stanley_follower - last waypoint reached")
             return
     
-        bl_nearest_point = get_intersection_point(current_pose, self.waypoints[bl_back_wp_idx].pose.pose, self.waypoints[bl_front_wp_idx].pose.pose)
+        bl_nearest_point = get_closest_point(current_pose.position, self.waypoints[bl_back_wp_idx].pose.pose.position, self.waypoints[bl_front_wp_idx].pose.pose.position)
         lookahead_point = get_point_on_path_within_distance(self.waypoints, self.last_wp_idx, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
 
         track_heading = get_heading_between_two_points(bl_nearest_point, lookahead_point)
@@ -121,8 +121,8 @@ class StanleyFollower:
     def find_two_nearest_waypoint_idx(self, x, y):
         _, idx = self.waypoint_tree.query([(x, y)], 2)
         # sort to get them in ascending order - follow along path
-        sorted = np.sort(idx[0])
-        return sorted[0], sorted[1]
+        idx[0].sort()
+        return idx[0][0], idx[0][1]
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):

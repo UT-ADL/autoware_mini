@@ -40,10 +40,8 @@ class NovatelOem7Localizer:
         self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
         self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
 
-        # output localizer settings to console
-        rospy.loginfo("novatel_oem7_localizer - coordinate_transformer: %s ", str(self.coordinate_transformer))
-        rospy.loginfo("novatel_oem7_localizer - use_msl_height: %s ", str(self.use_msl_height))
-        rospy.loginfo("novatel_oem7_localizer - use_custom_origin: %s ", str(self.use_custom_origin))
+        # output information to console
+        rospy.loginfo("novatel_localizer - localizer initialized using %s coordinates", str(self.coordinate_transformer))
 
 
     def inspva_callback(self, inspva_msg):
