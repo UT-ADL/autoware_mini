@@ -21,8 +21,8 @@ class ClusterDetector:
         self.enable_pointcloud = rospy.get_param('~enable_pointcloud', False)
         self.enable_convex_hull = rospy.get_param('~enable_convex_hull', True)
 
-        self.cluster_sub = rospy.Subscriber('points_clustered', PointCloud2, self.cluster_callback, queue_size=1, buff_size=1024*1024)
         self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=5)
+        rospy.Subscriber('points_clustered', PointCloud2, self.cluster_callback, queue_size=1, buff_size=1024*1024)
 
     def cluster_callback(self, msg):
         data = numpify(msg)

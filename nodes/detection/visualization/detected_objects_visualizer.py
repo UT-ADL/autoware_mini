@@ -10,8 +10,8 @@ from std_msgs.msg import Header, ColorRGBA
 
 class DetectedObjectsVisualizer:
     def __init__(self):
-        self.objects_sub = rospy.Subscriber('detected_objects', DetectedObjectArray, self.objects_callback, queue_size=1, buff_size=1024*1024)
-        self.markers_pub = rospy.Publisher('detected_objects_markers', MarkerArray, queue_size=1)
+        self.markers_pub = rospy.Publisher('detected_objects_markers', MarkerArray, queue_size=5)
+        rospy.Subscriber('detected_objects', DetectedObjectArray, self.objects_callback, queue_size=1)
         self.published_ids = set()
 
     def objects_callback(self, msg):
