@@ -33,7 +33,7 @@ class Lanelet2MapLoader:
         self.markers_pub.publish(marker_array)
 
         rospy.loginfo("lanelet2_map_loader - map loaded with %i lanelets and %i regulatory elements from file: %s" % 
-                      (len(map.laneletLayer), len(map.regulatoryElementLayer), str(self.map_file)))
+                      (len(map.laneletLayer), len(map.regulatoryElementLayer), str(self.lanelet2_map)))
 
     def run(self):
         rospy.spin()

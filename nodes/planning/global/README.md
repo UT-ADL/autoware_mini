@@ -28,7 +28,7 @@ Uses Lanelet2 map to generate the global path. Currently loads map itself. `/cur
 
 ## lanelet2_map_loader and visualizer
 
-`lanelet2_map_loader` will load lanelet2 map and call also the `lanelet2_map_visualizer` that will create the markers fori rviz visualization.
+`lanelet2_map_loader` will load lanelet2 map and call also the `lanelet2_map_visualizer` that will create the markers for rviz visualization.
 
 ##### Parameters
 
