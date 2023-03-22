@@ -24,7 +24,7 @@ class Lanelet2GlobalPlanner:
     def __init__(self):
 
         # Parameters
-        self.map_file = rospy.get_param("~lanelet2_map")
+        self.lanelet2_map = rospy.get_param("~lanelet2_map")
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
 
         # Internal variables
@@ -49,7 +49,7 @@ class Lanelet2GlobalPlanner:
 
         # Load lanelet map - TODO: should be replaced by loading from the topic
         projector = UtmProjector(Origin(58.385345, 26.726272))
-        self.map = load(self.map_file, projector)
+        self.map = load(self.lanelet2_map, projector)
 
     def goal_callback(self, msg):
 
