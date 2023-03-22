@@ -83,7 +83,7 @@ class WaypointVisualizer:
             marker.action = marker.ADD
             marker.id = 0
             marker.scale.x = 1.5
-            marker.color = ColorRGBA(0.1, 10, 1.0, 0.4)
+            marker.color = ColorRGBA(0.9, 0.6, 1.0, 0.6)
             for waypoint in waypoints:
                 marker.points.append(waypoint.pose.pose.position)
             marker_array.markers.append(marker)

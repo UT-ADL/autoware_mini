@@ -31,6 +31,8 @@
         <!-- Waypoint_visualizer - necessary also for visualizing path from global planner-->
         <node pkg="autoware_mini" type="waypoint_visualizer.py" name="waypoint_visualizer" output="screen" required="true"/>
 
+        <rosparam command="load" file="$(find autoware_mini)/config/planning.yaml" />
+
     </group>
 
 </launch>
