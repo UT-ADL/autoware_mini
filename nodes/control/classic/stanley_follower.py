@@ -93,7 +93,7 @@ class StanleyFollower:
             return
     
         bl_nearest_point = get_closest_point(current_pose.position, self.waypoints[bl_back_wp_idx].pose.pose.position, self.waypoints[bl_front_wp_idx].pose.pose.position)
-        lookahead_point = get_point_on_path_within_distance(self.waypoints, self.last_wp_idx, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
+        lookahead_point = get_point_on_path_within_distance(self.waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
 
         track_heading = get_heading_between_two_points(bl_nearest_point, lookahead_point)
         heading_error = get_relative_heading_error(track_heading, current_heading)

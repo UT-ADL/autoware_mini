@@ -166,7 +166,7 @@ def get_distance_between_two_points(point1, point2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
-def get_point_on_path_within_distance(waypoints, last_idx, front_wp_idx, start_point, distance):
+def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, distance):
     """
     Get point on path within distance from ego pose
     :param waypoints: waypoints
@@ -178,6 +178,7 @@ def get_point_on_path_within_distance(waypoints, last_idx, front_wp_idx, start_p
     """
 
     point = Point()
+    last_idx = len(waypoints) - 1
 
     i = front_wp_idx
     d = get_distance_between_two_points(start_point, waypoints[i].pose.pose.position)
