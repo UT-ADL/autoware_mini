@@ -115,7 +115,6 @@ class Lanelet2GlobalPlanner:
 
     def convert_to_waypoints(self, lanelet_sequence):
         waypoints = []
-        wp_id = 0
 
         for lanelet in lanelet_sequence:
             blinker = LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP[lanelet.attributes['turn_direction']]
@@ -134,7 +133,6 @@ class Lanelet2GlobalPlanner:
                 # Later curvature based speed adjustment
                 waypoint.twist.twist.linear.x = 4.0
                 waypoints.append(waypoint)
-                wp_id += 1
 
         # build KDTree for nearest neighbour search
         waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in waypoints])
