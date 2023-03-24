@@ -30,7 +30,6 @@ class PurePursuitFollower:
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
-        self.last_wp_idx = 0
 
         # Subscribers
         self.path_sub = rospy.Subscriber('path', Lane, self.path_callback)
@@ -55,11 +54,9 @@ class PurePursuitFollower:
             self.publish_vehicle_command(rospy.Time.now(), 0.0, 0.0, 0, 0)
             self.waypoint_tree = None
             self.waypoints = None
-            self.last_wp_idx = 0
             return
 
         self.waypoints = path_msg.waypoints
-        self.last_wp_idx = len(self.waypoints) - 1
         # create kd-tree for nearest neighbor search
         waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
         self.waypoint_tree = KDTree(waypoints_xy)
@@ -83,7 +80,7 @@ class PurePursuitFollower:
         # Find 2 nearest waypoint idx's on path (from base_link)
         back_wp_idx, front_wp_idx = self.find_two_nearest_waypoint_idx(current_pose.position.x, current_pose.position.y)
 
-        if front_wp_idx == self.last_wp_idx:
+        if front_wp_idx == len(self.waypoints)-1:
             # stop vehicle - last waypoint is reached
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(10, "pure_pursuit_follower - last waypoint reached")

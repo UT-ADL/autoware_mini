@@ -28,7 +28,6 @@ class StanleyFollower:
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
-        self.last_wp_idx = 0
 
         # Subscribers
         self.path_sub = rospy.Subscriber('path', Lane, self.path_callback)
@@ -53,11 +52,9 @@ class StanleyFollower:
             # if path is cancelled and empty waypoints received
             self.waypoint_tree = None
             self.waypoints = None
-            self.last_wp_idx = 0
             return
 
         self.waypoints = path_msg.waypoints
-        self.last_wp_idx = len(self.waypoints) - 1
         # create kd-tree for nearest neighbor search
         waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
         self.waypoint_tree = KDTree(waypoints_xy)
@@ -86,7 +83,7 @@ class StanleyFollower:
         # get closest point to base_link on path (line defined by 2 closest waypoints) - (bl_)
         bl_back_wp_idx, bl_front_wp_idx = self.find_two_nearest_waypoint_idx(current_pose.position.x, current_pose.position.y)
 
-        if bl_front_wp_idx == self.last_wp_idx:
+        if bl_front_wp_idx == len(self.waypoints)-1:
             # stop vehicle if last waypoint is reached
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(10, "stanley_follower - last waypoint reached")
