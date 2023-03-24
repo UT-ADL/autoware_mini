@@ -31,14 +31,14 @@ class NovatelOem7Localizer:
             rospy.logfatal("novatel_localizer - coordinate_transformer not supported: %s ", str(self.coordinate_transformer))
             exit(1)
 
+        # Publishers
+        self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
+        self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
+        
         # Subscribers
         if self.use_msl_height:
             self.bestpos_sub = rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback)
         self.inspva_sub = rospy.Subscriber('/novatel/oem7/inspva', INSPVA, self.inspva_callback)
-
-        # Publishers
-        self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
-        self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
 
         # output information to console
         rospy.loginfo("novatel_localizer - localizer initialized using %s coordinates", str(self.coordinate_transformer))

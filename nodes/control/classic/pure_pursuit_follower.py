@@ -33,18 +33,18 @@ class PurePursuitFollower:
         self.waypoints = None
         self.lock = threading.Lock()
 
+        # Publishers
+        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
+        if self.publish_debug_info:
+            self.pure_pursuit_markers_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
+            self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
+
         # Subscribers
         self.path_sub = rospy.Subscriber('path', Lane, self.path_callback)
         self.current_pose_sub = message_filters.Subscriber('current_pose', PoseStamped)
         self.current_velocity_sub = message_filters.Subscriber('current_velocity', TwistStamped)
         ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10, slop=0.1)
         ts.registerCallback(self.current_status_callback)
-
-        # Publishers
-        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
-        if self.publish_debug_info:
-            self.pure_pursuit_markers_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
-            self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
 
         # output information to console
         rospy.loginfo("pure_pursuit_follower - initialized")

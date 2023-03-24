@@ -36,6 +36,9 @@ class WaypointSaver:
         self.writer = csv.writer(self.file)
         self.writer.writerow(['x', 'y', 'z', 'yaw', 'velocity', 'change_flag', 'steering_flag', 'accel_flag', 'stop_flag', 'event_flag'])
 
+        # Publishers
+        self.waypoint_marker_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1)
+
         # Subscribers
         self.current_pose_sub = message_filters.Subscriber('current_pose', PoseStamped)
         self.current_velocity_sub = message_filters.Subscriber('current_velocity', TwistStamped)
@@ -44,9 +47,6 @@ class WaypointSaver:
         # Sync 2 source topics in callback
         ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10, slop=0.1)
         ts.registerCallback(self.data_callback)
-
-        # Publishers
-        self.waypoint_marker_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1)
 
         # loginfo
         rospy.loginfo("waypoint_saver - interval: %i m", self.interval)

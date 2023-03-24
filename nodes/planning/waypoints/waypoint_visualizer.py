@@ -11,11 +11,11 @@ class WaypointVisualizer:
         # will be taken from the received path message: lane.header.frame_id
         self.output_frame = None
 
-        # Subscribers
-        self.path_sub = rospy.Subscriber('path', Lane, self.waypoints_callback, queue_size=1)
-
         # Publishers
         self.waypoints_markers_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1, latch=True)
+
+        # Subscribers
+        self.path_sub = rospy.Subscriber('path', Lane, self.waypoints_callback, queue_size=1)
 
     def waypoints_callback(self, lane):
         self.output_frame = lane.header.frame_id
