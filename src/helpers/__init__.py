@@ -86,17 +86,14 @@ def get_pose_using_heading_and_distance(start_pose, heading, distance):
 
     return pose
 
-def get_relative_heading_error(path_heading, current_heading):
+def normalize_heading_error(err):
     """
-    Get heading error relative to path using current heading and path heading
-    Input angles are within range [-pi, pi] and it needs to be considered when calculating the error
-    and to retain the information of the direction of the error.
-    :param path_heading: path heading error in radians
-    :param current_heading: ego car current heading in radians
+    Get heading error relative to path
+    Previously subtracted track and current heading need to be normilized, since the original
+    heading angles are within range [-pi, pi]
+    :param err: heading error
     :return err: steering difference in radians
     """
-
-    err = (path_heading - current_heading)
 
     if err > math.pi:
         err -= 2 * math.pi

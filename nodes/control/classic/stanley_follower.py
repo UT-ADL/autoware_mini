@@ -3,12 +3,13 @@
 import rospy
 import math
 import message_filters
+import threading
 import numpy as np
 from sklearn.neighbors import KDTree
 
 from helpers import get_heading_from_pose_orientation, get_blinker_state, get_heading_between_two_points, \
     get_closest_point, get_point_on_path_within_distance, get_cross_track_error, \
-    get_pose_using_heading_and_distance, get_relative_heading_error
+    get_pose_using_heading_and_distance, normalize_heading_error
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
 from std_msgs.msg import ColorRGBA, Float32MultiArray
@@ -28,6 +29,7 @@ class StanleyFollower:
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
+        self.lock = threading.Lock()
 
         # Subscribers
         self.path_sub = rospy.Subscriber('path', Lane, self.path_callback)
@@ -50,50 +52,61 @@ class StanleyFollower:
 
         if len(path_msg.waypoints) == 0:
             # if path is cancelled and empty waypoints received
+            self.lock.acquire()
             self.waypoint_tree = None
             self.waypoints = None
+            self.lock.release()
             return
 
-        self.waypoints = path_msg.waypoints
         # create kd-tree for nearest neighbor search
-        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
-        self.waypoint_tree = KDTree(waypoints_xy)
+        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in path_msg.waypoints])
+        waypoint_tree = KDTree(waypoints_xy)
+        self.lock.acquire()
+        self.waypoint_tree = waypoint_tree
+        self.waypoints = path_msg.waypoints
+        self.lock.release()
 
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
-        if self.waypoint_tree is None:
+
+        self.lock.acquire()
+        waypoints = self.waypoints
+        waypoint_tree = self.waypoint_tree
+        self.lock.release()
+    
+        stamp = current_pose_msg.header.stamp
+        current_pose = current_pose_msg.pose
+        current_velocity = current_velocity_msg.twist.linear.x
+        current_heading = get_heading_from_pose_orientation(current_pose)
+
+        if waypoint_tree is None:
             # if no waypoints received yet or global_path cancelled, stop the vehicle
-            self.publish_vehicle_command(rospy.Time.now(), 0.0, 0.0, 0, 0)
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(30, "stanley_follower - no waypoints received or path cancelled, stopping!")
             return
 
         if self.publish_debug_info:
             start_time = rospy.get_time()
-
-        stamp = current_pose_msg.header.stamp
-        current_pose = current_pose_msg.pose
-        current_velocity = current_velocity_msg.twist.linear.x
-        current_heading = get_heading_from_pose_orientation(current_pose)
         
         # Find pose for the front wheel and 2 closest waypoint idx (fw_)
         front_wheel_pose = get_pose_using_heading_and_distance(current_pose, current_heading, self.wheel_base)
-        fw_back_wp_idx, fw_front_wp_idx = self.find_two_nearest_waypoint_idx(front_wheel_pose.position.x, front_wheel_pose.position.y)
-        cross_track_error = get_cross_track_error(front_wheel_pose, self.waypoints[fw_back_wp_idx].pose.pose, self.waypoints[fw_front_wp_idx].pose.pose)
+        fw_back_wp_idx, fw_front_wp_idx = self.find_two_nearest_waypoint_idx(waypoint_tree, front_wheel_pose.position.x, front_wheel_pose.position.y)
+        cross_track_error = get_cross_track_error(front_wheel_pose, waypoints[fw_back_wp_idx].pose.pose, waypoints[fw_front_wp_idx].pose.pose)
 
         # get closest point to base_link on path (line defined by 2 closest waypoints) - (bl_)
-        bl_back_wp_idx, bl_front_wp_idx = self.find_two_nearest_waypoint_idx(current_pose.position.x, current_pose.position.y)
+        bl_back_wp_idx, bl_front_wp_idx = self.find_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
 
-        if bl_front_wp_idx == len(self.waypoints)-1:
+        if bl_front_wp_idx == len(waypoints)-1:
             # stop vehicle if last waypoint is reached
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(10, "stanley_follower - last waypoint reached")
             return
     
-        bl_nearest_point = get_closest_point(current_pose.position, self.waypoints[bl_back_wp_idx].pose.pose.position, self.waypoints[bl_front_wp_idx].pose.pose.position)
-        lookahead_point = get_point_on_path_within_distance(self.waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
+        bl_nearest_point = get_closest_point(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
+        lookahead_point = get_point_on_path_within_distance(waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
 
         track_heading = get_heading_between_two_points(bl_nearest_point, lookahead_point)
-        heading_error = get_relative_heading_error(track_heading, current_heading)
+        heading_error = normalize_heading_error(track_heading - current_heading)
 
         if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_error)) > self.heading_angle_limit:
             # stop vehicle if cross track error or heading angle difference is over limit
@@ -106,8 +119,8 @@ class StanleyFollower:
         steering_angle = heading_error + delta_error
 
         # target_velocity and blinkers
-        target_velocity = self.waypoints[bl_front_wp_idx].twist.twist.linear.x
-        left_blinker, right_blinker  = get_blinker_state(self.waypoints[bl_front_wp_idx].wpstate.steering_state)
+        target_velocity = waypoints[bl_front_wp_idx].twist.twist.linear.x
+        left_blinker, right_blinker  = get_blinker_state(waypoints[bl_front_wp_idx].wpstate.steering_state)
 
         # Publish
         self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
@@ -115,8 +128,8 @@ class StanleyFollower:
             self.publish_stanley_markers(stamp, bl_nearest_point, lookahead_point, front_wheel_pose, heading_error)
             self.follower_debug_pub.publish(Float32MultiArray(data=[(rospy.get_time() - start_time), current_heading, track_heading, heading_error, cross_track_error, target_velocity]))
 
-    def find_two_nearest_waypoint_idx(self, x, y):
-        _, idx = self.waypoint_tree.query([(x, y)], 2)
+    def find_two_nearest_waypoint_idx(self, waypoint_tree, x, y):
+        _, idx = waypoint_tree.query([(x, y)], 2)
         # sort to get them in ascending order - follow along path
         idx[0].sort()
         return idx[0][0], idx[0][1]
