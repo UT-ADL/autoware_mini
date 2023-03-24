@@ -6,6 +6,7 @@ import numpy as np
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 from lanelet2.core import BasicPoint2d
+from lanelet2.geometry import distance, to2D
 
 from sklearn.neighbors import KDTree
 
@@ -70,6 +71,14 @@ class Lanelet2GlobalPlanner:
         goal_lanelet = self.map.laneletLayer.nearest(new_goal, 1)[0]
         start_lanelet = self.map.laneletLayer.nearest(start_point, 1)[0]
 
+        if distance(start_point, to2D(start_lanelet.centerline)) > self.distance_to_centerline_limit:
+            rospy.logwarn("lanelet2_global_planner - start point too far from centerline")
+            return
+        
+        if distance(new_goal, to2D(goal_lanelet.centerline)) > self.distance_to_centerline_limit:
+            rospy.logwarn("lanelet2_global_planner - goal point too far from centerline")
+            return
+
         graph = lanelet2.routing.RoutingGraph(self.map, self.traffic_rules)
         route = graph.getRoute(start_lanelet, goal_lanelet, 0, True)        # lanelet2.routing.Route
         if route == None:
@@ -80,20 +89,9 @@ class Lanelet2GlobalPlanner:
         path_no_lane_change = path.getRemainingLane(start_lanelet)          # lanelet2.core.LaneletSequence
         new_waypoints, new_waypoint_tree = self.convert_to_waypoints(path_no_lane_change)
 
-        # Check start and goal point distances from centerline and clip the path
-        d, start_idx = new_waypoint_tree.query([(start_point.x, start_point.y)], 1)
-        if d[0][0] > self.distance_to_centerline_limit:
-            new_waypoints = None
-            new_waypoint_tree = None
-            rospy.logwarn("lanelet2_global_planner - start point too far from centerline")
-            return
-        
-        d, goal_idx = new_waypoint_tree.query([(new_goal.x, new_goal.y)], 1)
-        if d[0][0] > self.distance_to_centerline_limit:
-            new_waypoints = None
-            new_waypoint_tree = None
-            rospy.logwarn("lanelet2_global_planner - goal point too far from centerline")
-            return
+        # find closest point idx for start and goal
+        _, start_idx = new_waypoint_tree.query([(start_point.x, start_point.y)], 1)
+        _, goal_idx = new_waypoint_tree.query([(new_goal.x, new_goal.y)], 1)
 
         # update goal point and add new waypoints to the existing ones
         self.goal_point = new_goal
