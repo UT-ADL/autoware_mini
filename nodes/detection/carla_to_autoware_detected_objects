@@ -1,0 +1,124 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2020 Intel Corporation
+#
+# This work is licensed under the terms of the MIT license.
+# For a copy, see <https://opensource.org/licenses/MIT>.
+"""
+ground truth detections. Publishes the following topics:
+    /ground_truth/objects  (autoware_msgs::DetectedObjectArray)
+"""
+import rospy
+import math
+import numpy as np
+
+from geometry_msgs.msg import PolygonStamped, Point
+from autoware_msgs.msg import DetectedObjectArray, DetectedObject
+from tf.transformations import quaternion_matrix
+from derived_object_msgs.msg import ObjectArray
+from helpers import LestTransformer
+
+
+CLASSIFICATION_PEDESTRIAN = 4
+
+class CarlaToAutowareDetectedObjects:
+
+    def __init__(self):
+
+        # Node parameters
+        self.role_name = rospy.get_param('~role_name', 'ego_vehicle')
+        self.use_offset = rospy.get_param("~use_offset", default=True)
+
+        # Subscribers
+        rospy.Subscriber('/carla/objects'.format(self.role_name),
+                         ObjectArray, self.carla_objects_callback)
+
+        # Publishers
+        self.detected_objects_pub = rospy.Publisher(
+            'detected_objects', DetectedObjectArray, queue_size=1)
+
+        # Internal paramters
+        self.lest_transformer = LestTransformer()
+
+    def carla_objects_callback(self, data):
+        """
+        callback for carla objects
+        """
+
+        objects_msg = DetectedObjectArray()
+        objects_msg.header = data.header
+
+        for obj in data.objects:
+
+            # Ignore ego vehicle as detected object
+            if obj.detection_level == 1:
+                continue
+
+            object_msg = DetectedObject()
+            object_msg.header = obj.header
+            object_msg.id = obj.id
+            object_msg.label = "unknown"
+            object_msg.score = 1
+            object_msg.valid = True
+            object_msg.space_frame = 'map'
+            object_msg.pose = obj.pose
+
+            if self.use_offset:
+                object_msg.pose.position = self.lest_transformer.transform_position(object_msg.pose.position)
+                object_msg.pose.orientation = self.lest_transformer.transform_orientation(object_msg.pose.orientation)
+
+            # Correct height of ground truth obstacles except pedestrians
+            if obj.classification != CLASSIFICATION_PEDESTRIAN:
+                object_msg.pose.position.z += obj.shape.dimensions[2] / 2
+
+            object_msg.dimensions.x = obj.shape.dimensions[0]
+            object_msg.dimensions.y = obj.shape.dimensions[1]
+            object_msg.dimensions.z = obj.shape.dimensions[2]
+            object_msg.velocity.linear.x = math.sqrt(obj.twist.linear.x**2 + obj.twist.linear.y**2 + obj.twist.linear.z**2)
+            object_msg.acceleration = obj.accel
+            object_msg.convex_hull = self.produce_hull(obj.pose.position, object_msg.dimensions, object_msg.header, object_msg.pose.orientation)
+            object_msg.pose_reliable = True
+            object_msg.velocity_reliable = True
+            object_msg.acceleration_reliable = True
+            object_msg.valid = True
+
+            objects_msg.objects.append(object_msg)
+
+        # Publish converted detected objects
+        self.detected_objects_pub.publish(objects_msg)
+
+    def produce_hull(self, centroid, dimension_vector, header, yaw_quaternion):
+        """
+        create hull for a given pose and dimension
+        """
+
+        convex_hull = PolygonStamped()
+        convex_hull.header = header
+
+        rot_mat = quaternion_matrix([yaw_quaternion.x, yaw_quaternion.y, yaw_quaternion.z, yaw_quaternion.w])
+        dim_vector = dimension_vector
+        halved_dim = [dim_vector.x/2, dim_vector.y/2, dim_vector.z/2]
+
+        point_1 = [halved_dim[0], halved_dim[1], halved_dim[2]]
+        point_2 = [- halved_dim[0], halved_dim[1], halved_dim[2]]
+        point_3 = [-halved_dim[0], -halved_dim[1], halved_dim[2]]
+        point_4 = [halved_dim[0],  - halved_dim[1], halved_dim[2]]
+
+        corner_points = np.array([point_1, point_4, point_3, point_2, point_1])
+        corner_points = np.c_[corner_points, np.ones((corner_points.shape[0]))]
+        rotated_corners = np.dot(rot_mat, corner_points.T).T
+
+        for corner_point in rotated_corners:
+            convex_hull.polygon.points.append(Point(
+                centroid.x + corner_point[0], centroid.y + corner_point[1], centroid.z + corner_point[2]))
+
+        return convex_hull
+
+    def run(self):
+        rospy.spin()
+
+
+if __name__ == '__main__':
+    rospy.init_node('carla_to_autoware_detected_objects', log_level=rospy.INFO, anonymous=False)
+    node = CarlaToAutowareDetectedObjects()
+    node.run()

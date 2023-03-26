@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2019 Intel Corporation
+#
+# This work is licensed under the terms of the MIT license.
+# For a copy, see <https://opensource.org/licenses/MIT>.
+"""
+receive autoware_msgs::VehicleCmd and publish ackermann_msgs::AckermannDrive
+"""
+import rospy
+from ackermann_msgs.msg import AckermannDrive
+from autoware_msgs.msg import VehicleCmd
+from std_msgs.msg import Float64
+
+
+class VehicleCMDToAckerMann:
+
+    def __init__(self):
+
+        # Node parameters
+        role_name = rospy.get_param('~role_name', 'ego_vehicle')
+
+        # Subscribers
+        rospy.Subscriber('/vehicle_cmd', VehicleCmd,
+                         self.vehicle_cmd_callback, queue_size=1)
+
+        # Publishers
+        self.ackerman_cmd_pub = rospy.Publisher(
+            '/carla/{}/ackermann_cmd'.format(role_name), AckermannDrive, queue_size=1)
+        self.target_speed_pub = rospy.Publisher(
+            '/carla/{}/target_speed'.format(role_name), Float64, queue_size=1)
+
+    def vehicle_cmd_callback(self, data):
+        """
+        callback for vehicle cmds
+        """
+
+        msg = AckermannDrive()
+        msg.speed = data.ctrl_cmd.linear_velocity
+        msg.steering_angle = data.ctrl_cmd.steering_angle
+        msg.acceleration = data.ctrl_cmd.linear_acceleration
+
+        # Publish ackermandrive cmd
+        self.ackerman_cmd_pub.publish(msg)
+        # Publish target speed (currently used only by scenario runner)
+        self.target_speed_pub.publish(Float64(msg.speed))
+
+    def run(self):
+        rospy.spin()
+
+
+if __name__ == '__main__':
+    rospy.init_node('vehicle_cmd_to_ackermann', log_level=rospy.INFO, anonymous=False)
+    node = VehicleCMDToAckerMann()
+    node.run()

@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<launch>
+    
+    <arg name="bag_file"                    default="/home/tambet/2021-01-12-15-57-27_r05_demo_route_mpc.bag" doc="bag file to play" />
+
+    <arg name="use_manual_control"          default="false"                 doc="use manual control for carla"/>
+    <arg name="use_detection"               default="true"                  doc="use object detection"/>
+    <arg name="use_tf"                      default="false"                 doc="replaces tf-s in bag with the current ones"/>
+    <arg name="localizer"                   default="carla"                 doc="gnss, carla" />
+    <arg name="detector"                    default="carla"                 doc="simple, carla" />
+    <arg name="use_cam"                     default="false" />
+    <arg name='map_name'                    default='tartu'/>
+    <!-- Scenario Runner args -->
+    <arg name='use_scenario_runner'         default='false'/>
+    <arg name='scenario_runner_path'        default='$(optenv SCENARIO_RUNNER_ROOT)'/>
+    <arg name='scenario_name'               default='FollowLeadingVehicle'/>
+    <arg name='scenario_file'               default='temp.xosc'/>
+    <!-- <arg name='scenario_file'               default='$(find autoware_ut)/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/> -->
+
+
+    <!-- Vehicle platform -->
+    <!-- <include file="$(find vehicle_platform)/launch/platform.launch" >
+        <arg name="use_tf"          value="$(arg use_tf)" />
+        <arg name="use_lexus_model" value="true" />
+        <arg name="use_gnss"        value="false" />
+        <arg name="use_dbw"         value="false" />
+        <arg name="use_ssc"         value="false" />
+    </include> -->
+
+    <!-- Localization -->
+    <include file="$(find autoware_mini)/launch/localization.launch">
+        <arg name="localizer"       value="$(arg localizer)" />
+    </include>
+
+    <!-- Detection -->
+    <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
+        <arg name="detector"       value="$(arg detector)" />
+    </include>
+
+    <!-- Carla platform -->
+    <include file="$(find autoware_mini)/launch/carla_platform.launch">
+        <!-- <arg name="use_lexus_model"                     value="$(arg use_lexus_model)" /> -->
+        <arg name='map_name'                            value='$(arg map_name)'/>
+        <arg name="use_manual_control"                  value="$(arg use_manual_control)" />
+        <!-- <arg name="use_obstacle_detection"              value="$(arg use_obstacle_detection)" /> -->
+        <!-- <arg name="use_tl_detection"                    value="$(arg use_tl_detection)" /> -->
+        <arg name="use_cam"                             value="$(arg use_cam)" />
+        <!-- <arg name="use_api"                             value="$(arg use_api)" /> -->
+        <!-- <arg name="localizer"                           value="$(arg localizer)" /> -->
+        <arg name="detector"                            value="$(arg detector)" />
+        <arg name="scenario_runner_path"                value="$(arg scenario_runner_path)" />
+        <arg name="use_scenario_runner"                 value="$(arg use_scenario_runner)" />
+        <arg name="scenario_name"                       value="$(arg scenario_name)" />
+        <arg name="scenario_file"                       value="$(arg scenario_file)" />
+    </include>
+
+    <!-- Rviz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
+
+</launch>

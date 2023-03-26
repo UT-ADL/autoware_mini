@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="localizer"   default="gnss"  doc="gnss" />
+    <arg name="localizer"   default="gnss"  doc="gnss, carla" />
 
 
     <group ns="localization">
@@ -8,6 +8,14 @@
         <node if="$(eval arg('localizer')=='gnss')" pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" />
+
+        <group if="$(eval arg('localizer') =='carla')">
+            <node pkg='autoware_mini' type='carla_to_autoware_localization' name='carla_to_autoware_localization' output='screen'>
+                <remap from='/ground_truth/current_pose' to='/current_pose' />
+                <remap from='/ground_truth/current_velocity' to='/current_velocity' />
+            </node>
+        </group>
+
 
     </group>
 

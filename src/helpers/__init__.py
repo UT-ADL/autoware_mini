@@ -1,7 +1,8 @@
 import math
-from tf.transformations import euler_from_quaternion
+from pyproj import CRS, Transformer, Proj
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from autoware_msgs.msg import WaypointState
-from geometry_msgs.msg import Pose, Point
+from geometry_msgs.msg import Pose, Point, Quaternion
 
 
 def get_heading_from_pose_orientation(pose):
@@ -195,3 +196,76 @@ def get_point_on_path_within_distance(waypoints, last_idx, front_wp_idx, start_p
     point.y = waypoints[i].pose.pose.position.y - dy
     point.z = waypoints[i].pose.pose.position.z
     return point
+
+
+class LestTransformer:
+    
+    def __init__(self, use_custom_origin=True, origin_x=650000, origin_y=6465000, lat = 58.382296, lon = 26.726196):
+        """ Transforms vector3 position into LEST coordinates
+
+        Parameters
+        ----------
+        use_custom_origin : bool
+            Bool to set if custom offsetting should be applied to transformations
+        origin_x : init
+            x offset to be used when use_custom_origin is true
+        origin_y : init
+            y offset to be used when use_custom_origin is true
+        yaw_offset : float
+            yaw offset in degrees
+        """
+
+        sim_crs = Proj("+proj=tmerc +lat_0={0} +lon_0={1} +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +vunits=m +no_defs".format(lat, lon))
+        lest_crs = CRS.from_epsg(3301)
+
+        # Get meridian convergence or yaw angle between Lest97 origin latitude and our custom UTM projection origin latitude
+        meridian_convergence = Proj(lest_crs).get_factors(lon, lat).meridian_convergence
+
+        self.origin_x = origin_x
+        self.origin_y = origin_y
+        self.yaw_offset = math.radians(meridian_convergence)
+        self.use_custom_origin = use_custom_origin
+
+        self.transformer = Transformer.from_proj(sim_crs, lest_crs)
+
+
+    def transform_position(self, position):
+        """ Transforms vector3 position into LEST coordinates
+
+        Parameters
+        ----------
+        position : geometry_msgs/Vector3
+            Position to be transformed
+        
+        Returns
+        -------
+        geometry_msgs/Vector3
+            Transformed position
+        """
+        
+        position.y, position.x = self.transformer.transform(position.x, position.y)
+
+        if self.use_custom_origin:
+            position.x -= self.origin_x
+            position.y -= self.origin_y
+        
+        return position
+
+    def transform_orientation(self, orientation):
+        """ Transforms orientation to lest
+
+        Parameters
+        ----------
+        orientation : geometry_msgs/Quaternion
+            Quaternion to be transformed
+        
+        Returns
+        -------
+        geometry_msgs/Quaternion
+            Transformed quaternion
+        """
+
+        roll, pitch, yaw = euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+        orientation = quaternion_from_euler(roll, pitch, yaw + self.yaw_offset)
+        
+        return Quaternion(x=orientation[0], y=orientation[1], z=orientation[2], w=orientation[3])

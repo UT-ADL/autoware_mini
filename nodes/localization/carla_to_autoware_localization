@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2020 Intel Corporation
+#
+# This work is licensed under the terms of the MIT license.
+# For a copy, see <https://opensource.org/licenses/MIT>.
+"""
+ground truth localization. Publishes the following topics:
+    /ground_truth/current_velocty (geometry_msgs::TwistStamped)
+    /ground_truth/current_pose    (geometry_msgs::PoseStamped)
+"""
+import rospy
+import math
+import tf
+from geometry_msgs.msg import PoseStamped, TwistStamped
+from nav_msgs.msg import Odometry
+from helpers import LestTransformer
+
+
+class CarlaToAutowareLocalizer:
+
+    def __init__(self):
+
+        # Node parameters
+        self.use_offset = rospy.get_param("~use_offset", default=True)
+        self.role_name = rospy.get_param('~role_name', 'ego_vehicle')
+
+        # Publishers
+        self.pose_pub = rospy.Publisher(
+            '/ground_truth/current_pose', PoseStamped, queue_size=1)
+        self.twist_pub = rospy.Publisher(
+            '/ground_truth/current_velocity', TwistStamped, queue_size=1)
+
+        # Internal paramters
+        self.lest_transformer = LestTransformer()
+        self.br = tf.TransformBroadcaster()
+        self.tf_listener = tf.TransformListener()
+
+        # Subscribers
+        rospy.Subscriber('/carla/odometry'.format(self.role_name),
+                         Odometry, self.odometry_callback)
+
+
+
+    def odometry_callback(self, data):
+        """
+        callback odometry
+        """
+
+        position = data.pose.pose.position
+        orientation = data.pose.pose.orientation
+
+        if self.use_offset:
+
+            # Lest transformations
+            position = self.lest_transformer.transform_position(position)
+            orientation = self.lest_transformer.transform_orientation(orientation)
+
+        # Odometry Pose
+        pose = PoseStamped()
+        pose.header = data.header
+        pose.pose.position = position
+        pose.pose.orientation = orientation
+
+        # Publish Transform
+        self.br.sendTransform((pose.pose.position.x, pose.pose.position.y, pose.pose.position.z),
+                              (pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w),
+                               rospy.Time.now(),
+                               self.role_name, '/map')
+
+        # Twist
+        linear = data.twist.twist.linear
+        angular = data.twist.twist.angular
+
+        # Publish current velocity
+        twist = TwistStamped()
+        twist.header = data.header
+        twist.header.frame_id = "base_link"     # Twist should be in base_link
+                                                # https://answers.ros.org/question/341161/reference-frames-of-odometry-message/
+        twist.twist.linear.x = math.sqrt(linear.x**2 + linear.y**2 + linear.z**2)
+        twist.twist.angular = angular
+        self.twist_pub.publish(twist)
+
+
+        current_pose = PoseStamped()
+        current_pose.header.frame_id = "base_link"
+        current_pose.header.stamp = pose.header.stamp
+        current_pose.pose.orientation.x = 0
+        current_pose.pose.orientation.y = 0
+        current_pose.pose.orientation.z = 0
+        current_pose.pose.orientation.w = 1
+
+        # Publish current pose
+        try:
+            self.tf_listener.lookupTransform("/map", current_pose.header.frame_id, rospy.Time.now())
+
+            # Should avoid wait for transform
+            # self.tf_listener.waitForTransform("/map", current_pose.header.frame_id,
+            #                                   current_pose.header.stamp, rospy.Duration(1.0))
+            current_pose = self.tf_listener.transformPose("/map", current_pose)
+
+            self.pose_pub.publish(current_pose)
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, Exception) as e:
+            rospy.logwarn("[%s] TF Failure transforming pose from base_link to map:\r\n %s"%(rospy.get_name(), e))
+        
+
+    def run(self):
+        rospy.spin()
+
+
+if __name__ == '__main__':
+    # log_level set to errors only
+    rospy.init_node('carla_to_autoware_localization', log_level=rospy.ERROR, anonymous=False)
+    node = CarlaToAutowareLocalizer()
+    node.run()

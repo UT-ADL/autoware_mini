@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name='host'                                                default='localhost' />
+    <arg name='port'                                                default='2000' />
+    <arg name='timeout'                                             default='100' />
+    <arg name='role_name'                                           default='ego_vehicle' />
+    <arg name="vehicle_filter"                                      default='utlexus*' />
+    <arg name="map_name"                                            default='' /><!-- Map to load on startup, this should match with CARLA environments-->
+    <arg name='use_lexus_model'                                     default='true'/>
+
+    <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
+    <arg if="$(eval 'tartu' in map_name.lower())"  name="spawn_point"    default="4.70, 342.07,36,0,0,-98" />
+    <arg if="$(eval map_name.lower() == 'town01')" name="spawn_point"    default="150,-133.5,10,0,0,0" />
+
+    <!-- Control -->
+    <arg name='passive'                                             default='' />     <!-- Enable/disable passive mode -->
+    <arg name='synchronous_mode_wait_for_vehicle_control_command'   default='false' /><!-- Synchronous mode-->
+    <arg name='fixed_delta_seconds'                                 default='0.05' />
+    <arg name='use_manual_control'                                  default='false' /><!-- Toggle manual control-->
+    <arg name="detector"                                            default="carla"/>
+    <arg name="use_cam"                                             default="false" />
+
+    <!-- Perception & Localization -->
+    <!-- <arg name="use_obstacle_detection"                              default="true" />
+    <arg name="use_tl_detection"                                    default="true" />  -->
+    <!-- <arg name="tl_grouping_file"                                    default="$(find autoware_mini)/maps/$(arg map_name)/vector_map/tl_stoplines_carla.json" /> -->
+    <!-- <arg name="localizer"                                           default="carla"    doc="{gpsins, ndt, carla}" />
+    <arg name="detector"                                            default="carla"/>
+    <arg name="use_cam"                                             default="$(arg use_cam)" />
+    <arg name="use_api"                                             default="$(arg use_api)" /> -->
+
+    <!-- Load correct sensor configurations-->
+    <arg if="$(eval arg('detector') == 'carla' and use_cam)"      name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_lidars_and_radars.json" />
+    <arg if="$(eval arg('detector') == 'carla' and not use_cam)"  name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_minimal.json" />
+    <arg if="$(eval arg('detector') != 'carla' and use_cam)"      name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors.json" />
+    <arg if="$(eval arg('detector') != 'carla' and not use_cam)"  name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_cam.json" />
+
+    
+    <!-- Scenario Runner args -->
+    <arg name='use_scenario_runner'                                 default='false'/>
+    <arg name='scenario_runner_path'                                default='$(optenv SCENARIO_RUNNER_ROOT)'/>
+    <!-- By default we use an example follow leading vehicle scenario file -->
+    <arg name='scenario_name'                                       default='FollowLeadingVehicle'/>
+    <arg name='scenario_file'                                       default='$(find autoware_mini)/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/>
+
+    <!-- Lexus model -->
+  <include if="$(arg use_lexus_model)" file="$(find vehicle_platform)/launch/sensors/lexus_model.launch" />
+    
+    <!--
+      ######################
+      ## CARLA ROS bridge ##
+      ######################
+    -->
+    <include file="$(find carla_ros_bridge)/launch/carla_ros_bridge.launch">
+      <arg name='host'                                              value='$(arg host)' />
+      <arg name='port'                                              value='$(arg port)' />
+      <!-- If using tartu map then run Tartu environment of Carla -->
+      <arg if="$(eval 'tartu' in arg('map_name').lower())"
+           name='town'                                              value='Tartu'/>
+      <arg unless="$(eval 'tartu' in arg('map_name').lower())"
+           name='town'                                              value='$(arg map_name)'/>
+      <arg name='timeout'                                           value='$(arg timeout)' />
+      <arg name='passive'                                           value='$(arg passive)' />
+      <arg name='synchronous_mode_wait_for_vehicle_control_command' value='$(arg synchronous_mode_wait_for_vehicle_control_command)' />
+      <arg name='fixed_delta_seconds'                               value='$(arg fixed_delta_seconds)' />
+    </include>
+
+    <!-- ====================================================================================================== -->
+  
+    <!--
+      #######################
+      ## CARLA Ego vehicle ##
+      #######################
+    -->
+    <include file="$(find carla_spawn_objects)/launch/carla_example_ego_vehicle.launch">
+    <!-- The ego vehicle, that will be controlled by an agent (e.g. carla_ad_agent) -->
+      <arg name="objects_definition_file"               value='$(arg objects_definition_file)' />
+      <arg name='role_name'                             value='$(arg role_name)' />
+      <arg name="spawn_point_ego_vehicle"               value="$(arg spawn_point)" />
+      <arg name="spawn_sensors_only"                    value="false" />
+    </include>
+  
+    <group if='$(arg use_manual_control)'>
+      <!-- carla manual control -->
+      <include file='$(find carla_manual_control)/launch/carla_manual_control.launch'>
+        <arg name='role_name' value='$(arg role_name)' />
+      </include>
+    </group>
+
+    <group unless='$(arg use_manual_control)'>
+      <!-- carla ackermann control -->
+      <include file='$(find carla_ackermann_control)/launch/carla_ackermann_control.launch'>
+        <arg name='role_name' value='$(arg role_name)' />
+      </include>
+      <!-- tune carla ackermann controller parameters -->
+      <node name='$(anon dynparam)' pkg='dynamic_reconfigure' type='dynparam'
+        args='set_from_parameters carla/ego_vehicle/ackermann_control'>
+        <param name='speed_Kp' type='double' value='0.15' />
+        <param name='speed_Ki' type='double' value='0.0' />
+        <param name='speed_Kd' type='double' value='0.4' />
+  
+        <param name='accel_Kp' type='double' value='0.03' />
+        <param name='accel_Ki' type='double' value='0.0' />
+        <param name='accel_Kd' type='double' value='0.05' />
+      </node>
+    </group>
+
+    <!-- ====================================================================================================== -->
+
+    <!--
+      ########################################
+      ## CARLA Autoware bridge (Converters) ##
+      ########################################
+    -->
+    <!-- <include file='$(find carla_autoware_bridge)/launch/autoware_bridge.launch'>
+        <arg name='role_name'                     value='$(arg role_name)'/>
+        <arg name='map_name'                      value='$(arg map_name)' />
+        <arg name="use_obstacle_detection"        value="$(arg use_obstacle_detection)" />
+        <arg name="use_tl_detection"              value="$(arg use_tl_detection)" />
+        <arg name="use_cam"                       value="$(arg use_cam)" />
+        <arg name="use_api"                       value="$(arg use_api)" />
+        <arg name="tl_grouping_file"              value="$(arg tl_grouping_file)" />
+        <arg name="localizer"                     value="$(arg localizer)" />
+        <arg name="detector"                      value="$(arg detector)" />
+    </include> -->
+
+    <!-- ====================================================================================================== -->
+
+    <!--
+      ##############################################
+      ## Scenario Runner with given scenario file ##
+      ##############################################
+    -->
+  <group if="$(arg use_scenario_runner)">
+    <include  file="$(find carla_waypoint_publisher)/launch/carla_waypoint_publisher.launch">
+      <arg name='host'      value='$(arg host)'/>
+      <arg name='port'      value='$(arg port)'/>
+      <arg name='timeout'   value='$(arg timeout)'/>
+      <arg name='role_name' value='$(arg role_name)'/>
+    </include>
+
+    <include file="$(find carla_ros_scenario_runner)/launch/carla_ros_scenario_runner.launch">
+      <arg name='host'                  value='$(arg host)'/>
+      <arg name='port'                  value='$(arg port)'/>
+      <arg name="role_name"             value="$(arg role_name)"/>
+      <arg name="scenario_runner_path"  value="$(arg scenario_runner_path)"/>
+      <arg name="wait_for_ego"          value="True"/>
+    </include>
+
+    <node pkg="rostopic" type="rostopic" name="publish_scenarios"
+    args="pub /carla/available_scenarios carla_ros_scenario_runner_types/CarlaScenarioList '{ 'scenarios':  
+      [
+        {
+          'name': '$(arg scenario_name)',
+          'scenario_file': '$(arg scenario_file)'
+        }
+      ]
+    }' -l"/>
+  
+    <node pkg="rosservice" type="rosservice" name="vehicle_scenario" 
+    args="call --wait /scenario_runner/execute_scenario 
+    '{ 'scenario': 
+      { 'scenario_file': '$(arg scenario_file)' } 
+    }'
+    "/>
+
+  </group>
+
+  <!-- ====================================================================================================== -->
+
+</launch>
