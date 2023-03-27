@@ -63,7 +63,6 @@ class StanleyFollower:
         # prepare waypoints for nearest neighbor search
         waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in path_msg.waypoints])
         waypoint_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(waypoints_xy)
-        print(self.nearest_neighbor_search)
         self.lock.acquire()
         self.waypoint_tree = waypoint_tree
         self.waypoints = path_msg.waypoints

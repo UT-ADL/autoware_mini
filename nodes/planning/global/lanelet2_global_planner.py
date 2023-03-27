@@ -25,14 +25,14 @@ class Lanelet2GlobalPlanner:
     def __init__(self):
 
         # Parameters
-        self.lanelet2_map = rospy.get_param("~lanelet2_map")
+        self.lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
 
         # Internal variables
         self.current_location = None
         self.goal_point = None
         self.waypoints = []
-        self.map = None
+        self.Lanelet2_map = None
         self.output_frame = "map"
 
         # traffic rules
@@ -43,14 +43,14 @@ class Lanelet2GlobalPlanner:
         self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
 
         #Subscribers
-        #self.sub = rospy.Subscriber('lanelet_map_bin', MapBin, self.map_callback, queue_size=1)
+        #self.sub = rospy.Subscriber('lanelet_map_bin', MapBin, self.lanelet2_map_callback, queue_size=1)
         self.sub = rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
         self.sub = rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
         self.sub = rospy.Subscriber('cancel_global_path', Bool, self.cancel_global_path_callback, queue_size=1)
 
         # Load lanelet map - TODO: should be replaced by loading from the topic
         projector = UtmProjector(Origin(58.385345, 26.726272))
-        self.map = load(self.lanelet2_map, projector)
+        self.lanelet2_map = load(self.lanelet2_map_name, projector)
 
     def goal_callback(self, msg):
 
@@ -59,7 +59,7 @@ class Lanelet2GlobalPlanner:
             rospy.logwarn("lanelet2_global_planner - current_pose not available")
             return
 
-        if self.map == None:
+        if self.lanelet2_map == None:
             rospy.logwarn("lanelet2_global_planner - lanelet2 map not available")
             return
 
@@ -68,8 +68,8 @@ class Lanelet2GlobalPlanner:
         new_goal = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
 
         # Get nearest lanelets
-        goal_lanelet = self.map.laneletLayer.nearest(new_goal, 1)[0]
-        start_lanelet = self.map.laneletLayer.nearest(start_point, 1)[0]
+        goal_lanelet = self.lanelet2_map.laneletLayer.nearest(new_goal, 1)[0]
+        start_lanelet = self.lanelet2_map.laneletLayer.nearest(start_point, 1)[0]
 
         if distance(start_point, to2D(start_lanelet.centerline)) > self.distance_to_centerline_limit:
             rospy.logwarn("lanelet2_global_planner - start point too far from centerline")
@@ -79,7 +79,7 @@ class Lanelet2GlobalPlanner:
             rospy.logwarn("lanelet2_global_planner - goal point too far from centerline")
             return
 
-        graph = lanelet2.routing.RoutingGraph(self.map, self.traffic_rules)
+        graph = lanelet2.routing.RoutingGraph(self.lanelet2_map, self.traffic_rules)
         route = graph.getRoute(start_lanelet, goal_lanelet, 0, True)        # lanelet2.routing.Route
         if route == None:
             rospy.logwarn("lanelet2_global_planner - no route found, try new goal!")
@@ -116,13 +116,6 @@ class Lanelet2GlobalPlanner:
 
         for lanelet in lanelet_sequence:
             blinker = LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP[lanelet.attributes['turn_direction']]
-
-            # print(lanelet.centerline)
-            # print(lanelet.centerline.to_list())
-            # print(len(lanelet.centerline))
-
-            # TODO: add to lits, for x and y - convert to arrays and use np.diff
-            # then calc the pose orientation from the diff
 
             # loop over centerline points use enumerate to get index
             for idx, point in enumerate(lanelet.centerline):
