@@ -26,6 +26,7 @@ class Lanelet2GlobalPlanner:
 
         # Parameters
         self.lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
+        self.output_frame = rospy.get_param("~output_frame", map)
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
 
         # Internal variables
@@ -33,24 +34,22 @@ class Lanelet2GlobalPlanner:
         self.goal_point = None
         self.waypoints = []
         self.Lanelet2_map = None
-        self.output_frame = "map"
+
+        # Load lanelet map
+        projector = UtmProjector(Origin(58.385345, 26.726272))
+        self.lanelet2_map = load(self.lanelet2_map_name, projector)
 
         # traffic rules
         self.traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
                                                   lanelet2.traffic_rules.Participants.Vehicle)
-        
+
         #Publishers
         self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
 
         #Subscribers
-        #self.sub = rospy.Subscriber('lanelet_map_bin', MapBin, self.lanelet2_map_callback, queue_size=1)
         self.sub = rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
         self.sub = rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
         self.sub = rospy.Subscriber('cancel_global_path', Bool, self.cancel_global_path_callback, queue_size=1)
-
-        # Load lanelet map - TODO: should be replaced by loading from the topic
-        projector = UtmProjector(Origin(58.385345, 26.726272))
-        self.lanelet2_map = load(self.lanelet2_map_name, projector)
 
     def goal_callback(self, msg):
 
