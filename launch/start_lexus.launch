@@ -8,15 +8,6 @@
     <arg name="use_detection"           default="false"         doc="use object detection" />    
     <arg name="max_speed"               default="30" />
     
-    <!-- Vehicle platform -->
-    <include file="$(find vehicle_platform)/launch/platform.launch" >
-        <arg name="use_tf"          value="true" />
-        <arg name="use_lexus_model" value="true" />
-        <arg name="use_gnss"        value="true" />
-        <arg name="use_dbw"         value="true" />
-        <arg name="use_ssc"         value="true" />
-    </include>
-
     <!-- Localizer -->
     <include file="$(find autoware_mini)/launch/localization.launch" />
 
@@ -36,7 +27,7 @@
     </include>
 
     <!-- Vehicle -->
-    <include file="$(find autoware_mini)/launch/vehicle.launch" >
+    <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
         <arg name="max_speed" value="$(arg max_speed)" />
     </include>
 

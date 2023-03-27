@@ -31,12 +31,8 @@ The key modules of Autoware Mini are:
 
 2. Clone the repo
    ```
-   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware_mini.git
-   # if using Carla with simulator
-   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/simulations/carla_ros_bridge.git
-   # if using on real vehicle
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/vehicle_platform.git
-   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/ouster-driver.git
+   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware_mini.git
    ```
 
 3. Install system dependencies
@@ -62,7 +58,7 @@ The key modules of Autoware Mini are:
 roslaunch autoware_mini start_sim.launch
 ```
 
-You should see Rviz windows with a default path. You need to give the vehicle initial position with 2D Pose Estimate button.
+You should see Rviz window with a default map. You need to give the vehicle initial position with 2D Pose Estimate button and goal using 2D Nav Goal button.
 
 ## Launching with Carla
 

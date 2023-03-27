@@ -2,12 +2,20 @@
 <launch>
     <arg name="max_speed"   default="30"/>
 
+    <!-- Vehicle platform -->
+    <include file="$(find vehicle_platform)/launch/platform.launch" >
+        <arg name="use_tf"          value="true" />
+        <arg name="use_lexus_model" value="true" />
+        <arg name="use_gnss"        value="true" />
+        <arg name="use_dbw"         value="true" />
+        <arg name="use_ssc"         value="true" />
+    </include>
+
     <group ns="vehicle">
 
         <!-- Remap topics -->
         <remap from="current_pose"     to="/localization/current_pose" />
         <remap from="vehicle_cmd"      to="/control/vehicle_cmd" />
-
 
         <!-- SSC interface -->
         <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true" >
