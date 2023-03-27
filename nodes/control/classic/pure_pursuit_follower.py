@@ -5,10 +5,10 @@ import math
 import message_filters
 import threading
 import numpy as np
-from sklearn.neighbors import KDTree
+from sklearn.neighbors import NearestNeighbors
 
 from helpers import get_heading_from_pose_orientation, get_heading_between_two_points, get_blinker_state, \
-    normalize_heading_error, get_point_on_path_within_distance, get_closest_point, \
+    normalize_heading_error, get_point_on_path_within_distance, get_closest_point_on_line, \
     get_cross_track_error
 
 from visualization_msgs.msg import MarkerArray, Marker
@@ -27,6 +27,7 @@ class PurePursuitFollower:
         self.heading_angle_limit = rospy.get_param("~heading_angle_limit", 90.0)
         self.lateral_error_limit = rospy.get_param("~lateral_error_limit", 2.0)
         self.publish_debug_info = rospy.get_param("~publish_debug_info", False)
+        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
 
         # Variables - init
         self.waypoint_tree = None
@@ -60,9 +61,9 @@ class PurePursuitFollower:
             self.lock.release()
             return
 
-        # create kd-tree for nearest neighbor search
+        # prepare waypoints for nearest neighbor search
         waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in path_msg.waypoints])
-        waypoint_tree = KDTree(waypoints_xy)
+        waypoint_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(waypoints_xy)
         self.lock.acquire()
         self.waypoint_tree = waypoint_tree
         self.waypoints = path_msg.waypoints
@@ -98,7 +99,7 @@ class PurePursuitFollower:
             return
 
         # get nearest point on path from base_link
-        nearest_point = get_closest_point(current_pose.position, waypoints[back_wp_idx].pose.pose.position, waypoints[front_wp_idx].pose.pose.position)
+        nearest_point = get_closest_point_on_line(current_pose.position, waypoints[back_wp_idx].pose.pose.position, waypoints[front_wp_idx].pose.pose.position)
         
         # calc lookahead distance (velocity * planning_time)
         lookahead_distance = current_velocity * self.planning_time
@@ -139,7 +140,7 @@ class PurePursuitFollower:
 
 
     def find_two_nearest_waypoint_idx(self, waypoint_tree, x, y):
-        _, idx = waypoint_tree.query([(x, y)], 2)
+        idx = waypoint_tree.kneighbors([(x, y)], 2, return_distance=False)
         # sort to get them in ascending order - follow along path
         idx[0].sort()
         return idx[0][0], idx[0][1]

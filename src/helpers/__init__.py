@@ -103,7 +103,7 @@ def normalize_heading_error(err):
     return err
 
 
-def get_closest_point(ego_point, point1, point2):
+def get_closest_point_on_line(ego_point, point1, point2):
     """
     Calculates closest point on path. Constructs one line that is given by two points and
     the other line is given by a point and is known to be perpendicular to the first line.

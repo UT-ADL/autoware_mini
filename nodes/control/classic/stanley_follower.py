@@ -5,10 +5,10 @@ import math
 import message_filters
 import threading
 import numpy as np
-from sklearn.neighbors import KDTree
+from sklearn.neighbors import NearestNeighbors
 
 from helpers import get_heading_from_pose_orientation, get_blinker_state, get_heading_between_two_points, \
-    get_closest_point, get_point_on_path_within_distance, get_cross_track_error, \
+    get_closest_point_on_line, get_point_on_path_within_distance, get_cross_track_error, \
     get_pose_using_heading_and_distance, normalize_heading_error
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
@@ -25,6 +25,7 @@ class StanleyFollower:
         self.heading_angle_limit = rospy.get_param("~heading_angle_limit", 90.0)
         self.lateral_error_limit = rospy.get_param("~lateral_error_limit", 2.0)
         self.publish_debug_info = rospy.get_param("~publish_debug_info", False)
+        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
 
         # Variables - init
         self.waypoint_tree = None
@@ -52,15 +53,17 @@ class StanleyFollower:
 
         if len(path_msg.waypoints) == 0:
             # if path is cancelled and empty waypoints received
+            rospy.logwarn_throttle(30, "stanley_follower - no waypoints received or path cancelled, stopping!")
             self.lock.acquire()
             self.waypoint_tree = None
             self.waypoints = None
             self.lock.release()
             return
 
-        # create kd-tree for nearest neighbor search
+        # prepare waypoints for nearest neighbor search
         waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in path_msg.waypoints])
-        waypoint_tree = KDTree(waypoints_xy)
+        waypoint_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(waypoints_xy)
+        print(self.nearest_neighbor_search)
         self.lock.acquire()
         self.waypoint_tree = waypoint_tree
         self.waypoints = path_msg.waypoints
@@ -82,7 +85,6 @@ class StanleyFollower:
         if waypoint_tree is None:
             # if no waypoints received yet or global_path cancelled, stop the vehicle
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
-            rospy.logwarn_throttle(30, "stanley_follower - no waypoints received or path cancelled, stopping!")
             return
 
         if self.publish_debug_info:
@@ -102,7 +104,7 @@ class StanleyFollower:
             rospy.logwarn_throttle(10, "stanley_follower - last waypoint reached")
             return
     
-        bl_nearest_point = get_closest_point(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
+        bl_nearest_point = get_closest_point_on_line(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
         lookahead_point = get_point_on_path_within_distance(waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
 
         track_heading = get_heading_between_two_points(bl_nearest_point, lookahead_point)
@@ -129,7 +131,7 @@ class StanleyFollower:
             self.follower_debug_pub.publish(Float32MultiArray(data=[(rospy.get_time() - start_time), current_heading, track_heading, heading_error, cross_track_error, target_velocity]))
 
     def find_two_nearest_waypoint_idx(self, waypoint_tree, x, y):
-        _, idx = waypoint_tree.query([(x, y)], 2)
+        idx = waypoint_tree.kneighbors([(x, y)], 2, return_distance=False)
         # sort to get them in ascending order - follow along path
         idx[0].sort()
         return idx[0][0], idx[0][1]

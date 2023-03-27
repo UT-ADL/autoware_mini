@@ -39,14 +39,14 @@ class Lanelet2GlobalPlanner:
         self.traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
                                                   lanelet2.traffic_rules.Participants.Vehicle)
         
+        #Publishers
+        self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
+
         #Subscribers
         #self.sub = rospy.Subscriber('lanelet_map_bin', MapBin, self.map_callback, queue_size=1)
         self.sub = rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
         self.sub = rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
         self.sub = rospy.Subscriber('cancel_global_path', Bool, self.cancel_global_path_callback, queue_size=1)
-
-        #Publishers
-        self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
 
         # Load lanelet map - TODO: should be replaced by loading from the topic
         projector = UtmProjector(Origin(58.385345, 26.726272))
@@ -116,6 +116,13 @@ class Lanelet2GlobalPlanner:
 
         for lanelet in lanelet_sequence:
             blinker = LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP[lanelet.attributes['turn_direction']]
+
+            # print(lanelet.centerline)
+            # print(lanelet.centerline.to_list())
+            # print(len(lanelet.centerline))
+
+            # TODO: add to lits, for x and y - convert to arrays and use np.diff
+            # then calc the pose orientation from the diff
 
             # loop over centerline points use enumerate to get index
             for idx, point in enumerate(lanelet.centerline):
