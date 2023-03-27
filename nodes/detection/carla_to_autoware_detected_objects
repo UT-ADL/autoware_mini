@@ -63,9 +63,9 @@ class CarlaToAutowareDetectedObjects:
             object_msg.space_frame = 'map'
             object_msg.pose = obj.pose
 
-            if self.use_offset:
-                object_msg.pose.position = self.lest_transformer.transform_position(object_msg.pose.position)
-                object_msg.pose.orientation = self.lest_transformer.transform_orientation(object_msg.pose.orientation)
+            # if self.use_offset:
+            #     object_msg.pose.position = self.lest_transformer.transform_position(object_msg.pose.position)
+            #     object_msg.pose.orientation = self.lest_transformer.transform_orientation(object_msg.pose.orientation)
 
             # Correct height of ground truth obstacles except pedestrians
             if obj.classification != CLASSIFICATION_PEDESTRIAN:

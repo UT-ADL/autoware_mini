@@ -18,6 +18,16 @@
 
         <rosparam command="load" file="$(find autoware_mini)/config/control.yaml"/>
 
+
+        <!-- convert twist to carla ackermann drive-->
+        <node pkg='autoware_mini' type='vehiclecmd_to_ackermanndrive' name='vehiclecmd_to_ackermanndrive' output='screen'>
+            <!-- <param name="role_name" value="$(arg role_name)"/> -->
+        </node>
+
+        <node pkg='autoware_mini' type='carla_to_autoware_vehicle_status' name='carla_to_autoware_vehicle_status' output='screen'>
+            <!-- <param name="role_name" value="$(arg role_name)"/> -->
+        </node>
+
     </group>
 
 </launch>

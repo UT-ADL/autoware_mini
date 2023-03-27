@@ -15,6 +15,11 @@
     <arg name='scenario_runner_path'        default='$(optenv SCENARIO_RUNNER_ROOT)'/>
     <arg name='scenario_name'               default='FollowLeadingVehicle'/>
     <arg name='scenario_file'               default='temp.xosc'/>
+
+    <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
+    <arg name="planner"                 default="lanelet2"      doc="waypoints, lanelet2" />
+    <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
+    <arg name="lanelet2_map"            default="tartu_demo_l_c_wp.osm" />
     <!-- <arg name='scenario_file'               default='$(find autoware_ut)/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/> -->
 
 
@@ -26,6 +31,19 @@
         <arg name="use_dbw"         value="false" />
         <arg name="use_ssc"         value="false" />
     </include> -->
+
+
+    <!-- Planner -->
+    <include file="$(find autoware_mini)/launch/planning.launch">
+        <arg name="planner"         value="$(arg planner)" />
+        <arg name="waypoints_file"  value="$(arg waypoints_file)" />
+        <arg name="lanelet2_map"    value="$(arg lanelet2_map)" />
+    </include>
+
+    <!-- Follower -->
+    <include file="$(find autoware_mini)/launch/control.launch">
+        <arg name="follower" value="$(arg follower)" />
+    </include>
 
     <!-- Localization -->
     <include file="$(find autoware_mini)/launch/localization.launch">
@@ -55,6 +73,6 @@
     </include>
 
     <!-- Rviz -->
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="false" />
 
 </launch>

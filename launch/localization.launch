@@ -11,8 +11,8 @@
 
         <group if="$(eval arg('localizer') =='carla')">
             <node pkg='autoware_mini' type='carla_to_autoware_localization' name='carla_to_autoware_localization' output='screen'>
-                <remap from='/ground_truth/current_pose' to='/current_pose' />
-                <remap from='/ground_truth/current_velocity' to='/current_velocity' />
+                <remap from='/ground_truth/current_pose' to='current_pose' />
+                <remap from='/ground_truth/current_velocity' to='current_velocity' />
             </node>
         </group>
 

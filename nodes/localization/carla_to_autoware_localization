@@ -12,7 +12,7 @@ ground truth localization. Publishes the following topics:
 import rospy
 import math
 import tf
-from geometry_msgs.msg import PoseStamped, TwistStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped, Pose, Point
 from nav_msgs.msg import Odometry
 from helpers import LestTransformer
 
@@ -39,7 +39,10 @@ class CarlaToAutowareLocalizer:
         # Subscribers
         rospy.Subscriber('/carla/odometry'.format(self.role_name),
                          Odometry, self.odometry_callback)
-
+        
+        # self.init_pose = Pose()
+        self.init_position = Point(4.70, 342.07, 36)
+        self.init_orientation = None
 
 
     def odometry_callback(self, data):
@@ -50,11 +53,11 @@ class CarlaToAutowareLocalizer:
         position = data.pose.pose.position
         orientation = data.pose.pose.orientation
 
-        if self.use_offset:
+        # if self.use_offset:
 
-            # Lest transformations
-            position = self.lest_transformer.transform_position(position)
-            orientation = self.lest_transformer.transform_orientation(orientation)
+        #     # Lest transformations
+        #     position = self.lest_transformer.transform_position(position)
+        #     orientation = self.lest_transformer.transform_orientation(orientation)
 
         # Odometry Pose
         pose = PoseStamped()
@@ -62,8 +65,11 @@ class CarlaToAutowareLocalizer:
         pose.pose.position = position
         pose.pose.orientation = orientation
 
+        if self.init_orientation is None:
+            self.init_orientation = orientation
+
         # Publish Transform
-        self.br.sendTransform((pose.pose.position.x, pose.pose.position.y, pose.pose.position.z),
+        self.br.sendTransform((pose.pose.position.x - self.init_position.x, pose.pose.position.y - self.init_position.y, pose.pose.position.z - self.init_position.z),
                               (pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w),
                                rospy.Time.now(),
                                self.role_name, '/map')
