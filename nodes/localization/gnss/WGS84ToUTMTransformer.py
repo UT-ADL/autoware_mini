@@ -7,7 +7,7 @@ from lanelet2.projection import UtmProjector
 
 
 class WGS84ToUTMTransformer:
-    def __init__(self, use_custom_origin, origin_lat=58.385345, origin_lon=26.726272):
+    def __init__(self, use_custom_origin, origin_lat, origin_lon):
 
         self.origin = Origin(origin_lat, origin_lon)
         # find out zone number, multiply with width of zone (6 degrees) and add 3 degrees to get central meridian

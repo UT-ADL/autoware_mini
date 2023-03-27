@@ -2,7 +2,6 @@
 
 import rospy
 from lanelet2_map_visualizer import visualize_lanelet2_map
-import lanelet2
 from lanelet2.io import Origin, loadRobust
 from lanelet2.projection import UtmProjector
 
@@ -16,12 +15,22 @@ class Lanelet2MapLoader:
     
         # Parameters
         self.lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
+        
+        self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
+        self.use_custom_origin = rospy.get_param("/localization/use_custom_origin")
+        self.utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
+        self.utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
         # create MarkerArray publisher
         self.markers_pub = rospy.Publisher('lanelet2_map_markers', MarkerArray, queue_size=1, latch=True)
 
         # Load the map using Lanelet2
-        projector = UtmProjector(Origin(58.385345, 26.726272))
+        if self.coordinate_transformer == "utm" and self.use_custom_origin:
+                projector = UtmProjector(Origin(self.utm_origin_lat, self.utm_origin_lon))
+        else:
+            rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            exit(1)
+
         map, errors = loadRobust(self.lanelet2_map_name, projector)
 
         if len(errors) > 0:

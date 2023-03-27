@@ -28,6 +28,11 @@ class Lanelet2GlobalPlanner:
         self.lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         self.output_frame = rospy.get_param("~output_frame", map)
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
+        
+        self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
+        self.use_custom_origin = rospy.get_param("/localization/use_custom_origin")
+        self.utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
+        self.utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
         # Internal variables
         self.current_location = None
@@ -36,7 +41,12 @@ class Lanelet2GlobalPlanner:
         self.Lanelet2_map = None
 
         # Load lanelet map
-        projector = UtmProjector(Origin(58.385345, 26.726272))
+        if self.coordinate_transformer == "utm" and self.use_custom_origin:
+                projector = UtmProjector(Origin(self.utm_origin_lat, self.utm_origin_lon))
+        else:
+            rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            exit(1)
+
         self.lanelet2_map = load(self.lanelet2_map_name, projector)
 
         # traffic rules
