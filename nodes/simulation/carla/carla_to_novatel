@@ -25,7 +25,6 @@ class CarlaToNovaltel():
         self.velocity = None
         self.gnss_forward_data = None
 
-
     def odometry_callback(self, data):
         """
         callback odometry
