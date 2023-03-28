@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/usr/bin/env python
 
 import rospy
@@ -9,6 +10,13 @@ from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from std_msgs.msg import ColorRGBA
 
 =======
+<<<<<<< HEAD
+=======
+#!/usr/bin/env python3
+
+import rospy
+import threading
+>>>>>>> Added basic obstacle simulation node. Reorganize simulation and obstacle detection code a bit.
 import math
 import cv2
 
