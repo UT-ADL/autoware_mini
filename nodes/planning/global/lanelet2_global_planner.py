@@ -13,6 +13,8 @@ from sklearn.neighbors import KDTree
 from geometry_msgs.msg import PoseStamped
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
 from std_msgs.msg import Bool
+from tf.transformations import quaternion_from_euler
+from helpers import get_heading_between_two_points
 
 LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
     "straight": WaypointState.STR_STRAIGHT,
@@ -28,7 +30,8 @@ class Lanelet2GlobalPlanner:
         self.lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         self.output_frame = rospy.get_param("~output_frame", map)
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
-        
+        self.speed_limit = rospy.get_param("~speed_limit", 40.0) / 3.6
+
         self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
         self.use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         self.utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
@@ -123,22 +126,40 @@ class Lanelet2GlobalPlanner:
     def convert_to_waypoints(self, lanelet_sequence):
         waypoints = []
 
-        for lanelet in lanelet_sequence:
+        last_lanelet = False
+
+        for i , lanelet in enumerate(lanelet_sequence):
             blinker = LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP[lanelet.attributes['turn_direction']]
+
+            if i == len(lanelet_sequence)-1:
+                last_lanelet = True
 
             # loop over centerline points use enumerate to get index
             for idx, point in enumerate(lanelet.centerline):
-                if idx == 0:
-                    # skip first point on every lanelet, because it is the same as the last point of the previous lanelet
-                    continue
+                if not last_lanelet and idx == len(lanelet.centerline)-1:
+                    # skip last point on every lanelet (except last), because it is the same as the first point of the following lanelet
+                    break
                 waypoint = Waypoint()
                 waypoint.pose.pose.position.x = point.x
                 waypoint.pose.pose.position.y = point.y
                 waypoint.pose.pose.position.z = point.z
                 waypoint.wpstate.steering_state = blinker
-                # TODO: add speeds to lanelets (speed_limit) or use traffic rules. For now, use constant speed
-                # Later curvature based speed adjustment
-                waypoint.twist.twist.linear.x = 4.0
+
+                # calculate quaternion for orientation
+                if last_lanelet and idx == len(lanelet.centerline)-1:
+                    # use heading of previous point - last point of last lanelet has no following point
+                    heading = get_heading_between_two_points(lanelet.centerline[idx-1], lanelet.centerline[idx])
+                else:
+                    heading = get_heading_between_two_points(lanelet.centerline[idx], lanelet.centerline[idx+1])
+                x, y, z, w = quaternion_from_euler(0, 0, heading)
+                waypoint.pose.pose.orientation.x = x
+                waypoint.pose.pose.orientation.y = y
+                waypoint.pose.pose.orientation.z = z
+                waypoint.pose.pose.orientation.w = w
+
+                # TODO: will be replaced by speed from map
+                waypoint.twist.twist.linear.x = self.speed_limit
+
                 waypoints.append(waypoint)
 
         # build KDTree for nearest neighbour search
