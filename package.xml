@@ -12,6 +12,7 @@
   <exec_depend>tf</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>message_filters</exec_depend>
+  <exec_depend>ros_numpy</exec_depend>
   <exec_depend>lanelet2</exec_depend>
   <exec_depend>rviz</exec_depend>
   <exec_depend>joy</exec_depend>
