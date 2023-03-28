@@ -1,0 +1,12 @@
+lanelet2_global_planner:
+  output_frame: map
+  distance_to_centerline_limit: 5.0
+  speed_limit: 40.0                   # max velocity for route (km/h), will be replaced by speed taken from map
+
+waypoint_loader:
+  output_frame: map
+  wp_left_width: 1.4
+  wp_right_width: 1.4
+
+waypoint_saver:
+  interval: 1.0

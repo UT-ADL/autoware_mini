@@ -87,17 +87,14 @@ def get_pose_using_heading_and_distance(start_pose, heading, distance):
 
     return pose
 
-def get_relative_heading_error(path_heading, current_heading):
+def normalize_heading_error(err):
     """
-    Get heading error relative to path using current heading and path heading
-    Input angles are within range [-pi, pi] and it needs to be considered when calculating the error
-    and to retain the information of the direction of the error.
-    :param path_heading: path heading error in radians
-    :param current_heading: ego car current heading in radians
+    Get heading error relative to path
+    Previously subtracted track and current heading need to be normilized, since the original
+    heading angles are within range [-pi, pi]
+    :param err: heading error
     :return err: steering difference in radians
     """
-
-    err = (path_heading - current_heading)
 
     if err > math.pi:
         err -= 2 * math.pi
@@ -107,7 +104,7 @@ def get_relative_heading_error(path_heading, current_heading):
     return err
 
 
-def get_closest_point(ego_point, point1, point2):
+def get_closest_point_on_line(ego_point, point1, point2):
     """
     Calculates closest point on path. Constructs one line that is given by two points and
     the other line is given by a point and is known to be perpendicular to the first line.
@@ -167,7 +164,7 @@ def get_distance_between_two_points(point1, point2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
-def get_point_on_path_within_distance(waypoints, last_idx, front_wp_idx, start_point, distance):
+def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, distance):
     """
     Get point on path within distance from ego pose
     :param waypoints: waypoints
@@ -179,6 +176,7 @@ def get_point_on_path_within_distance(waypoints, last_idx, front_wp_idx, start_p
     """
 
     point = Point()
+    last_idx = len(waypoints) - 1
 
     i = front_wp_idx
     d = get_distance_between_two_points(start_point, waypoints[i].pose.pose.position)

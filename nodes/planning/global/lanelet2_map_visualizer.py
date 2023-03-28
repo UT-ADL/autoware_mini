@@ -8,11 +8,10 @@ RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
 YELLOW = ColorRGBA(1.0, 1.0, 0.0, 0.8)
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.8)
 
-GREY = ColorRGBA(0.4, 0.4, 0.4, 0.4)
-BLUE = ColorRGBA(0.0, 0.0, 1.0, 0.4)
-ORANGE = ColorRGBA(1.0, 0.5, 0.0, 0.4)
-WHITE = ColorRGBA(1.0, 1.0, 1.0, 0.4)
-CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.1)
+GREY = ColorRGBA(0.4, 0.4, 0.4, 0.6)
+ORANGE = ColorRGBA(1.0, 0.5, 0.0, 0.6)
+WHITE = ColorRGBA(1.0, 1.0, 1.0, 0.6)
+CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.3)
 
 LANELET_COLOR_TO_MARKER_COLOR = {
     "red": RED,
@@ -27,30 +26,30 @@ def visualize_lanelet2_map(map):
     marker_array = MarkerArray()
 
     # Visualize different parts of the map
-    lanelet_markers = visualize_laneltLayer(map.laneletLayer)
+    lanelet_markers = visualize_laneltLayer(map)
     reg_el_markers = visualize_regulatoryElementLayer(map)
+    linestring_markers = visualize_lineStringLayer(map)
 
     # conactenate the MarkerArrays
-    marker_array.markers = lanelet_markers.markers + reg_el_markers.markers
-    
+    marker_array.markers = lanelet_markers.markers + reg_el_markers.markers + linestring_markers.markers
     return marker_array
 
 
-def visualize_laneltLayer(laneletLayer):
+def visualize_laneltLayer(map):
 
     # Create a MarkerArray
     marker_array = MarkerArray()
 
-    for lanelet in laneletLayer:
+    for lanelet in map.laneletLayer:
 
         stamp = rospy.Time.now()
-        
+
         # TODO bicycle_lane, bus_lane, emergency_lane, parking_lane, pedestrian_lane, sidewalk, special_lane, traffic_island, traffic_lane, traffic_zone, walkway        
         if lanelet.attributes["subtype"] == "road":
         
             # Create markers for the left, right boundary and centerline
-            left_boundary_marker = linestring_to_marker(lanelet.leftBound, "Left boundary", lanelet.id, YELLOW, 0.05, stamp)
-            right_boundary_marker = linestring_to_marker(lanelet.rightBound, "Right boundary", lanelet.id, WHITE, 0.05, stamp)
+            left_boundary_marker = linestring_to_marker(lanelet.leftBound, "Left boundary", lanelet.id, GREY, 0.1, stamp)
+            right_boundary_marker = linestring_to_marker(lanelet.rightBound, "Right boundary", lanelet.id, GREY, 0.1, stamp)
             centerline_marker = linestring_to_marker(lanelet.centerline, "Centerline", lanelet.id, CYAN, 1.5, stamp)
 
             # Add the markers to the MarkerArray
@@ -59,11 +58,13 @@ def visualize_laneltLayer(laneletLayer):
             marker_array.markers.append(centerline_marker)
 
         elif lanelet.attributes["subtype"] == "crosswalk":
-            left_crosswalk = linestring_to_marker(lanelet.leftBound, "Left boundary", lanelet.id, GREEN, 0.3, stamp)
-            right_crosswalk = linestring_to_marker(lanelet.rightBound, "Right boundary", lanelet.id, GREEN, 0.3, stamp)
 
-            marker_array.markers.append(left_crosswalk)
-            marker_array.markers.append(right_crosswalk)
+            points = [point for point in lanelet.leftBound]
+            points += [point for point in lanelet.rightBound.invert()]
+            points.append(lanelet.leftBound[0])
+
+            crosswalk_marker = linestring_to_marker(points, "Crosswalk", lanelet.id, ORANGE, 0.3, stamp)
+            marker_array.markers.append(crosswalk_marker)
 
     return marker_array
 
@@ -100,6 +101,22 @@ def visualize_regulatoryElementLayer(map):
                     marker_array.markers.append(marker)
 
         # TODO stop line, yield line, speed limit, etc.
+
+    return marker_array
+
+
+def visualize_lineStringLayer(map):
+
+    marker_array = MarkerArray()
+
+    for line in map.lineStringLayer:
+            # if has attributes
+            if line.attributes:
+                # select stop lines
+                if line.attributes["type"] == "stop_line":
+                    points = [point for point in line]
+                    stopline_marker = linestring_to_marker(points, "Stop line", line.id, WHITE, 0.5, rospy.Time.now())
+                    marker_array.markers.append(stopline_marker)
 
     return marker_array
 

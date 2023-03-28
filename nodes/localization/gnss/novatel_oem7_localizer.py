@@ -13,9 +13,13 @@ class NovatelOem7Localizer:
     def __init__(self):
 
         # Parameters
-        self.coordinate_transformer = rospy.get_param("~coordinate_transformer", "utm")
+        self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer", "utm")
+        self.use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
+        self.utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
+        self.utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
+        self.lest97_origin_northing = rospy.get_param("/localization/lest97_origin_northing")
+        self.lest97_origin_easting = rospy.get_param("/localization/lest97_origin_easting")
         self.use_msl_height = rospy.get_param("~use_msl_height", True)
-        self.use_custom_origin = rospy.get_param("~use_custom_origin", True)
 
         # variable to store undulation value from bestpos message
         self.undulation = 0.0
@@ -23,22 +27,22 @@ class NovatelOem7Localizer:
         # initialize coordinate_transformer
         if self.coordinate_transformer == "utm":
             import WGS84ToUTMTransformer
-            self.transfromer = WGS84ToUTMTransformer.WGS84ToUTMTransformer(self.use_custom_origin)
+            self.transfromer = WGS84ToUTMTransformer.WGS84ToUTMTransformer(self.use_custom_origin, self.utm_origin_lat, self.utm_origin_lon)
         elif self.coordinate_transformer == "lest97":
             import WGS84ToLest97Transformer
-            self.transfromer = WGS84ToLest97Transformer.WGS84ToLest97Transformer(self.use_custom_origin)
+            self.transfromer = WGS84ToLest97Transformer.WGS84ToLest97Transformer(self.use_custom_origin, self.lest97_origin_northing, self.lest97_origin_easting)
         else:
             rospy.logfatal("novatel_localizer - coordinate_transformer not supported: %s ", str(self.coordinate_transformer))
             exit(1)
 
+        # Publishers
+        self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
+        self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
+        
         # Subscribers
         if self.use_msl_height:
             self.bestpos_sub = rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback)
         self.inspva_sub = rospy.Subscriber('/novatel/oem7/inspva', INSPVA, self.inspva_callback)
-
-        # Publishers
-        self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
-        self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
 
         # output information to console
         rospy.loginfo("novatel_localizer - localizer initialized using %s coordinates", str(self.coordinate_transformer))

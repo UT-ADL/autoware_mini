@@ -17,8 +17,8 @@ class PointsClusterer:
 
         self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='ball_tree')
 
-        self.points_sub = rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=1024*1024)
-        self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=1)
+        self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=5)
+        rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=1024*1024)
 
     def points_callback(self, msg):
         data = numpify(msg)

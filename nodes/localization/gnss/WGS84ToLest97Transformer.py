@@ -8,7 +8,7 @@ class WGS84ToLest97Transformer:
     # https://epsg.io/3301
     # NB! axes: northing (origin_x), easting (origin_y)
 
-    def __init__(self, use_custom_origin, origin_x=6465000, origin_y=650000):
+    def __init__(self, use_custom_origin, origin_x, origin_y):
         
         self.use_custom_origin = use_custom_origin
         self.origin_x = origin_x

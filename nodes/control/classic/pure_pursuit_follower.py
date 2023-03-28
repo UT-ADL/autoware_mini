@@ -3,11 +3,12 @@
 import rospy
 import math
 import message_filters
+import threading
 import numpy as np
-from sklearn.neighbors import KDTree
+from sklearn.neighbors import NearestNeighbors
 
 from helpers import get_heading_from_pose_orientation, get_heading_between_two_points, get_blinker_state, \
-    get_relative_heading_error, get_point_on_path_within_distance, get_closest_point, \
+    normalize_heading_error, get_point_on_path_within_distance, get_closest_point_on_line, \
     get_cross_track_error
 
 from visualization_msgs.msg import MarkerArray, Marker
@@ -26,11 +27,18 @@ class PurePursuitFollower:
         self.heading_angle_limit = rospy.get_param("~heading_angle_limit", 90.0)
         self.lateral_error_limit = rospy.get_param("~lateral_error_limit", 2.0)
         self.publish_debug_info = rospy.get_param("~publish_debug_info", False)
+        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
 
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
-        self.last_wp_idx = 0
+        self.lock = threading.Lock()
+
+        # Publishers
+        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
+        if self.publish_debug_info:
+            self.pure_pursuit_markers_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
+            self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
 
         # Subscribers
         self.path_sub = rospy.Subscriber('path', Lane, self.path_callback)
@@ -39,12 +47,6 @@ class PurePursuitFollower:
         ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10, slop=0.1)
         ts.registerCallback(self.current_status_callback)
 
-        # Publishers
-        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
-        if self.publish_debug_info:
-            self.pure_pursuit_markers_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
-            self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
-
         # output information to console
         rospy.loginfo("pure_pursuit_follower - initialized")
 
@@ -52,62 +54,69 @@ class PurePursuitFollower:
         
         if len(path_msg.waypoints) == 0:
             # if path is cancelled and empty waypoints received
-            self.publish_vehicle_command(rospy.Time.now(), 0.0, 0.0, 0, 0)
+            rospy.logwarn_throttle(30, "pure_pursuit_follower - empty waypoints received, stopping!")
+            self.lock.acquire()
             self.waypoint_tree = None
             self.waypoints = None
-            self.last_wp_idx = 0
+            self.lock.release()
             return
 
+        # prepare waypoints for nearest neighbor search
+        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in path_msg.waypoints])
+        waypoint_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(waypoints_xy)
+        self.lock.acquire()
+        self.waypoint_tree = waypoint_tree
         self.waypoints = path_msg.waypoints
-        self.last_wp_idx = len(self.waypoints) - 1
-        # create kd-tree for nearest neighbor search
-        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in self.waypoints])
-        self.waypoint_tree = KDTree(waypoints_xy)
+        self.lock.release()
 
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
-        if self.waypoint_tree is None:
-            # if no waypoints received yet or global_path cancelled, stop the vehicle
-            self.publish_vehicle_command(rospy.Time.now(), 0.0, 0.0, 0, 0)
-            rospy.logwarn_throttle(30, "pure_pursuit_follower - no waypoints received or path cancelled, stopping!")
-            return
-
-        if self.publish_debug_info:
-            start_time = rospy.get_time()
+        self.lock.acquire()
+        waypoints = self.waypoints
+        waypoint_tree = self.waypoint_tree
+        self.lock.release()
 
         stamp = current_pose_msg.header.stamp
         current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
 
-        # Find 2 nearest waypoint idx's on path (from base_link)
-        back_wp_idx, front_wp_idx = self.find_two_nearest_waypoint_idx(current_pose.position.x, current_pose.position.y)
+        if waypoint_tree is None:
+            # if no waypoints received yet or global_path cancelled, stop the vehicle
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            return
 
-        if front_wp_idx == self.last_wp_idx:
+        if self.publish_debug_info:
+            start_time = rospy.get_time()
+
+        # Find 2 nearest waypoint idx's on path (from base_link)
+        back_wp_idx, front_wp_idx = self.find_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
+
+        if front_wp_idx == len(waypoints)-1:
             # stop vehicle - last waypoint is reached
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(10, "pure_pursuit_follower - last waypoint reached")
             return
 
         # get nearest point on path from base_link
-        nearest_point = get_closest_point(current_pose.position, self.waypoints[back_wp_idx].pose.pose.position, self.waypoints[front_wp_idx].pose.pose.position)
+        nearest_point = get_closest_point_on_line(current_pose.position, waypoints[back_wp_idx].pose.pose.position, waypoints[front_wp_idx].pose.pose.position)
         
         # calc lookahead distance (velocity * planning_time)
         lookahead_distance = current_velocity * self.planning_time
         if lookahead_distance < self.min_lookahead_distance:
             lookahead_distance = self.min_lookahead_distance
 
-        cross_track_error = get_cross_track_error(current_pose, self.waypoints[back_wp_idx].pose.pose, self.waypoints[front_wp_idx].pose.pose)
+        cross_track_error = get_cross_track_error(current_pose, waypoints[back_wp_idx].pose.pose, waypoints[front_wp_idx].pose.pose)
 
         # lookahead_point - point on the path within given lookahead distance
-        lookahead_point = get_point_on_path_within_distance(self.waypoints, self.last_wp_idx, front_wp_idx, nearest_point, lookahead_distance)
+        lookahead_point = get_point_on_path_within_distance(waypoints, front_wp_idx, nearest_point, lookahead_distance)
 
         # find current_heading, lookahead_heading, heading error and cross_track_error
         current_heading = get_heading_from_pose_orientation(current_pose)
         lookahead_heading = get_heading_between_two_points(current_pose.position, lookahead_point)
         heading_error = lookahead_heading - current_heading
 
-        heading_angle_difference = get_relative_heading_error(lookahead_heading, current_heading)
+        heading_angle_difference = normalize_heading_error(heading_error)
 
         if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_angle_difference)) > self.heading_angle_limit:
             # stop vehicle if cross track error or heading angle difference is over limit
@@ -120,8 +129,8 @@ class PurePursuitFollower:
         steering_angle = math.atan(self.wheel_base * curvature)
 
         # target_velocity and blinkers
-        target_velocity = self.waypoints[front_wp_idx].twist.twist.linear.x
-        left_blinker, right_blinker = get_blinker_state(self.waypoints[front_wp_idx].wpstate.steering_state)
+        target_velocity = waypoints[front_wp_idx].twist.twist.linear.x
+        left_blinker, right_blinker = get_blinker_state(waypoints[front_wp_idx].wpstate.steering_state)
 
         # Publish
         self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
@@ -130,8 +139,8 @@ class PurePursuitFollower:
             self.follower_debug_pub.publish(Float32MultiArray(data=[1.0 / (rospy.get_time() - start_time), current_heading, lookahead_heading, heading_error, cross_track_error, target_velocity]))
 
 
-    def find_two_nearest_waypoint_idx(self, x, y):
-        _, idx = self.waypoint_tree.query([(x, y)], 2)
+    def find_two_nearest_waypoint_idx(self, waypoint_tree, x, y):
+        idx = waypoint_tree.kneighbors([(x, y)], 2, return_distance=False)
         # sort to get them in ascending order - follow along path
         idx[0].sort()
         return idx[0][0], idx[0][1]

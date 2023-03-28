@@ -2,29 +2,20 @@
 <launch>
 
     <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
-    <arg name="planner"                 default="waypoints"     doc="waypoints, lanelet2" />
+    <arg name="planner"                 default="lanelet2"      doc="waypoints, lanelet2" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map"            default="tartu_demo_l_c_wp_dem.osm" />
+    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
     <arg name="use_detection"           default="false"         doc="use object detection" />    
     <arg name="max_speed"               default="30" />
     
-    <!-- Vehicle platform -->
-    <include file="$(find vehicle_platform)/launch/platform.launch" >
-        <arg name="use_tf"          value="true" />
-        <arg name="use_lexus_model" value="true" />
-        <arg name="use_gnss"        value="true" />
-        <arg name="use_dbw"         value="true" />
-        <arg name="use_ssc"         value="true" />
-    </include>
-
     <!-- Localizer -->
     <include file="$(find autoware_mini)/launch/localization.launch" />
 
     <!-- Planner -->
     <include file="$(find autoware_mini)/launch/planning.launch">
-        <arg name="planner"         value="$(arg planner)" />
-        <arg name="waypoints_file"  value="$(arg waypoints_file)" />
-        <arg name="lanelet2_map"    value="$(arg lanelet2_map)" />
+        <arg name="planner"             value="$(arg planner)" />
+        <arg name="waypoints_file"      value="$(arg waypoints_file)" />
+        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>
 
     <!-- Detection -->
@@ -36,7 +27,7 @@
     </include>
 
     <!-- Vehicle -->
-    <include file="$(find autoware_mini)/launch/vehicle.launch" >
+    <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
         <arg name="max_speed" value="$(arg max_speed)" />
     </include>
 

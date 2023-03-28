@@ -23,9 +23,9 @@ class GroundRemovalNode:
         self.height = int(math.ceil((self.max_y - self.min_y) / self.cell_size))
         self.cols = np.empty((self.width, self.height))
 
-        self.ground_pub = rospy.Publisher('points_ground', PointCloud2, queue_size=1)
-        self.no_ground_pub = rospy.Publisher('points_no_ground', PointCloud2, queue_size=1)
-        self.pointcloud_sub = rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1)
+        self.ground_pub = rospy.Publisher('points_ground', PointCloud2, queue_size=5)
+        self.no_ground_pub = rospy.Publisher('points_no_ground', PointCloud2, queue_size=5)
+        rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1, buff_size=2*1024*1024)
     
     def pointcloud_callback(self, msg):
         data = numpify(msg)
