@@ -1,5 +1,5 @@
 pure_pursuit_follower:
-  planning_time: 2.0
+  planning_time: 1.0
   min_lookahead_distance: 6.0
   wheel_base: 2.789
   heading_angle_limit: 90.0
