@@ -1,6 +1,6 @@
 # Autoware Mini
 
-Autoware Mini is minimalistic Python-based autonomy software. It is built on Python and ROS 1 to make it easy to get started and tinkering. It uses Autoware messages to define the interfaces between the modules, aiming to be compatible with Autoware nodes. Autoware Mini currently works on ROS Melodic (Ubuntu 18.04), but we aim to make it compatible also with ROS Noetic (Ubuntu 20.04 and Conda Robostack).
+Autoware Mini is minimalistic Python-based autonomy software. It is built on Python and ROS 1 to make it easy to get started and tinkering. It uses Autoware messages to define the interfaces between the modules, aiming to be compatible with Autoware nodes. Autoware Mini currently works on ROS Noetic (Ubuntu 20.04 and through [Conda RoboStack](https://robostack.github.io/) also on Ubuntu 18.04).
 
 ## Goal
 
