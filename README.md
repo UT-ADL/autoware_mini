@@ -29,7 +29,7 @@ The key modules of Autoware Mini are:
    cd autoware_mini_ws/src
    ```
 
-2. Clone the repo
+2. Clone the repos
    ```
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/vehicle_platform.git
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware_mini.git
@@ -42,12 +42,7 @@ The key modules of Autoware Mini are:
    rosdep install --from-paths . --ignore-src -r -y
    ```
 
-4. Install Python dependencies
-   ```
-   pip install -r autoware_mini/requirements.txt
-   ```
-
-5. Build the workspace
+4. Build the workspace
    ```
    catkin build
    ```
