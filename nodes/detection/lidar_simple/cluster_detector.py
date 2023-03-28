@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
-import math
 import rospy
 import numpy as np
 import cv2
 
 from ros_numpy import numpify, msgify
-from tf.transformations import quaternion_from_euler
 
 from sensor_msgs.msg import PointCloud2
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
@@ -42,35 +40,21 @@ class ClusterDetector:
             if len(points) < self.min_cluster_size:
                 continue
 
-            # extract 2d points for simpler processing
-            points2d = np.empty((len(points), 2), dtype=np.float32)
-            points2d[:, 0] = points['x']
-            points2d[:, 1] = points['y']
+            # convert points to ndarray for simpler processing
+            points3d = np.empty((len(points), 3), dtype=np.float32)
+            points3d[:, 0] = points['x']
+            points3d[:, 1] = points['y']
+            points3d[:, 2] = points['z']
 
-            if self.bounding_box_type == 'axis_aligned':
-                # calculate axis-aligned bounding box
-                maxs = np.max(points2d, axis=0)
-                mins = np.min(points2d, axis=0)
-                center_x, center_y = (maxs + mins) / 2.0
-                dim_x, dim_y = maxs - mins
+            # calculate centroid and dimensions
+            maxs = np.max(points3d, axis=0)
+            mins = np.min(points3d, axis=0)
+            center_x, center_y, center_z = (maxs + mins) / 2.0
+            dim_x, dim_y, dim_z = maxs - mins
 
-                # always pointing forward
-                qx = qy = qz = 0.0
-                qw = 1.0
-            elif self.bounding_box_type == 'min_area':
-                # calculate minimum area bounding box
-                (center_x, center_y), (dim_x, dim_y), heading_angle = cv2.minAreaRect(points2d)
-
-                # calculate quaternion for heading angle
-                qx, qy, qz, qw = quaternion_from_euler(0.0, 0.0, math.radians(heading_angle))
-            else:
-                assert False, "wrong bounding_box_type: " + self.bounding_box_type
-
-            # calculate height and vertical position
-            max_z = np.max(points['z'])
-            min_z = np.min(points['z'])
-            dim_z = max_z - min_z
-            center_z = (max_z + min_z) / 2.0
+            # always pointing forward
+            qx = qy = qz = 0.0
+            qw = 1.0
 
             # create DetectedObject
             object = DetectedObject(header=header)
@@ -102,8 +86,8 @@ class ClusterDetector:
 
             # create convex hull
             if self.enable_convex_hull:
-                hull_points = cv2.convexHull(points2d)
-                hull_points = hull_points[:,0,:]
+                points2d = np.ascontiguousarray(points3d[:,:2])
+                hull_points = cv2.convexHull(points2d)[:,0,:]
                 object.convex_hull.polygon.points = [Point32(x, y, center_z) for x, y in hull_points]
 
             objects.objects.append(object)
