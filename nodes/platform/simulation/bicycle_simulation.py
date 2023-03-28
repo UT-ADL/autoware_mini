@@ -35,12 +35,12 @@ class BicycleSimulation:
         self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=10)
         self.br = TransformBroadcaster()
 
+        # visualization of the bicycle model
+        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=10)
+
         # initial position and vehicle command from outside
         rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
         rospy.Subscriber('vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
-
-        # visualization of the bicycle model
-        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=10)
 
     def initialpose_callback(self, msg):
         # extract position
