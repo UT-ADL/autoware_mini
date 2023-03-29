@@ -10,9 +10,12 @@ from std_msgs.msg import Header, ColorRGBA
 
 class DetectedObjectsVisualizer:
     def __init__(self):
+        self.published_ids = set()
+
         self.markers_pub = rospy.Publisher('detected_objects_markers', MarkerArray, queue_size=5)
         rospy.Subscriber('detected_objects', DetectedObjectArray, self.objects_callback, queue_size=1)
-        self.published_ids = set()
+
+        rospy.loginfo("detected_objects_visualizer - initialized")
 
     def objects_callback(self, msg):
         header = Header()
