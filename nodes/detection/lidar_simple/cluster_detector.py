@@ -23,6 +23,8 @@ class ClusterDetector:
         self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=5)
         rospy.Subscriber('points_clustered', PointCloud2, self.cluster_callback, queue_size=1, buff_size=1024*1024)
 
+        rospy.loginfo("cluster_detector - initialized")
+
     def cluster_callback(self, msg):
         data = numpify(msg)
 
