@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import math
 import rospy
@@ -13,6 +13,7 @@ class NovatelOem7Localizer:
     def __init__(self):
 
         # Parameters
+        self.child_frame = rospy.get_param("/localization/child_frame", "base_link")
         self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer", "utm")
         self.use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
         self.utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
@@ -95,7 +96,7 @@ class NovatelOem7Localizer:
         vel_msg = TwistStamped()
 
         vel_msg.header.stamp = stamp
-        vel_msg.header.frame_id = "base_link"
+        vel_msg.header.frame_id = self.child_frame
         vel_msg.twist.linear.x = velocity
 
         self.current_velocity_pub.publish(vel_msg)
@@ -108,7 +109,7 @@ class NovatelOem7Localizer:
 
         t.header.stamp = stamp
         t.header.frame_id = "map"
-        t.child_frame_id = "base_link"
+        t.child_frame_id = self.child_frame
 
         t.transform.translation.x = x
         t.transform.translation.y = y

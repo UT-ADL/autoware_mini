@@ -1,0 +1,12 @@
+carla:
+  ##########
+  # Carla ros-bridge provides following role_names 
+  # ["hero", "ego_vehicle", "hero0", "hero1", "hero2", "hero3", "hero4", "hero5", "hero6", "hero7", "hero8", "hero9"]
+  #---------
+  # By default we use ego_vehicle role which initializes the vehicle at given spawn point while other roles initialize 
+  # vehicle randomly over the map.
+  #---------
+  # If you intend to change the role from ego_vehicle to something else make sure to change
+  # "id": "ego_vehicle" to  "id": "role_name_here" in sensor configuration files.
+  ##########
+  role_name: ego_vehicle 

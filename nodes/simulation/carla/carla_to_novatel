@@ -43,11 +43,11 @@ class CarlaToNovaltel():
         """
 
         if self.velocity is None:
-            print("No velocity")
+            rospy.logwarn("carla_to_novatel - No velocity")
             return
 
         if self.gnss_forward_data is None:
-            print("No gnss_forward_data")
+            rospy.logwarn("carla_to_novatel - No gnss_forward_data")
             return
         
         bestposMsg = BESTPOS()

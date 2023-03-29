@@ -23,7 +23,7 @@ class CarlaToAutowareLocalizer:
 
         # Node parameters
         self.use_offset = rospy.get_param("~use_offset", default=True)
-        self.role_name = rospy.get_param('~role_name', 'ego_vehicle')
+        self.role_name = rospy.get_param('/carla/role_name', default='ego_vehicle')
 
         # Publishers
         self.pose_pub = rospy.Publisher(
@@ -37,7 +37,7 @@ class CarlaToAutowareLocalizer:
         self.tf_listener = tf.TransformListener()
 
         # Subscribers
-        rospy.Subscriber('/carla/odometry'.format(self.role_name),
+        rospy.Subscriber('/carla/odometry',
                          Odometry, self.odometry_callback)
         
         # NOTE: Difference given by carla's map origin and utm projection

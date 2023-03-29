@@ -16,7 +16,7 @@ class OdometryToPoseStamped:
     def __init__(self):
 
         # Node parameters
-        role_name = rospy.get_param('~role_name', 'ego_vehicle')
+        role_name = rospy.get_param('/carla/role_name', default='ego_vehicle')
 
         # Subscribers
         rospy.Subscriber('/carla/odometry'.format(role_name),

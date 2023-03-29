@@ -1,10 +1,14 @@
 <?xml version="1.0"?>
 <launch>
 
+    
     <arg name='host'                                                default='localhost' />
     <arg name='port'                                                default='2000' />
     <arg name='timeout'                                             default='100' />
-    <arg name='role_name'                                           default='ego_vehicle' />
+
+    <arg name="config_file"                                         default="$(find autoware_mini)/config/carla/bridge_config.yaml"/>
+    <!-- Load role_name from yaml configuration -->
+    <arg name="role_name"                                           default="$(eval eval('_' + '_import_' + '_'+ '(\'yaml\')').safe_load(open(arg('config_file'))).get('carla').get('role_name'))"/>
     <arg name="vehicle_filter"                                      default='utlexus*' />
     <arg name="map_name"                                            default='' /><!-- Map to load on startup, this should match with CARLA environments-->
     <arg name='use_lexus_model'                                     default='true'/>
@@ -18,7 +22,10 @@
     <arg name='synchronous_mode_wait_for_vehicle_control_command'   default='false' /><!-- Synchronous mode-->
     <arg name='fixed_delta_seconds'                                 default='0.05' />
     <arg name='use_manual_control'                                  default='false' /><!-- Toggle manual control-->
+
+    <!-- Module type -->
     <arg name="detector"                                            default="carla"/>
+    <arg name="localizer"                                           default="carla"/>
     <arg name="use_cam"                                             default="false" />
 
     <!-- Load correct sensor configurations-->
@@ -36,13 +43,12 @@
     <arg name='scenario_file'                                       default='$(find autoware_mini)/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/>
 
     <!-- Lexus model -->
-  <include if="$(arg use_lexus_model)" file="$(find vehicle_platform)/launch/sensors/lexus_model.launch" />
+    <include if="$(arg use_lexus_model)" file="$(find vehicle_platform)/launch/sensors/lexus_model.launch" />
     
     <!--
-      ############
-      ## Remaps ##
-      ############
-
+      ########################
+      ## Carla topic remaps ##
+      ########################
     -->
     <remap from="/carla/$(arg role_name)/base_link/rgb_view/camera_info" to="/carla/rgb_view/camera_info" />
     <remap from="/carla/$(arg role_name)/base_link/rgb_view/image" to="/carla/rgb_view/image_raw" />
@@ -51,10 +57,19 @@
     <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fr/camera_info" to="/camera_fr/camera_info" />
     <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fl/image" to="/camera_fl/image_raw" />
     <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fr/image" to="/camera_fr/image_raw" />
+    <remap from="/carla/$(arg role_name)/base_link/gnss_forward" to="/carla/gnss_forward" />
+    <remap from="/carla/$(arg role_name)/base_link/gnss" to="/carla/gnss" />
     <remap from="/carla/$(arg role_name)/imu" to="/gps/imu" />
     <remap from="/carla/$(arg role_name)/odometry" to="/carla/odometry" />
     <remap from="/carla/$(arg role_name)/objects" to="/carla/ground_truth_objects" />
 
+    <!-- ====================================================================================================== -->
+
+    <!--
+      #####################
+      ## Carla TF remaps ##
+      #####################
+    -->
 
     <node pkg="tf" type="tf_remap" name="tf_remapper" output="screen">
        <rosparam subst_value="true" command="load">
@@ -62,10 +77,6 @@
         - {old: '$(arg role_name)/base_link', new: 'base_link'}
         - {old: '$(arg role_name)/base_link/lidar_center/lidar_front/os_sensor', new: '/lidar_front/os_sensor'}
         - {old: '$(arg role_name)/base_link/base_footprint', new: 'base_footprint'}
-        - {old: '$(arg role_name)/base_link/radar_fc', new: 'radar_fc'}
-        - {old: '$(arg role_name)/base_link/imu', new: 'imu'}
-        - {old: '$(arg role_name)/base_link/gnss', new: 'gnss'}
-        - {old: '$(arg role_name)/base_link/gnss_forward', new: 'gnss_forward'}
     </rosparam>
     </node>    
 
@@ -81,7 +92,6 @@
     <include file="$(find carla_ros_bridge)/launch/carla_ros_bridge.launch">
       <arg name='host'                                              value='$(arg host)' />
       <arg name='port'                                              value='$(arg port)' />
-      <!-- <arg name='tf_topic'                                          value='/tf_old' /> -->
       <!-- If using tartu map then run Tartu environment of Carla -->
       <arg if="$(eval 'tartu' in arg('map_name').lower())"
            name='town'                                              value='Tartu'/>
@@ -93,6 +103,9 @@
       <arg name='fixed_delta_seconds'                               value='$(arg fixed_delta_seconds)' />
     </include>
   </group>
+
+  <!-- Load carla ros bridge configurations -->
+  <rosparam file="$(arg config_file)" command="load" />
 
     <!-- ====================================================================================================== -->
   
@@ -136,6 +149,28 @@
 
     <!-- ====================================================================================================== -->
 
+    <!--
+      ######################################
+      ## CARLA Autoware Bridge Misc Nodes ##
+      ######################################
+    -->
+    
+    <group>
+      <remap from="vehicle_cmd"     to="/control/vehicle_cmd" />
+      <remap from="vehicle_status"  to="/control/vehicle_status" />
+
+      <node pkg='autoware_mini' type='vehiclecmd_to_ackermanndrive' name='vehiclecmd_to_ackermanndrive' output='screen' required="true" />
+      <node pkg='autoware_mini' type='carla_to_autoware_vehicle_status' name='carla_to_autoware_vehicle_status' output='screen' required="true" />
+      
+      <!-- If localizer is novatel then change child_frame to role_name and run carla_to_novatel msgs converter -->
+      <group if="$(eval localizer.lower() == 'novatel')">
+        <param  name="/localization/child_frame" value="$(arg role_name)" />
+        <node pkg='autoware_mini' type='carla_to_novatel' name='carla_to_novatel' output='screen' required="true" />
+      </group>
+    </group>
+    
+    <!-- ====================================================================================================== -->
+    
     <!--
       ##############################################
       ## Scenario Runner with given scenario file ##

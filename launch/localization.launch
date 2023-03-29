@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="localizer"   default="gnss"  doc="gnss, carla" />
+    <arg name="localizer"   default="novatel"  doc="novatel, carla" />
 
 
     <group ns="localization">
