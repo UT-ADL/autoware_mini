@@ -17,7 +17,7 @@ class WaypointLoader:
         self.wp_right_width = rospy.get_param("~wp_right_width", 1.4)
 
         # Publishers
-        self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('global_path', Lane, queue_size=1, latch=True)
 
         self.waypoints = self.load_waypoints(self.waypoints_file)
         self.publish_waypoints()  
