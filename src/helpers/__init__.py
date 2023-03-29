@@ -1,7 +1,7 @@
 import math
-from tf.transformations import euler_from_quaternion
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from autoware_msgs.msg import WaypointState
-from geometry_msgs.msg import Pose, Point
+from geometry_msgs.msg import Pose, Point, Quaternion
 
 
 def get_heading_from_pose_orientation(pose):
@@ -26,6 +26,17 @@ def get_heading_between_two_points(back_p, forward_p):
     """
 
     return math.atan2(forward_p.y - back_p.y, forward_p.x - back_p.x)
+
+def get_orientation_from_yaw(heading):
+    """
+    Get orientation from heading (-pi...pi)
+    :param heading: heading in radians
+    :return: orientation
+    """
+
+    x, y, z, w = quaternion_from_euler(0, 0, heading)
+    orientation = Quaternion(x, y, z, w)
+    return orientation
 
 
 def get_blinker_state(steering_state):
