@@ -26,16 +26,18 @@ class CarlaToAutowareDetectedObjects:
     def __init__(self):
 
         # Node parameters
-        self.role_name = rospy.get_param('~role_name', 'ego_vehicle')
         self.use_offset = rospy.get_param("~use_offset", default=True)
 
         # Subscribers
-        rospy.Subscriber('/carla/objects'.format(self.role_name),
+        rospy.Subscriber('/carla/ground_truth_objects',
                          ObjectArray, self.carla_objects_callback)
 
         # Publishers
         self.detected_objects_pub = rospy.Publisher(
             'detected_objects', DetectedObjectArray, queue_size=1)
+        
+        # Initial offset betweeen carla map origin and UTM project origin
+        self.init_position = Point(4.8857, 343.4465, 35)
 
         # Internal paramters
         self.lest_transformer = LestTransformer()
@@ -50,10 +52,6 @@ class CarlaToAutowareDetectedObjects:
 
         for obj in data.objects:
 
-            # Ignore ego vehicle as detected object
-            if obj.detection_level == 1:
-                continue
-
             object_msg = DetectedObject()
             object_msg.header = obj.header
             object_msg.id = obj.id
@@ -62,10 +60,11 @@ class CarlaToAutowareDetectedObjects:
             object_msg.valid = True
             object_msg.space_frame = 'map'
             object_msg.pose = obj.pose
-
-            # if self.use_offset:
-            #     object_msg.pose.position = self.lest_transformer.transform_position(object_msg.pose.position)
-            #     object_msg.pose.orientation = self.lest_transformer.transform_orientation(object_msg.pose.orientation)
+    
+            # NOTE: Need to add correct offset via UTM transformer
+            object_msg.pose.position.x = object_msg.pose.position.x - self.init_position.x 
+            object_msg.pose.position.y = object_msg.pose.position.y - self.init_position.y
+            object_msg.pose.position.z = object_msg.pose.position.z - self.init_position.z 
 
             # Correct height of ground truth obstacles except pedestrians
             if obj.classification != CLASSIFICATION_PEDESTRIAN:

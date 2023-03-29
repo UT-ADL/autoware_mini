@@ -41,7 +41,6 @@
                         {
                             "type": "sensor.other.radar",
                             "id": "radar_fc",
-                            "topic_name":"/radar_fc/points_raw",
                             "spawn_point": {"x": 4.0, "y": 0.0, "z": -0.12, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
                             "horizontal_fov": 30.0,
                             "vertical_fov": 30.0,
@@ -66,7 +65,6 @@
                         {
                             "type": "sensor.other.imu",
                             "id": "imu",
-                            "topic_name":"/gps/imu",
                             "spawn_point": {"x": 0.0, "y": 0.0, "z": 0.0, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
                             "noise_accel_stddev_x": 0.0, "noise_accel_stddev_y": 0.0, "noise_accel_stddev_z": 0.0,
                             "noise_gyro_stddev_x": 0.0, "noise_gyro_stddev_y": 0.0, "noise_gyro_stddev_z": 0.0,
@@ -75,7 +73,6 @@
                         {
                             "type": "sensor.lidar.ray_cast",
                             "id": "lidar_center",
-                            "topic_name":"/lidar_center/points_raw",
                             "spawn_point": {"x": 1.02, "y": 0, "z": 1.51, "roll": -0.02879793, "pitch": 0.0003490659, "yaw": -0.0459},
                             "range": 200,
                             "channels": 32,
@@ -89,19 +86,16 @@
                                 {
                                     "type": "sensor.other.imu",
                                     "id": "camera_fr",
-                                    "topic_name":"/camera_fr",
                                     "spawn_point": {"x": 1.152, "y": -0.168, "z": -0.747, "roll": -1.378984, "pitch": 0.04415683, "yaw": -1.7793631}
                                 },
                                 {
                                     "type": "sensor.other.imu",
                                     "id": "camera_fl",
-                                    "topic_name":"/camera_fl",
                                     "spawn_point": {"x": 1.131, "y": 0.338, "z": -0.747, "roll": -1.4044664, "pitch": -0.00261799, "yaw": -1.422443}
                                 },
                                 {
                                     "type": "sensor.lidar.ray_cast",
                                     "id": "lidar_front/os_sensor",
-                                    "topic_name":"/lidar_front/points_raw",
                                     "spawn_point": {"x": 0.8559, "y": 0.0642, "z": -0.4051, "roll": 0.003995038, "pitch": -0.009182, "yaw": 0.8641542},
                                     "range": 120,
                                     "channels": 128,

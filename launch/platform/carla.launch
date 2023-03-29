@@ -10,7 +10,7 @@
     <arg name='use_lexus_model'                                     default='true'/>
 
     <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
-    <arg if="$(eval 'tartu' in map_name.lower())"  name="spawn_point"    default="4.70, 342.07,36,0,0,-98" />
+    <arg if="$(eval 'tartu' in map_name.lower())"  name="spawn_point"    default="4.70, 342.07,36,0,0,-98" />    
     <arg if="$(eval map_name.lower() == 'town01')" name="spawn_point"    default="150,-133.5,10,0,0,0" />
 
     <!-- Control -->
@@ -20,15 +20,6 @@
     <arg name='use_manual_control'                                  default='false' /><!-- Toggle manual control-->
     <arg name="detector"                                            default="carla"/>
     <arg name="use_cam"                                             default="false" />
-
-    <!-- Perception & Localization -->
-    <!-- <arg name="use_obstacle_detection"                              default="true" />
-    <arg name="use_tl_detection"                                    default="true" />  -->
-    <!-- <arg name="tl_grouping_file"                                    default="$(find autoware_mini)/maps/$(arg map_name)/vector_map/tl_stoplines_carla.json" /> -->
-    <!-- <arg name="localizer"                                           default="carla"    doc="{gpsins, ndt, carla}" />
-    <arg name="detector"                                            default="carla"/>
-    <arg name="use_cam"                                             default="$(arg use_cam)" />
-    <arg name="use_api"                                             default="$(arg use_api)" /> -->
 
     <!-- Load correct sensor configurations-->
     <arg if="$(eval arg('detector') == 'carla' and use_cam)"      name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_lidars_and_radars.json" />
@@ -48,13 +39,49 @@
   <include if="$(arg use_lexus_model)" file="$(find vehicle_platform)/launch/sensors/lexus_model.launch" />
     
     <!--
+      ############
+      ## Remaps ##
+      ############
+
+    -->
+    <remap from="/carla/$(arg role_name)/base_link/rgb_view/camera_info" to="/carla/rgb_view/camera_info" />
+    <remap from="/carla/$(arg role_name)/base_link/rgb_view/image" to="/carla/rgb_view/image_raw" />
+    <remap from="/carla/$(arg role_name)/base_link/lidar_center" to="/points_raw_center" />
+    <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fl/camera_info" to="/camera_fl/camera_info" />
+    <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fr/camera_info" to="/camera_fr/camera_info" />
+    <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fl/image" to="/camera_fl/image_raw" />
+    <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fr/image" to="/camera_fr/image_raw" />
+    <remap from="/carla/$(arg role_name)/imu" to="/gps/imu" />
+    <remap from="/carla/$(arg role_name)/odometry" to="/carla/odometry" />
+    <remap from="/carla/$(arg role_name)/objects" to="/carla/ground_truth_objects" />
+
+
+    <node pkg="tf" type="tf_remap" name="tf_remapper" output="screen">
+       <rosparam subst_value="true" command="load">
+      mappings:
+        - {old: '$(arg role_name)/base_link', new: 'base_link'}
+        - {old: '$(arg role_name)/base_link/lidar_center/lidar_front/os_sensor', new: '/lidar_front/os_sensor'}
+        - {old: '$(arg role_name)/base_link/base_footprint', new: 'base_footprint'}
+        - {old: '$(arg role_name)/base_link/radar_fc', new: 'radar_fc'}
+        - {old: '$(arg role_name)/base_link/imu', new: 'imu'}
+        - {old: '$(arg role_name)/base_link/gnss', new: 'gnss'}
+        - {old: '$(arg role_name)/base_link/gnss_forward', new: 'gnss_forward'}
+    </rosparam>
+    </node>    
+
+    <!-- ====================================================================================================== -->
+
+    <!--
       ######################
       ## CARLA ROS bridge ##
       ######################
     -->
+  <group>
+  <remap from="tf" to="/tf_old"/>
     <include file="$(find carla_ros_bridge)/launch/carla_ros_bridge.launch">
       <arg name='host'                                              value='$(arg host)' />
       <arg name='port'                                              value='$(arg port)' />
+      <!-- <arg name='tf_topic'                                          value='/tf_old' /> -->
       <!-- If using tartu map then run Tartu environment of Carla -->
       <arg if="$(eval 'tartu' in arg('map_name').lower())"
            name='town'                                              value='Tartu'/>
@@ -65,6 +92,7 @@
       <arg name='synchronous_mode_wait_for_vehicle_control_command' value='$(arg synchronous_mode_wait_for_vehicle_control_command)' />
       <arg name='fixed_delta_seconds'                               value='$(arg fixed_delta_seconds)' />
     </include>
+  </group>
 
     <!-- ====================================================================================================== -->
   
@@ -105,25 +133,6 @@
         <param name='accel_Kd' type='double' value='0.05' />
       </node>
     </group>
-
-    <!-- ====================================================================================================== -->
-
-    <!--
-      ########################################
-      ## CARLA Autoware bridge (Converters) ##
-      ########################################
-    -->
-    <!-- <include file='$(find carla_autoware_bridge)/launch/autoware_bridge.launch'>
-        <arg name='role_name'                     value='$(arg role_name)'/>
-        <arg name='map_name'                      value='$(arg map_name)' />
-        <arg name="use_obstacle_detection"        value="$(arg use_obstacle_detection)" />
-        <arg name="use_tl_detection"              value="$(arg use_tl_detection)" />
-        <arg name="use_cam"                       value="$(arg use_cam)" />
-        <arg name="use_api"                       value="$(arg use_api)" />
-        <arg name="tl_grouping_file"              value="$(arg tl_grouping_file)" />
-        <arg name="localizer"                     value="$(arg localizer)" />
-        <arg name="detector"                      value="$(arg detector)" />
-    </include> -->
 
     <!-- ====================================================================================================== -->
 

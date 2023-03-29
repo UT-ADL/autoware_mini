@@ -61,7 +61,6 @@
                         {
                             "type": "sensor.other.imu",
                             "id": "imu",
-                            "topic_name":"/gps/imu",
                             "spawn_point": {"x": 0.0, "y": 0.0, "z": 0.0, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
                             "noise_accel_stddev_x": 0.0, "noise_accel_stddev_y": 0.0, "noise_accel_stddev_z": 0.0,
                             "noise_gyro_stddev_x": 0.0, "noise_gyro_stddev_y": 0.0, "noise_gyro_stddev_z": 0.0,
@@ -76,7 +75,6 @@
                                 {
                                     "type": "sensor.camera.rgb",
                                     "id": "camera_fr",
-                                    "topic_name":"/camera_fr",
                                     "spawn_point": {"x": 1.152, "y": -0.168, "z": -0.747, "roll": -1.378984, "pitch": 0.04415683, "yaw": -1.7793631},
                                     "image_size_x": 2064,
                                     "image_size_y": 1544,
@@ -85,7 +83,6 @@
                                 {
                                     "type": "sensor.camera.rgb",
                                     "id": "camera_fl",
-                                    "topic_name":"/camera_fl",
                                     "spawn_point": {"x": 1.131, "y": 0.338, "z": -0.747, "roll": -1.4044664, "pitch": -0.00261799, "yaw": -1.422443},
                                     "image_size_x": 2064,
                                     "image_size_y": 1544,

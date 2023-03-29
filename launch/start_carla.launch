@@ -19,52 +19,37 @@
     <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
     <arg name="planner"                 default="lanelet2"      doc="waypoints, lanelet2" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map"            default="tartu_demo_l_c_wp.osm" />
-    <!-- <arg name='scenario_file'               default='$(find autoware_ut)/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/> -->
-
-
-    <!-- Vehicle platform -->
-    <!-- <include file="$(find vehicle_platform)/launch/platform.launch" >
-        <arg name="use_tf"          value="$(arg use_tf)" />
-        <arg name="use_lexus_model" value="true" />
-        <arg name="use_gnss"        value="false" />
-        <arg name="use_dbw"         value="false" />
-        <arg name="use_ssc"         value="false" />
-    </include> -->
+    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
+    <!-- <arg name='scenario_file'               default='$(find autoware_mini)/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/> -->
 
 
     <!-- Planner -->
     <include file="$(find autoware_mini)/launch/planning.launch">
-        <arg name="planner"         value="$(arg planner)" />
-        <arg name="waypoints_file"  value="$(arg waypoints_file)" />
-        <arg name="lanelet2_map"    value="$(arg lanelet2_map)" />
+        <arg name="planner"             value="$(arg planner)" />
+        <arg name="waypoints_file"      value="$(arg waypoints_file)" />
+        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>
 
     <!-- Follower -->
     <include file="$(find autoware_mini)/launch/control.launch">
-        <arg name="follower" value="$(arg follower)" />
+        <arg name="follower"            value="$(arg follower)" />
     </include>
 
     <!-- Localization -->
     <include file="$(find autoware_mini)/launch/localization.launch">
-        <arg name="localizer"       value="$(arg localizer)" />
+        <arg name="localizer"           value="$(arg localizer)" />
     </include>
 
     <!-- Detection -->
     <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
-        <arg name="detector"       value="$(arg detector)" />
+        <arg name="detector"            value="$(arg detector)" />
     </include>
 
     <!-- Carla platform -->
-    <include file="$(find autoware_mini)/launch/carla_platform.launch">
-        <!-- <arg name="use_lexus_model"                     value="$(arg use_lexus_model)" /> -->
+    <include file="$(find autoware_mini)/launch/platform/carla.launch">
         <arg name='map_name'                            value='$(arg map_name)'/>
         <arg name="use_manual_control"                  value="$(arg use_manual_control)" />
-        <!-- <arg name="use_obstacle_detection"              value="$(arg use_obstacle_detection)" /> -->
-        <!-- <arg name="use_tl_detection"                    value="$(arg use_tl_detection)" /> -->
         <arg name="use_cam"                             value="$(arg use_cam)" />
-        <!-- <arg name="use_api"                             value="$(arg use_api)" /> -->
-        <!-- <arg name="localizer"                           value="$(arg localizer)" /> -->
         <arg name="detector"                            value="$(arg detector)" />
         <arg name="scenario_runner_path"                value="$(arg scenario_runner_path)" />
         <arg name="use_scenario_runner"                 value="$(arg use_scenario_runner)" />
