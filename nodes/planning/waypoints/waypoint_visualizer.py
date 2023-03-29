@@ -12,18 +12,31 @@ class WaypointVisualizer:
         self.output_frame = None
 
         # Publishers
-        self.waypoints_markers_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1, latch=True)
+        self.global_path_markers_pub = rospy.Publisher('global_path_markers', MarkerArray, queue_size=1, latch=True)
+        self.smoothed_path_markers_pub = rospy.Publisher('smoothed_path_markers', MarkerArray, queue_size=1, latch=True)
 
         # Subscribers
-        self.path_sub = rospy.Subscriber('path', Lane, self.waypoints_callback, queue_size=1)
+        self.global_path_sub = rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=1)
+        self.smoothed_path_sub = rospy.Subscriber('smoothed_path', Lane, self.smoothed_path_callback, queue_size=1)
 
-    def waypoints_callback(self, lane):
+    def global_path_callback(self, lane):
         self.output_frame = lane.header.frame_id
-        self.publish_waypoints_markers(lane.waypoints)
+        self.publish_global_path_markers(lane.waypoints)
 
+    def smoothed_path_callback(self, lane):
+        self.output_frame = lane.header.frame_id
+        self.publish_smoothed_path_markers(lane.waypoints)
 
-    # Waypoints visualization in RVIZ
-    def publish_waypoints_markers(self, waypoints):
+    def publish_global_path_markers(self, waypoints):
+        marker_array = self.create_path_markers(waypoints)
+        self.global_path_markers_pub.publish(marker_array)
+
+    def publish_smoothed_path_markers(self, waypoints):
+        marker_array = self.create_path_markers(waypoints)
+        self.smoothed_path_markers_pub.publish(marker_array)
+
+    # Create standard path markers visualization for RVIZ
+    def create_path_markers(self, waypoints):
         marker_array = MarkerArray()
 
         if len(waypoints) == 0:
@@ -88,9 +101,7 @@ class WaypointVisualizer:
                 marker.points.append(waypoint.pose.pose.position)
             marker_array.markers.append(marker)
 
-        # publish markers
-        self.waypoints_markers_pub.publish(marker_array)
-
+        return marker_array
 
     def run(self):
         rospy.spin()

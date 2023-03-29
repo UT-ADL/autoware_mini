@@ -57,7 +57,7 @@ class Lanelet2GlobalPlanner:
                                                   lanelet2.traffic_rules.Participants.Vehicle)
 
         #Publishers
-        self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('global_path', Lane, queue_size=1, latch=True)
 
         #Subscribers
         self.sub = rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
