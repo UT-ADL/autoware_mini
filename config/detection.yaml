@@ -18,4 +18,3 @@ lidar_center:
     enable_convex_hull: True
 obstacle_simulation:
   publish_rate: 10
-  add_or_move: move

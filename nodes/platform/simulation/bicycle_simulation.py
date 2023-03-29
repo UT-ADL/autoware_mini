@@ -42,6 +42,8 @@ class BicycleSimulation:
         rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
         rospy.Subscriber('vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
 
+        rospy.loginfo("bicycle_simulation - initialized")
+
     def initialpose_callback(self, msg):
         # extract position
         self.x = msg.pose.pose.position.x
@@ -51,6 +53,11 @@ class BicycleSimulation:
         orientation = msg.pose.pose.orientation
         quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
         _, _, self.heading_angle = tf.transformations.euler_from_quaternion(quaternion)
+
+        rospy.loginfo("bicycle_simulation - initial position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame", 
+                    msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z,
+                    msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, 
+                    msg.pose.pose.orientation.w, msg.header.frame_id)
 
     def vehicle_cmd_callback(self, msg):
         # new velocity and steering angle take effect instantaneously
