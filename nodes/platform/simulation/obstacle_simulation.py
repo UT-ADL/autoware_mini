@@ -5,7 +5,6 @@ import threading
 
 from geometry_msgs.msg import PointStamped, Point32
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
-
 from std_msgs.msg import ColorRGBA
 
 from helpers import get_heading_from_pose_orientation
