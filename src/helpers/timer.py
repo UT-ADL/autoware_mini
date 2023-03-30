@@ -16,4 +16,4 @@ class Timer:
         return self.dict[key]
 
     def __str__(self):
-        return str(self.dict)
+        return str(dict(self.dict))
