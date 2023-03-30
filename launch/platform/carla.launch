@@ -153,8 +153,8 @@
       ######################################
       ## CARLA Autoware Bridge Misc Nodes ##
       ######################################
-    -->
-    
+    -->  
+
     <group>
       <remap from="vehicle_cmd"     to="/control/vehicle_cmd" />
       <remap from="vehicle_status"  to="/control/vehicle_status" />
@@ -167,6 +167,10 @@
         <param  name="/localization/child_frame" value="$(arg role_name)" />
         <node pkg='autoware_mini' type='carla_to_novatel' name='carla_to_novatel' output='screen' required="true" />
       </group>
+
+      <!-- For now lane waypoints converter is only required when scenario runner is running -->
+      <node if="$(arg use_scenario_runner)" pkg='autoware_mini' type='carla_to_autoware_waypoints' name='carla_to_autoware_waypoints' output='screen' required="true" />
+
     </group>
     
     <!-- ====================================================================================================== -->
