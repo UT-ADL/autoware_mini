@@ -65,6 +65,8 @@ class PointsClusterer:
         cluster_msg.header.frame_id = msg.header.frame_id
         self.cluster_pub.publish(cluster_msg)
 
+        rospy.logdebug("%d points, %d clusters", len(points), np.max(labels) + 1)
+
     def run(self):
         rospy.spin()
 
