@@ -19,10 +19,13 @@ class BicycleSimulation:
         # get parameters
         self.publish_rate = rospy.get_param("publish_rate", 50)
         self.wheel_base = rospy.get_param("wheel_base", 2.789)
+        self.acceleration_limit = rospy.get_param("acceleration_limit", 3.0)
+        self.deceleration_limit = rospy.get_param("deceleration_limit", 3.0)
 
         # internal state of bicycle model
         self.x = 0
         self.y = 0
+        self.acceleration = 0
         self.velocity = 0
         self.heading_angle = 0
         self.steering_angle = 0
@@ -60,8 +63,27 @@ class BicycleSimulation:
                     msg.pose.pose.orientation.w, msg.header.frame_id)
 
     def vehicle_cmd_callback(self, msg):
-        # new velocity and steering angle take effect instantaneously
-        self.velocity = msg.ctrl_cmd.linear_velocity
+        # if target velocity is higher than current velocity
+        if msg.ctrl_cmd.linear_velocity > self.velocity + 0.0001:
+            # if acceleration is provided, use it, otherwise take from parameters
+            if msg.ctrl_cmd.linear_acceleration != 0:
+                self.acceleration = abs(msg.ctrl_cmd.linear_acceleration)
+            else:
+                self.acceleration = abs(self.acceleration_limit)
+        # if target velocity is lower than current velocity
+        elif msg.ctrl_cmd.linear_velocity < self.velocity - 0.0001:
+            # if acceleration is provided, use it, otherwise take from parameters
+            if msg.ctrl_cmd.linear_acceleration != 0:
+                self.acceleration = -abs(msg.ctrl_cmd.linear_acceleration)
+            else:
+                self.acceleration = -abs(self.deceleration_limit)
+        # target velocity achieved, no need for acceleration
+        else:
+            self.acceleration = 0
+
+        rospy.logdebug("target velocity: %.3f, current velocity: %.3f, acceleration: %.3f", msg.ctrl_cmd.linear_velocity, self.velocity, self.acceleration)
+
+        # new steering angle takes effect instantaneously
         self.steering_angle = msg.ctrl_cmd.steering_angle
 
         # remember blinkers, just to be able to publish status
@@ -75,6 +97,9 @@ class BicycleSimulation:
             self.blinkers = 0
 
     def update_model_state(self, delta_t):
+        # change velocity by acceleration
+        self.velocity += self.acceleration * delta_t
+
         # compute change according to bicycle model equations
         x_dot = self.velocity * math.cos(self.heading_angle)
         y_dot = self.velocity * math.sin(self.heading_angle)
