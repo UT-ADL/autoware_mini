@@ -94,7 +94,6 @@ class ObstacleSimulation:
         # overwrite object timestamp
         for o in msg.objects:
             o.header.stamp = stamp
-        
 
         self.objects_pub.publish(msg)
 
