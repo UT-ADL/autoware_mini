@@ -13,7 +13,8 @@ class PathSmoothing:
 
         # Parameters
         self.waypoint_interval = rospy.get_param("~waypoint_interval", 1.0)
-        self.curvature_step = rospy.get_param("~curvature_step", 1)
+        self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index", 4)
+        self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit", 3.0)
 
         # Publishers
         self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1)
@@ -73,28 +74,24 @@ class PathSmoothing:
         blinker_new = np.maximum(blinker_left, blinker_right * 2)
         blinker_new[blinker_new == 0] = 3
 
-        # Calculate yaw angle for path and add last yaw angle to the end of the array
+        # Yaw - calculate yaw angle for path and add last yaw angle to the end of the array
         yaw = np.arctan2( np.diff(y_new), np.diff(x_new))
         yaw = np.append(yaw, yaw[-1])
 
-        # TODO instead calc radius and then centrifugal force?
-        # Curvature
-        curvature = calculate_curvature(x_new, y_new, self.curvature_step)
-
-        # TODO implement curvature based or centrifugal force based speed
-
-
+        # Speed
+        # TODO: when map based speed is implemented check if gives reasonable results
         speed_interpolated = np.interp(new_distances, distances, speed)
-        # TODO change when curvature based speed is implemented
-        speed_curvature = np.full(new_distances.shape, 40.0)
-        speed_new = np.minimum(speed_interpolated, speed_curvature)
-
+        # Calculate speed limit based on lateral acceleration limit
+        radius = calculate_radius_with_step_n(x_new, y_new, self.radius_calc_neighbour_index)
+        speed_radius = np.sqrt(self.lateral_acceleration_limit * np.abs(radius))
+        speed_new = np.fmin(speed_interpolated, speed_radius)
 
         # TODO: remove or add param for debug visualization
-        # debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances)
+        # debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
 
-        # Stack arrays for faster accessing
+        # Stack
         smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, yaw), axis=1)
+
         return smoothed_path_array
 
     def publish_smoothed_path(self, smoothed_path, output_frame):
@@ -121,25 +118,45 @@ class PathSmoothing:
     def run(self):
         rospy.spin()
 
-def calculate_curvature(x, y, step):
-    # calculate curvature for a given path
-    # x, y: path coordinates
-    # step: step size for calculating curvature
+def calculate_radius_with_step_n(x, y, n):
+    # calculate radius of the circle using 3 points
+    # x, y: path coordinates in array
+    # n: step sixe to select points used for calculating radius
+    # https://en.wikipedia.org/wiki/Circumscribed_circle#Cartesian_coordinates
 
-    # calculate first and second derivative
-    dx = np.gradient(x, step)
-    dy = np.gradient(y, step)
-    ddx = np.gradient(dx, step)
-    ddy = np.gradient(dy, step)
+    # calculate radius for each point in the path
+    radius = np.zeros(x.shape)
+    for i in range(n, x.shape[0] - n):
+        # calculate radius for each point in the path
+        radius[i] = np.abs((x[i-n] - x[i+n])**2 + (y[i-n] - y[i+n])**2) / (2 * ((x[i-n] - x[i]) * (y[i+n] - y[i]) - (x[i+n] - x[i]) * (y[i-n] - y[i])))
 
-    # calculate curvature
-    curvature = (dx * ddy - dy * ddx) / (dx**2 + dy**2)**(3/2)
+    # Replace n valus (zeros) from beginning of the array with n'th value (first not zero)
+    radius[:n] = radius[n]
+    # Replace n valus (zeros) from end of the array with n+1'th value (last not zero)
+    radius[-n:] = radius[-(n+1)]
+    
+    return radius
 
-    return curvature
+# TODO remove - verify, but does not seem to produce good results, but is vectorized
+def calculate_radius_closest_points(x, y):
+    # calculate radius of the circle using 3 points
+    # x, y: array of x and y coordinates
+
+    # calculate differences between points
+    x_diff = np.diff(x)
+    y_diff = np.diff(y)
+
+    # calculate radius
+    radius = (x_diff[1:] * y_diff[:-1] - x_diff[:-1] * y_diff[1:]) / (x_diff[1:]**2 + y_diff[1:]**2)**(3/2)
+
+    # add 0 to the start and end of the array
+    radius = np.append(0, radius)
+    radius = np.append(radius, 0)
+
+    return radius
 
 
-
-def debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances):
+def debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new):
     # plot 3 figures
     # 1. x-y path with old and new waypoints
     # 2. z path with old and new waypoints
@@ -167,6 +184,15 @@ def debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinke
     ax.scatter(new_distances, blinker_new, color = 'red', marker = 'x', alpha = 0.5, label = 'blinker interpolated')
     ax.plot(new_distances, blinker_new, color = 'red', alpha = 0.5, label = 'blinker interpolated')
     ax.scatter(distances, blinker, color = 'blue', alpha = 0.5, label = 'blinker old')
+    plt.legend()
+    plt.show()
+
+    # new plot for speed
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.subplots()
+    ax.scatter(new_distances, speed_new * 3.6, color = 'red', marker = 'x', alpha = 0.5, label = 'speed interpolated')
+    ax.plot(new_distances, speed_new * 3.6, color = 'red', alpha = 0.5, label = 'speed interpolated')
+    ax.scatter(distances, speed * 3.6, color = 'blue', alpha = 0.5, label = 'speed old')
     plt.legend()
     plt.show()
 
