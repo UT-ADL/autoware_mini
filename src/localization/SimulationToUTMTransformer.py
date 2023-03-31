@@ -45,10 +45,6 @@ class SimulationToUTMTransformer:
             Transformed pose
         """
         pose_utm = Pose()
-        pose_utm.orientation.x = 0
-        pose_utm.orientation.y = 0
-        pose_utm.orientation.z = 0
-        pose_utm.orientation.w = 1
         
         pose_utm.position.x, pose_utm.position.y = \
             self.sim2utm_transformer.transform(pose_sim.position.x, pose_sim.position.y)
