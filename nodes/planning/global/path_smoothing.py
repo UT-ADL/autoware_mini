@@ -76,7 +76,7 @@ class PathSmoothing:
         blinker_new[blinker_new == 0] = 3
 
         # Yaw - calculate yaw angle for path and add last yaw angle to the end of the array
-        yaw = np.arctan2( np.diff(y_new), np.diff(x_new))
+        yaw = np.arctan2(np.diff(y_new), np.diff(x_new))
         yaw = np.append(yaw, yaw[-1])
 
         # Speed
@@ -103,7 +103,7 @@ class PathSmoothing:
         lane = Lane()
         lane.header.frame_id = output_frame
         lane.header.stamp = rospy.Time.now()
-        lane.waypoints = [self.create_waypoint(x, y, z, blinker, speed, yaw) for x, y, z, blinker, speed, yaw in smoothed_path]
+        lane.waypoints = [self.create_waypoint(*wp) for wp in smoothed_path]
 
         self.smoothed_path_pub.publish(lane)
 
@@ -128,37 +128,15 @@ def calculate_radius_with_step_n(x, y, n):
     # n: step sixe to select points used for calculating radius
     # https://en.wikipedia.org/wiki/Circumscribed_circle#Cartesian_coordinates
 
+    radius = np.empty_like(x)
     # calculate radius for each point in the path
-    radius = np.zeros(x.shape)
-    for i in range(n, x.shape[0] - n):
-        # calculate radius for each point in the path
-        radius[i] = np.abs((x[i-n] - x[i+n])**2 + (y[i-n] - y[i+n])**2) / (2 * ((x[i-n] - x[i]) * (y[i+n] - y[i]) - (x[i+n] - x[i]) * (y[i-n] - y[i])))
-
-    # Replace n valus (zeros) from beginning of the array with n'th value (first not zero)
+    radius[n:-n] = np.abs((x[:-2*n] - x[2*n:])**2 + (y[:-2*n] - y[2*n:])**2) / (2 * ((x[:-2*n] - x[n:-n]) * (y[2*n:] - y[n:-n]) - (x[2*n:] - x[n:-n]) * (y[:-2*n] - y[n:-n])))
+    # Replace n values from beginning of the array with the first value
     radius[:n] = radius[n]
-    # Replace n valus (zeros) from end of the array with n+1'th value (last not zero)
+    # Replace n values from end of the array with the last value
     radius[-n:] = radius[-(n+1)]
-    
-    return radius
-
-# TODO remove - verify, but does not seem to produce good results, but is vectorized
-def calculate_radius_closest_points(x, y):
-    # calculate radius of the circle using 3 points
-    # x, y: array of x and y coordinates
-
-    # calculate differences between points
-    x_diff = np.diff(x)
-    y_diff = np.diff(y)
-
-    # calculate radius
-    radius = (x_diff[1:] * y_diff[:-1] - x_diff[:-1] * y_diff[1:]) / (x_diff[1:]**2 + y_diff[1:]**2)**(3/2)
-
-    # add 0 to the start and end of the array
-    radius = np.append(0, radius)
-    radius = np.append(radius, 0)
 
     return radius
-
 
 def debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new):
     # plot 3 figures
