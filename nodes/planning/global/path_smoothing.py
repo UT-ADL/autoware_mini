@@ -13,6 +13,7 @@ class PathSmoothing:
 
         # Parameters
         self.waypoint_interval = rospy.get_param("~waypoint_interval", 1.0)
+        self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves", True)
         self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index", 4)
         self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit", 3.0)
 
@@ -81,10 +82,13 @@ class PathSmoothing:
         # Speed
         # TODO: when map based speed is implemented check if gives reasonable results
         speed_interpolated = np.interp(new_distances, distances, speed)
-        # Calculate speed limit based on lateral acceleration limit
-        radius = calculate_radius_with_step_n(x_new, y_new, self.radius_calc_neighbour_index)
-        speed_radius = np.sqrt(self.lateral_acceleration_limit * np.abs(radius))
-        speed_new = np.fmin(speed_interpolated, speed_radius)
+        speed_new = speed_interpolated
+
+        if self.adjust_speeds_in_curves:
+            # Calculate speed limit based on lateral acceleration limit
+            radius = calculate_radius_with_step_n(x_new, y_new, self.radius_calc_neighbour_index)
+            speed_radius = np.sqrt(self.lateral_acceleration_limit * np.abs(radius))
+            speed_new = np.fmin(speed_interpolated, speed_radius)
 
         # TODO: remove or add param for debug visualization
         # debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
