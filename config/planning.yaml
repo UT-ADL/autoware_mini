@@ -13,5 +13,6 @@ waypoint_saver:
 
 path_smoothing:
   waypoint_interval: 1.0            # m
+  adjust_speeds_in_curves: True
   radius_calc_neighbour_index: 4    # int
   lateral_acceleration_limit: 3.0   # m/s2

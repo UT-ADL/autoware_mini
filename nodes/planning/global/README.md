@@ -24,7 +24,7 @@ Uses Lanelet2 map to generate the global path. Currently loads map itself. `/cur
 
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `path` | `autoware_msgs/Lane` | Lane - array of waypoints with global path. Path is visualized using `waypoint_visualizer` node. |
+| `global_path` | `autoware_msgs/Lane` | Lane - array of waypoints with global path. Path is visualized using `waypoint_visualizer` node. |
 
 ## lanelet2_map_loader and visualizer
 
@@ -39,3 +39,26 @@ Uses Lanelet2 map to generate the global path. Currently loads map itself. `/cur
 | Topic | Type | Comment |
 | --- | --- | --- |
 | `lanelet2_map_markers` | `visualization_msgs/MarkerArray` | Visualizes different lanelet2 map elemets, like: lanelet centerlines, left- and right edges, traffic light bulbs, stop lines and crosswalks. |
+
+## path_smoothing
+
+Takes in global path from `lanelet2_global_planner` or loaded waypoints from file `waypoint_loader` and makes the global path waypoints equally spaced. Original waypoint locations are not retained. It also interpolates speeds, blinkers, calculates orientation and adjusts speeds in curves based on curve radius and lateral acceleration limit.
+
+##### Parameters
+
+* `waypoint interval` - spacing between smoothed waypoints in meters
+* `adjust_speeds_in_curves` - Boolean to adjsut speed in curves or not
+* `radius_calc_neighbour_index` - Determins which smoothed waypoints are used for curve radius calculation +/- index from central point
+* `lateral_acceleration_limit` - Approximation of allowed lateral acceleration in m/s2
+
+##### Subscribes
+
+| Topic | Type | Comment |
+| --- | --- | --- |
+| `global_path` | `autoware_msgs/Lane` | path from `lanelet2_global_planner` or loaded waypoints |
+
+##### Publishes
+
+| Topic | Type | Comment |
+| --- | --- | --- |
+| `smoothed_path` | `autoware_msgs/Lane` | Smoothed waypoints with equal distance spacing |

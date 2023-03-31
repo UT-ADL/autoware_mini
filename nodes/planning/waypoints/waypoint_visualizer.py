@@ -14,10 +14,12 @@ class WaypointVisualizer:
         # Publishers
         self.global_path_markers_pub = rospy.Publisher('global_path_markers', MarkerArray, queue_size=1, latch=True)
         self.smoothed_path_markers_pub = rospy.Publisher('smoothed_path_markers', MarkerArray, queue_size=1, latch=True)
+        self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, latch=True)
 
         # Subscribers
         self.global_path_sub = rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=1)
         self.smoothed_path_sub = rospy.Subscriber('smoothed_path', Lane, self.smoothed_path_callback, queue_size=1)
+        self.local_path_sub = rospy.Subscriber('local_path', Lane, self.local_path_callback, queue_size=1)
 
     def global_path_callback(self, lane):
         self.output_frame = lane.header.frame_id
@@ -27,6 +29,10 @@ class WaypointVisualizer:
         self.output_frame = lane.header.frame_id
         self.publish_smoothed_path_markers(lane.waypoints)
 
+    def local_path_callback(self, lane):
+        self.output_frame = lane.header.frame_id
+        self.publish_local_path_markers(lane.waypoints)
+
     def publish_global_path_markers(self, waypoints):
         marker_array = self.create_path_markers(waypoints)
         self.global_path_markers_pub.publish(marker_array)
@@ -34,6 +40,10 @@ class WaypointVisualizer:
     def publish_smoothed_path_markers(self, waypoints):
         marker_array = self.create_path_markers(waypoints)
         self.smoothed_path_markers_pub.publish(marker_array)
+
+    def publish_local_path_markers(self, waypoints):
+        marker_array = self.create_local_path_markers(waypoints)
+        self.local_path_markers_pub.publish(marker_array)
 
     # Create standard path markers visualization for RVIZ
     def create_path_markers(self, waypoints):
@@ -102,6 +112,35 @@ class WaypointVisualizer:
             marker_array.markers.append(marker)
 
         return marker_array
+
+    def create_local_path_markers(self, waypoints):
+        marker_array = MarkerArray()
+
+        if len(waypoints) == 0:
+            # create marker_array to delete all visualization markers
+            marker = Marker()
+            marker.header.frame_id = self.output_frame
+            marker.action = Marker.DELETEALL
+            marker_array.markers.append(marker)
+
+        else:
+
+            # line strips
+            marker = Marker()
+            marker.header.frame_id = self.output_frame
+            marker.header.stamp = rospy.Time.now()
+            marker.ns = "Path"
+            marker.type =   marker.LINE_STRIP
+            marker.action = marker.ADD
+            marker.id = 0
+            marker.scale.x = 1.2
+            marker.color = ColorRGBA(1.0, 0.1, 0.1, 0.6)
+            for waypoint in waypoints:
+                marker.points.append(waypoint.pose.pose.position)
+            marker_array.markers.append(marker)
+
+        return marker_array
+
 
     def run(self):
         rospy.spin()

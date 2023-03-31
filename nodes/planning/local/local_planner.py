@@ -1,12 +1,10 @@
+#!/usr/bin/env python
 
 import rospy
+import threading
 import numpy as np
-import matplotlib.pyplot as plt
-from autoware_msgs.msg import Lane
-from geometry_msgs.msg import PoseStamped
-
-from scipy import interpolate
-
+from autoware_msgs.msg import Lane, Waypoint, DetectedObjectArray
+from geometry_msgs.msg import PoseStamped, TwistStamped
 
 
 class LocalPlanner:
@@ -14,98 +12,140 @@ class LocalPlanner:
     def __init__(self):
 
         # Parameters
-        self.waypoint_interval = rospy.get_param("~waypoint_interval", 1.0)
+        self.local_path_length = rospy.get_param("~local_path_length", 100)
+        self.output_frame = rospy.get_param("~output_frame", "map")
 
         # Internal variables
+        self.lock = threading.Lock()
+        self.global_path_array = None
+        self.global_path_last_idx = None
+        self.global_path_waypoints = None
+        self.current_velocity = 0.0
+        self.local_path_start_global_idx = 0
 
         # Publishers
+        self.local_path_pub = rospy.Publisher('/planning/local_path', Lane, queue_size=1)
+        self.local_path_wp_pub = rospy.Publisher('/planning/local_path', Waypoint, queue_size=1)
 
         # Subscribers
-        self.path_sub = rospy.Subscriber('/planning/path', Lane, self.path_callback, queue_size=1)
-        self.current_pose_sub = rospy.Subscriber('/current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
+        self.path_sub = rospy.Subscriber('/planning/smoothed_path', Lane, self.path_callback, queue_size=1)
+        self.current_pose_sub = rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
+        self.current_velocity_sub = rospy.Subscriber('/localization/current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1)
+        self.detect_objects_sub = rospy.Subscriber('/detection/detected_objects', DetectedObjectArray, self.detect_objects_callback, queue_size=1)
 
 
-    def path_callback(self, lane):
+    def path_callback(self, msg):
         
-        waypoints_array = np.array([[wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, wp.wpstate.steering_state] for wp in lane.waypoints])        
-        self.global_path = interpolate_using_distance(waypoints_array, self.waypoint_interval)
+        if len(msg.waypoints) == 0:
+            self.lock.acquire()
+            self.global_path_array = None
+            self.global_path_waypoints = None
+            self.global_path_last_idx = None
+            self.local_path_start_global_idx = 0
+            self.lock.release()
+            return
+
+        # extract all waypoint attributes with one loop
+        global_path_waypoints = msg.waypoints
+        global_path_array = np.array([(
+                wp.pose.pose.position.x,
+                wp.pose.pose.position.y,
+                wp.pose.pose.position.z,
+                wp.wpstate.steering_state,
+                wp.twist.twist.linear.x
+            ) for wp in msg.waypoints])
+        
+        self.lock.acquire()
+        self.global_path_array = global_path_array
+        self.global_path_waypoints = global_path_waypoints
+        self.global_path_last_idx = len(global_path_array) - 1
+        self.local_path_start_global_idx = 0
+        self.lock.release()
+
+        # when global path is received, local path will be recalculated
+        # publish local path - send empty np.array
+        # self.publish_local_path(np.array([]))
+
+    def current_velocity_callback(self, msg):
+        self.current_velocity = msg.twist.linear.x
+
 
     def current_pose_callback(self, msg):
 
-        # local_path is extracted from global_path in every step if it is fast using array slicing
+        # get current pose
+        self.current_pose = np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z])
+
+
+    def detect_objects_callback(self, msg):
+        self.objects = msg.objects
+
+        if self.global_path_array is None:
+            return
+
+        # get global path
+        self.lock.acquire()
+        global_path_array = self.global_path_array
+        global_path_waypoints = self.global_path_waypoints
+        global_path_last_idx = self.global_path_last_idx
+        local_path_start_global_idx = self.local_path_start_global_idx
+        self.lock.release()
         
-        # local path
+        # use while loop to calculate distance between current pose and points in global path
+        # continue until the distance is decreasing
+        
+        # initial distance
+        distance = 10000.0
+        end_index = 0
 
-        # check dist from end of local_path - update local path if needed
+        for i in range(local_path_start_global_idx, global_path_last_idx + 1):
+            d = np.sqrt(np.sum((global_path_array[i,0:2] - self.current_pose[0:2])**2))
+            if d < distance:
+                distance = d
+            else:
+                local_path_start_global_idx = i - 1
+                end_index = local_path_start_global_idx + self.local_path_length
+                if end_index > global_path_last_idx:
+                    end_index = global_path_last_idx + 1
+                # print("start: ", self.local_path_start_global_idx, "end: ", end_index, "last: ", self.global_path_last_idx, "len: ", len(global_path_array))
+                break
+
+        # slice local path from global path
+        local_path_array = global_path_array[local_path_start_global_idx:end_index,:]
+
+        # TODO: add object avoidance
+        # use local_path_array
 
 
-        pass
+
+        # TODO just to test - approach goal
+        # distance_to_path_end = np.cumsum(np.sqrt(np.diff(local_path_array[:,0])**2 + np.diff(local_path_array[:,1])**2))[-1]
+        # if  distance_to_path_end < 50:
+        #     # TODO: add current velocity and deceleration and distance based vel calc
+        #     print("approach goal")
+        #     local_path_array[:,4] = 0.0
+
+        # slice waypoints from global path to local path
+        local_path_waypoints = global_path_waypoints[local_path_start_global_idx:end_index]
+        self.publish_local_path_wp(local_path_waypoints)
+
+
+        # update local path start index
+        self.lock.acquire()
+        self.local_path_start_global_idx = local_path_start_global_idx
+        self.lock.release()
+
+
+    def publish_local_path_wp(self, local_path_waypoints):
+        # create lane message
+        lane = Lane()
+        lane.header.frame_id = self.output_frame
+        lane.header.stamp = rospy.Time.now()
+        lane.waypoints = local_path_waypoints
+        self.local_path_pub.publish(lane)
 
 
     def run(self):
         rospy.spin()
-
-
-def interpolate_using_distance(waypoints_array, waypoint_interval):
-
-        # extract into arrays
-        x_path = waypoints_array[:,0]
-        y_path = waypoints_array[:,1]
-        z_path = waypoints_array[:,2]
-        blinker = waypoints_array[:,3]
-
-        # TODO speeds, curvature and adjsut speed based on that.
-
-        # distance differeneces between points
-        x_diff = np.diff(x_path)
-        y_diff = np.diff(y_path)
-        distances = np.cumsum(np.sqrt(x_diff**2 + y_diff**2))
-        # add 0 to the beginning of the array
-        distances = np.insert(distances, 0, 0)
-        new_distances = np.linspace(0, distances[-1], num=int(distances[-1] / waypoint_interval))
-
-        x_new = np.interp(new_distances, distances, x_path)
-        y_new = np.interp(new_distances, distances, y_path)
-        z_new = np.interp(new_distances, distances, z_path)
-        # test blinkers with equal weights?
-        blinker_new = np.interp(new_distances, distances, blinker)
-
-        # debug visualization
-        debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances)
-
-        # Stack arrays for faster accessing - call it global path array 
-
-
-def debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances):
-    # plot 3 figures
-    # 1. x-y path with old and new waypoints
-    # 2. z path with old and new waypoints
-    # 3. blinker path with old and new waypoints
-
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(x_path,y_path, color = 'blue')
-    ax.scatter(x_new, y_new, color = 'red', marker = 'x', alpha = 0.5, label = 'interpolated')
-    plt.legend()
-    plt.show()
-
-    # new plot for heights 
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(new_distances, z_new, color = 'red', marker = 'x', alpha = 0.5, label = 'height interpolated')
-    ax.plot(new_distances, z_new, color = 'red', alpha = 0.5, label = 'height interpolated')
-    ax.scatter(distances, z_path, color = 'blue', alpha = 0.5, label = 'height old')
-    plt.legend()
-    plt.show()
-
-    # new plot for blinkers
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(new_distances, blinker_new, color = 'red', marker = 'x', alpha = 0.5, label = 'blinker interpolated')
-    ax.plot(new_distances, blinker_new, color = 'red', alpha = 0.5, label = 'blinker interpolated')
-    ax.scatter(distances, blinker, color = 'blue', alpha = 0.5, label = 'blinker old')
-    plt.legend()
-    plt.show()
 
 
 if __name__ == '__main__':
