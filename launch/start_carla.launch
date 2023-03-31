@@ -1,11 +1,8 @@
 <?xml version="1.0"?>
 <launch>
     
-    <arg name="bag_file"                    default="/home/tambet/2021-01-12-15-57-27_r05_demo_route_mpc.bag" doc="bag file to play" />
-
     <arg name="use_manual_control"          default="false"                 doc="use manual control for carla"/>
     <arg name="use_detection"               default="true"                  doc="use object detection"/>
-    <arg name="use_tf"                      default="false"                 doc="replaces tf-s in bag with the current ones"/>
     <arg name="localizer"                   default="carla"                 doc="novatel, carla" />
     <arg name="detector"                    default="carla"                 doc="simple, carla" />
     <arg name="use_cam"                     default="false" />
