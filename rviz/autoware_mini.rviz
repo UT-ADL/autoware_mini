@@ -6,9 +6,9 @@ Panels:
       Expanded:
         - /Global Options1
         - /Detection1/Lidar center1
+        - /Detection1/Lidar center1/Detected objects1
         - /Detection1/Lidar center1/Detected objects1/Namespaces1
         - /Simulation1
-        - /Camera2
       Splitter Ratio: 0.7558823823928833
     Tree Height: 1252
   - Class: rviz/Selection
@@ -177,7 +177,7 @@ Visualization Manager:
           Color: 255; 255; 255
           Color Transformer: Intensity
           Decay Time: 0
-          Enabled: false
+          Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Min Color: 0; 0; 0
@@ -192,16 +192,6 @@ Visualization Manager:
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: false
-        - Class: rviz/Camera
-          Enabled: true
-          Image Rendering: background and overlay
-          Image Topic: /carla/rgb_view/image_raw
-          Name: 3rd Person Camera
-          Overlay Alpha: 0.5
-          Queue Size: 2
-          Transport Hint: raw
-          Unreliable: false
           Value: true
         - Alpha: 1
           Autocompute Intensity Bounds: true
@@ -277,7 +267,7 @@ Visualization Manager:
               Color: 255; 255; 255
               Color Transformer: Intensity
               Decay Time: 0
-              Enabled: true
+              Enabled: false
               Invert Rainbow: false
               Max Color: 255; 255; 255
               Min Color: 0; 0; 0
@@ -292,7 +282,7 @@ Visualization Manager:
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
-              Value: true
+              Value: false
             - Alpha: 1
               Autocompute Intensity Bounds: true
               Autocompute Value Bounds:
@@ -388,86 +378,6 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: Simulation
-    - Class: rviz/Camera
-      Enabled: false
-      Image Rendering: background and overlay
-      Image Topic: /carla/camera_fr/image_raw
-      Name: Camera
-      Overlay Alpha: 0.5
-      Queue Size: 2
-      Transport Hint: raw
-      Unreliable: false
-      Value: false
-      Visibility:
-        Camera: true
-        Control:
-          Current pose: true
-          Follower markers: true
-          Value: true
-        Detection:
-          "":
-            "": true
-            Value: true
-          Value: true
-        Grid: true
-        Map:
-          Lanelet2 map: true
-          Value: true
-        Planning:
-          "": true
-          Value: true
-        Sensing:
-          "": true
-          Value: true
-        Simulation:
-          "": true
-          Value: true
-        System:
-          Lexus model: true
-          TF: true
-          Value: true
-        Value: true
-      Zoom Factor: 1
-    - Class: rviz/Camera
-      Enabled: false
-      Image Rendering: background and overlay
-      Image Topic: /carla/camera_fl/image_raw
-      Name: Camera
-      Overlay Alpha: 0.5
-      Queue Size: 2
-      Transport Hint: raw
-      Unreliable: false
-      Value: false
-      Visibility:
-        Camera: true
-        Control:
-          Current pose: true
-          Follower markers: true
-          Value: true
-        Detection:
-          "":
-            "": true
-            Value: true
-          Value: true
-        Grid: true
-        Map:
-          Lanelet2 map: true
-          Value: true
-        Planning:
-          "": true
-          Value: true
-        Sensing:
-          "": true
-          Value: true
-        Simulation:
-          "": true
-          Value: true
-        System:
-          Lexus model: true
-          TF: true
-          Value: true
-        Value: true
-      Zoom Factor: 1
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -495,7 +405,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -3.240006446838379
+      Angle: 0
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -511,9 +421,7 @@ Visualization Manager:
       Y: 0
     Saved: ~
 Window Geometry:
-  3rd Person Camera:
-    collapsed: false
-  Camera:
+  Displays:
     collapsed: false
   Height: 1403
   Hide Left Dock: false
