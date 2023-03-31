@@ -14,7 +14,7 @@ import math
 import tf
 from geometry_msgs.msg import PoseStamped, TwistStamped, Pose, Point
 from nav_msgs.msg import Odometry
-from helpers import LestTransformer
+from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 
 
 class CarlaToAutowareLocalizer:
@@ -32,21 +32,13 @@ class CarlaToAutowareLocalizer:
             '/ground_truth/current_velocity', TwistStamped, queue_size=1)
 
         # Internal paramters
-        self.lest_transformer = LestTransformer()
+        self.sim2utm_transformer = SimulationToUTMTransformer()
         self.br = tf.TransformBroadcaster()
         self.tf_listener = tf.TransformListener()
 
         # Subscribers
         rospy.Subscriber('/carla/odometry',
                          Odometry, self.odometry_callback)
-        
-        # NOTE: Difference given by carla's map origin and utm projection
-        # --> -7.2227463510935195 -339.4496575007215
-        # Whereas:
-        # Ego and Map origin align at -4.8857463510935195 -343.446575007215
-
-        self.init_position = Point(4.8857, 343.4465, 35)
-        self.init_orientation = None
 
 
     def odometry_callback(self, data):
@@ -63,12 +55,12 @@ class CarlaToAutowareLocalizer:
         pose.pose.position = position
         pose.pose.orientation = orientation
 
-        if self.init_orientation is None:
-            self.init_orientation = orientation
+        if self.use_offset:
+            pose.pose =self.sim2utm_transformer.transform_pose(pose.pose)
 
         # Publish Transform
         # NOTE: Need to add correct offset via UTM transformer
-        self.br.sendTransform((pose.pose.position.x - self.init_position.x, pose.pose.position.y - self.init_position.y, pose.pose.position.z - self.init_position.z),
+        self.br.sendTransform((pose.pose.position.x, pose.pose.position.y, pose.pose.position.z),
                               (pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w),
                                rospy.Time.now(),
                                self.role_name, '/map')

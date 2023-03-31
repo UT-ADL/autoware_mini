@@ -21,6 +21,7 @@
   <exec_depend>python-sklearn</exec_depend>
   <exec_depend>python-pyproj</exec_depend>
   <exec_depend>python-opencv</exec_depend>
+  <exec_depend>python-pygame</exec_depend>
 
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
