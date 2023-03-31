@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     
-    <arg name="bag_file"        default="/home/tambet/2021-01-12-15-57-27_r05_demo_route_mpc.bag" doc="bag file to play" />
+    <arg name="bag_file"        default="2021-01-12-15-57-27_r05_demo_route_mpc.bag" doc="bag file to play" />
 
     <arg name="use_detection"   default="true"  doc="use object detection"/>
     <arg name="use_tf"          default="false" doc="replaces tf-s in bag with the current ones"/>
@@ -10,7 +10,7 @@
     <param name="/use_sim_time" value="true" />
 
     <!-- Play back bag -->
-    <node pkg="rosbag" type="play" name="player" required="true" args="$(arg bag_file) --clock">
+    <node pkg="rosbag" type="play" name="player" required="true" args="$(find autoware_mini)/data/bags/$(arg bag_file) --clock --loop">
         <!-- Rename saved topics that are replaced by current ones -->
         <remap from="/tf" to="/bag/tf" if="$(arg use_tf)"/>
         <remap from="/tf_static" to="/bag/tf_static" if="$(arg use_tf)"/>

@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-    <node pkg='autoware_mini' type='carla_to_autoware_detected_objects' name='carla_to_autoware_detected_objects' output='screen'/>
-    <node type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
-
-</launch>

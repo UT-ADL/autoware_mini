@@ -10,7 +10,7 @@
 
         <!-- Bicycle_model simulator -->
         <node pkg="autoware_mini" type="bicycle_simulation.py" name="bicycle_simulation" output="screen" required="true" />
-    
+
     </group>
 
 

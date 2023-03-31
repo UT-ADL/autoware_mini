@@ -19,10 +19,13 @@ class BicycleSimulation:
         # get parameters
         self.publish_rate = rospy.get_param("publish_rate", 50)
         self.wheel_base = rospy.get_param("wheel_base", 2.789)
+        self.acceleration_limit = rospy.get_param("acceleration_limit", 3.0)
+        self.deceleration_limit = rospy.get_param("deceleration_limit", 3.0)
 
         # internal state of bicycle model
         self.x = 0
         self.y = 0
+        self.acceleration = 0
         self.velocity = 0
         self.heading_angle = 0
         self.steering_angle = 0
@@ -35,12 +38,14 @@ class BicycleSimulation:
         self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=10)
         self.br = TransformBroadcaster()
 
+        # visualization of the bicycle model
+        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=10)
+
         # initial position and vehicle command from outside
         rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
         rospy.Subscriber('vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
 
-        # visualization of the bicycle model
-        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=10)
+        rospy.loginfo("bicycle_simulation - initialized")
 
     def initialpose_callback(self, msg):
         # extract position
@@ -52,9 +57,33 @@ class BicycleSimulation:
         quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
         _, _, self.heading_angle = tf.transformations.euler_from_quaternion(quaternion)
 
+        rospy.loginfo("bicycle_simulation - initial position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame", 
+                    msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z,
+                    msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, 
+                    msg.pose.pose.orientation.w, msg.header.frame_id)
+
     def vehicle_cmd_callback(self, msg):
-        # new velocity and steering angle take effect instantaneously
-        self.velocity = msg.ctrl_cmd.linear_velocity
+        # if target velocity is higher than current velocity
+        if msg.ctrl_cmd.linear_velocity > self.velocity + 0.0001:
+            # if acceleration is provided, use it, otherwise take from parameters
+            if msg.ctrl_cmd.linear_acceleration != 0:
+                self.acceleration = abs(msg.ctrl_cmd.linear_acceleration)
+            else:
+                self.acceleration = abs(self.acceleration_limit)
+        # if target velocity is lower than current velocity
+        elif msg.ctrl_cmd.linear_velocity < self.velocity - 0.0001:
+            # if acceleration is provided, use it, otherwise take from parameters
+            if msg.ctrl_cmd.linear_acceleration != 0:
+                self.acceleration = -abs(msg.ctrl_cmd.linear_acceleration)
+            else:
+                self.acceleration = -abs(self.deceleration_limit)
+        # target velocity achieved, no need for acceleration
+        else:
+            self.acceleration = 0
+
+        rospy.logdebug("target velocity: %.3f, current velocity: %.3f, acceleration: %.3f", msg.ctrl_cmd.linear_velocity, self.velocity, self.acceleration)
+
+        # new steering angle takes effect instantaneously
         self.steering_angle = msg.ctrl_cmd.steering_angle
 
         # remember blinkers, just to be able to publish status
@@ -68,6 +97,9 @@ class BicycleSimulation:
             self.blinkers = 0
 
     def update_model_state(self, delta_t):
+        # change velocity by acceleration
+        self.velocity += self.acceleration * delta_t
+
         # compute change according to bicycle model equations
         x_dot = self.velocity * math.cos(self.heading_angle)
         y_dot = self.velocity * math.sin(self.heading_angle)

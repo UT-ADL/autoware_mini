@@ -57,7 +57,7 @@ class Lanelet2GlobalPlanner:
                                                   lanelet2.traffic_rules.Participants.Vehicle)
 
         #Publishers
-        self.waypoints_pub = rospy.Publisher('path', Lane, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('global_path', Lane, queue_size=1, latch=True)
 
         #Subscribers
         self.sub = rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
@@ -65,6 +65,10 @@ class Lanelet2GlobalPlanner:
         self.sub = rospy.Subscriber('cancel_global_path', Bool, self.cancel_global_path_callback, queue_size=1)
 
     def goal_callback(self, msg):
+        rospy.loginfo("lanelet2_global_planner - goal position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame",
+                    msg.pose.position.x, msg.pose.position.y, msg.pose.position.z,
+                    msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z,
+                    msg.pose.orientation.w, msg.header.frame_id)
 
         if self.current_location == None:
             # TODO handle if current_pose gets lost at later stage - see current_pose_callback

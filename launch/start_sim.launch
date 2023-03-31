@@ -5,7 +5,8 @@
     <arg name="planner"                 default="lanelet2"      doc="waypoints, lanelet2" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
-
+    <arg name="use_detection"           default="true"          doc="use object detection" />
+    <arg name="detector"                default="sim"           doc="usually sim" />
 
     <!-- Planner -->
     <include file="$(find autoware_mini)/launch/planning.launch">
@@ -14,13 +15,18 @@
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>
 
+    <!-- Detection -->
+    <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
+        <arg name="detector" value="$(arg detector)" />
+    </include>
+
     <!-- Follower -->
     <include file="$(find autoware_mini)/launch/control.launch">
         <arg name="follower" value="$(arg follower)" />
     </include>
 
     <!-- Bicycle_model simulator -->
-    <include file="$(find autoware_mini)/launch/platform/bicycle_sim.launch" />
+    <include file="$(find autoware_mini)/launch/platform/simulation.launch" />
 
     <!-- Rviz -->
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini_sim.rviz" required="true" />

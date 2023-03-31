@@ -4,8 +4,14 @@ import rospy
 import numpy as np
 
 from ros_numpy import numpify, msgify
-
-from sklearn.cluster import DBSCAN
+try:
+    from sklearnex.cluster import DBSCAN
+    DBSCAN_ALGORITHM = 'auto'
+    rospy.logwarn("Intel® Extension for Scikit-learn found")
+except ImportError:
+    rospy.logwarn("Intel® Extension for Scikit-learn not found, reverting to original Scikit-learn. To speed up clustering install Intel® Extension for Scikit-learn, see https://intel.github.io/scikit-learn-intelex/.")
+    from sklearn.cluster import DBSCAN
+    DBSCAN_ALGORITHM = 'ball_tree'
 
 from sensor_msgs.msg import PointCloud2
 
@@ -15,10 +21,12 @@ class PointsClusterer:
         self.cluster_epsilon = rospy.get_param('~cluster_epsilon', 1.0)
         self.cluster_min_size = rospy.get_param('~cluster_min_size', 7)
 
-        self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='ball_tree')
+        self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm=DBSCAN_ALGORITHM)
 
         self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=5)
         rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=1024*1024)
+
+        rospy.loginfo("points_clusterer - initialized")
 
     def points_callback(self, msg):
         data = numpify(msg)
@@ -56,6 +64,8 @@ class PointsClusterer:
         cluster_msg.header.stamp = msg.header.stamp
         cluster_msg.header.frame_id = msg.header.frame_id
         self.cluster_pub.publish(cluster_msg)
+
+        rospy.logdebug("%d points, %d clusters", len(points), np.max(labels) + 1)
 
     def run(self):
         rospy.spin()

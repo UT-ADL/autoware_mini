@@ -8,7 +8,7 @@
         <!-- Remap topics -->
         <remap from="current_pose"     to="/localization/current_pose" />
         <remap from="current_velocity" to="/localization/current_velocity" />
-        <remap from="path"             to="/planning/path" />
+        <remap from="path"             to="/planning/smoothed_path" />
 
 
         <!-- Follower -->

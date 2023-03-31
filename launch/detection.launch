@@ -1,16 +1,24 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="detector"            default="simple"    doc="simple, carla" />
+    <arg name="detector"            default="simple"    doc="simple, sim, carla" />
     <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
 
     <group ns="detection">
         <group if="$(arg use_lidar_center)" ns="lidar_center">
-            <remap from="points_raw" to="/points_raw_center" />
+            <remap from="points_raw" to="/lidar_center/points_raw" />
+            <remap from="detected_objects" to="/detection/detected_objects" />
             
             <include if="$(eval arg('detector')=='simple')" file="$(find autoware_mini)/launch/detection/lidar_simple.launch" />
-
-            <include if="$(eval arg('detector')=='carla')" file="$(find autoware_mini)/launch/detection/carla_ground_truth_detection.launch" />
+            
+            <!-- Carla's ground truth as detection -->
+            <node if="$(eval arg('detector')=='carla')" pkg='autoware_mini' type='carla_to_autoware_detected_objects' name='carla_to_autoware_detected_objects' output='screen'/>
         </group>
+
+        <!-- Obstacle simulator -->
+        <node if="$(eval arg('detector')=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />
+
+        <!-- Detected objects visualizer -->
+        <node type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/detection.yaml"/>
     </group>

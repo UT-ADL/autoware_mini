@@ -28,6 +28,9 @@
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
         </node>
 
+        <!-- Path smoothing -->
+        <node pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true"/>
+
         <!-- Waypoint_visualizer - necessary also for visualizing path from global planner-->
         <node pkg="autoware_mini" type="waypoint_visualizer.py" name="waypoint_visualizer" output="screen" required="true"/>
 

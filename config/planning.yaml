@@ -10,3 +10,8 @@ waypoint_loader:
 
 waypoint_saver:
   interval: 1.0
+
+path_smoothing:
+  waypoint_interval: 1.0            # m
+  radius_calc_neighbour_index: 4    # int
+  lateral_acceleration_limit: 3.0   # m/s2
