@@ -53,6 +53,7 @@
     <remap from="/carla/$(arg role_name)/base_link/rgb_view/camera_info" to="/carla/rgb_view/camera_info" />
     <remap from="/carla/$(arg role_name)/base_link/rgb_view/image" to="/carla/rgb_view/image_raw" />
     <remap from="/carla/$(arg role_name)/base_link/lidar_center" to="/points_raw_center" />
+    <remap from="/carla/$(arg role_name)/base_link/lidar_center/lidar_front/os_sensor" to="/poins_raw_front" />
     <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fl/camera_info" to="/camera_fl/camera_info" />
     <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fr/camera_info" to="/camera_fr/camera_info" />
     <remap from="/carla/$(arg role_name)/base_link/lidar_center/camera_fl/image" to="/camera_fl/image_raw" />
@@ -75,7 +76,6 @@
        <rosparam subst_value="true" command="load">
       mappings:
         - {old: '$(arg role_name)/base_link', new: 'base_link'}
-        - {old: '$(arg role_name)/base_link/lidar_center/lidar_front/os_sensor', new: '/lidar_front/os_sensor'}
         - {old: '$(arg role_name)/base_link/base_footprint', new: 'base_footprint'}
     </rosparam>
     </node>    
