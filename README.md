@@ -33,6 +33,7 @@ The key modules of Autoware Mini are:
    ```
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/vehicle_platform.git
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware_mini.git
+   git clone --recurse-submodules https://github.com/carla-simulator/ros-bridge.git carla_ros_bridge
    ```
 
 3. Install system dependencies
@@ -60,13 +61,59 @@ roslaunch autoware_mini start_sim.launch
 
 You should see Rviz window with a default map. You need to give the vehicle initial position with 2D Pose Estimate button and goal using 2D Nav Goal button.
 
-## Launching with Carla
-
-TBD
-
 
 ## Launching in Lexus
 
 ```
 roslaunch autoware_mini start_lexus.launch
+```
+
+---
+
+## Download Carla + Tartu map (Skip if already done)
+
+1. Download [Carla 0.9.13](https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz) and extract it. We will call this extracted folder `<CARLA ROOT>`.
+2. Download [Tartu.tar.gz](https://drive.google.com/file/d/10CHEOjHyiLJgD13g6WwDZ2_AWoLasG2F/view?usp=share_link)
+3. Copy Tartu.tar.gz inside the import folder under `<CARLA ROOT>` directory.
+4. Run ./ImportAssets.sh from the `<CARLA ROOT>` directory. This will install Tartu map. (You can now delete the Tartu.tar.gz file from import folder.)
+5. Since we will be refereing to `<CARLA ROOT>` alot, lets export it as environment variable. Make sure to replace the path where Carla is downloaded.
+
+```
+export CARLA_ROOT=/path/to/your/carla/installation
+
+```
+6. Now, enter the following command. (<b>NOTE:</b> Here we assume that `CARLA_ROOT`  was set from the previous command.)
+```
+export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla/dist/carla-0.9.13-py3.7-linux-x86_64.egg:${CARLA_ROOT}/PythonAPI/carla/agents:${CARLA_ROOT}/PythonAPI/carla
+
+```
+<b>Note:</b> It will be convenient if above variables are automatically exported whenever you open a terminal. Putting above exports in `~/.bashrc` will reduce hassle of exporting everytime.
+
+---
+
+## Launching with Carla
+
+1. In a new terminal, (assuming enviornment variables are exported) Run Carla simulator by entering followig command.
+
+```
+$CARLA_ROOT/./CarlaUE4.sh -prefernvidia -quality-level=Low
+```
+### Launch using ground-truth detection:
+2. In a new terminal, (assuming enviornment variables are exported) run the following command. This run’s tartu environment of Carla with minimal sensors and our autonomy stack. The detected objects come from Carla directly.
+
+```
+roslaunch autoware_mini start_carla.launch
+```
+### OR
+### Launch using lidar based detector:
+2. In a new terminal, (assuming enviornment variables are exported) run the following command. This run’s tartu environment of Carla with lidar sensors and our autonomy stack. The detection is performed using Lidar based euclidean cluster detector.
+
+```
+roslaunch autoware_mini start_carla.launch detector:=simple
+```
+### Generate Traffic
+3. In a new terminal, (assuming enviornment variables are exported) generate random traffic by entering following command.
+
+```
+python $CARLA_ROOT/PythonAPI/examples/generate_traffic.py --asynch
 ```
