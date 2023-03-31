@@ -15,7 +15,7 @@
 
         <!-- Waypoint_loader -->
         <node if="$(eval arg('planner')=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
-            <param name="waypoints_file" value="$(find autoware_mini)/data/$(arg waypoints_file)" />
+            <param name="waypoints_file" value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
         </node>
 
         <!-- Lanelet2 map loader -->

@@ -18,7 +18,7 @@ class PathSmoothing:
         self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit", 3.0)
 
         # Publishers
-        self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1)
+        self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1, latch=True)
 
         # Subscribers
         self.global_path_sub = rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=1)
