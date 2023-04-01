@@ -1,0 +1,83 @@
+<launch>
+    <arg name="use_lidar_center"        default="true" />
+    <arg name="use_lidar_front"         default="true" />
+    <arg name="detection_method"        default="clustering" doc="{clustering, pointpillars, vella}" />
+
+    <!-- Lidar(s) -->
+    <group if="$(eval (use_lidar_center or use_lidar_front) and (arg('detection_method')=='clustering'))">
+        <!-- Center lidar ground removal -->
+        <group if="$(arg use_lidar_center)" ns="lidar_center">
+            <remap unless="$(arg use_lidar_front)" from="points_no_ground" to="/detection/lidar/points_no_ground" />
+            <node pkg="autoware_mini" type="ground_removal.py" name="ground_removal" output="log" />
+        </group>
+
+        <!-- Front lidar ground removal -->
+        <group if="$(arg use_lidar_front)" ns="lidar_front">
+            <remap unless="$(arg use_lidar_front)" from="points_no_ground" to="/detection/lidar/points_no_ground" />
+            <node pkg="autoware_mini" type="ground_removal.py" name="ground_removal" output="log" />
+        </group>
+    </group>
+
+        <group ns="detection">
+        <group if="$(eval use_lidar_center or use_lidar_front)" ns="lidar">
+            <group if="$(eval arg('detection_method')=='clustering')">
+
+                <!-- Lidar merging node -->
+                <node if="$(eval use_lidar_center and use_lidar_front)" pkg="points_preprocessor" type="points_concat_filter" name="points_concat_filter" output="screen">
+                    <remap from="/points_concat" to="points_no_ground" />
+                </node>
+
+                <!-- Clustering -->
+                <remap from="/detection/lidar_detector/cloud_clusters" to="cloud_clusters" />
+                <remap from="/detection/lidar_detector/objects" to="objects" />
+                <remap from="/points_cluster" to="points_cluster" />
+                <remap from="/points_lanes" to="points_lanes" />
+                <remap from="/points_ground" to="points_ground" />
+                <remap from="/cluster_centroids" to="cluster_centroids" />
+                <node pkg="lidar_euclidean_cluster_detect" type="lidar_euclidean_cluster_detect" name="lidar_euclidean_cluster_detect" output="screen"></node>
+            </group>
+
+            <!-- Autoware PoinPillars-->
+            <group if="$(eval arg('detection_method')=='pointpillars' and use_lidar_center)">
+                <include file="$(find autoware_ut)/launch/detection/point_pillars.launch">
+                    <arg name="input_topic" default="/lidar_center/points_raw" />
+                    <arg name="output_topic" default="objects" />
+                    <arg name="baselink_support" default="false" />
+                    <arg name="reproduce_result_mode" default="true" />
+                    <arg name="score_threshold" default="0.5" />
+                    <arg name="nms_overlap_threshold" default="0.5" />
+                    <arg name="pfe_onnx_file" value="$(find autoware_ut)/config/pointpillars_models/pfe.onnx"/>
+                    <arg name="rpn_onnx_file" value="$(find autoware_ut)/config/pointpillars_models/rpn.onnx"/>
+                </include>
+            </group>
+
+            <!-- Vella detections -->
+            <group if="$(eval arg('detection_method')=='vella' and use_lidar_center)">
+                <node pkg="autoware_ut" type="vella_to_autoware_converter.py" name="vella_to_autoware_converter" output="screen">
+                    <remap if="$(arg use_radar)" from="objects" to="tracked_objects" />
+                    <remap unless="$(arg use_radar)" from="objects" to="/detection/objects" />
+                </node>
+                <node pkg="autoware_ut" type="odom_publisher.py" name="odom_publisher" output="screen" />
+                <node pkg="autoware_ut" type="vella_detector.sh" name="vella_detector" args ="2.11
+                   $(find autoware_ut)/config/vella/vella_extrinsics.yaml  /odom 2 " output="screen"/>
+
+
+                <node if="$(arg use_radar)" pkg="detected_objects_visualizer" type="visualize_detected_objects" name="vella_objects_viz" output="screen">
+                    <remap from="objects" to="tracked_objects" />
+                </node>
+                <node unless="$(arg use_radar)" pkg="detected_objects_visualizer" type="visualize_detected_objects" name="vella_objects_viz" output="screen" ns = '/detection'/>
+            </group>
+
+            <!-- Tracker IMM_UKF or CVKF -->
+            <include unless="$(eval arg('detection_method')=='vella')" file="$(find autoware_ut)/launch/detection/tracking.launch">
+                <arg name="namespace" value="lidar" />
+                <arg name="lidar_tracker" value="$(arg lidar_tracker)" />
+                <arg name="tracker_input_topic" value="objects" />
+                <arg if="$(arg use_radar)" name="tracker_output_topic" value="tracked_objects" />
+                <arg unless="$(arg use_radar)" name="tracker_output_topic" value="/detection/objects" />
+            </include>
+
+        </group>
+
+
+</launch>
