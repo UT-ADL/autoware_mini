@@ -28,7 +28,7 @@ class VellaToAutoware:
         # transform listener
         self.tf_listener = tf.TransformListener()
         # Autoware detected objects publisher
-        self.detected_object_array_pub = rospy.Publisher('objects', DetectedObjectArray, queue_size=10)
+        self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=10)
         # vella tracks subscriber
         rospy.Subscriber('vdk/tracks', Track3DArray, self.vella_tracks_callback, queue_size=1)
 
