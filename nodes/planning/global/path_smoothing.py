@@ -16,6 +16,7 @@ class PathSmoothing:
         self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves", True)
         self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration", True)
         self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_limit", 1.0)
+        self.speed_averaging_window = rospy.get_param("~speed_averaging_window", 21)
         self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index", 4)
         self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit", 3.0)
 
@@ -92,10 +93,22 @@ class PathSmoothing:
             speed_radius = np.sqrt(self.lateral_acceleration_limit * np.abs(radius))
             speed_new = np.fmin(speed_interpolated, speed_radius)
 
+        # loop over array backwards and forwards to adjust speeds using the deceleration limit
         if self.adjust_speeds_using_deceleration:
-            # loop over speed_new reversely and adjust speed if it is higher than calculated limit using deceleration
+            accel_constant = 2 * self.speed_deceleration_limit * self.waypoint_interval
+            # backward loop
             for i in range(len(speed_new) - 2, 0, -1):
-                speed_new[i] = min(speed_new[i], np.sqrt(speed_new[i + 1]**2 + 2 * self.speed_deceleration_limit * self.waypoint_interval))
+                speed_new[i] = min(speed_new[i], np.sqrt(speed_new[i + 1]**2 + accel_constant))
+            # forward loop
+            for i in range(1, len(speed_new) ):
+                speed_new[i] = min(speed_new[i], np.sqrt(speed_new[i - 1]**2 + accel_constant))
+
+        if self.speed_averaging_window > 1:
+            # average array values using window size of n
+            speed_new = np.convolve(speed_new, np.ones((self.speed_averaging_window,))/self.speed_averaging_window, mode='same')
+            # replace n/2 values at the beginning and end of the array with the n+1 and n-1 values respectively
+            speed_new[:int(self.speed_averaging_window/2)] = speed_new[int(self.speed_averaging_window/2)]
+            speed_new[-int(self.speed_averaging_window/2):] = speed_new[-int(self.speed_averaging_window/2)-1]
 
         # TODO: remove or add param for debug visualization
         # debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
