@@ -155,11 +155,9 @@ def calculate_radius_step_n_triangle_equation(x, y, n):
 
     # calculate the area of the triangle
     s = (a + b + c) / 2
-    v = (s * (s - a) * (s - b) * (s - c))
-
-    # replace values close to 0 with a small value to avoid division by 0
-    v[v < 0.0000000001] = 0.0000000001
-    area = np.sqrt(v)
+    # TODO: added np.abs because sometimes negative values are there, check why
+    area = np.sqrt(np.abs(s * (s - a) * (s - b) * (s - c)))
+    area = np.maximum(area, 0.0000000001)
 
     # calculate the radius of the circle
     radius = (a * b * c) / (4 * area)
