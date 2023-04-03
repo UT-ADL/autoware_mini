@@ -89,7 +89,7 @@ class PathSmoothing:
 
         if self.adjust_speeds_in_curves:
             # Calculate speed limit based on lateral acceleration limit
-            radius = calculate_radius_with_step_n(x_new, y_new, self.radius_calc_neighbour_index)
+            radius = calculate_radius_step_n_triangle_equation(x_new, y_new, self.radius_calc_neighbour_index)
             speed_radius = np.sqrt(self.lateral_acceleration_limit * np.abs(radius))
             speed_new = np.fmin(speed_interpolated, speed_radius)
 
@@ -141,6 +141,35 @@ class PathSmoothing:
 
     def run(self):
         rospy.spin()
+
+def calculate_radius_step_n_triangle_equation(x, y, n):
+
+    # equation derived from:
+    # https://en.wikipedia.org/wiki/Circumscribed_circle#Other_properties
+    # diameter = a*b*c / 2*area
+
+    # find the lengths of the 3 edges for the triangle
+    a = np.sqrt((x[n:-n] - x[:-2*n])**2 + (y[n:-n] - y[:-2*n])**2)
+    b = np.sqrt((x[:-2*n] - x[2*n:])**2 + (y[:-2*n] - y[2*n:])**2)
+    c = np.sqrt((x[2*n:] - x[n:-n])**2 + (y[2*n:] - y[n:-n])**2)
+
+    # calculate the area of the triangle
+    s = (a + b + c) / 2
+    v = (s * (s - a) * (s - b) * (s - c))
+
+    # replace values close to 0 with a small value to avoid division by 0
+    v[v < 0.0000000001] = 0.0000000001
+    area = np.sqrt(v)
+
+    # calculate the radius of the circle
+    radius = (a * b * c) / (4 * area)
+
+    # append n values to the beginning of the array with the first value
+    radius = np.append(radius[:n], radius)
+    # append n values to the end of the array with the last value
+    radius = np.append(radius, radius[-n:])
+
+    return radius
 
 def calculate_radius_with_step_n(x, y, n):
     # calculate radius of the circle using 3 points

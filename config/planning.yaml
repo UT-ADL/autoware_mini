@@ -15,6 +15,7 @@ path_smoothing:
   waypoint_interval: 1.0                  # m
   adjust_speeds_in_curves: True
   adjust_speeds_using_deceleration: True
+  speed_averaging_window: 11              # window size (will be applied only if > 1)
   speed_deceleration_limit: 1.0           # m/s2
   radius_calc_neighbour_index: 4          # int
   lateral_acceleration_limit: 3.0         # m/s2
