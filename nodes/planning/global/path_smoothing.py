@@ -15,7 +15,7 @@ class PathSmoothing:
         self.waypoint_interval = rospy.get_param("~waypoint_interval", 1.0)
         self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves", True)
         self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration", True)
-        self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_adjusment", 1.0)  # m/s2
+        self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_limit", 1.0)
         self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index", 4)
         self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit", 3.0)
 
