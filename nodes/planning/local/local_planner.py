@@ -23,6 +23,9 @@ class LocalPlanner:
         self.current_velocity = 0.0
         self.local_path_start_global_idx = 0
 
+        self.closest_object_distance = 0.0
+        self.closest_object_velocity = 0.0
+
         # Publishers
         self.local_path_pub = rospy.Publisher('/planning/local_path', Lane, queue_size=1)
         self.local_path_wp_pub = rospy.Publisher('/planning/local_path', Waypoint, queue_size=1)
@@ -51,7 +54,6 @@ class LocalPlanner:
                 wp.pose.pose.position.x,
                 wp.pose.pose.position.y,
                 wp.pose.pose.position.z,
-                wp.wpstate.steering_state,
                 wp.twist.twist.linear.x
             ) for wp in msg.waypoints])
         
@@ -118,12 +120,10 @@ class LocalPlanner:
 
 
         # TODO just to test - approach goal
-        # distance_to_path_end = np.cumsum(np.sqrt(np.diff(local_path_array[:,0])**2 + np.diff(local_path_array[:,1])**2))[-1]
-        # if  distance_to_path_end < 50:
-        #     # TODO: add current velocity and deceleration and distance based vel calc
-        #     print("approach goal")
-        #     local_path_array[:,4] = 0.0
-
+        distance_to_path_end = np.cumsum(np.sqrt(np.diff(local_path_array[:,0])**2 + np.diff(local_path_array[:,1])**2))[-1]
+        self.closest_object_distance = distance_to_path_end
+        self.closest_object_velocity = 0.0
+        
         # slice waypoints from global path to local path
         local_path_waypoints = global_path_waypoints[local_path_start_global_idx:end_index]
         self.publish_local_path_wp(local_path_waypoints)
@@ -141,6 +141,9 @@ class LocalPlanner:
         lane.header.frame_id = self.output_frame
         lane.header.stamp = rospy.Time.now()
         lane.waypoints = local_path_waypoints
+        lane.closest_object_distance = self.closest_object_distance
+        lane.closest_object_velocity = self.closest_object_velocity
+        
         self.local_path_pub.publish(lane)
 
 
