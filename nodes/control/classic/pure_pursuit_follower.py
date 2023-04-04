@@ -30,6 +30,8 @@ class PurePursuitFollower:
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
         self.use_closest_object_info = rospy.get_param("~use_closest_object_info", False)
 
+        self.speed_deceleration_limit = rospy.get_param("/planning/path_smoothing/speed_deceleration_limit", 1.0)
+
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
@@ -137,7 +139,7 @@ class PurePursuitFollower:
         # target_velocity from map and based on closest object
         target_velocity = waypoints[front_wp_idx].twist.twist.linear.x
         if self.use_closest_object_info:
-            closest_obj_based_vel = math.sqrt(self.closest_object_velocity**2 + (2 * 1 * self.closest_object_distance))
+            closest_obj_based_vel = math.sqrt(self.closest_object_velocity**2 + (2 * self.speed_deceleration_limit * self.closest_object_distance))
             target_velocity = min(target_velocity, closest_obj_based_vel)
 
         # blinkers
