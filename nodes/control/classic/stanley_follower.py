@@ -26,6 +26,7 @@ class StanleyFollower:
         self.lateral_error_limit = rospy.get_param("~lateral_error_limit", 2.0)
         self.publish_debug_info = rospy.get_param("~publish_debug_info", False)
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
+        self.use_closest_object_info = rospy.get_param("~use_closest_object_info", False)
 
         # Variables - init
         self.waypoint_tree = None
@@ -58,6 +59,9 @@ class StanleyFollower:
             self.waypoint_tree = None
             self.waypoints = None
             self.lock.release()
+
+            self.closest_object_distance = 0.0
+            self.closest_object_velocity = 0.0
             return
 
         # prepare waypoints for nearest neighbor search
@@ -67,6 +71,9 @@ class StanleyFollower:
         self.waypoint_tree = waypoint_tree
         self.waypoints = path_msg.waypoints
         self.lock.release()
+
+        self.closest_object_distance = path_msg.closest_object_distance
+        self.closest_object_velocity = path_msg.closest_object_velocity
 
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
@@ -119,8 +126,13 @@ class StanleyFollower:
         delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))
         steering_angle = heading_error + delta_error
 
-        # target_velocity and blinkers
+        # target_velocity from map and based on closest object
         target_velocity = waypoints[bl_front_wp_idx].twist.twist.linear.x
+        if self.use_closest_object_info:
+            closest_obj_based_vel = math.sqrt(self.closest_object_velocity**2 + (2 * 1 * self.closest_object_distance))
+            target_velocity = min(target_velocity, closest_obj_based_vel)
+
+        # blinkers
         left_blinker, right_blinker  = get_blinker_state(waypoints[bl_front_wp_idx].wpstate.steering_state)
 
         # Publish
