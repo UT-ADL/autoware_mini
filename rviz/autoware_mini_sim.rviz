@@ -26,6 +26,7 @@ Panels:
     Name: Views
     Splitter Ratio: 0.5
   - Class: rviz/Time
+    Experimental: false
     Name: Time
     SyncMode: 0
     SyncSource: ""
@@ -255,12 +256,18 @@ Visualization Manager:
           Value: false
         - Class: rviz/MarkerArray
           Enabled: true
+          Marker Topic: /planning/target_lane_markers
+          Name: Start and Goal lanelets
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
           Marker Topic: /planning/smoothed_path_markers
           Name: Smoothed path markers
           Namespaces:
-            Path: true
-            Velocity label: true
-            Waypoint pose: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -364,4 +371,4 @@ Window Geometry:
     collapsed: false
   Width: 1865
   X: 55
-  Y: 0
+  Y: 360

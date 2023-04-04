@@ -10,9 +10,10 @@ from lanelet2.geometry import distance, to2D
 
 from sklearn.neighbors import KDTree
 
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, Point
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, ColorRGBA
+from visualization_msgs.msg import MarkerArray, Marker
 from tf.transformations import quaternion_from_euler
 from helpers import get_heading_between_two_points
 
@@ -21,6 +22,9 @@ LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
     "left": WaypointState.STR_LEFT,
     "right": WaypointState.STR_RIGHT
 }
+
+RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
+GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.8)
 
 class Lanelet2GlobalPlanner:
     
@@ -58,6 +62,7 @@ class Lanelet2GlobalPlanner:
 
         #Publishers
         self.waypoints_pub = rospy.Publisher('global_path', Lane, queue_size=1, latch=True)
+        self.target_lane_pub = rospy.Publisher('target_lane_markers', MarkerArray, queue_size=1, latch=True)
 
         #Subscribers
         self.sub = rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
@@ -86,32 +91,38 @@ class Lanelet2GlobalPlanner:
         # Get nearest lanelets
         goal_lanelet = self.lanelet2_map.laneletLayer.nearest(new_goal, 1)[0]
         start_lanelet = self.lanelet2_map.laneletLayer.nearest(start_point, 1)[0]
-
-        if distance(start_point, to2D(start_lanelet.centerline)) > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - start point too far from centerline")
-            return
-        
-        if distance(new_goal, to2D(goal_lanelet.centerline)) > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - goal point too far from centerline")
-            return
+        self.publish_target_lanelets(start_lanelet, goal_lanelet)
 
         graph = lanelet2.routing.RoutingGraph(self.lanelet2_map, self.traffic_rules)
         route = graph.getRoute(start_lanelet, goal_lanelet, 0, True)        # lanelet2.routing.Route
         if route == None:
             rospy.logwarn("lanelet2_global_planner - no route found, try new goal!")
             return
-        
-        path = route.shortestPath()                                         # lanelet2.routing.LaneletPath - might be useful for lane change functionality?
-        path_no_lane_change = path.getRemainingLane(start_lanelet)          # lanelet2.core.LaneletSequence
-        new_waypoints, new_waypoint_tree = self.convert_to_waypoints(path_no_lane_change)
+
+        path = route.shortestPath()
+        path_no_lane_change = path.getRemainingLane(start_lanelet)
+
+        # check if goal is in path
+        if path_no_lane_change[len(path_no_lane_change)-1].id != goal_lanelet.id:
+            rospy.logwarn("lanelet2_global_planner - last lanelet in path (%d) is not goal lanelet (%d)", path_no_lane_change[len(path_no_lane_change)-1].id, goal_lanelet.id)
+            return
+
+        waypoints, waypoint_tree = self.convert_to_waypoints(path_no_lane_change)
 
         # find closest point idx for start and goal
-        _, start_idx = new_waypoint_tree.query([(start_point.x, start_point.y)], 1)
-        _, goal_idx = new_waypoint_tree.query([(new_goal.x, new_goal.y)], 1)
+        d, start_idx = waypoint_tree.query([(start_point.x, start_point.y)], 1)
+        if d[0][0] > self.distance_to_centerline_limit:
+            rospy.logwarn("lanelet2_global_planner - start point too far (%f) from centerline", d[0][0])
+            return
+
+        d, goal_idx = waypoint_tree.query([(new_goal.x, new_goal.y)], 1)
+        if d[0][0] > self.distance_to_centerline_limit:
+            rospy.logwarn("lanelet2_global_planner - goal point too far (%f) from centerline", d[0][0])
+            return
 
         # update goal point and add new waypoints to the existing ones
         self.goal_point = new_goal
-        self.waypoints += new_waypoints[start_idx[0][0]:goal_idx[0][0]]
+        self.waypoints += waypoints[start_idx[0][0]:goal_idx[0][0]]
 
         self.publish_waypoints(self.waypoints)
         rospy.loginfo("lanelet2_global_planner - path published")
@@ -182,6 +193,38 @@ class Lanelet2GlobalPlanner:
         
         self.waypoints_pub.publish(lane)
 
+
+    def publish_target_lanelets(self, start_lanelet, goal_lanelet):
+        
+        marker_array = MarkerArray()
+
+        # create correct ones
+        marker = self.create_target_lanelet_marker()
+        marker.ns = "start_lanelet"
+        marker.color = GREEN
+        for point in to2D(start_lanelet.centerline):
+            marker.points.append(Point(point.x, point.y, 0.0))
+        marker_array.markers.append(marker)
+
+        marker = self.create_target_lanelet_marker()
+        marker.ns = "goal_lanelet"
+        marker.color = RED
+        for point in to2D(goal_lanelet.centerline):
+            marker.points.append(Point(point.x, point.y, 0.0))
+        marker_array.markers.append(marker)
+
+        self.target_lane_pub.publish(marker_array)
+    
+    def create_target_lanelet_marker(self):
+        marker = Marker()
+        marker.header.frame_id = "map"
+        marker.header.stamp = rospy.Time.now()
+        marker.action = Marker.ADD
+        marker.type = Marker.POINTS
+        marker.pose.orientation.w = 1.0
+        marker.scale.x = 0.3
+        marker.scale.y = 0.3
+        return marker
 
     def run(self):
         rospy.spin()
