@@ -35,6 +35,8 @@ class Lanelet2GlobalPlanner:
         self.output_frame = rospy.get_param("~output_frame", map)
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
         self.speed_limit = rospy.get_param("~speed_limit", 40.0) / 3.6
+        self.wp_left_width = rospy.get_param("~wp_left_width", 1.4)
+        self.wp_right_width = rospy.get_param("~wp_right_width", 1.4)
 
         self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
         self.use_custom_origin = rospy.get_param("/localization/use_custom_origin")
@@ -174,6 +176,10 @@ class Lanelet2GlobalPlanner:
 
                 # TODO: will be replaced by speed from map
                 waypoint.twist.twist.linear.x = self.speed_limit
+                # TODO: currently LW and RW from our map database are not available in lanelet map
+                # or fiind leftBound and rightBound dist from centerline?
+                waypoint.dtlane.lw = self.wp_left_width
+                waypoint.dtlane.rw = self.wp_right_width
 
                 waypoints.append(waypoint)
 

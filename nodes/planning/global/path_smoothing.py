@@ -39,7 +39,9 @@ class PathSmoothing:
                 wp.pose.pose.position.y,
                 wp.pose.pose.position.z,
                 wp.wpstate.steering_state,
-                wp.twist.twist.linear.x
+                wp.twist.twist.linear.x,
+                wp.dtlane.lw,
+                wp.dtlane.rw
             ) for wp in msg.waypoints])
 
         smoothed_path_array = self.smooth_global_path(waypoints_array)
@@ -56,6 +58,8 @@ class PathSmoothing:
         z_path = waypoints_array[:,2]
         blinker = waypoints_array[:,3]
         speed = waypoints_array[:,4]
+        lw = waypoints_array[:,5]
+        rw = waypoints_array[:,6]
 
         # distance differeneces between points
         distances = np.cumsum(np.sqrt(np.sum(np.diff(xy_path, axis=0)**2, axis=1)))
@@ -81,6 +85,10 @@ class PathSmoothing:
         # Yaw - calculate yaw angle for path and add last yaw angle to the end of the array
         yaw = np.arctan2(np.diff(y_new), np.diff(x_new))
         yaw = np.append(yaw, yaw[-1])
+
+        # lw and rw
+        lw_new = np.interp(new_distances, distances, lw)
+        rw_new = np.interp(new_distances, distances, rw)
 
         # Speed
         # TODO: when map based speed is implemented check if gives reasonable results
@@ -114,7 +122,7 @@ class PathSmoothing:
             debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
 
         # Stack
-        smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, yaw), axis=1)
+        smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, lw_new, rw_new, yaw), axis=1)
 
         return smoothed_path_array
 
@@ -127,7 +135,7 @@ class PathSmoothing:
 
         self.smoothed_path_pub.publish(lane)
 
-    def create_waypoint(self, x, y, z, blinker, speed, yaw):
+    def create_waypoint(self, x, y, z, blinker, speed, lw, rw, yaw):
         # create waypoint
         waypoint = Waypoint()
         waypoint.pose.pose.position.x = x
@@ -136,6 +144,8 @@ class PathSmoothing:
         waypoint.wpstate.steering_state = int(blinker)
         waypoint.twist.twist.linear.x = speed
         waypoint.pose.pose.orientation = get_orientation_from_yaw(yaw)
+        waypoint.dtlane.lw = lw
+        waypoint.dtlane.rw = rw
 
         return waypoint
 
