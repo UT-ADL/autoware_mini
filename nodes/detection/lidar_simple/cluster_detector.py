@@ -20,7 +20,7 @@ class ClusterDetector:
         self.enable_pointcloud = rospy.get_param('~enable_pointcloud', False)
         self.enable_convex_hull = rospy.get_param('~enable_convex_hull', True)
 
-        self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=5)
+        self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         rospy.Subscriber('points_clustered', PointCloud2, self.cluster_callback, queue_size=1, buff_size=1024*1024)
 
         rospy.loginfo("cluster_detector - initialized")
