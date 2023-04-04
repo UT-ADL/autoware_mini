@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Detection1
         - /Detection1/Lidar center1
         - /Detection1/Lidar center1/Detected objects1
         - /Detection1/Lidar center1/Detected objects1/Namespaces1
@@ -28,7 +29,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: Points raw center
+    SyncSource: Points ground
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -81,11 +82,13 @@ Visualization Manager:
               Value: true
             lexus_model:
               Value: true
-            lidar:
+            lidar_0:
               Value: true
             lidar_center:
               Value: true
             lidar_front/os_sensor:
+              Value: true
+            map:
               Value: true
             radar_fc:
               Value: true
@@ -96,32 +99,33 @@ Visualization Manager:
           Show Axes: true
           Show Names: true
           Tree:
-            base_link:
-              base_footprint:
-                {}
-              imu:
-                {}
-              lexus_model:
-                {}
-              lidar_center:
-                camera_fl:
+            map:
+              base_link:
+                base_footprint:
                   {}
-                camera_fr:
+                imu:
                   {}
-                interfacea_link0:
+                lexus_model:
                   {}
-                interfacea_link1:
+                lidar_center:
+                  camera_fl:
+                    {}
+                  camera_fr:
+                    {}
+                  interfacea_link0:
+                    {}
+                  interfacea_link1:
+                    {}
+                  interfacea_link2:
+                    {}
+                  interfacea_link3:
+                    {}
+                  lidar_0:
+                    {}
+                  lidar_front/os_sensor:
+                    {}
+                radar_fc:
                   {}
-                interfacea_link2:
-                  {}
-                interfacea_link3:
-                  {}
-                lidar:
-                  {}
-                lidar_front/os_sensor:
-                  {}
-              radar_fc:
-                {}
           Update Interval: 0
           Value: true
         - Alpha: 1
@@ -221,7 +225,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: false
-      Enabled: true
+      Enabled: false
       Name: Sensing
     - Class: rviz/Group
       Displays:
@@ -250,7 +254,7 @@ Visualization Manager:
               Size (Pixels): 3
               Size (m): 0.10000000149011612
               Style: Flat Squares
-              Topic: detection/lidar_center/points_ground
+              Topic: /detection/lidar/points_ground
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
@@ -278,7 +282,7 @@ Visualization Manager:
               Size (Pixels): 3
               Size (m): 0.10000000149011612
               Style: Flat Squares
-              Topic: detection/lidar_center/points_no_ground
+              Topic: /detection/lidar/points_no_ground
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
@@ -306,14 +310,14 @@ Visualization Manager:
               Size (Pixels): 3
               Size (m): 0.10000000149011612
               Style: Flat Squares
-              Topic: detection/lidar_center/points_clustered
+              Topic: /detection/lidar/points_clustered
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
               Value: false
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: detection/detected_objects_markers
+              Marker Topic: /detection/detected_objects_markers
               Name: Detected objects
               Namespaces:
                 bounding_box: true
@@ -382,7 +386,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: lidar
+    Fixed Frame: lidar_center
     Frame Rate: 30
   Name: root
   Tools:
