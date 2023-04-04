@@ -12,10 +12,10 @@ ground truth localization. Publishes the following topics:
 import rospy
 import math
 import tf
-from geometry_msgs.msg import PoseStamped, TwistStamped, Pose, Point
+
+from geometry_msgs.msg import PoseStamped, TwistStamped
 from nav_msgs.msg import Odometry
 from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
-
 
 class CarlaToAutowareLocalizer:
 
@@ -26,80 +26,49 @@ class CarlaToAutowareLocalizer:
         self.role_name = rospy.get_param('/carla/role_name', default='ego_vehicle')
 
         # Publishers
-        self.pose_pub = rospy.Publisher(
-            '/ground_truth/current_pose', PoseStamped, queue_size=1)
-        self.twist_pub = rospy.Publisher(
-            '/ground_truth/current_velocity', TwistStamped, queue_size=1)
+        self.pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
+        self.twist_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
 
         # Internal paramters
         self.sim2utm_transformer = SimulationToUTMTransformer()
         self.br = tf.TransformBroadcaster()
-        self.tf_listener = tf.TransformListener()
 
         # Subscribers
-        rospy.Subscriber('/carla/odometry',
-                         Odometry, self.odometry_callback)
+        rospy.Subscriber('/carla/odometry', Odometry, self.odometry_callback, queue_size=10)
 
 
-    def odometry_callback(self, data):
+    def odometry_callback(self, odom):
         """
         callback odometry
         """
-        
-        position = data.pose.pose.position
-        orientation = data.pose.pose.orientation
-
         # Odometry Pose
-        pose = PoseStamped()
-        pose.header = data.header
-        pose.pose.position = position
-        pose.pose.orientation = orientation
+        current_pose = PoseStamped()
+        current_pose.header.frame_id = "base_link"
+        current_pose.header.stamp = odom.header.stamp
 
         if self.use_offset:
-            pose.pose =self.sim2utm_transformer.transform_pose(pose.pose)
+            current_pose.pose = self.sim2utm_transformer.transform_pose(odom.pose.pose)
+        else:
+            current_pose.pose = odom.pose
 
-        # Publish Transform
-        # NOTE: Need to add correct offset via UTM transformer
-        self.br.sendTransform((pose.pose.position.x, pose.pose.position.y, pose.pose.position.z),
-                              (pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w),
-                               rospy.Time.now(),
-                               self.role_name, '/map')
-
-        # Twist
-        linear = data.twist.twist.linear
-        angular = data.twist.twist.angular
+        # Publish current pose
+        self.pose_pub.publish(current_pose)
 
         # Publish current velocity
         twist = TwistStamped()
-        twist.header = data.header
+        twist.header.stamp = odom.header.stamp
         twist.header.frame_id = "base_link"     # Twist should be in base_link
                                                 # https://answers.ros.org/question/341161/reference-frames-of-odometry-message/
-        twist.twist.linear.x = math.sqrt(linear.x**2 + linear.y**2 + linear.z**2)
-        twist.twist.angular = angular
-        self.twist_pub.publish(twist)
+        speed = odom.twist.twist.linear
+        twist.twist.linear.x = math.sqrt(speed.x**2 + speed.y**2 + speed.z**2)
+        twist.twist.angular = odom.twist.twist.angular
+        self.twist_pub.publish(twist)        
 
-
-        current_pose = PoseStamped()
-        current_pose.header.frame_id = "base_link"
-        current_pose.header.stamp = pose.header.stamp
-        current_pose.pose.orientation.x = 0
-        current_pose.pose.orientation.y = 0
-        current_pose.pose.orientation.z = 0
-        current_pose.pose.orientation.w = 1
-
-        # Publish current pose
-        try:
-            self.tf_listener.lookupTransform("/map", current_pose.header.frame_id, rospy.Time.now())
-
-            # Should avoid wait for transform
-            # self.tf_listener.waitForTransform("/map", current_pose.header.frame_id,
-            #                                   current_pose.header.stamp, rospy.Duration(1.0))
-            current_pose = self.tf_listener.transformPose("/map", current_pose)
-
-            self.pose_pub.publish(current_pose)
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, Exception) as e:
-            rospy.logwarn("[%s] TF Failure transforming pose from base_link to map:\r\n %s"%(rospy.get_name(), e))
-        
+        # Publish Transform
+        # NOTE: Need to add correct offset via UTM transformer
+        self.br.sendTransform((current_pose.pose.position.x, current_pose.pose.position.y, current_pose.pose.position.z),
+                              (current_pose.pose.orientation.x, current_pose.pose.orientation.y, current_pose.pose.orientation.z, current_pose.pose.orientation.w),
+                               current_pose.header.stamp, self.role_name, 'map')
 
     def run(self):
         rospy.spin()

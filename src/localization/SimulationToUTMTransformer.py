@@ -20,16 +20,18 @@ class SimulationToUTMTransformer:
         """
 
         sim_crs = Proj("+proj=tmerc +lat_0=58.382296 +lon_0=26.726196 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +vunits=m +no_defs")
-        self.utm_crs = CRS.from_epsg(25835)
+        utm_crs = CRS.from_epsg(25835)
         wgs84_crs = CRS.from_epsg(4326)
 
-        wgs842utm_transformer = Transformer.from_proj(wgs84_crs, self.utm_crs)
+        wgs842utm_transformer = Transformer.from_proj(wgs84_crs, utm_crs)
         self.utm_origin_x, self.utm_origin_y = wgs842utm_transformer.transform(origin_lat, origin_lon)
 
         self.use_custom_origin = use_custom_origin
 
-        self.sim2utm_transformer = Transformer.from_proj(sim_crs, self.utm_crs)
-        self.utm2wgs84_transformer = Transformer.from_proj(self.utm_crs, wgs84_crs)
+        self.sim2utm_transformer = Transformer.from_proj(sim_crs, utm_crs)
+        self.utm2wgs84_transformer = Transformer.from_proj(utm_crs, wgs84_crs)
+
+        self.utm_proj = Proj(utm_crs)
 
     def transform_pose(self, pose_sim):
         """ Transforms simulation pose into UTM coordinates
@@ -50,7 +52,7 @@ class SimulationToUTMTransformer:
             self.sim2utm_transformer.transform(pose_sim.position.x, pose_sim.position.y)
 
         lat, lon = self.utm2wgs84_transformer.transform(pose_utm.position.x, pose_utm.position.y)
-        yaw_offset = Proj(self.utm_crs).get_factors(lon, lat).meridian_convergence
+        yaw_offset = self.utm_proj.get_factors(lon, lat).meridian_convergence
         yaw_offset = math.radians(yaw_offset)
         
         roll, pitch, yaw = euler_from_quaternion(
