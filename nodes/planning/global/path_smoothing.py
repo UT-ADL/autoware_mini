@@ -2,9 +2,8 @@
 
 import rospy
 import numpy as np
-import matplotlib.pyplot as plt
 from autoware_msgs.msg import Lane, Waypoint
-from helpers import get_orientation_from_yaw
+from helpers import get_orientation_from_yaw, debug_plots_path_smoothing
 
 
 class PathSmoothing:
@@ -19,6 +18,7 @@ class PathSmoothing:
         self.speed_averaging_window = rospy.get_param("~speed_averaging_window", 21)
         self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index", 4)
         self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit", 3.0)
+        self.output_debug_info = rospy.get_param("~output_debug_info", False)
 
         # Publishers
         self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1, latch=True)
@@ -110,8 +110,8 @@ class PathSmoothing:
             speed_new[:int(self.speed_averaging_window/2)] = speed_new[int(self.speed_averaging_window/2)]
             speed_new[-int(self.speed_averaging_window/2):] = speed_new[-int(self.speed_averaging_window/2)-1]
 
-        # TODO: remove or add param for debug visualization
-        # debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
+        if self.output_debug_info:
+            debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
 
         # Stack
         smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, yaw), axis=1)
@@ -168,62 +168,6 @@ def calculate_radius_step_n_triangle_equation(x, y, n):
     radius = np.append(radius, radius[-n:])
 
     return radius
-
-def calculate_radius_with_step_n(x, y, n):
-    # calculate radius of the circle using 3 points
-    # x, y: path coordinates in array
-    # n: step sixe to select points used for calculating radius
-    # https://en.wikipedia.org/wiki/Circumscribed_circle#Cartesian_coordinates
-
-    radius = np.empty_like(x)
-    # calculate radius for each point in the path
-    radius[n:-n] = np.abs((x[:-2*n] - x[2*n:])**2 + (y[:-2*n] - y[2*n:])**2) / (2 * ((x[:-2*n] - x[n:-n]) * (y[2*n:] - y[n:-n]) - (x[2*n:] - x[n:-n]) * (y[:-2*n] - y[n:-n])))
-    # Replace n values from beginning of the array with the first value
-    radius[:n] = radius[n]
-    # Replace n values from end of the array with the last value
-    radius[-n:] = radius[-(n+1)]
-
-    return radius
-
-def debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new):
-    # plot 3 figures
-    # 1. x-y path with old and new waypoints
-    # 2. z path with old and new waypoints
-    # 3. blinker path with old and new waypoints
-
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(x_path,y_path, color = 'blue')
-    ax.scatter(x_new, y_new, color = 'red', marker = 'x', alpha = 0.5, label = 'interpolated')
-    plt.legend()
-    plt.show()
-
-    # new plot for heights 
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(new_distances, z_new, color = 'red', marker = 'x', alpha = 0.5, label = 'height interpolated')
-    ax.plot(new_distances, z_new, color = 'red', alpha = 0.5, label = 'height interpolated')
-    ax.scatter(distances, z_path, color = 'blue', alpha = 0.5, label = 'height old')
-    plt.legend()
-    plt.show()
-
-    # new plot for blinkers
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(new_distances, blinker_new, color = 'red', marker = 'x', alpha = 0.5, label = 'blinker interpolated')
-    ax.plot(new_distances, blinker_new, color = 'red', alpha = 0.5, label = 'blinker interpolated')
-    ax.scatter(distances, blinker, color = 'blue', alpha = 0.5, label = 'blinker old')
-    plt.legend()
-    plt.show()
-
-    # new plot for speed
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(new_distances, speed_new * 3.6, color = 'red', marker = 'x', alpha = 0.5, label = 'speed interpolated')
-    ax.plot(new_distances, speed_new * 3.6, color = 'red', alpha = 0.5, label = 'speed interpolated')
-    ax.scatter(distances, speed * 3.6, color = 'blue', alpha = 0.5, label = 'speed old')
-    plt.legend()
-    plt.show()
 
 
 if __name__ == '__main__':
