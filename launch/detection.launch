@@ -1,13 +1,24 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="detector"            default="simple"    doc="simple,sim" />
+    <arg name="detector"            default="simple"    doc="simple,sim, vella" />
     <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
 
     <group ns="detection">
         <group if="$(arg use_lidar_center)" ns="lidar_center">
-            <remap from="points_raw" to="/lidar_center/points_raw" />
-            <remap from="detected_objects" to="/detection/detected_objects" />
-            <include if="$(eval arg('detector')=='simple')" file="$(find autoware_mini)/launch/detection/lidar_simple.launch" />
+            <group if="$(eval arg('detector')=='simple')">
+                <remap from="points_raw" to="/lidar_center/points_raw" />
+                <remap from="detected_objects" to="/detection/detected_objects" />
+                <include file="$(find autoware_mini)/launch/detection/lidar_simple.launch" />
+            <group>
+
+            <group if="$(eval arg('detector')=='vella')">
+                <node pkg="autoware_ut" type="odom_publisher.py" name="odom_publisher" output="screen" />
+                <node pkg="autoware_ut" type="vella_detector.sh" name="vella_detector" args ="2.11
+                   $(find autoware_ut)/config/vella/vella_extrinsics.yaml  /odom 2 " output="screen"/>
+                <node pkg="autoware_ut" type="vella_to_autoware_converter.py" name="vella_to_autoware_converter" output="screen">
+                    <remap unless="$(arg use_radar)" from="detected_objects" to="/detection/objects" />
+                </node>
+            </group>
         </group>
 
         <!-- Obstacle simulator -->
