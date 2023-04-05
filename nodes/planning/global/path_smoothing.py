@@ -14,6 +14,7 @@ class PathSmoothing:
         self.waypoint_interval = rospy.get_param("~waypoint_interval", 1.0)
         self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves", True)
         self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration", True)
+        self.adjust_endpoint_speeds_to_zero = rospy.get_param("~adjust_endpoint_speeds_to_zero", True)
         self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_limit", 1.0)
         self.speed_averaging_window = rospy.get_param("~speed_averaging_window", 21)
         self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index", 4)
@@ -117,6 +118,27 @@ class PathSmoothing:
             # replace n/2 values at the beginning and end of the array with the n+1 and n-1 values respectively
             speed_new[:int(self.speed_averaging_window/2)] = speed_new[int(self.speed_averaging_window/2)]
             speed_new[-int(self.speed_averaging_window/2):] = speed_new[-int(self.speed_averaging_window/2)-1]
+
+        if self.adjust_endpoint_speeds_to_zero:
+            # set first and last speed to zero
+            speed_new[0] = 0
+            speed_new[-1] = 0
+
+            # adjust speed graphs using deceleartion limit and waypoint interval
+            accel_constant = 2 * self.speed_deceleration_limit * self.waypoint_interval
+            # backward loop - end point
+            for i in range(len(speed_new) - 2, 0, -1):
+                adjusted_speed = np.sqrt(speed_new[i + 1]**2 + accel_constant)
+                if adjusted_speed > speed_new[i]:
+                    break
+                speed_new[i] = adjusted_speed
+            # forward loop - start point
+            for i in range(1, len(speed_new) ):
+                adjusted_speed = np.sqrt(speed_new[i - 1]**2 + accel_constant)
+                if adjusted_speed > speed_new[i]:
+                    break
+                speed_new[i] = adjusted_speed
+
 
         if self.output_debug_info:
             debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
