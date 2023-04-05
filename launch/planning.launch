@@ -4,7 +4,7 @@
     <arg name="planner"                 default="waypoints"     doc="waypoints, lanelet2" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
-    
+    <arg name="use_local_planner"       default="false" />
 
     <group ns="planning">
 
@@ -30,6 +30,9 @@
 
         <!-- Path smoothing -->
         <node pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true"/>
+
+        <!-- Local planner -->
+        <node if="$(eval arg('use_local_planner'))" pkg="autoware_mini" type="local_planner.py" name="local_planner" output="screen" required="true"/>
 
         <!-- Waypoint_visualizer - necessary also for visualizing path from global planner-->
         <node pkg="autoware_mini" type="waypoint_visualizer.py" name="waypoint_visualizer" output="screen" required="true"/>

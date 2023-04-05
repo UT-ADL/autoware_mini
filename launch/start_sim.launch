@@ -6,6 +6,7 @@
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
     <arg name="use_detection"           default="true"          doc="use object detection" />
+    <arg name="use_local_planner"       default="false" />
     <arg name="detector"                default="sim"           doc="usually sim" />
 
     <!-- Planner -->
@@ -13,6 +14,7 @@
         <arg name="planner"             value="$(arg planner)" />
         <arg name="waypoints_file"      value="$(arg waypoints_file)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+        <arg name="use_local_planner"   value="$(arg use_local_planner)" />
     </include>
 
     <!-- Detection -->
@@ -22,7 +24,8 @@
 
     <!-- Follower -->
     <include file="$(find autoware_mini)/launch/control.launch">
-        <arg name="follower" value="$(arg follower)" />
+        <arg name="follower"            value="$(arg follower)" />
+        <arg name="use_local_planner"   value="$(arg use_local_planner)" />
     </include>
 
     <!-- Bicycle_model simulator -->
