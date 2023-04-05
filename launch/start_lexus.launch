@@ -5,7 +5,8 @@
     <arg name="planner"                 default="lanelet2"      doc="waypoints, lanelet2" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
-    <arg name="use_detection"           default="false"         doc="use object detection" />    
+    <arg name="use_detection"           default="false"         doc="use object detection" />
+    <arg name="detector"                default="simple"        doc="simple, vella" />
     <arg name="max_speed"               default="30" />
     
     <!-- Localizer -->
@@ -19,7 +20,9 @@
     </include>
 
     <!-- Detection -->
-    <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch" />
+    <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch" >
+        <arg name="detector" value="$(arg detector)" />
+    </include>
 
     <!-- Follower -->
     <include file="$(find autoware_mini)/launch/control.launch">
@@ -29,6 +32,7 @@
     <!-- Vehicle -->
     <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
         <arg name="max_speed" value="$(arg max_speed)" />
+        <arg name="detector"  value="$(arg detector)" />
     </include>
 
     <!-- Rviz -->
