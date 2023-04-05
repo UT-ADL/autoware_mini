@@ -8,6 +8,9 @@ from std_msgs.msg import ColorRGBA
 class WaypointVisualizer:
     def __init__(self):
 
+        # Parameters
+        self.car_safety_width = rospy.get_param("/planning/local_planner/car_safety_width", 1.3)
+
         # will be taken from the received path message: lane.header.frame_id
         self.output_frame = None
 
@@ -124,20 +127,19 @@ class WaypointVisualizer:
             marker_array.markers.append(marker)
 
         else:
-
-            # line strips
-            marker = Marker()
-            marker.header.frame_id = self.output_frame
-            marker.header.stamp = rospy.Time.now()
-            marker.ns = "Path"
-            marker.type =   marker.LINE_STRIP
-            marker.action = marker.ADD
-            marker.id = 0
-            marker.scale.x = 1.2
-            marker.color = ColorRGBA(1.0, 0.1, 0.1, 0.6)
-            for waypoint in waypoints:
-                marker.points.append(waypoint.pose.pose.position)
-            marker_array.markers.append(marker)
+            for i, waypoint in enumerate(waypoints):
+                marker = Marker()
+                marker.header.frame_id = self.output_frame
+                marker.header.stamp = rospy.Time.now()
+                marker.id = i
+                marker.type = marker.CYLINDER
+                marker.action = marker.ADD
+                marker.pose = waypoint.pose.pose
+                marker.scale.x = 2 * self.car_safety_width
+                marker.scale.y = 2 * self.car_safety_width
+                marker.scale.z = 0.3
+                marker.color = ColorRGBA(waypoint.cost, 1.0 - waypoint.cost, 0.0, 0.2)
+                marker_array.markers.append(marker)
 
         return marker_array
 
