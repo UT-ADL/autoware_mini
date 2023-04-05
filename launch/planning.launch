@@ -9,9 +9,10 @@
     <group ns="planning">
 
         <!-- Remap topics -->
-        <remap from="current_pose"      to="/localization/current_pose" />
-        <remap from="current_velocity"  to="/localization/current_velocity" />
-        <remap from="goal"              to="/move_base_simple/goal" />
+        <remap from="current_pose"          to="/localization/current_pose" />
+        <remap from="current_velocity"      to="/localization/current_velocity" />
+        <remap from="goal"                  to="/move_base_simple/goal" />
+        <remap from="detected_objects"      to="/detection/detected_objects" />
 
         <!-- Waypoint_loader -->
         <node if="$(eval arg('planner')=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">

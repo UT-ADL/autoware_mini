@@ -27,14 +27,13 @@ class LocalPlanner:
         self.closest_object_velocity = 0.0
 
         # Publishers
-        self.local_path_pub = rospy.Publisher('/planning/local_path', Lane, queue_size=1)
-        self.local_path_wp_pub = rospy.Publisher('/planning/local_path', Waypoint, queue_size=1)
+        self.local_path_pub = rospy.Publisher('local_path', Lane, queue_size=1)
 
         # Subscribers
-        self.path_sub = rospy.Subscriber('/planning/smoothed_path', Lane, self.path_callback, queue_size=1)
-        self.current_pose_sub = rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
-        self.current_velocity_sub = rospy.Subscriber('/localization/current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1)
-        self.detect_objects_sub = rospy.Subscriber('/detection/detected_objects', DetectedObjectArray, self.detect_objects_callback, queue_size=1)
+        self.path_sub = rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)
+        self.current_pose_sub = rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
+        self.current_velocity_sub = rospy.Subscriber('current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1)
+        self.detect_objects_sub = rospy.Subscriber('detected_objects', DetectedObjectArray, self.detect_objects_callback, queue_size=1)
 
 
     def path_callback(self, msg):
