@@ -3,9 +3,12 @@
 import rospy
 import threading
 import numpy as np
+from sklearn.neighbors import NearestNeighbors
 from autoware_msgs.msg import Lane, Waypoint, DetectedObjectArray
-from geometry_msgs.msg import PoseStamped, TwistStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped, Point
 
+from helpers import get_closest_point_on_line
+from helpers.timer import Timer
 
 class LocalPlanner:
 
@@ -14,12 +17,16 @@ class LocalPlanner:
         # Parameters
         self.local_path_length = rospy.get_param("~local_path_length", 100)
         self.output_frame = rospy.get_param("~output_frame", "map")
+        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
+        self.safety_distance = rospy.get_param("~safety_distance", 4.0)
+        self.car_safety_width = rospy.get_param("~car_safety_width", 2.0)
 
         # Internal variables
         self.lock = threading.Lock()
         self.global_path_array = None
         self.global_path_last_idx = None
         self.global_path_waypoints = None
+        self.global_path_tree = None
         self.current_velocity = 0.0
         self.local_path_start_global_idx = 0
 
@@ -43,6 +50,7 @@ class LocalPlanner:
             self.global_path_array = None
             self.global_path_waypoints = None
             self.global_path_last_idx = None
+            self.global_path_tree = None
             self.local_path_start_global_idx = 0
             self.lock.release()
             return
@@ -55,10 +63,14 @@ class LocalPlanner:
                 wp.pose.pose.position.z,
                 wp.twist.twist.linear.x
             ) for wp in msg.waypoints])
-        
+
+        # create global_wp_tree
+        global_path_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(global_path_array[:,0:2])
+
         self.lock.acquire()
         self.global_path_array = global_path_array
         self.global_path_waypoints = global_path_waypoints
+        self.global_path_tree = global_path_tree
         self.global_path_last_idx = len(global_path_array) - 1
         self.local_path_start_global_idx = 0
         self.lock.release()
@@ -78,7 +90,8 @@ class LocalPlanner:
 
 
     def detect_objects_callback(self, msg):
-        self.objects = msg.objects
+
+        t = Timer()
 
         if self.global_path_array is None:
             return
@@ -87,51 +100,73 @@ class LocalPlanner:
         self.lock.acquire()
         global_path_array = self.global_path_array
         global_path_waypoints = self.global_path_waypoints
+        global_path_tree = self.global_path_tree
         global_path_last_idx = self.global_path_last_idx
-        local_path_start_global_idx = self.local_path_start_global_idx
         self.lock.release()
         
-        # use while loop to calculate distance between current pose and points in global path
-        # continue until the distance is decreasing
-        
-        # initial distance
-        distance = 10000.0
-        end_index = 0
+        obstacle_tree = None
 
-        for i in range(local_path_start_global_idx, global_path_last_idx + 1):
-            d = np.sqrt(np.sum((global_path_array[i,0:2] - self.current_pose[0:2])**2))
-            if d < distance:
-                distance = d
-            else:
-                local_path_start_global_idx = i - 1
-                end_index = local_path_start_global_idx + self.local_path_length
-                if end_index > global_path_last_idx:
-                    end_index = global_path_last_idx + 1
-                # print("start: ", self.local_path_start_global_idx, "end: ", end_index, "last: ", self.global_path_last_idx, "len: ", len(global_path_array))
-                break
+        if len(msg.objects) > 0:
+            obstacle_array = np.array([(
+                    obj.pose.position.x,
+                    obj.pose.position.y,
+                    obj.pose.position.z,
+                    obj.velocity.linear.x
+                ) for obj in msg.objects])
+            obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,0:3])
 
-        # slice local path from global path
-        local_path_array = global_path_array[local_path_start_global_idx:end_index,:]
+        # find local path start index
+        wp_backward, wp_forward = self.find_two_nearest_waypoint_idx(global_path_tree, self.current_pose[0], self.current_pose[1])
+
+        # TODO: take from array - optimize here!!! Do not create Point object
+        nearest_point = get_closest_point_on_line(Point(self.current_pose[0], self.current_pose[1], self.current_pose[2]),
+                                                  global_path_waypoints[wp_backward].pose.pose.position, 
+                                                  global_path_waypoints[wp_forward].pose.pose.position)
+
+        end_index = wp_forward + self.local_path_length
+        if end_index > global_path_last_idx:
+            end_index = global_path_last_idx + 1
+
+        local_path_array = global_path_array[wp_forward : end_index,:]
+        # TODO optimize! make array out of nearest point and insert it in front of local_path_array
+        nearest_point_array = np.array([(nearest_point.x, nearest_point.y, nearest_point.z, 0.0)])
+        # add nearest point as first point in local path
+        local_path_array = np.concatenate((nearest_point_array, local_path_array), axis=0)
+
+        # calc local path distances and set closest object distance to the last point in local path
+        local_path_distances = np.cumsum(np.sqrt(np.diff(local_path_array[:,0])**2 + np.diff(local_path_array[:,1])**2))
+        local_path_distances = np.insert(local_path_distances, 0, 0.0)
+        self.closest_object_distance = local_path_distances[-1]
+        self.closest_object_velocity = 0.0
+
+        t('distances')
 
         # TODO: add object avoidance
-        # use local_path_array
+        # iterate over local path and check if there is an object in front of the car
+        if obstacle_tree is not None:
+            for i in range(len(local_path_array)):
+                d, idx = obstacle_tree.kneighbors([(local_path_array[i,0], local_path_array[i,1], local_path_array[i,2])], 1)
+                if d[0][0] < self.car_safety_width:
+                    # obstacle is within width of the car from path
+                    # print(i, "idx: ", idx, "d: ", d)
+                    # might be close to many points (2m), need to know closest or 2 closest / project onto path and calc distance
+                    # create additional marker for closest point and publish it
+                    if local_path_distances[i] + d[0][0]  < self.closest_object_distance:
+                        # TODO need to stop before the OBS - car length + buffer zone
+                        self.closest_object_distance = local_path_distances[i] + d[0][0] - 4.0 - self.safety_distance
+                        if self.closest_object_distance < 0.0:
+                            self.closest_object_distance = 0.0
+                        self.closest_object_velocity = obstacle_array[idx[0][0],3]
 
+        t('obstacles')
 
-
-        # TODO just to test - approach goal
-        distance_to_path_end = np.cumsum(np.sqrt(np.diff(local_path_array[:,0])**2 + np.diff(local_path_array[:,1])**2))[-1]
-        self.closest_object_distance = distance_to_path_end
-        self.closest_object_velocity = 0.0
-        
         # slice waypoints from global path to local path
-        local_path_waypoints = global_path_waypoints[local_path_start_global_idx:end_index]
+        local_path_waypoints = global_path_waypoints[wp_forward:end_index]
         self.publish_local_path_wp(local_path_waypoints)
 
+        t('publish')
 
-        # update local path start index
-        self.lock.acquire()
-        self.local_path_start_global_idx = local_path_start_global_idx
-        self.lock.release()
+        print(t)
 
 
     def publish_local_path_wp(self, local_path_waypoints):
@@ -145,6 +180,11 @@ class LocalPlanner:
         
         self.local_path_pub.publish(lane)
 
+    def find_two_nearest_waypoint_idx(self, waypoint_tree, x, y):
+        idx = waypoint_tree.kneighbors([(x, y)], 2, return_distance=False)
+        # sort to get them in ascending order - follow along path
+        idx[0].sort()
+        return idx[0][0], idx[0][1]
 
     def run(self):
         rospy.spin()
