@@ -16,5 +16,12 @@ lidar_center:
     min_cluster_size: 5
     enable_pointcloud: False
     enable_convex_hull: True
+
+  vella_to_autoware_converter:
+    confidence_filter: 0.5
+    track_length_filter: 0
+    lidar_frame: "lidar_center"
+    output_frame: "map"
+
 obstacle_simulation:
   publish_rate: 10

@@ -23,7 +23,7 @@ class VellaToAutoware:
         self.confidence_filter = rospy.get_param("~confidence_filter", 0.5) # filter out objects with score less than this threshold
         self.track_length_filter = rospy.get_param("~track_length_filter", 0) # filter out objects with track length less than this threshold
         self.lidar_frame = rospy.get_param("~lidar_frame", 'lidar_center') # frame_id for tracks published by vella - vella does not populate frame_id of vdk/tracks messages
-        self.output_frame = rospy.get_param("~map_frame", 'map')  # transform vella tracks from lidar frame to this frame
+        self.output_frame = rospy.get_param("~output_frame", 'map')  # transform vella tracks from lidar frame to this frame
 
         # transform listener
         self.tf_listener = tf.TransformListener()
