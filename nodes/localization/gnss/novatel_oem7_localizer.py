@@ -7,6 +7,7 @@ from tf2_ros import TransformBroadcaster
 
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
 from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion, TransformStamped
+from nav_msgs.msg import Odometry
 
 from localization.WGS84ToUTMTransformer import WGS84ToUTMTransformer
 from localization.WGS84ToLest97Transformer import WGS84ToLest97Transformer
@@ -40,6 +41,9 @@ class NovatelOem7Localizer:
         # Publishers
         self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
         self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
+        if self.use_vella:
+            # odometry publisher for vella
+            self.odometry_pub = rospy.Publisher('/odom', Odometry, queue_size=1)
         
         # Subscribers
         if self.use_msl_height:
@@ -72,6 +76,9 @@ class NovatelOem7Localizer:
         self.publish_current_pose(stamp, x, y, height, orientation)
         self.publish_current_velocity(stamp, velocity)
         self.publish_map_to_baselink_tf(stamp, x, y, height, orientation)
+        if self.use_vella:
+            # odometry publisher for vella
+            self.publish_odometry(stamp, velocity, x, y, height, orientation)
 
     def bestpos_callback(self, bestpos_msg):
         self.undulation = bestpos_msg.undulation
@@ -101,6 +108,22 @@ class NovatelOem7Localizer:
         vel_msg.twist.linear.x = velocity
 
         self.current_velocity_pub.publish(vel_msg)
+
+    def publish_odometry(self, stamp, velocity, x, y, height, orientation):
+
+        odom_msg = Odometry()
+        odom_msg.header.stamp = stamp
+        odom_msg.header.frame_id = 'vehicle'
+        odom_msg.child_frame_id = 'vehicle'
+
+        odom_msg.pose.pose.position.x = x
+        odom_msg.pose.pose.position.y = y
+        odom_msg.pose.pose.position.z = height
+
+        odom_msg.pose.orientation = orientation
+        odom_msg.twist.twist.linear.x = velocity
+
+        self.odometry_pub.publish(odom_msg)
 
 
     def publish_map_to_baselink_tf(self, stamp, x, y, height, orientation):
