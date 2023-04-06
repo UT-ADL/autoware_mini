@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2023 Autonomous Driving Lab (ADL), University of Tartu.
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
@@ -14,50 +14,40 @@ from carla_msgs.msg import CarlaEgoVehicleStatus
 from autoware_msgs.msg import VehicleStatus, Gear
 
 
-class CarlaToAutowareVehicleStatus:
+class CarlaVehicleStatusPublisher:
 
     def __init__(self):
-
         # Node parameters
-        role_name = rospy.get_param('/carla/role_name', default='ego_vehicle')
-
-        # Subscribers
-        rospy.Subscriber('/carla/{}/vehicle_status'.format(role_name), CarlaEgoVehicleStatus,
-                         self.vehicle_status_callback)
-        rospy.Subscriber('/carla/{}/vehicle_info'.format(role_name), CarlaEgoVehicleInfo,
-                         self.vehicle_info_callback)
+        self.max_steer_angle = math.radians(rospy.get_param("~max_steer_angle", default=70))
 
         # Publishers
         self.vehicle_status_pub = rospy.Publisher(
             'vehicle_status', VehicleStatus, queue_size=1)
 
-        # Internal parameters
-        self.vehicle_info = None
+        # Subscribers
+        rospy.Subscriber('/carla/ego_vehicle/vehicle_status', CarlaEgoVehicleStatus,
+                         self.vehicle_status_callback, queue_size=1)
+        rospy.Subscriber('/carla/ego_vehicle/vehicle_info', CarlaEgoVehicleInfo,
+                         self.vehicle_info_callback, queue_size=1)
 
     def vehicle_info_callback(self, data):
         """
         callback for vehicle info
         """
-        self.vehicle_info = data
+        # get max steering angle (use smallest non-zero value of all wheels)
+        for wheel in data.wheels:
+            if wheel.max_steer_angle and wheel.max_steer_angle < self.max_steer_angle:
+                self.max_steering_angle = wheel.max_steer_angle
 
     def vehicle_status_callback(self, data):
         """
         callback for vehicle status
         """
-        if self.vehicle_info is None:
-            return
+
         status = VehicleStatus()
         status.header = data.header
-        status.speed = data.velocity
 
-        # calculate max steering angle
-        max_steering_angle = math.radians(70)
-        # get max steering angle (use smallest non-zero value of all wheels)
-        for wheel in self.vehicle_info.wheels:
-            if wheel.max_steer_angle and wheel.max_steer_angle < max_steering_angle:
-                max_steering_angle = wheel.max_steer_angle
-
-        status.angle = data.control.steer * math.degrees(max_steering_angle)
+        status.angle = data.control.steer * math.degrees(self.max_steer_angle)
         status.speed = data.velocity * 3.6  # speed is expected in km/h
 
         if data.control.reverse:
@@ -77,6 +67,6 @@ class CarlaToAutowareVehicleStatus:
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_to_autoware_vehicle_status', log_level=rospy.INFO, anonymous=False)
-    node = CarlaToAutowareVehicleStatus()
+    rospy.init_node('carla_vehicle_status_publisher', log_level=rospy.INFO, anonymous=False)
+    node = CarlaVehicleStatusPublisher()
     node.run()

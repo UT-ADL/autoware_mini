@@ -108,7 +108,7 @@
                                     "points_per_second": 320000,
                                     "upper_fov": 20.0,
                                     "lower_fov": -20.0,
-                                    "rotation_frequency": 10,
+                                    "rotation_frequency": 20,
                                     "noise_stddev": 0.0
                                 }
                             ]

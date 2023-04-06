@@ -84,16 +84,6 @@
                             "attached_objects":
                             [
                                 {
-                                    "type": "sensor.other.imu",
-                                    "id": "camera_fr",
-                                    "spawn_point": {"x": 1.152, "y": -0.168, "z": -0.747, "roll": -1.378984, "pitch": 0.04415683, "yaw": -1.7793631}
-                                },
-                                {
-                                    "type": "sensor.other.imu",
-                                    "id": "camera_fl",
-                                    "spawn_point": {"x": 1.131, "y": 0.338, "z": -0.747, "roll": -1.4044664, "pitch": -0.00261799, "yaw": -1.422443}
-                                },
-                                {
                                     "type": "sensor.lidar.ray_cast",
                                     "id": "lidar_front/os_sensor",
                                     "spawn_point": {"x": 0.8559, "y": 0.0642, "z": -0.4051, "roll": 0.003995038, "pitch": -0.009182, "yaw": 0.8641542},
@@ -102,7 +92,7 @@
                                     "points_per_second": 320000,
                                     "upper_fov": 20.0,
                                     "lower_fov": -20.0,
-                                    "rotation_frequency": 10,
+                                    "rotation_frequency": 20,
                                     "noise_stddev": 0.0
                                 }
                             ]

@@ -7,7 +7,7 @@
     
         <node if="$(eval arg('localizer')=='novatel')" pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true" />
 
-        <node if="$(eval arg('localizer') =='carla')" pkg='autoware_mini' type='carla_to_autoware_localization' name='carla_to_autoware_localization' output='screen' required="true" />
+        <node if="$(eval arg('localizer') =='carla')" pkg='autoware_mini' type='carla_localizer' name='carla_localizer' output='screen' required="true" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" />
 

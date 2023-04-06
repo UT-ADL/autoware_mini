@@ -39,11 +39,6 @@
                             "spawn_point": {"x": 0.0, "y": 0.0, "z": -0.6, "roll": 0.0, "pitch": 0.0, "yaw": 0.0}
                         },
                         {
-                            "type": "sensor.other.imu",
-                            "id": "radar_fc",
-                            "spawn_point": {"x": 4.0, "y": 0.0, "z": -0.12, "roll": 0.0, "pitch": 0.0, "yaw": 0.0}
-                        },
-                        {
                             "type": "sensor.other.gnss",
                             "id": "gnss_forward",
                             "sensor_tick": 0.05,
@@ -87,11 +82,6 @@
                                     "image_size_x": 2064,
                                     "image_size_y": 1544,
                                     "fov": 25.3
-                                },
-                                {
-                                    "type": "sensor.other.imu",
-                                    "id": "lidar_front/os_sensor",
-                                    "spawn_point": {"x": 0.8559, "y": 0.0642, "z": -0.4051, "roll": 0.003995038, "pitch": -0.009182, "yaw": 0.8641542}
                                 }
                             ]
                         },

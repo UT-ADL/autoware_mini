@@ -31,9 +31,9 @@ The key modules of Autoware Mini are:
 
 2. Clone the repo
    ```
+   git clone --recurse-submodules https://github.com/carla-simulator/ros-bridge.git carla_ros_bridge
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/vehicle_platform.git
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware_mini.git
-   git clone --recurse-submodules https://github.com/carla-simulator/ros-bridge.git carla_ros_bridge
    ```
 
 3. Install system dependencies
@@ -70,7 +70,9 @@ roslaunch autoware_mini start_lexus.launch
 
 ---
 
-## Download Carla + Tartu map (Skip if already done)
+## Launching with Carla
+
+### Download Carla + Tartu map (Skip if already done)
 
 1. Download [Carla 0.9.13](https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz) and extract it. We will call this extracted folder `<CARLA ROOT>`.
 2. Download [Tartu.tar.gz](https://drive.google.com/file/d/10CHEOjHyiLJgD13g6WwDZ2_AWoLasG2F/view?usp=share_link)
@@ -91,27 +93,27 @@ export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla/dist/carla-0.9.13-py
 
 ---
 
-## Launching with Carla
+### Launch instructions
 
 1. In a new terminal, (assuming enviornment variables are exported) Run Carla simulator by entering followig command.
 
 ```
 $CARLA_ROOT/./CarlaUE4.sh -prefernvidia -quality-level=Low
 ```
-### Launch using ground-truth detection:
+#### Launch using ground-truth detection:
 2. In a new terminal, (assuming enviornment variables are exported) run the following command. This run’s tartu environment of Carla with minimal sensors and our autonomy stack. The detected objects come from Carla directly.
 
 ```
 roslaunch autoware_mini start_carla.launch
 ```
-### OR
-### Launch using lidar based detector:
+#### OR
+#### Launch using lidar based detector:
 2. In a new terminal, (assuming enviornment variables are exported) run the following command. This run’s tartu environment of Carla with lidar sensors and our autonomy stack. The detection is performed using Lidar based euclidean cluster detector.
 
 ```
 roslaunch autoware_mini start_carla.launch detector:=simple
 ```
-### Generate Traffic
+#### Generate Traffic
 3. In a new terminal, (assuming enviornment variables are exported) generate random traffic by entering following command.
 
 ```

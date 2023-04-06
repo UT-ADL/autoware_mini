@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2023 Autonomous Driving Lab (ADL), University of Tartu.
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
 """
 ground truth detections. Publishes the following topics:
-    /ground_truth/objects  (autoware_msgs::DetectedObjectArray)
+    receive :derived_object_msgs::ObjectArray and publishes autoware_msgs::DetectedObjectArray
 """
 import rospy
 import math
@@ -34,23 +34,28 @@ CLASS_ID_TO_LABEL = {
     11: 'sign'
 }
 
-class CarlaToAutowareDetectedObjects:
+class CarlaDetector:
 
     def __init__(self):
 
         # Node parameters
         self.use_offset = rospy.get_param("~use_offset", default=True)
-
-        # Subscribers
-        rospy.Subscriber('/carla/ground_truth_objects',
-                         ObjectArray, self.carla_objects_callback)
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
+        utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
+        utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
         # Publishers
         self.detected_objects_pub = rospy.Publisher(
             'detected_objects', DetectedObjectArray, queue_size=1)
 
+        # Subscribers
+        rospy.Subscriber('/carla/ground_truth_objects',
+                         ObjectArray, self.carla_objects_callback, queue_size=1)
+
         # Internal paramters
-        self.sim2utm_transformer = SimulationToUTMTransformer()
+        self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
+                                                              origin_lat=utm_origin_lat,
+                                                              origin_lon=utm_origin_lon)
 
     def carla_objects_callback(self, data):
         """
@@ -108,12 +113,10 @@ class CarlaToAutowareDetectedObjects:
         point_4 = [halved_dim[0],  - halved_dim[1], halved_dim[2]]
 
         corner_points = np.array([point_1, point_4, point_3, point_2, point_1])
-        corner_points = np.c_[corner_points, np.ones((corner_points.shape[0]))]
+        corner_points = np.concatenate((corner_points, np.ones((corner_points.shape[0], 1))), axis=1)
         rotated_corners = np.dot(rot_mat, corner_points.T).T
 
-        for corner_point in rotated_corners:
-            convex_hull.polygon.points.append(Point(
-                centroid.x + corner_point[0], centroid.y + corner_point[1], centroid.z + corner_point[2]))
+        convex_hull.polygon.points = [Point(centroid.x + corner_point[0], centroid.y + corner_point[1], centroid.z + corner_point[2]) for corner_point in rotated_corners]
 
         return convex_hull
 
@@ -122,6 +125,6 @@ class CarlaToAutowareDetectedObjects:
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_to_autoware_detected_objects', log_level=rospy.INFO, anonymous=False)
-    node = CarlaToAutowareDetectedObjects()
+    rospy.init_node('carla_detector', log_level=rospy.INFO, anonymous=False)
+    node = CarlaDetector()
     node.run()

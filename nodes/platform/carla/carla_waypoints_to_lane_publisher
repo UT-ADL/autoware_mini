@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2023 Autonomous Driving Lab (ADL), University of Tartu.
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
@@ -14,20 +14,14 @@ from autoware_msgs.msg import Waypoint
 from nav_msgs.msg import Path
 
 
-class CarlaToAutowareWaypoints():
+class CarlaWaypointsToLanePublisher():
 
     def __init__(self):
-
-        # Node parameters
-        role_name = rospy.get_param('/carla/role_name', default='ego_vehicle')
+        # Publishers
+        self.waypoints_pub = rospy.Publisher('/global_path', LaneArray, queue_size=1, latch=True)
 
         # Subscribers
-        rospy.Subscriber('/carla/{}/waypoints'.format(role_name),
-                         Path, self.path_callback)
-
-        # Publishers
-        self.waypoints_pub = rospy.Publisher(
-            '/lane_waypoints_array', LaneArray, queue_size=1, latch=True)
+        rospy.Subscriber('/carla/ego_vehicle/waypoints', Path, self.path_callback, queue_size=1)
 
     def path_callback(self, data):
         """
@@ -36,11 +30,8 @@ class CarlaToAutowareWaypoints():
         msg = LaneArray()
         lane = Lane()
         lane.header = data.header
+        lane.waypoints = [Waypoint(pose=pose) for pose in data.poses]
         msg.lanes.append(lane)
-        for pose in data.poses:
-            waypoint = Waypoint()
-            waypoint.pose = pose
-            msg.lanes[0].waypoints.append(waypoint)
 
         self.waypoints_pub.publish(msg)
 
@@ -49,6 +40,6 @@ class CarlaToAutowareWaypoints():
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_to_autoware_waypoints', log_level=rospy.INFO, anonymous=False)
-    node = CarlaToAutowareWaypoints()
+    rospy.init_node('carla_waypoints_to_lane_publisher', log_level=rospy.INFO, anonymous=False)
+    node = CarlaWaypointsToLanePublisher()
     node.run()

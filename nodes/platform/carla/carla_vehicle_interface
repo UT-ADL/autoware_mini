@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2023 Autonomous Driving Lab (ADL), University of Tartu.
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
@@ -13,22 +13,19 @@ from autoware_msgs.msg import VehicleCmd
 from std_msgs.msg import Float64
 
 
-class VehicleCMDToAckerMann:
+class CarlaVehicleInterface:
 
     def __init__(self):
 
-        # Node parameters
-        role_name = rospy.get_param('/carla/role_name', default='ego_vehicle')
+        # Publishers
+        self.ackerman_cmd_pub = rospy.Publisher(
+            '/carla/ego_vehicle/ackermann_cmd', AckermannDrive, queue_size=1)
+        self.target_speed_pub = rospy.Publisher(
+            '/carla/ego_vehicle/target_speed', Float64, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('vehicle_cmd', VehicleCmd,
                          self.vehicle_cmd_callback, queue_size=1)
-
-        # Publishers
-        self.ackerman_cmd_pub = rospy.Publisher(
-            '/carla/{}/ackermann_cmd'.format(role_name), AckermannDrive, queue_size=1)
-        self.target_speed_pub = rospy.Publisher(
-            '/carla/{}/target_speed'.format(role_name), Float64, queue_size=1)
 
     def vehicle_cmd_callback(self, data):
         """
@@ -50,6 +47,6 @@ class VehicleCMDToAckerMann:
 
 
 if __name__ == '__main__':
-    rospy.init_node('vehicle_cmd_to_ackermann', log_level=rospy.INFO, anonymous=False)
-    node = VehicleCMDToAckerMann()
+    rospy.init_node('carla_vehicle_interface', log_level=rospy.INFO, anonymous=False)
+    node = CarlaVehicleInterface()
     node.run()
