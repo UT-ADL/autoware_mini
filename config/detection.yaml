@@ -17,7 +17,7 @@ lidar_center:
     enable_pointcloud: False
     enable_convex_hull: True
 
-  vella_to_autoware_converter:
+  vella_detector:
     confidence_filter: 0.5
     track_length_filter: 0
     lidar_frame: "lidar_center"

@@ -15,7 +15,8 @@ from geometry_msgs.msg import PolygonStamped, Point, Pose, Quaternion
 
 
 MPH_TO_MS_MULTIPLIER = 0.447 # if we find out that vella speeds are indeed given in mph then multiply our speed with this constant  to get speeds in m/s
-class VellaToAutoware:
+
+class VellaDetector:
     def __init__(self):
         rospy.loginfo(self.__class__.__name__ + " - Initializing Vella to Autoware converter")
 
@@ -54,7 +55,8 @@ class VellaToAutoware:
             if vella_track.confidence < self.confidence_filter or vella_track.track_length < self.track_length_filter:
                 continue
             # if filtering test passed, create the autoware detected object
-            detected_objects_array.objects.append(self.generate_autoware_object_from_vella_track(vella_track,  vella_tracks.header.stamp, tf_matrix, tf_rot))
+            detected_object = self.generate_autoware_object_from_vella_track(vella_track, vella_tracks.header.stamp, tf_matrix, tf_rot)
+            detected_objects_array.objects.append(detected_object)
 
         # publish the detected objects array
         self.detected_object_array_pub.publish(detected_objects_array)
@@ -77,7 +79,7 @@ class VellaToAutoware:
         # stamp it with vella created stamp
         detected_object.header.stamp = vella_stamp
         detected_object.id = vella_track.id
-        detected_object.label = 'unknown'  #vella_track.label  -------- for hulls to be visualized the label needs to be set to unknown
+        detected_object.label = vella_track.label
         detected_object.valid = True
 
         # Transform position and orientation to output frame using the transformation matrix and quaternion saved when callback was received
@@ -114,13 +116,11 @@ class VellaToAutoware:
         obj_pose_quat = [obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w]
         # transform the objects' orientation quaternion to output frame by multiplying it with the transform quaternion. Note: it's not an ordinary
         # element-wise multiplication
-        transformed_orientation = quaternion_multiply(tf_rot, obj_pose_quat)
-        transformed_pose.orientation = Quaternion(transformed_orientation[0],
-                                                    transformed_orientation[1],
-                                                    transformed_orientation[2],
-                                                    transformed_orientation[3])
+        x, y, z, w = quaternion_multiply(tf_rot, obj_pose_quat)
+        transformed_pose.orientation = Quaternion(x, y, z, w)
 
         return transformed_pose
+
     def produce_hull(self, obj_pose, obj_dims, vella_stamp):
 
         """
@@ -154,5 +154,5 @@ class VellaToAutoware:
 
 if __name__ == '__main__':
     rospy.init_node('vella_to_autoware_converter', anonymous=True, log_level=rospy.INFO)
-    node = VellaToAutoware()
+    node = VellaDetector()
     node.run()

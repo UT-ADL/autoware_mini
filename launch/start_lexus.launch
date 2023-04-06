@@ -10,7 +10,9 @@
     <arg name="max_speed"               default="30" />
     
     <!-- Localizer -->
-    <include file="$(find autoware_mini)/launch/localization.launch" />
+    <include file="$(find autoware_mini)/launch/localization.launch" >
+        <arg name="detector" value="$(arg detector)" />
+    </include>
 
     <!-- Planner -->
     <include file="$(find autoware_mini)/launch/planning.launch">

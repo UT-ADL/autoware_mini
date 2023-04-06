@@ -1,5 +1,5 @@
-### 2017 Honda Civic LX ###
-### Using Vella Mesa 00F mounted on the moonroof of the vehicle ###
+### UT Lexus RX450h ###
+### Using Velodyne VLP-32 mounted on the roof of the vehicle ###
 ### Notes: <use this area to write specific notes about this vehicle setup if it is unique> ###
 
 id:
@@ -33,8 +33,8 @@ tf:
     qy: 0.0
     qz: 0.0
     qw: 1.0
-    ### The lidar_center is called lidar_0 in Vella tree. The pointcloud published by velodyne driver in vella has the frame_id lidar_0
-  - ### therefore lidar_0 needs be part of the main tree for so that we have map->lidar_0 transform. This allows pointcloud to be published in rviz
+    ### Lidar_center is called lidar_0 in the Vella tree. The pointcloud published by velodyne driver in vella has the frame_id lidar_0
+  - ### therefore lidar_0 needs be part of the main tree so that we have map->lidar_0 transform available. This allows pointcloud to be visualized in rviz
     frame_from: 'lidar_0'
     frame_to: 'lidar_center'
     tx: 0.0 # meters
