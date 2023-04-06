@@ -1,2 +1,1 @@
 pyproj >= 2.6.0
-simple_pid
