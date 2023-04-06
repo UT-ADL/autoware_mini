@@ -30,6 +30,8 @@
         <arg name="use_gnss"        value="false" />
         <arg name="use_dbw"         value="false" />
         <arg name="use_ssc"         value="false" />
+        <arg name="detector"        value="$(arg detector)" />
+
     </include>
 
     <!-- Localization -->
