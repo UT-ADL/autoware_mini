@@ -166,6 +166,7 @@ class LocalPlanner:
 
         # OBJECT DETECTION
 
+        # TODO: need to rethink this varaiable maybe boolean - is_blocked or similar where locall_planner interferes with map speeds
         idx_after_obj = 0
 
         # store indexes of local wp where obstacles are found witihn radius
@@ -198,12 +199,14 @@ class LocalPlanner:
             # sort based on calculated (theoretical target velocity at ego location)
             obs_on_path = obs_on_path[:, obs_on_path[4].argsort()]
 
+            # TODO viz only if obj causes braking speed_dist combination below map_speed or current speed - otherwise clear
             # VIZ STOP POINT
             # find index of point when the value in array exeeds the distance to the nearest obstacle
-            # TODO: somethign is wrong here distance wise or wrong index - stopline does not ppear at the right place, some inconsistency visible
+            # TODO: somethign is wrong here distance wise or wrong index - stopline does not appear at the right place, some inconsistency visible
+            # possible kd_tree distances - need to find point on path and the distance to that point
             idx_after_obj = np.where(local_path_distances > obs_on_path[0,0])[0][0]
             stop_point = interpolate_point_between_two_points(local_path_array[idx_after_obj-1,0:3], local_path_array[idx_after_obj,0:3], local_path_distances[idx_after_obj-1] - obs_on_path[0,0])
-            # TODO: need check if exceeds pi or -pi? what happens
+            # TODO: need check if exceeds pi or -pi? what happens (can't just subtract pi/2)
             stop_heading = get_heading_between_two_points(Point(local_path_array[idx_after_obj-1,0], local_path_array[idx_after_obj-1,1], local_path_array[idx_after_obj-1,2]),
                                                        Point(local_path_array[idx_after_obj,0], local_path_array[idx_after_obj,1], local_path_array[idx_after_obj,2])) - np.pi/2
             stop_quaternion = get_orientation_from_yaw(stop_heading)
@@ -215,9 +218,10 @@ class LocalPlanner:
         # slice waypoints from global path to local path
         local_path_waypoints = global_path_waypoints[wp_forward:end_index]
 
+        # TODO: when obstacle is lost speeds are not reverted
         # Calculate velocity profile in local path waypoints
         if idx_after_obj > 0:
-            # calculate velocity based on distance to obstacle and deceleration limit
+            # calculate velocity based on distance to obstacle using deceleration limit
             for i in range(0, idx_after_obj):
                 # obj distance obs_on_path[0][0]
                 # obj velocity obs_on_path[3][0]
