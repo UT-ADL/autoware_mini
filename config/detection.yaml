@@ -8,6 +8,7 @@ lidar_center:
     max_z: 1.0
     cell_size: 1.0
     tolerance: 0.1
+    filter: none
   points_clusterer:
     sample_size: 10000
     cluster_epsilon: 1.0

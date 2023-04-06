@@ -4,18 +4,19 @@
     <arg name="planner"                 default="waypoints"     doc="waypoints, lanelet2" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
-    
+    <arg name="use_local_planner"       default="false" />
 
     <group ns="planning">
 
         <!-- Remap topics -->
-        <remap from="current_pose"      to="/localization/current_pose" />
-        <remap from="current_velocity"  to="/localization/current_velocity" />
-        <remap from="goal"              to="/move_base_simple/goal" />
+        <remap from="current_pose"          to="/localization/current_pose" />
+        <remap from="current_velocity"      to="/localization/current_velocity" />
+        <remap from="goal"                  to="/move_base_simple/goal" />
+        <remap from="detected_objects"      to="/detection/detected_objects" />
 
         <!-- Waypoint_loader -->
         <node if="$(eval arg('planner')=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
-            <param name="waypoints_file" value="$(find autoware_mini)/data/$(arg waypoints_file)" />
+            <param name="waypoints_file" value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
         </node>
 
         <!-- Lanelet2 map loader -->
@@ -30,6 +31,9 @@
 
         <!-- Path smoothing -->
         <node pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true"/>
+
+        <!-- Local planner -->
+        <node if="$(eval arg('use_local_planner'))" pkg="autoware_mini" type="local_planner.py" name="local_planner" output="screen" required="true"/>
 
         <!-- Waypoint_visualizer - necessary also for visualizing path from global planner-->
         <node pkg="autoware_mini" type="waypoint_visualizer.py" name="waypoint_visualizer" output="screen" required="true"/>

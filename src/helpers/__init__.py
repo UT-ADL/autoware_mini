@@ -1,4 +1,5 @@
 import math
+import matplotlib.pyplot as plt
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from autoware_msgs.msg import WaypointState
 from geometry_msgs.msg import Pose, Point, Quaternion
@@ -204,3 +205,39 @@ def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, dist
     point.y = waypoints[i].pose.pose.position.y - dy
     point.z = waypoints[i].pose.pose.position.z
     return point
+
+def debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new):
+
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.subplots()
+    ax.scatter(x_path,y_path, color = 'blue')
+    ax.scatter(x_new, y_new, color = 'red', marker = 'x', alpha = 0.5, label = 'interpolated')
+    plt.legend()
+    plt.show()
+
+    # new plot for heights 
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.subplots()
+    ax.scatter(new_distances, z_new, color = 'red', marker = 'x', alpha = 0.5, label = 'height interpolated')
+    ax.plot(new_distances, z_new, color = 'red', alpha = 0.5, label = 'height interpolated')
+    ax.scatter(distances, z_path, color = 'blue', alpha = 0.5, label = 'height old')
+    plt.legend()
+    plt.show()
+
+    # new plot for blinkers
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.subplots()
+    ax.scatter(new_distances, blinker_new, color = 'red', marker = 'x', alpha = 0.5, label = 'blinker interpolated')
+    ax.plot(new_distances, blinker_new, color = 'red', alpha = 0.5, label = 'blinker interpolated')
+    ax.scatter(distances, blinker, color = 'blue', alpha = 0.5, label = 'blinker old')
+    plt.legend()
+    plt.show()
+
+    # new plot for speed
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.subplots()
+    ax.scatter(new_distances, speed_new * 3.6, color = 'red', marker = 'x', alpha = 0.5, label = 'speed interpolated')
+    ax.plot(new_distances, speed_new * 3.6, color = 'red', alpha = 0.5, label = 'speed interpolated')
+    ax.scatter(distances, speed * 3.6, color = 'blue', alpha = 0.5, label = 'speed old')
+    plt.legend()
+    plt.show()

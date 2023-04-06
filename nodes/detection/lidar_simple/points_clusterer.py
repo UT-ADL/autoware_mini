@@ -23,7 +23,7 @@ class PointsClusterer:
 
         self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm=DBSCAN_ALGORITHM)
 
-        self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=5)
+        self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=1)
         rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=1024*1024)
 
         rospy.loginfo("points_clusterer - initialized")

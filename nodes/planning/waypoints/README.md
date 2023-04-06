@@ -52,14 +52,23 @@ Will record waypoint file with the following columns:
 
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `path` | `autoware_msgs/LaneArray` | Lane contains an array of waypoints `autoware_msgs/Waypoint` |
+| `global_path` | `autoware_msgs/Lane` | Lane contains an array of waypoints `autoware_msgs/Waypoint` |
 
 ## waypoint_visualizer
 
-Subscribes to `path` topic and if something is published there then creates visualization topic for rviz. No parameters and no subscribers.
+Visualizes `global_path` and `smoothed_path`. Visualizations for both path's are the same.
+
+##### Subscribes
+
+| Topic | Type | Comment |
+| --- | --- | --- |
+| `global_path` | `autoware_msgs/Lane` | path from global planner or loaded waypoints |
+| `smoothed_path` | `autoware_msgs/Lane` | smoothed global path |
+
 
 ##### Publishes
 
 | Topic | Type | Comment |
 | --- | --- | --- |
-| `path_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |
+| `global_path_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |
+| `smoothed_path_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |

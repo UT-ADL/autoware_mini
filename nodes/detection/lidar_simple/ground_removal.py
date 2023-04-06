@@ -4,6 +4,7 @@ import math
 
 import rospy
 import numpy as np
+import cv2
 
 from ros_numpy import numpify, msgify
 from sensor_msgs.msg import PointCloud2
@@ -18,13 +19,14 @@ class GroundRemovalNode:
         self.max_z = rospy.get_param('~max_z', 1.0)
         self.cell_size = rospy.get_param('~cell_size', 1.0)
         self.tolerance = rospy.get_param('~tolerance', 0.1)
+        self.filter = rospy.get_param('~filter', 'none')
 
         self.width = int(math.ceil((self.max_x - self.min_x) / self.cell_size))
         self.height = int(math.ceil((self.max_y - self.min_y) / self.cell_size))
-        self.cols = np.empty((self.width, self.height))
+        self.cols = np.empty((self.width, self.height), dtype=np.float32)
 
-        self.ground_pub = rospy.Publisher('points_ground', PointCloud2, queue_size=5)
-        self.no_ground_pub = rospy.Publisher('points_no_ground', PointCloud2, queue_size=5)
+        self.ground_pub = rospy.Publisher('points_ground', PointCloud2, queue_size=1)
+        self.no_ground_pub = rospy.Publisher('points_no_ground', PointCloud2, queue_size=1)
         rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1, buff_size=2*1024*1024)
 
         rospy.loginfo("ground_removal - initialized")
@@ -49,6 +51,16 @@ class GroundRemovalNode:
         self.cols.fill(np.nan)
         idx = np.argsort(-zi)
         self.cols[xi[idx], yi[idx]] = zi[idx]
+
+        # bring cell minimum lower, if all cells around it are lower
+        if self.filter == 'median':
+            cols_blur = cv2.medianBlur(self.cols, 3)
+            self.cols = np.fmin(self.cols, cols_blur)
+        elif self.filter == 'average':
+            cols_blur = cv2.blur(self.cols, (3, 3), cv2.BORDER_REPLICATE)
+            self.cols = np.fmin(self.cols, cols_blur)
+        elif self.filter != 'none':
+            assert False, "Unknown filter value: " + self.filter
 
         # filter out closest points to minimum point up to some tolerance
         ground_mask = (zi <= (self.cols[xi, yi] + self.tolerance))

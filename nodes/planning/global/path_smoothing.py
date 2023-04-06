@@ -2,9 +2,8 @@
 
 import rospy
 import numpy as np
-import matplotlib.pyplot as plt
 from autoware_msgs.msg import Lane, Waypoint
-from helpers import get_orientation_from_yaw
+from helpers import get_orientation_from_yaw, debug_plots_path_smoothing
 
 
 class PathSmoothing:
@@ -13,11 +12,17 @@ class PathSmoothing:
 
         # Parameters
         self.waypoint_interval = rospy.get_param("~waypoint_interval", 1.0)
+        self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves", True)
+        self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration", True)
+        self.adjust_endpoint_speeds_to_zero = rospy.get_param("~adjust_endpoint_speeds_to_zero", True)
+        self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_limit", 1.0)
+        self.speed_averaging_window = rospy.get_param("~speed_averaging_window", 21)
         self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index", 4)
         self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit", 3.0)
+        self.output_debug_info = rospy.get_param("~output_debug_info", False)
 
         # Publishers
-        self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1)
+        self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1, latch=True)
 
         # Subscribers
         self.global_path_sub = rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=1)
@@ -35,7 +40,9 @@ class PathSmoothing:
                 wp.pose.pose.position.y,
                 wp.pose.pose.position.z,
                 wp.wpstate.steering_state,
-                wp.twist.twist.linear.x
+                wp.twist.twist.linear.x,
+                wp.dtlane.lw,
+                wp.dtlane.rw
             ) for wp in msg.waypoints])
 
         smoothed_path_array = self.smooth_global_path(waypoints_array)
@@ -52,6 +59,8 @@ class PathSmoothing:
         z_path = waypoints_array[:,2]
         blinker = waypoints_array[:,3]
         speed = waypoints_array[:,4]
+        lw = waypoints_array[:,5]
+        rw = waypoints_array[:,6]
 
         # distance differeneces between points
         distances = np.cumsum(np.sqrt(np.sum(np.diff(xy_path, axis=0)**2, axis=1)))
@@ -75,22 +84,67 @@ class PathSmoothing:
         blinker_new[blinker_new == 0] = 3
 
         # Yaw - calculate yaw angle for path and add last yaw angle to the end of the array
-        yaw = np.arctan2( np.diff(y_new), np.diff(x_new))
+        yaw = np.arctan2(np.diff(y_new), np.diff(x_new))
         yaw = np.append(yaw, yaw[-1])
+
+        # lw and rw
+        lw_new = np.interp(new_distances, distances, lw)
+        rw_new = np.interp(new_distances, distances, rw)
 
         # Speed
         # TODO: when map based speed is implemented check if gives reasonable results
         speed_interpolated = np.interp(new_distances, distances, speed)
-        # Calculate speed limit based on lateral acceleration limit
-        radius = calculate_radius_with_step_n(x_new, y_new, self.radius_calc_neighbour_index)
-        speed_radius = np.sqrt(self.lateral_acceleration_limit * np.abs(radius))
-        speed_new = np.fmin(speed_interpolated, speed_radius)
+        speed_new = speed_interpolated
 
-        # TODO: remove or add param for debug visualization
-        # debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
+        if self.adjust_speeds_in_curves:
+            # Calculate speed limit based on lateral acceleration limit
+            radius = calculate_radius_step_n_triangle_equation(x_new, y_new, self.radius_calc_neighbour_index)
+            speed_radius = np.sqrt(self.lateral_acceleration_limit * np.abs(radius))
+            speed_new = np.fmin(speed_interpolated, speed_radius)
+
+        # loop over array backwards and forwards to adjust speeds using the deceleration limit
+        if self.adjust_speeds_using_deceleration:
+            accel_constant = 2 * self.speed_deceleration_limit * self.waypoint_interval
+            # backward loop
+            for i in range(len(speed_new) - 2, 0, -1):
+                speed_new[i] = min(speed_new[i], np.sqrt(speed_new[i + 1]**2 + accel_constant))
+            # forward loop
+            for i in range(1, len(speed_new) ):
+                speed_new[i] = min(speed_new[i], np.sqrt(speed_new[i - 1]**2 + accel_constant))
+
+        if self.speed_averaging_window > 1:
+            # average array values using window size of n
+            speed_new = np.convolve(speed_new, np.ones((self.speed_averaging_window,))/self.speed_averaging_window, mode='same')
+            # replace n/2 values at the beginning and end of the array with the n+1 and n-1 values respectively
+            speed_new[:int(self.speed_averaging_window/2)] = speed_new[int(self.speed_averaging_window/2)]
+            speed_new[-int(self.speed_averaging_window/2):] = speed_new[-int(self.speed_averaging_window/2)-1]
+
+        if self.adjust_endpoint_speeds_to_zero:
+            # set first and last speed to zero
+            speed_new[0] = 0
+            speed_new[-1] = 0
+
+            # adjust speed graphs using deceleartion limit and waypoint interval
+            accel_constant = 2 * self.speed_deceleration_limit * self.waypoint_interval
+            # backward loop - end point
+            for i in range(len(speed_new) - 2, 0, -1):
+                adjusted_speed = np.sqrt(speed_new[i + 1]**2 + accel_constant)
+                if adjusted_speed > speed_new[i]:
+                    break
+                speed_new[i] = adjusted_speed
+            # forward loop - start point
+            for i in range(1, len(speed_new) ):
+                adjusted_speed = np.sqrt(speed_new[i - 1]**2 + accel_constant)
+                if adjusted_speed > speed_new[i]:
+                    break
+                speed_new[i] = adjusted_speed
+
+
+        if self.output_debug_info:
+            debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
 
         # Stack
-        smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, yaw), axis=1)
+        smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, lw_new, rw_new, yaw), axis=1)
 
         return smoothed_path_array
 
@@ -99,11 +153,11 @@ class PathSmoothing:
         lane = Lane()
         lane.header.frame_id = output_frame
         lane.header.stamp = rospy.Time.now()
-        lane.waypoints = [self.create_waypoint(x, y, z, blinker, speed, yaw) for x, y, z, blinker, speed, yaw in smoothed_path]
+        lane.waypoints = [self.create_waypoint(*wp) for wp in smoothed_path]
 
         self.smoothed_path_pub.publish(lane)
 
-    def create_waypoint(self, x, y, z, blinker, speed, yaw):
+    def create_waypoint(self, x, y, z, blinker, speed, lw, rw, yaw):
         # create waypoint
         waypoint = Waypoint()
         waypoint.pose.pose.position.x = x
@@ -112,89 +166,40 @@ class PathSmoothing:
         waypoint.wpstate.steering_state = int(blinker)
         waypoint.twist.twist.linear.x = speed
         waypoint.pose.pose.orientation = get_orientation_from_yaw(yaw)
+        waypoint.dtlane.lw = lw
+        waypoint.dtlane.rw = rw
 
         return waypoint
 
     def run(self):
         rospy.spin()
 
-def calculate_radius_with_step_n(x, y, n):
-    # calculate radius of the circle using 3 points
-    # x, y: path coordinates in array
-    # n: step sixe to select points used for calculating radius
-    # https://en.wikipedia.org/wiki/Circumscribed_circle#Cartesian_coordinates
+def calculate_radius_step_n_triangle_equation(x, y, n):
 
-    # calculate radius for each point in the path
-    radius = np.zeros(x.shape)
-    for i in range(n, x.shape[0] - n):
-        # calculate radius for each point in the path
-        radius[i] = np.abs((x[i-n] - x[i+n])**2 + (y[i-n] - y[i+n])**2) / (2 * ((x[i-n] - x[i]) * (y[i+n] - y[i]) - (x[i+n] - x[i]) * (y[i-n] - y[i])))
+    # equation derived from:
+    # https://en.wikipedia.org/wiki/Circumscribed_circle#Other_properties
+    # diameter = a*b*c / 2*area
 
-    # Replace n valus (zeros) from beginning of the array with n'th value (first not zero)
-    radius[:n] = radius[n]
-    # Replace n valus (zeros) from end of the array with n+1'th value (last not zero)
-    radius[-n:] = radius[-(n+1)]
-    
-    return radius
+    # find the lengths of the 3 edges for the triangle
+    a = np.sqrt((x[n:-n] - x[:-2*n])**2 + (y[n:-n] - y[:-2*n])**2)
+    b = np.sqrt((x[:-2*n] - x[2*n:])**2 + (y[:-2*n] - y[2*n:])**2)
+    c = np.sqrt((x[2*n:] - x[n:-n])**2 + (y[2*n:] - y[n:-n])**2)
 
-# TODO remove - verify, but does not seem to produce good results, but is vectorized
-def calculate_radius_closest_points(x, y):
-    # calculate radius of the circle using 3 points
-    # x, y: array of x and y coordinates
+    # calculate the area of the triangle
+    s = (a + b + c) / 2
+    # TODO: added np.abs because sometimes negative values are there, check why
+    area = np.sqrt(np.abs(s * (s - a) * (s - b) * (s - c)))
+    area = np.maximum(area, 0.0000000001)
 
-    # calculate differences between points
-    x_diff = np.diff(x)
-    y_diff = np.diff(y)
+    # calculate the radius of the circle
+    radius = (a * b * c) / (4 * area)
 
-    # calculate radius
-    radius = (x_diff[1:] * y_diff[:-1] - x_diff[:-1] * y_diff[1:]) / (x_diff[1:]**2 + y_diff[1:]**2)**(3/2)
-
-    # add 0 to the start and end of the array
-    radius = np.append(0, radius)
-    radius = np.append(radius, 0)
+    # append n values to the beginning of the array with the first value
+    radius = np.append(radius[:n], radius)
+    # append n values to the end of the array with the last value
+    radius = np.append(radius, radius[-n:])
 
     return radius
-
-
-def debug_visualize(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new):
-    # plot 3 figures
-    # 1. x-y path with old and new waypoints
-    # 2. z path with old and new waypoints
-    # 3. blinker path with old and new waypoints
-
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(x_path,y_path, color = 'blue')
-    ax.scatter(x_new, y_new, color = 'red', marker = 'x', alpha = 0.5, label = 'interpolated')
-    plt.legend()
-    plt.show()
-
-    # new plot for heights 
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(new_distances, z_new, color = 'red', marker = 'x', alpha = 0.5, label = 'height interpolated')
-    ax.plot(new_distances, z_new, color = 'red', alpha = 0.5, label = 'height interpolated')
-    ax.scatter(distances, z_path, color = 'blue', alpha = 0.5, label = 'height old')
-    plt.legend()
-    plt.show()
-
-    # new plot for blinkers
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(new_distances, blinker_new, color = 'red', marker = 'x', alpha = 0.5, label = 'blinker interpolated')
-    ax.plot(new_distances, blinker_new, color = 'red', alpha = 0.5, label = 'blinker interpolated')
-    ax.scatter(distances, blinker, color = 'blue', alpha = 0.5, label = 'blinker old')
-    plt.legend()
-    plt.show()
-
-    # new plot for speed
-    fig = plt.figure(figsize=(10, 15))
-    ax = fig.subplots()
-    ax.scatter(new_distances, speed_new * 3.6, color = 'red', marker = 'x', alpha = 0.5, label = 'speed interpolated')
-    ax.plot(new_distances, speed_new * 3.6, color = 'red', alpha = 0.5, label = 'speed interpolated')
-    ax.scatter(distances, speed * 3.6, color = 'blue', alpha = 0.5, label = 'speed old')
-    plt.legend()
-    plt.show()
 
 
 if __name__ == '__main__':

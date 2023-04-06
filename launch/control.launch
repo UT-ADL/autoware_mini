@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="follower"    default="pure_pursuit"  doc="pure_pursuit, stanley" />
+    <arg name="follower"            default="pure_pursuit"  doc="pure_pursuit, stanley" />
+    <arg name="use_local_planner"   default="false" />
     
     <group ns="control">
 
         <!-- Remap topics -->
         <remap from="current_pose"     to="/localization/current_pose" />
         <remap from="current_velocity" to="/localization/current_velocity" />
-        <remap from="path"             to="/planning/smoothed_path" />
+        <remap if="$(eval arg('use_local_planner'))"     from="path"    to="/planning/local_path" />
+        <remap unless="$(eval arg('use_local_planner'))" from="path"    to="/planning/smoothed_path" />
 
 
         <!-- Follower -->

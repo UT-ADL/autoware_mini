@@ -2,6 +2,8 @@ lanelet2_global_planner:
   output_frame: map
   distance_to_centerline_limit: 5.0
   speed_limit: 40.0                   # max velocity for route (km/h), will be replaced by speed taken from map
+  wp_left_width: 1.4
+  wp_right_width: 1.4
 
 waypoint_loader:
   output_frame: map
@@ -12,6 +14,20 @@ waypoint_saver:
   interval: 1.0
 
 path_smoothing:
-  waypoint_interval: 1.0            # m
-  radius_calc_neighbour_index: 4    # int
-  lateral_acceleration_limit: 3.0   # m/s2
+  waypoint_interval: 1.0                  # m
+  adjust_speeds_in_curves: True
+  adjust_speeds_using_deceleration: True
+  speed_averaging_window: 21              # window size (will be applied only if > 1)
+  adjust_endpoint_speeds_to_zero: True
+  speed_deceleration_limit: 1.0           # m/s2
+  radius_calc_neighbour_index: 4          # int
+  lateral_acceleration_limit: 3.0         # m/s2
+  output_debug_info: False
+
+local_planner:
+  local_path_length : 100
+  nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
+  braking_safety_distance: 2.0
+  car_safety_width : 1.1
+  speed_deceleration_limit: 1.0
+  max_speed_limit: 40.0
