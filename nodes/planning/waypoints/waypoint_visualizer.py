@@ -131,6 +131,7 @@ class WaypointVisualizer:
                 marker = Marker()
                 marker.header.frame_id = self.output_frame
                 marker.header.stamp = rospy.Time.now()
+                marker.ns = "Waypoints"
                 marker.id = i
                 marker.type = marker.CYLINDER
                 marker.action = marker.ADD
@@ -139,6 +140,21 @@ class WaypointVisualizer:
                 marker.scale.y = 2 * self.car_safety_width
                 marker.scale.z = 0.3
                 marker.color = ColorRGBA(waypoint.cost, 1.0 - waypoint.cost, 0.0, 0.2)
+                marker_array.markers.append(marker)
+
+            # velocity labels
+            for i, waypoint in enumerate(waypoints):
+                marker = Marker()
+                marker.header.frame_id = self.output_frame
+                marker.header.stamp = rospy.Time.now()
+                marker.ns = "Velocity label"
+                marker.id = i
+                marker.type = marker.TEXT_VIEW_FACING
+                marker.action = marker.ADD
+                marker.pose = waypoint.pose.pose
+                marker.scale.z = 0.5
+                marker.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)
+                marker.text = str(round(waypoint.twist.twist.linear.x * 3.6, 1))
                 marker_array.markers.append(marker)
 
         return marker_array

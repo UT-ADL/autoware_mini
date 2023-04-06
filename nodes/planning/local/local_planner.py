@@ -4,10 +4,12 @@ import rospy
 import threading
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
-from autoware_msgs.msg import Lane, Waypoint, DetectedObjectArray
+from autoware_msgs.msg import Lane, DetectedObjectArray
 from geometry_msgs.msg import PoseStamped, TwistStamped, Point
+from visualization_msgs.msg import Marker
+from std_msgs.msg import ColorRGBA
 
-from helpers import get_closest_point_on_line
+from helpers import get_closest_point_on_line, interpolate_point_between_two_points, get_orientation_from_yaw, get_heading_between_two_points
 from helpers.timer import Timer
 
 
@@ -39,6 +41,7 @@ class LocalPlanner:
 
         # Publishers
         self.local_path_pub = rospy.Publisher('local_path', Lane, queue_size=1)
+        self.stop_point_visualization_pub = rospy.Publisher('stop_point_visualization', Marker, queue_size=1)
 
         # Subscribers
         self.path_sub = rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)
@@ -163,46 +166,94 @@ class LocalPlanner:
 
         # OBJECT DETECTION
 
+        idx_after_obj = 0
+
         # store indexes of local wp where obstacles are found witihn radius
         wp_with_obs = []
 
         # iterate over local path and check if there is an object within distance from waypoint
         if obstacle_tree is not None:
+            # ask closest obstacle points for all local_path waypoints
+            obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[1:,0:3], self.car_safety_width, return_distance=True)
+            
+            # TODO: might be better way to to it - needed to viz obstacles in whole path!
+            # get list of indexes of local_path waypoints where obstacles are found
+            wp_with_obs = [i for i in range(len(obstacle_d)) if len(obstacle_d[i]) > 0]
 
-            # skip nearest_point (current pose projected to path) added in front, to be in sync later when wp are sliced
-            for i in range(1, len(local_path_array)):
-                # find OBS points from path within distance limit
-                obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors([local_path_array[i,0:3]], self.car_safety_width)
-                # if we have obstacles within radius
-                if len(obstacle_d[0]) > 0:
-                    wp_with_obs.append(i)
-                    # TODO: use "obstacle_id" group points (2 obstacles within one point with different speeds)
-                    # TODO: iterate over all points and calc deceleration based velocity for current location - use that min
+            # add corresponding "along path distances" to obstacle_d
+            obstacle_d = [np.add(obstacle_d[i], local_path_distances[i]) for i in range(len(obstacle_d))]
+            # flatten obstacle_d and obstacle_idx and then and stack
+            obs_on_path = np.vstack((np.hstack(obstacle_d), np.hstack(obstacle_idx)))
+            # by matching index update array by adding 3rd row that contains object id taken from obstacle_array
+            obs_on_path = np.vstack((obs_on_path, obstacle_array[obs_on_path[1].astype(int), 4]))
+            # sort by distance and remove all duplicate object points but closest one
+            obs_on_path = obs_on_path[:, obs_on_path[0].argsort()]
+            obs_on_path = obs_on_path[:, np.unique(obs_on_path[2], return_index=True)[1]]
+            # adding velocity array will contain: [distance, obstacle_array_id, obstacle_id, velocity]
+            obs_on_path = np.vstack((obs_on_path, obstacle_array[obs_on_path[1].astype(int), 3]))
 
-                    # Approximation: find min distance in obstacle_d and use index to get obstacle global id
-                    obs_array_id = obstacle_idx[0][np.argmin(obstacle_d[0])]
-                    d = local_path_distances[i] + min(obstacle_d[0]) - CURRENT_POSE_TO_CAR_FRONT_METERS - self.braking_safety_distance
-                    # calc theoretical target velocity based on distance to obstacle and deceleration limit
-                    # TODO: make function
-                    # target_velocity = np.sqrt(obstacle_array[obs_array_id,3]**2 + 2 * self.speed_deceleration_limit * d)
+            # calculate closest object in terms of distance, velocity and fixed deceleration
+            # sqrt(v**2 + 2 * a * d)
+            obs_on_path = np.vstack((obs_on_path, np.sqrt((obs_on_path[3]**2 + 2 * self.speed_deceleration_limit * obs_on_path[0]))))
+            # sort based on calculated (theoretical target velocity at ego location)
+            obs_on_path = obs_on_path[:, obs_on_path[4].argsort()]
 
-                    if d < self.closest_object_distance:
-                        self.closest_object_velocity = obstacle_array[obs_array_id,3]
-                        self.closest_object_distance = max(0, d)
+            # VIZ STOP POINT
+            # find index of point when the value in array exeeds the distance to the nearest obstacle
+            # TODO: somethign is wrong here distance wise or wrong index - stopline does not ppear at the right place, some inconsistency visible
+            idx_after_obj = np.where(local_path_distances > obs_on_path[0,0])[0][0]
+            stop_point = interpolate_point_between_two_points(local_path_array[idx_after_obj-1,0:3], local_path_array[idx_after_obj,0:3], local_path_distances[idx_after_obj-1] - obs_on_path[0,0])
+            # TODO: need check if exceeds pi or -pi? what happens
+            stop_heading = get_heading_between_two_points(Point(local_path_array[idx_after_obj-1,0], local_path_array[idx_after_obj-1,1], local_path_array[idx_after_obj-1,2]),
+                                                       Point(local_path_array[idx_after_obj,0], local_path_array[idx_after_obj,1], local_path_array[idx_after_obj,2])) - np.pi/2
+            stop_quaternion = get_orientation_from_yaw(stop_heading)
+            self.visualize_stop_point(stop_point, stop_quaternion)
+
+            t("numpy")
 
 
         # slice waypoints from global path to local path
         local_path_waypoints = global_path_waypoints[wp_forward:end_index]
 
-        for i in range(len(wp_with_obs)):
-            # -1 to compensate for current_pose projection on path that is not here when slicing the waypoints
-            # add to cost, in visualization it will be shown as red / green
-            local_path_waypoints[wp_with_obs[i] - 1].cost = 1.0
+        # Calculate velocity profile in local path waypoints
+        if idx_after_obj > 0:
+            # calculate velocity based on distance to obstacle and deceleration limit
+            for i in range(0, idx_after_obj):
+                # obj distance obs_on_path[0][0]
+                # obj velocity obs_on_path[3][0]
+                # obj distance corrected with car front and safety distance
+                obj_distance = max(0, obs_on_path[0][0] - local_path_distances[i] - CURRENT_POSE_TO_CAR_FRONT_METERS - self.braking_safety_distance)
+                target_vel = np.sqrt(obs_on_path[3,0]**2 + 2 * self.speed_deceleration_limit * obj_distance)
+                local_path_waypoints[i].twist.twist.linear.x = min(target_vel, local_path_waypoints[i].twist.twist.linear.x)
+
+
+        # enumerate over local path waypoints and set cost to 1.0 if there is an obstacle
+        for i, wp in enumerate(local_path_waypoints):
+            wp.cost = 0.0
+            if i in wp_with_obs:
+                wp.cost = 1.0
 
         self.publish_local_path_wp(local_path_waypoints)
 
         t('publish')
         print(t)
+
+
+    def visualize_stop_point(self, stop_point, stop_quaternion):
+        marker = Marker()
+        marker.header.frame_id = self.output_frame
+        marker.header.stamp = rospy.Time.now()
+        marker.ns = "stop_point"
+        marker.id = 0
+        marker.type = marker.CUBE
+        marker.action = marker.ADD
+        marker.pose.position = stop_point
+        marker.pose.orientation = stop_quaternion
+        marker.scale.x = 5.0
+        marker.scale.y = 0.2
+        marker.scale.z = 3.0
+        marker.color = ColorRGBA(1.0, 0.0, 0.0, 0.7)
+        self.stop_point_visualization_pub.publish(marker)
 
 
     def publish_local_path_wp(self, local_path_waypoints):

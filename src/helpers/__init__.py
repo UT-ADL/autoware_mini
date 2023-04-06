@@ -175,6 +175,42 @@ def get_distance_between_two_points(point1, point2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
+
+def interpolate_point_between_two_points(point1_array, point2_array, distance):
+    """
+    Interpolate point between two points. The point is on the line between point1 and point2
+    :param point1_array: [x, y, z]
+    :param point2_array: [x, y, z]
+    :param distance: distance from first point towards second point
+    :return: [x, y, z]
+    """
+    
+    x1 = point1_array[0]
+    y1 = point1_array[1]
+    z1 = point1_array[2]
+    x2 = point2_array[0]
+    y2 = point2_array[1]
+    z2 = point2_array[2]
+
+    # calculate distance between points
+    d = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+    # calculate ratio
+    ratio = distance / d
+
+    # calculate new point
+    x = x1 + ratio * (x2 - x1)
+    y = y1 + ratio * (y2 - y1)
+
+    # calculate z
+    z = (z2 + z1) /2
+
+    # create_point x, y, z
+    point = Point(x=x, y=y, z=z)
+
+    return point
+
+
 def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, distance):
     """
     Get point on path within distance from ego pose
@@ -205,6 +241,7 @@ def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, dist
     point.y = waypoints[i].pose.pose.position.y - dy
     point.z = waypoints[i].pose.pose.position.z
     return point
+
 
 def debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new):
 
