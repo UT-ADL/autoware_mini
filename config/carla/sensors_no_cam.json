@@ -76,7 +76,7 @@
                             "spawn_point": {"x": 1.02, "y": 0, "z": 1.51, "roll": -0.02879793, "pitch": 0.0003490659, "yaw": -0.0459},
                             "range": 200,
                             "channels": 32,
-                            "points_per_second": 320000,
+                            "points_per_second": 600000,
                             "upper_fov": 20.0,
                             "lower_fov": -20.0,
                             "rotation_frequency": 20,
@@ -84,16 +84,9 @@
                             "attached_objects":
                             [
                                 {
-                                    "type": "sensor.lidar.ray_cast",
+                                    "type": "sensor.other.imu",
                                     "id": "lidar_front/os_sensor",
-                                    "spawn_point": {"x": 0.8559, "y": 0.0642, "z": -0.4051, "roll": 0.003995038, "pitch": -0.009182, "yaw": 0.8641542},
-                                    "range": 120,
-                                    "channels": 128,
-                                    "points_per_second": 320000,
-                                    "upper_fov": 20.0,
-                                    "lower_fov": -20.0,
-                                    "rotation_frequency": 20,
-                                    "noise_stddev": 0.0
+                                    "spawn_point": {"x": 0.8559, "y": 0.0642, "z": -0.4051, "roll": 0.003995038, "pitch": -0.009182, "yaw": 0.8641542}
                                 }
                             ]
                         },

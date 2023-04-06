@@ -14,11 +14,11 @@ from autoware_msgs.msg import Waypoint
 from nav_msgs.msg import Path
 
 
-class CarlaWaypointsToLanePublisher():
+class CarlaWaypointsPublisher():
 
     def __init__(self):
         # Publishers
-        self.waypoints_pub = rospy.Publisher('/global_path', LaneArray, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('global_path', LaneArray, queue_size=1, latch=True)
 
         # Subscribers
         rospy.Subscriber('/carla/ego_vehicle/waypoints', Path, self.path_callback, queue_size=1)
@@ -40,6 +40,6 @@ class CarlaWaypointsToLanePublisher():
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_waypoints_to_lane_publisher', log_level=rospy.INFO, anonymous=False)
-    node = CarlaWaypointsToLanePublisher()
+    rospy.init_node('carla_waypoints_publisher', log_level=rospy.INFO)
+    node = CarlaWaypointsPublisher()
     node.run()

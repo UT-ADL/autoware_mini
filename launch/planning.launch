@@ -14,7 +14,7 @@
         <remap from="goal"                  to="/move_base_simple/goal" />
         <remap from="detected_objects"      to="/detection/detected_objects" />
 
-        <!-- Waypoint_loader -->
+        <!-- Waypoint loader -->
         <node if="$(eval arg('planner')=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
             <param name="waypoints_file" value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
         </node>
@@ -28,6 +28,9 @@
         <node if="$(eval arg('planner')=='lanelet2')" pkg="autoware_mini" type="lanelet2_global_planner.py" name="lanelet2_global_planner" output="screen" required="true">
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
         </node>
+
+        <!-- Carla waypoints publisher -->
+        <node if="$(eval arg('planner')=='carla')" pkg='autoware_mini' type='carla_waypoints_publisher.py' name='carla_waypoints_publisher' output='screen' required="true" />
 
         <!-- Path smoothing -->
         <node pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true"/>

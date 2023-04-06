@@ -12,7 +12,7 @@
         </group>
         
         <!-- Carla's ground truth as detection -->
-        <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector" name="carla_detector" output="screen" required="true" />
+        <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
 
         <!-- Obstacle simulator -->
         <node if="$(eval arg('detector')=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />

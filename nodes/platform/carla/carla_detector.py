@@ -44,6 +44,11 @@ class CarlaDetector:
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
+        # Internal parameters
+        self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
+                                                              origin_lat=utm_origin_lat,
+                                                              origin_lon=utm_origin_lon)
+
         # Publishers
         self.detected_objects_pub = rospy.Publisher(
             'detected_objects', DetectedObjectArray, queue_size=1)
@@ -51,11 +56,6 @@ class CarlaDetector:
         # Subscribers
         rospy.Subscriber('/carla/ground_truth_objects',
                          ObjectArray, self.carla_objects_callback, queue_size=1)
-
-        # Internal paramters
-        self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
-                                                              origin_lat=utm_origin_lat,
-                                                              origin_lon=utm_origin_lon)
 
     def carla_objects_callback(self, data):
         """
@@ -95,7 +95,7 @@ class CarlaDetector:
         # Publish converted detected objects
         self.detected_objects_pub.publish(objects_msg)
 
-    def produce_hull(self, centroid, dimension_vector, header, yaw_quaternion):
+    def produce_hull(self, centroid, dim_vector, header, yaw_quaternion):
         """
         create hull for a given pose and dimension
         """
@@ -104,7 +104,6 @@ class CarlaDetector:
         convex_hull.header = header
 
         rot_mat = quaternion_matrix([yaw_quaternion.x, yaw_quaternion.y, yaw_quaternion.z, yaw_quaternion.w])
-        dim_vector = dimension_vector
         halved_dim = [dim_vector.x/2, dim_vector.y/2, dim_vector.z/2]
 
         point_1 = [halved_dim[0], halved_dim[1], halved_dim[2]]
@@ -116,7 +115,7 @@ class CarlaDetector:
         corner_points = np.concatenate((corner_points, np.ones((corner_points.shape[0], 1))), axis=1)
         rotated_corners = np.dot(rot_mat, corner_points.T).T
 
-        convex_hull.polygon.points = [Point(centroid.x + corner_point[0], centroid.y + corner_point[1], centroid.z + corner_point[2]) for corner_point in rotated_corners]
+        convex_hull.polygon.points = [Point(centroid.x + x, centroid.y + y, centroid.z + z) for x, y, z, _ in rotated_corners]
 
         return convex_hull
 
@@ -125,6 +124,6 @@ class CarlaDetector:
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_detector', log_level=rospy.INFO, anonymous=False)
+    rospy.init_node('carla_detector', log_level=rospy.INFO)
     node = CarlaDetector()
     node.run()

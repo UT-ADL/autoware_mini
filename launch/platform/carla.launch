@@ -9,7 +9,7 @@
   <arg name="map_name"                                            default='' /><!-- Map to load on startup, this should match with CARLA environments-->
 
   <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
-  <arg if="$(eval 'tartu' in map_name.lower())"  name="spawn_point"    default="4.70, 342.07,36,0,0,-98" />    
+  <arg if="$(eval 'tartu' in map_name.lower())"  name="spawn_point"    default="4.70,342.07,36,0,0,-98" />    
   <arg if="$(eval map_name.lower() == 'town01')" name="spawn_point"    default="150,-133.5,10,0,0,0" />
 
   <!-- Control -->
@@ -116,17 +116,12 @@
   
   <group if='$(arg use_manual_control)'>
     <!-- carla manual control -->
-    <include file='$(find carla_manual_control)/launch/carla_manual_control.launch'>
-      <arg name='role_name' value='ego_vehicle' />
-    </include>
-
+    <include file='$(find carla_manual_control)/launch/carla_manual_control.launch' />
   </group>
 
   <group unless='$(arg use_manual_control)'>
     <!-- carla ackermann control -->
-    <include file='$(find carla_ackermann_control)/launch/carla_ackermann_control.launch'>
-      <arg name='role_name' value='ego_vehicle' />
-    </include>
+    <include file='$(find carla_ackermann_control)/launch/carla_ackermann_control.launch' />
     
     <!-- tune carla ackermann controller parameters -->
     <node name='$(anon dynparam)' pkg='dynamic_reconfigure' type='dynparam'
@@ -153,18 +148,14 @@
     <remap from="vehicle_cmd"     to="/control/vehicle_cmd" />
     <remap from="vehicle_status"  to="/control/vehicle_status" />
 
-    <node pkg='autoware_mini' type='carla_vehicle_interface' name='carla_vehicle_interface' output='screen' required="true" />
-    <node pkg='autoware_mini' type='carla_vehicle_status_publisher' name='carla_vehicle_status_publisher' output='screen' required="true" />
+    <node pkg='autoware_mini' type='carla_vehicle_interface.py' name='carla_vehicle_interface' output='screen' required="true" />
+    <node pkg='autoware_mini' type='carla_vehicle_status_publisher.py' name='carla_vehicle_status_publisher' output='screen' required="true" />
     
     <!-- If localizer is novatel then change child_frame to ego_vehicle and run carla_to_novatel msgs converter -->
     <group if="$(eval localizer.lower() == 'novatel')">
-      <param  name="/localization/child_frame" value="ego_vehicle" />
-      <node pkg='autoware_mini' type='carla_novatel_driver' name='carla_novatel_driver' output='screen' required="true" />
+      <param  name="/localization/novatel_oem7_localizer/child_frame" value="ego_vehicle" />
+      <node pkg='autoware_mini' type='carla_novatel_driver.py' name='carla_novatel_driver' output='screen' required="true" />
     </group>
-
-    <!-- For now lane waypoints converter is only required when scenario runner is running -->
-    <node if="$(arg use_scenario_runner)" pkg='autoware_mini' type='carla_waypoints_to_lane_publisher' name='carla_waypoints_to_lane_publisher' output='screen' required="true" />
-
   </group>
   
   <!-- ====================================================================================================== -->

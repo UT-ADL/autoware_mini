@@ -8,30 +8,31 @@ from tf2_ros import TransformBroadcaster
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
 from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion, TransformStamped
 
+from localization.WGS84ToUTMTransformer import WGS84ToUTMTransformer
+from localization.WGS84ToLest97Transformer import WGS84ToLest97Transformer
+
 
 class NovatelOem7Localizer:
     def __init__(self):
 
         # Parameters
-        self.child_frame = rospy.get_param("/localization/child_frame", "base_link")
-        self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer", "utm")
-        self.use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
-        self.utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
-        self.utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
-        self.lest97_origin_northing = rospy.get_param("/localization/lest97_origin_northing")
-        self.lest97_origin_easting = rospy.get_param("/localization/lest97_origin_easting")
+        self.coordinate_transformer = rospy.get_param("coordinate_transformer", "utm")
+        self.use_custom_origin = rospy.get_param("use_custom_origin", True)
+        self.utm_origin_lat = rospy.get_param("utm_origin_lat")
+        self.utm_origin_lon = rospy.get_param("utm_origin_lon")
+        self.lest97_origin_northing = rospy.get_param("lest97_origin_northing")
+        self.lest97_origin_easting = rospy.get_param("lest97_origin_easting")
         self.use_msl_height = rospy.get_param("~use_msl_height", True)
+        self.child_frame = rospy.get_param("~child_frame", "base_link")
 
         # variable to store undulation value from bestpos message
         self.undulation = 0.0
 
         # initialize coordinate_transformer
         if self.coordinate_transformer == "utm":
-            import WGS84ToUTMTransformer
-            self.transfromer = WGS84ToUTMTransformer.WGS84ToUTMTransformer(self.use_custom_origin, self.utm_origin_lat, self.utm_origin_lon)
+            self.transformer = WGS84ToUTMTransformer(self.use_custom_origin, self.utm_origin_lat, self.utm_origin_lon)
         elif self.coordinate_transformer == "lest97":
-            import WGS84ToLest97Transformer
-            self.transfromer = WGS84ToLest97Transformer.WGS84ToLest97Transformer(self.use_custom_origin, self.lest97_origin_northing, self.lest97_origin_easting)
+            self.transformer = WGS84ToLest97Transformer(self.use_custom_origin, self.lest97_origin_northing, self.lest97_origin_easting)
         else:
             rospy.logfatal("novatel_localizer - coordinate_transformer not supported: %s ", str(self.coordinate_transformer))
             exit(1)
@@ -54,8 +55,8 @@ class NovatelOem7Localizer:
         stamp = inspva_msg.header.stamp
 
         # transform GNSS coordinates and correct azimuth
-        x, y = self.transfromer.transform_lat_lon(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height)
-        azimuth = self.transfromer.correct_azimuth(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.azimuth)
+        x, y = self.transformer.transform_lat_lon(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height)
+        azimuth = self.transformer.correct_azimuth(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.azimuth)
 
         velocity = calculate_velocity(inspva_msg.east_velocity, inspva_msg.north_velocity)
 

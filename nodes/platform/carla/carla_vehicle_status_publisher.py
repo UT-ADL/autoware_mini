@@ -36,7 +36,7 @@ class CarlaVehicleStatusPublisher:
         """
         # get max steering angle (use smallest non-zero value of all wheels)
         for wheel in data.wheels:
-            if wheel.max_steer_angle and wheel.max_steer_angle < self.max_steer_angle:
+            if wheel.max_steer_angle > 0 and wheel.max_steer_angle < self.max_steer_angle:
                 self.max_steering_angle = wheel.max_steer_angle
 
     def vehicle_status_callback(self, data):
@@ -67,6 +67,6 @@ class CarlaVehicleStatusPublisher:
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_vehicle_status_publisher', log_level=rospy.INFO, anonymous=False)
+    rospy.init_node('carla_vehicle_status_publisher', log_level=rospy.INFO)
     node = CarlaVehicleStatusPublisher()
     node.run()

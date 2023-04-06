@@ -6,8 +6,8 @@
 # For a copy, see <https://opensource.org/licenses/MIT>.
 """
 ground truth localization. Publishes the following topics:
-    /current_velocty (geometry_msgs::TwistStamped)
-    /current_pose    (geometry_msgs::PoseStamped)
+    current_velocty (geometry_msgs::TwistStamped)
+    current_pose    (geometry_msgs::PoseStamped)
 """
 import rospy
 import math
@@ -27,18 +27,17 @@ class CarlaLocalizer:
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
-        # Publishers
-        self.pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
-        self.twist_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
-
-        # Internal paramters
+        # Internal parameters
         self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
                                                               origin_lat=utm_origin_lat,
                                                               origin_lon=utm_origin_lon)
+        # Publishers
+        self.pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
+        self.twist_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
         self.br = tf.TransformBroadcaster()
 
         # Subscribers
-        rospy.Subscriber('/localization/odometry', Odometry, self.odometry_callback, queue_size=10)
+        rospy.Subscriber('/localization/odometry', Odometry, self.odometry_callback, queue_size=1)
 
 
     def odometry_callback(self, odom):
@@ -79,6 +78,6 @@ class CarlaLocalizer:
 
 if __name__ == '__main__':
     # log_level set to errors only
-    rospy.init_node('carla_to_autoware_localization', log_level=rospy.INFO, anonymous=False)
+    rospy.init_node('carla_localizer', log_level=rospy.INFO)
     node = CarlaLocalizer()
     node.run()

@@ -47,6 +47,6 @@ class CarlaVehicleInterface:
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_vehicle_interface', log_level=rospy.INFO, anonymous=False)
+    rospy.init_node('carla_vehicle_interface', log_level=rospy.INFO)
     node = CarlaVehicleInterface()
     node.run()
