@@ -10,11 +10,11 @@ ground truth detections. Publishes the following topics:
 """
 import rospy
 import math
-import numpy as np
+import cv2
 
 from geometry_msgs.msg import PolygonStamped, Point
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
-from tf.transformations import quaternion_matrix
+from tf.transformations import euler_from_quaternion
 from derived_object_msgs.msg import ObjectArray
 from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 
@@ -84,7 +84,7 @@ class CarlaDetector:
             object_msg.dimensions.z = obj.shape.dimensions[2]
             object_msg.velocity.linear.x = math.sqrt(obj.twist.linear.x**2 + obj.twist.linear.y**2 + obj.twist.linear.z**2)
             object_msg.acceleration = obj.accel
-            object_msg.convex_hull = self.produce_hull(object_msg.pose.position, object_msg.dimensions, object_msg.header, object_msg.pose.orientation)
+            object_msg.convex_hull = self.produce_hull(object_msg.pose, object_msg.dimensions, object_msg.header)
             object_msg.pose_reliable = True
             object_msg.velocity_reliable = True
             object_msg.acceleration_reliable = True
@@ -95,7 +95,7 @@ class CarlaDetector:
         # Publish converted detected objects
         self.detected_objects_pub.publish(objects_msg)
 
-    def produce_hull(self, centroid, dim_vector, header, yaw_quaternion):
+    def produce_hull(self, obj_pose, obj_dims, header):
         """
         create hull for a given pose and dimension
         """
@@ -103,19 +103,18 @@ class CarlaDetector:
         convex_hull = PolygonStamped()
         convex_hull.header = header
 
-        rot_mat = quaternion_matrix([yaw_quaternion.x, yaw_quaternion.y, yaw_quaternion.z, yaw_quaternion.w])
-        halved_dim = [dim_vector.x/2, dim_vector.y/2, dim_vector.z/2]
+        # compute heading angle from object's orientation
+        _, _, heading  = euler_from_quaternion((obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w))
 
-        point_1 = [halved_dim[0], halved_dim[1], halved_dim[2]]
-        point_2 = [- halved_dim[0], halved_dim[1], halved_dim[2]]
-        point_3 = [-halved_dim[0], -halved_dim[1], halved_dim[2]]
-        point_4 = [halved_dim[0],  - halved_dim[1], halved_dim[2]]
-
-        corner_points = np.array([point_1, point_4, point_3, point_2, point_1])
-        corner_points = np.concatenate((corner_points, np.ones((corner_points.shape[0], 1))), axis=1)
-        rotated_corners = np.dot(rot_mat, corner_points.T).T
-
-        convex_hull.polygon.points = [Point(centroid.x + x, centroid.y + y, centroid.z + z) for x, y, z, _ in rotated_corners]
+        # use cv2.boxPoints to get a rotated rectangle given the angle
+        points = cv2.boxPoints((
+                                (obj_pose.position.x, obj_pose.position.y),
+                                (obj_dims.x, obj_dims.y),
+                                math.degrees(heading)
+                                ))
+        convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
+        # Add the first polygon point to the list of points to make it 5 points in total and complete the loop
+        convex_hull.polygon.points.append(convex_hull.polygon.points[0])
 
         return convex_hull
 

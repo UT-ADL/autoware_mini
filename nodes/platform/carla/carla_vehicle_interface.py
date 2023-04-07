@@ -5,11 +5,19 @@
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
 """
-receive autoware_msgs::VehicleCmd and publish ackermann_msgs::AckermannDrive
+receive autoware_msgs::VehicleCmd
+        carla_msgs::CarlaEgoVehicleInfo
+        carla_msgs::CarlaEgoVehicleStatus
+        
+publish ackermann_msgs::AckermannDrive
+        autoware_msgs::VehicleStatus
+        std_msgs::Float64
 """
+import math
 import rospy
 from ackermann_msgs.msg import AckermannDrive
-from autoware_msgs.msg import VehicleCmd
+from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
+from carla_msgs.msg import CarlaEgoVehicleInfo, CarlaEgoVehicleStatus
 from std_msgs.msg import Float64
 
 
@@ -17,15 +25,25 @@ class CarlaVehicleInterface:
 
     def __init__(self):
 
+        # Node parameters
+        self.max_steer_angle = math.radians(rospy.get_param("~max_steer_angle", default=70))
+
         # Publishers
         self.ackerman_cmd_pub = rospy.Publisher(
             '/carla/ego_vehicle/ackermann_cmd', AckermannDrive, queue_size=1)
         self.target_speed_pub = rospy.Publisher(
             '/carla/ego_vehicle/target_speed', Float64, queue_size=1)
+        self.vehicle_status_pub = rospy.Publisher(
+            'vehicle_status', VehicleStatus, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('vehicle_cmd', VehicleCmd,
                          self.vehicle_cmd_callback, queue_size=1)
+        rospy.Subscriber('/carla/ego_vehicle/vehicle_info', CarlaEgoVehicleInfo,
+                         self.vehicle_info_callback, queue_size=1)
+        rospy.Subscriber('/carla/ego_vehicle/vehicle_status', CarlaEgoVehicleStatus,
+                         self.vehicle_status_callback, queue_size=1)
+        
 
     def vehicle_cmd_callback(self, data):
         """
@@ -41,6 +59,39 @@ class CarlaVehicleInterface:
         self.ackerman_cmd_pub.publish(msg)
         # Publish target speed (currently used only by scenario runner)
         self.target_speed_pub.publish(Float64(msg.speed))
+
+    def vehicle_info_callback(self, data):
+        """
+        callback for vehicle info
+        """
+        # get max steering angle (use smallest non-zero value of all wheels)
+        for wheel in data.wheels:
+            if wheel.max_steer_angle and wheel.max_steer_angle < self.max_steer_angle:
+                self.max_steering_angle = wheel.max_steer_angle
+
+    def vehicle_status_callback(self, data):
+        """
+        callback for vehicle status
+        """
+
+        status = VehicleStatus()
+        status.header = data.header
+
+        status.angle = data.control.steer * math.degrees(self.max_steer_angle)
+        status.speed = data.velocity * 3.6  # speed is expected in km/h
+
+        if data.control.reverse:
+            status.current_gear.gear = Gear.REVERSE
+        else:
+            status.current_gear.gear = Gear.DRIVE
+
+        if data.control.manual_gear_shift:
+            status.drivemode = VehicleStatus.MODE_MANUAL
+        else:
+            status.drivemode = VehicleStatus.MODE_AUTO
+
+        self.vehicle_status_pub.publish(status)
+
 
     def run(self):
         rospy.spin()

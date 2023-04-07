@@ -149,7 +149,6 @@
     <remap from="vehicle_status"  to="/control/vehicle_status" />
 
     <node pkg='autoware_mini' type='carla_vehicle_interface.py' name='carla_vehicle_interface' output='screen' required="true" />
-    <node pkg='autoware_mini' type='carla_vehicle_status_publisher.py' name='carla_vehicle_status_publisher' output='screen' required="true" />
     
     <!-- If localizer is novatel then change child_frame to ego_vehicle and run carla_to_novatel msgs converter -->
     <group if="$(eval localizer.lower() == 'novatel')">
