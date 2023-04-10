@@ -12,6 +12,7 @@ import rospy
 import math
 import cv2
 
+from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import PolygonStamped, Point
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from tf.transformations import euler_from_quaternion
@@ -33,6 +34,8 @@ CLASS_ID_TO_LABEL = {
     10: 'barrier',
     11: 'sign'
 }
+
+YELLOW80P = ColorRGBA(1.0, 1.0, 0.0, 0.8)
 
 class CarlaDetector:
 
@@ -71,6 +74,7 @@ class CarlaDetector:
             object_msg.header = obj.header
             object_msg.id = obj.id
             object_msg.label = CLASS_ID_TO_LABEL[obj.classification] 
+            object_msg.color = YELLOW80P
             object_msg.score = 1
             object_msg.valid = True
             object_msg.space_frame = 'map'
@@ -113,8 +117,6 @@ class CarlaDetector:
                                 math.degrees(heading)
                                 ))
         convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
-        # Add the first polygon point to the list of points to make it 5 points in total and complete the loop
-        convex_hull.polygon.points.append(convex_hull.polygon.points[0])
 
         return convex_hull
 

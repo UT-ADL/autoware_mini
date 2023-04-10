@@ -46,7 +46,6 @@
 
     <!-- Vehicle platform -->
     <include file="$(find vehicle_platform)/launch/platform.launch" >
-        <arg name="enable_raw_radar"    value="false" />
         <arg name="use_lexus_model"     value="true" />
     </include>
 

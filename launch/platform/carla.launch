@@ -54,7 +54,7 @@
   <remap from="/carla/ego_vehicle/base_link/gnss_forward" to="/gps/fix_forward" />
   <remap from="/carla/ego_vehicle/base_link/gnss" to="/gps/fix" />
   <remap from="/carla/ego_vehicle/imu" to="/gps/imu" />
-  <remap from="/carla/ego_vehicle/odometry" to="/localization/odometry" />
+  <remap from="/carla/ego_vehicle/odometry" to="/carla/odometry" />
   <remap from="/carla/ego_vehicle/objects" to="/carla/ground_truth_objects" />
   <remap from="/carla/ego_vehicle/goal" to="/move_base_simple/goal" />
 

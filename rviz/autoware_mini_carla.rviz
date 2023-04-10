@@ -4,10 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Sensing1
-        - /Sensing1/3rd Person Camera1
-        - /Sensing1/3rd Person Camera1/Visibility1
-        - /Sensing1/3rd Person Camera1/Visibility1/System1
+        - /Detection1
+        - /Detection1/Lidar1
+        - /Simulation1
       Splitter Ratio: 0.5916030406951904
     Tree Height: 865
   - Class: rviz/Selection
@@ -74,8 +73,6 @@ Visualization Manager:
               Value: true
             ego_vehicle/base_link/rgb_view:
               Value: true
-            ego_vehicle/lane_invasion:
-              Value: true
             lexus_model:
               Value: true
             map:
@@ -102,8 +99,6 @@ Visualization Manager:
                     {}
                   lexus_model:
                     {}
-                ego_vehicle/lane_invasion:
-                  {}
           Update Interval: 0
           Value: true
         - Alpha: 1
@@ -181,50 +176,6 @@ Visualization Manager:
           Use rainbow: true
           Value: false
         - Class: rviz/Camera
-          Enabled: true
-          Image Rendering: background and overlay
-          Image Topic: /carla/rgb_view/image_raw
-          Name: 3rd Person Camera
-          Overlay Alpha: 0.5
-          Queue Size: 2
-          Transport Hint: raw
-          Unreliable: false
-          Value: true
-          Visibility:
-            Control:
-              Current pose: true
-              Follower markers: true
-              Value: true
-            Detection:
-              Lidar center:
-                Detected objects: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Value: true
-            Grid: true
-            Map:
-              Lanelet2 map: true
-              Value: true
-            Planning:
-              Path markers: true
-              Value: true
-            Sensing:
-              Camera Left: true
-              Camera Right: true
-              Points raw center: true
-              Value: true
-            Simulation:
-              Bicycle markers: true
-              Value: true
-            System:
-              Lexus model: true
-              TF: false
-              Value: true
-            Value: true
-          Zoom Factor: 1
-        - Class: rviz/Camera
           Enabled: false
           Image Rendering: background and overlay
           Image Topic: /camera_fl/image_raw
@@ -240,12 +191,10 @@ Visualization Manager:
               Follower markers: true
               Value: true
             Detection:
-              Lidar center:
-                Detected objects: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
+              "":
+                "": true
                 Value: true
+              Detected objects: true
               Value: true
             Grid: true
             Map:
@@ -255,11 +204,11 @@ Visualization Manager:
               Path markers: true
               Value: true
             Sensing:
-              3rd Person Camera: true
               Camera Right: true
               Points raw center: true
               Value: true
             Simulation:
+              3rd Person Camera: true
               Bicycle markers: true
               Value: true
             System:
@@ -284,12 +233,10 @@ Visualization Manager:
               Follower markers: true
               Value: true
             Detection:
-              Lidar center:
-                Detected objects: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
+              "":
+                "": true
                 Value: true
+              Detected objects: true
               Value: true
             Grid: true
             Map:
@@ -299,11 +246,11 @@ Visualization Manager:
               Path markers: true
               Value: true
             Sensing:
-              3rd Person Camera: true
               Camera Left: true
               Points raw center: true
               Value: true
             Simulation:
+              3rd Person Camera: true
               Bicycle markers: true
               Value: true
             System:
@@ -402,19 +349,19 @@ Visualization Manager:
               Use Fixed Frame: true
               Use rainbow: true
               Value: false
-            - Class: rviz/MarkerArray
-              Enabled: true
-              Marker Topic: /detection/detected_objects_markers
-              Name: Detected objects
-              Namespaces:
-                bounding_box: true
-                centroid: true
-                convex_hull: true
-                text: true
-              Queue Size: 100
-              Value: true
           Enabled: true
-          Name: Lidar center
+          Name: Lidar
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /detection/detected_objects_markers
+          Name: Detected objects
+          Namespaces:
+            bounding_box: true
+            centroid: true
+            convex_hull: true
+            text: true
+          Queue Size: 100
+          Value: true
       Enabled: true
       Name: Detection
     - Class: rviz/Group
@@ -424,9 +371,7 @@ Visualization Manager:
           Marker Topic: /planning/smoothed_path_markers
           Name: Path markers
           Namespaces:
-            Path: true
-            Velocity label: true
-            Waypoint pose: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -469,6 +414,51 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: true
+        - Class: rviz/Camera
+          Enabled: true
+          Image Rendering: background and overlay
+          Image Topic: /carla/rgb_view/image_raw
+          Name: 3rd Person Camera
+          Overlay Alpha: 0.5
+          Queue Size: 2
+          Transport Hint: raw
+          Unreliable: false
+          Value: true
+          Visibility:
+            Control:
+              Current pose: true
+              Follower markers: true
+              Value: true
+            Detection:
+              Detected objects: true
+              Lidar:
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
+              Value: true
+            Grid: true
+            Map:
+              Lanelet2 map: true
+              Value: true
+            Planning:
+              Path markers: true
+              Value: true
+            Sensing:
+              Camera Left: true
+              Camera Right: true
+              Points raw center: true
+              Value: true
+            Simulation:
+              3rd Person Camera: true
+              Bicycle markers: true
+              Value: true
+            System:
+              Lexus model: true
+              TF: false
+              Value: true
+            Value: true
+          Zoom Factor: 1
       Enabled: true
       Name: Simulation
   Enabled: true
@@ -535,5 +525,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1848
-  X: 1992
-  Y: 112
+  X: 2632
+  Y: 75

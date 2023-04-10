@@ -34,38 +34,46 @@ class CarlaLocalizer:
         # Publishers
         self.pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
         self.twist_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
+        self.odom_pub = rospy.Publisher('odometry', Odometry, queue_size=1)
         self.br = tf.TransformBroadcaster()
 
         # Subscribers
-        rospy.Subscriber('/localization/odometry', Odometry, self.odometry_callback, queue_size=1)
+        rospy.Subscriber('/carla/odometry', Odometry, self.odometry_callback, queue_size=1)
 
 
-    def odometry_callback(self, odom):
+    def odometry_callback(self, msg):
         """
         callback odometry
         """
         # Odometry Pose
         current_pose = PoseStamped()
-        current_pose.header.frame_id = "base_link"
-        current_pose.header.stamp = odom.header.stamp
+        current_pose.header.frame_id = "map"
+        current_pose.header.stamp = msg.header.stamp
 
         if self.use_offset:
-            current_pose.pose = self.sim2utm_transformer.transform_pose(odom.pose.pose)
+            current_pose.pose = self.sim2utm_transformer.transform_pose(msg.pose.pose)
         else:
-            current_pose.pose = odom.pose
+            current_pose.pose = msg.pose
 
         # Publish current pose
         self.pose_pub.publish(current_pose)
 
         # Publish current velocity
-        twist = TwistStamped()
-        twist.header.stamp = odom.header.stamp
-        twist.header.frame_id = "base_link"     # Twist should be in base_link
-                                                # https://answers.ros.org/question/341161/reference-frames-of-odometry-message/
-        speed = odom.twist.twist.linear
-        twist.twist.linear.x = math.sqrt(speed.x**2 + speed.y**2 + speed.z**2)
-        twist.twist.angular = odom.twist.twist.angular
-        self.twist_pub.publish(twist)        
+        current_velocity = TwistStamped()
+        current_velocity.header.stamp = msg.header.stamp
+        current_velocity.header.frame_id = "ego_vehicle"
+        speed = msg.twist.twist.linear
+        current_velocity.twist.linear.x = math.sqrt(speed.x**2 + speed.y**2 + speed.z**2)
+        current_velocity.twist.angular = msg.twist.twist.angular
+        self.twist_pub.publish(current_velocity)
+
+        odom = Odometry()
+        odom.header.stamp = msg.header.stamp
+        odom.header.frame_id = current_pose.header.frame_id
+        odom.child_frame_id = current_velocity.header.frame_id
+        odom.pose.pose = current_pose.pose
+        odom.twist.twist = current_velocity.twist
+        self.odom_pub.publish(odom)
 
         # Publish Transform
         self.br.sendTransform((current_pose.pose.position.x, current_pose.pose.position.y, current_pose.pose.position.z),
