@@ -1,13 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import threading
-import math
-import cv2
 
 from geometry_msgs.msg import PointStamped, Point32
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
-
 from std_msgs.msg import ColorRGBA
 
 from helpers import get_heading_from_pose_orientation

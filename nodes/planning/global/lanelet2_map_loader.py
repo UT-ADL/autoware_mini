@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 from lanelet2_map_visualizer import visualize_lanelet2_map
