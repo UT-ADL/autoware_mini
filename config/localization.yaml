@@ -7,3 +7,4 @@ lest97_origin_easting: 650000.0
 
 novatel_oem7_localizer:
   use_msl_height: True
+  child_frame: base_link

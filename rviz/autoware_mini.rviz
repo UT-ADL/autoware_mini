@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Detection1
         - /Detection1/Lidar center1
         - /Detection1/Lidar center1/Detected objects1
         - /Detection1/Lidar center1/Detected objects1/Namespaces1
@@ -163,7 +164,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: false
-      Enabled: true
+      Enabled: false
       Name: Sensing
     - Class: rviz/Group
       Displays:
@@ -192,7 +193,7 @@ Visualization Manager:
               Size (Pixels): 3
               Size (m): 0.10000000149011612
               Style: Flat Squares
-              Topic: detection/lidar_center/points_ground
+              Topic: /detection/lidar/points_ground
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
@@ -220,7 +221,7 @@ Visualization Manager:
               Size (Pixels): 3
               Size (m): 0.10000000149011612
               Style: Flat Squares
-              Topic: detection/lidar_center/points_no_ground
+              Topic: /detection/lidar/points_no_ground
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
@@ -248,14 +249,14 @@ Visualization Manager:
               Size (Pixels): 3
               Size (m): 0.10000000149011612
               Style: Flat Squares
-              Topic: detection/lidar_center/points_clustered
+              Topic: /detection/lidar/points_clustered
               Unreliable: false
               Use Fixed Frame: true
               Use rainbow: true
               Value: false
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: detection/detected_objects_markers
+              Marker Topic: /detection/detected_objects_markers
               Name: Detected objects
               Namespaces:
                 {}
@@ -336,7 +337,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: lidar
+    Fixed Frame: lidar_center
     Frame Rate: 30
   Name: root
   Tools:

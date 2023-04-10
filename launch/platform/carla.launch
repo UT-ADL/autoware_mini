@@ -1,0 +1,201 @@
+<?xml version="1.0"?>
+<launch>
+
+    
+  <arg name='host'                                                default='localhost' />
+  <arg name='port'                                                default='2000' />
+  <arg name='timeout'                                             default='100' />
+
+  <arg name="map_name"                                            default='' /><!-- Map to load on startup, this should match with CARLA environments-->
+
+  <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
+  <arg if="$(eval 'tartu' in map_name.lower())"  name="spawn_point"    default="4.70,342.07,36,0,0,-98" />    
+  <arg if="$(eval map_name.lower() == 'town01')" name="spawn_point"    default="150,-133.5,10,0,0,0" />
+
+  <!-- Control -->
+  <arg name='passive'                                             default='' />     <!-- Enable/disable passive mode -->
+  <arg name='synchronous_mode_wait_for_vehicle_control_command'   default='false' /><!-- Synchronous mode-->
+  <arg name='fixed_delta_seconds'                                 default='0.05' />
+  <arg name='use_manual_control'                                  default='false' /><!-- Toggle manual control-->
+
+  <!-- Module type -->
+  <arg name="detector"                                            default="carla"/>
+  <arg name="localizer"                                           default="carla"/>
+  <arg name="use_cam"                                             default="false" />
+
+  <!-- Load correct sensor configurations-->
+  <arg if="$(eval arg('detector') == 'carla' and use_cam)"      name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_lidars_and_radars.json" />
+  <arg if="$(eval arg('detector') == 'carla' and not use_cam)"  name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_minimal.json" />
+  <arg if="$(eval arg('detector') != 'carla' and use_cam)"      name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors.json" />
+  <arg if="$(eval arg('detector') != 'carla' and not use_cam)"  name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_cam.json" />
+
+  
+  <!-- Scenario Runner args -->
+  <arg name='use_scenario_runner'                                 default='false'/>
+  <arg name='scenario_runner_path'                                default='$(optenv SCENARIO_RUNNER_ROOT)'/>
+  <!-- By default we use an example follow leading vehicle scenario file -->
+  <arg name='scenario_name'                                       default='FollowLeadingVehicle'/>
+  <arg name='scenario_file'                                       default='$(find autoware_mini)/data/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/>
+
+    
+  <!--
+    ########################
+    ## Carla topic remaps ##
+    ########################
+  -->
+  <remap from="/carla/ego_vehicle/base_link/rgb_view/camera_info" to="/carla/rgb_view/camera_info" />
+  <remap from="/carla/ego_vehicle/base_link/rgb_view/image" to="/carla/rgb_view/image_raw" />
+  <remap from="/carla/ego_vehicle/base_link/lidar_center" to="/lidar_center/points_raw" />
+  <remap from="/carla/ego_vehicle/base_link/lidar_center/lidar_front/os_sensor" to="/lidar_front/points_raw" />
+  <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fl/camera_info" to="/camera_fl/camera_info" />
+  <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fr/camera_info" to="/camera_fr/camera_info" />
+  <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fl/image" to="/camera_fl/image_raw" />
+  <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fr/image" to="/camera_fr/image_raw" />
+  <remap from="/carla/ego_vehicle/base_link/gnss_forward" to="/gps/fix_forward" />
+  <remap from="/carla/ego_vehicle/base_link/gnss" to="/gps/fix" />
+  <remap from="/carla/ego_vehicle/imu" to="/gps/imu" />
+  <remap from="/carla/ego_vehicle/odometry" to="/carla/odometry" />
+  <remap from="/carla/ego_vehicle/objects" to="/carla/ground_truth_objects" />
+  <remap from="/carla/ego_vehicle/goal" to="/move_base_simple/goal" />
+
+  
+
+  <!-- ====================================================================================================== -->
+
+  <!--
+    #####################
+    ## Carla TF remaps ##
+    #####################
+  -->
+
+  <node pkg="tf" type="tf_remap" name="tf_remapper" output="screen">
+    <rosparam subst_value="true" command="load">
+      mappings:
+        - {old: 'ego_vehicle/base_link', new: 'base_link'}
+        - {old: 'ego_vehicle/base_link/base_footprint', new: 'base_footprint'}
+    </rosparam>
+  </node>
+
+  <!-- ====================================================================================================== -->
+
+  <!--
+    ######################
+    ## CARLA ROS bridge ##
+    ######################
+  -->
+  <group>
+    <remap from="tf" to="/tf_old"/>
+    <include file="$(find carla_ros_bridge)/launch/carla_ros_bridge.launch">
+      <arg name='host'                                              value='$(arg host)' />
+      <arg name='port'                                              value='$(arg port)' />
+      <!-- If using tartu map then run Tartu environment of Carla -->
+      <arg if="$(eval 'tartu' in arg('map_name').lower())"
+           name='town'                                              value='Tartu'/>
+      <arg unless="$(eval 'tartu' in arg('map_name').lower())"
+           name='town'                                              value='$(arg map_name)'/>
+      <arg name='timeout'                                           value='$(arg timeout)' />
+      <arg name='passive'                                           value='$(arg passive)' />
+      <arg name='synchronous_mode_wait_for_vehicle_control_command' value='$(arg synchronous_mode_wait_for_vehicle_control_command)' />
+      <arg name='fixed_delta_seconds'                               value='$(arg fixed_delta_seconds)' />
+    </include>
+  </group>
+
+  <!-- ====================================================================================================== -->
+
+  <!--
+    #######################
+    ## CARLA Ego vehicle ##
+    #######################
+  -->
+  <include file="$(find carla_spawn_objects)/launch/carla_example_ego_vehicle.launch">
+  <!-- The ego vehicle, that will be controlled by an agent (e.g. carla_ad_agent) -->
+    <arg name="objects_definition_file"               value='$(arg objects_definition_file)' />
+    <arg name="spawn_point_ego_vehicle"               value="$(arg spawn_point)" />
+    <arg name="spawn_sensors_only"                    value="false" />
+  </include>
+  
+  <group if='$(arg use_manual_control)'>
+    <!-- carla manual control -->
+    <include file='$(find carla_manual_control)/launch/carla_manual_control.launch' />
+  </group>
+
+  <group unless='$(arg use_manual_control)'>
+    <!-- carla ackermann control -->
+    <include file='$(find carla_ackermann_control)/launch/carla_ackermann_control.launch' />
+    
+    <!-- tune carla ackermann controller parameters -->
+    <node name='$(anon dynparam)' pkg='dynamic_reconfigure' type='dynparam'
+      args='set_from_parameters carla/ego_vehicle/ackermann_control'>
+      <param name='speed_Kp' type='double' value='0.15' />
+      <param name='speed_Ki' type='double' value='0.0' />
+      <param name='speed_Kd' type='double' value='0.4' />
+
+      <param name='accel_Kp' type='double' value='0.03' />
+      <param name='accel_Ki' type='double' value='0.0' />
+      <param name='accel_Kd' type='double' value='0.05' />
+    </node>
+  </group>
+
+  <!-- ====================================================================================================== -->
+
+  <!--
+    ######################################
+    ## CARLA Autoware Bridge Misc Nodes ##
+    ######################################
+  -->  
+
+  <group>
+    <remap from="vehicle_cmd"     to="/control/vehicle_cmd" />
+    <remap from="vehicle_status"  to="/control/vehicle_status" />
+
+    <node pkg='autoware_mini' type='carla_vehicle_interface.py' name='carla_vehicle_interface' output='screen' required="true" />
+    
+    <!-- If localizer is novatel then change child_frame to ego_vehicle and run carla_to_novatel msgs converter -->
+    <group if="$(eval localizer.lower() == 'novatel')">
+      <param  name="/localization/novatel_oem7_localizer/child_frame" value="ego_vehicle" />
+      <node pkg='autoware_mini' type='carla_novatel_driver.py' name='carla_novatel_driver' output='screen' required="true" />
+    </group>
+  </group>
+  
+  <!-- ====================================================================================================== -->
+  
+  <!--
+    ##############################################
+    ## Scenario Runner with given scenario file ##
+    ##############################################
+  -->
+  <group if="$(arg use_scenario_runner)">
+    <include  file="$(find carla_waypoint_publisher)/launch/carla_waypoint_publisher.launch">
+      <arg name='host'      value='$(arg host)'/>
+      <arg name='port'      value='$(arg port)'/>
+      <arg name='timeout'   value='$(arg timeout)'/>
+    </include>
+
+    <include file="$(find carla_ros_scenario_runner)/launch/carla_ros_scenario_runner.launch">
+      <arg name='host'                  value='$(arg host)'/>
+      <arg name='port'                  value='$(arg port)'/>
+      <arg name="scenario_runner_path"  value="$(arg scenario_runner_path)"/>
+      <arg name="wait_for_ego"          value="True"/>
+    </include>
+
+    <node pkg="rostopic" type="rostopic" name="publish_scenarios"
+    args="pub /carla/available_scenarios carla_ros_scenario_runner_types/CarlaScenarioList '{ 'scenarios':  
+      [
+        {
+          'name': '$(arg scenario_name)',
+          'scenario_file': '$(arg scenario_file)'
+        }
+      ]
+    }' -l"/>
+  
+    <node pkg="rosservice" type="rosservice" name="vehicle_scenario" 
+    args="call --wait /scenario_runner/execute_scenario 
+    '{ 'scenario': 
+      { 'scenario_file': '$(arg scenario_file)' } 
+    }'
+    "/>
+  </group>
+
+  <!-- ====================================================================================================== -->
+
+</launch>

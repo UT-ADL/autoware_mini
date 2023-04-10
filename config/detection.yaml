@@ -1,4 +1,4 @@
-lidar_center:
+lidar:
   ground_removal:
     min_x: -60.0
     max_x: 60.0
@@ -12,7 +12,7 @@ lidar_center:
   points_clusterer:
     sample_size: 10000
     cluster_epsilon: 1.0
-    cluster_min_size: 7
+    cluster_min_size: 5
   cluster_detector:
     min_cluster_size: 5
     enable_pointcloud: False

@@ -16,6 +16,8 @@
         <remap from="/tf_static" to="/bag/tf_static" if="$(arg use_tf)"/>
         <remap from="/current_pose" to="/bag/current_pose" if="$(arg use_tf)"/>
         <remap from="/current_velocity" to="/bag/current_velocity" if="$(arg use_tf)"/>
+        <remap from="/points_raw_center" to="/lidar_center/points_raw"/>
+        <remap from="/lidar_0/vlp32/pcl2" to="/lidar_center/points_raw"/>
     </node>
 
     <!-- Vehicle platform -->

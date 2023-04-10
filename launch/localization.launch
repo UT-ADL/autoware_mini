@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="localizer"   default="novatel"  doc="gnss" />
+    <arg name="localizer"   default="novatel"  doc="novatel, carla" />
 
 
     <group ns="localization">
     
         <node if="$(eval arg('localizer')=='novatel')" pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true" />
+
+        <node if="$(eval arg('localizer') =='carla')" pkg='autoware_mini' type='carla_localizer.py' name='carla_localizer' output='screen' required="true" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" />
 
