@@ -3,6 +3,7 @@
     
     <arg name="use_manual_control"          default="false"                 doc="use manual control for carla"/>
     <arg name="use_detection"               default="true"                  doc="use object detection"/>
+    <arg name="use_local_planner"           default="true"                  doc="use local planner"/>
     <arg name="localizer"                   default="carla"                 doc="novatel, carla" />
     <arg name="detector"                    default="carla"                 doc="lidar_clusterer, carla" />
     <arg name="use_cam"                     default="false" />
@@ -27,6 +28,7 @@
         <arg name="planner"             value="$(arg planner)" />
         <arg name="waypoints_file"      value="$(arg waypoints_file)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+        <arg name="use_local_planner"   value="$(arg use_local_planner)" />
     </include>
 
     <!-- Follower -->
