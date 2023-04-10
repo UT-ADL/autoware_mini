@@ -4,7 +4,7 @@
     <arg name="use_manual_control"          default="false"                 doc="use manual control for carla"/>
     <arg name="use_detection"               default="true"                  doc="use object detection"/>
     <arg name="localizer"                   default="carla"                 doc="novatel, carla" />
-    <arg name="detector"                    default="carla"                 doc="simple, carla" />
+    <arg name="detector"                    default="carla"                 doc="lidar_clusterer, carla" />
     <arg name="use_cam"                     default="false" />
     <arg name='map_name'                    default='tartu'/>
     <arg name="follower"                    default="pure_pursuit"          doc="pure_pursuit, stanley" />

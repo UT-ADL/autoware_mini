@@ -11,7 +11,7 @@ from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
 from automotive_platform_msgs.msg import SpeedMode, SteerMode, TurnSignalCommand, GearCommand,\
      CurvatureFeedback, ThrottleFeedback, BrakeFeedback, GearFeedback, SteeringFeedback, VelocityAccelCov
 from automotive_navigation_msgs.msg import ModuleState
-from pacmod_msgs.msg import SystemRptInt
+from pacmod3_msgs.msg import SystemRptInt
 
 LOW_SPEED_THRESH = 0.01
 

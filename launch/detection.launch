@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="detector"            default="simple"    doc="simple, sim, carla" />
+    <arg name="detector"            default="lidar_clusterer"    doc="lidar_clusterer, sim, carla" />
     <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
 
     <group ns="detection">
@@ -8,7 +8,7 @@
             <remap if="$(arg use_lidar_center)" from="points_raw" to="/lidar_center/points_raw" />
             <remap from="detected_objects" to="/detection/detected_objects" />
             
-            <include if="$(eval arg('detector')=='simple')" file="$(find autoware_mini)/launch/detection/lidar_simple.launch" />
+            <include if="$(eval arg('detector')=='lidar_clusterer')" file="$(find autoware_mini)/launch/detection/lidar_clusterer.launch" />
         </group>
         
         <!-- Carla's ground truth as detection -->
