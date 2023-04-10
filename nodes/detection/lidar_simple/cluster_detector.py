@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
+import math
 import rospy
 import numpy as np
 import cv2
 
 from ros_numpy import numpify, msgify
+from tf.transformations import quaternion_from_euler
 
 from sensor_msgs.msg import PointCloud2
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
@@ -47,16 +49,32 @@ class ClusterDetector:
             points3d[:, 0] = points['x']
             points3d[:, 1] = points['y']
             points3d[:, 2] = points['z']
+            points2d = np.ascontiguousarray(points3d[:,:2])
 
-            # calculate centroid and dimensions
-            maxs = np.max(points3d, axis=0)
-            mins = np.min(points3d, axis=0)
-            center_x, center_y, center_z = (maxs + mins) / 2.0
-            dim_x, dim_y, dim_z = maxs - mins
+            if self.bounding_box_type == 'axis_aligned':
+                # calculate centroid and dimensions
+                maxs = np.max(points3d, axis=0)
+                mins = np.min(points3d, axis=0)
+                center_x, center_y, center_z = (maxs + mins) / 2.0
+                dim_x, dim_y, dim_z = maxs - mins
 
-            # always pointing forward
-            qx = qy = qz = 0.0
-            qw = 1.0
+                # always pointing forward
+                qx = qy = qz = 0.0
+                qw = 1.0
+            elif self.bounding_box_type == 'min_area':
+                # calculate minimum area bounding box
+                (center_x, center_y), (dim_x, dim_y), heading_angle = cv2.minAreaRect(points2d)
+
+                # calculate quaternion for heading angle
+                qx, qy, qz, qw = quaternion_from_euler(0.0, 0.0, math.radians(heading_angle))
+
+                # calculate height and vertical position
+                max_z = np.max(points['z'])
+                min_z = np.min(points['z'])
+                dim_z = max_z - min_z
+                center_z = (max_z + min_z) / 2.0
+            else:
+                assert False, "wrong bounding_box_type: " + self.bounding_box_type
 
             # create DetectedObject
             object = DetectedObject(header=header)
@@ -88,7 +106,6 @@ class ClusterDetector:
 
             # create convex hull
             if self.enable_convex_hull:
-                points2d = np.ascontiguousarray(points3d[:,:2])
                 hull_points = cv2.convexHull(points2d)[:,0,:]
                 object.convex_hull.polygon.points = [Point32(x, y, center_z) for x, y in hull_points]
 

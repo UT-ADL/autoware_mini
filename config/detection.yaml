@@ -15,6 +15,7 @@ lidar:
     cluster_min_size: 5
   cluster_detector:
     min_cluster_size: 5
+    bounding_box_type: axis_aligned
     enable_pointcloud: False
     enable_convex_hull: True
 obstacle_simulation:
