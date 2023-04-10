@@ -1,13 +1,13 @@
 # Autoware Mini
 
-Autoware Mini is minimalistic Python-based autonomy software. It is built on Python and ROS 1 to make it easy to get started and tinkering. It uses Autoware messages to define the interfaces between the modules, aiming to be compatible with Autoware nodes. Autoware Mini currently works on ROS Melodic (Ubuntu 18.04), but we aim to make it compatible also with ROS Noetic (Ubuntu 20.04 and Conda Robostack).
+Autoware Mini is minimalistic Python-based autonomy software. It is built on Python and ROS 1 to make it easy to get started and tinkering. It uses Autoware messages to define the interfaces between the modules, aiming to be compatible with [Autoware](https://www.autoware.org/). Autoware Mini currently works on ROS Noetic (Ubuntu 20.04 and through [Conda RoboStack](https://robostack.github.io/) also on many other Linux versions).
 
-## Goal
+Our goals with the Autoware Mini were:
+* easy to get started with --> minimal amount of dependencies
+* simple and pedagogical --> simple Python nodes and ROS 1
+* easy to implement machine learning based approaches --> Python
 
-We wanted an autonomy stack that
-* would be easy to get started with --> minimal amount of dependencies
-* would be simple and pedagogical --> simple Python nodes and ROS 1
-* would be easy to implement machine learning based approaches --> Python
+It is not production-level software, but aimed for teaching and research. At the same time we have validated the software with a real car in a real traffic in the city center of Tartu, Estonia.
 
 ## Architecture
 
@@ -31,9 +31,10 @@ The key modules of Autoware Mini are:
 
 2. Clone the repo
    ```
-   git clone --recurse-submodules https://github.com/carla-simulator/ros-bridge.git carla_ros_bridge
-   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/vehicle_platform.git
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware_mini.git
+   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/vehicle_platform.git
+   # if using Carla
+   git clone --recurse-submodules https://github.com/carla-simulator/ros-bridge.git carla_ros_bridge
    ```
 
 3. Install system dependencies
@@ -53,20 +54,15 @@ The key modules of Autoware Mini are:
    catkin build
    ```
 
-## Launching simulation
+## Launching planner simulation
+
+Planner simulation is very lightweight and has the least dependencies.
 
 ```
 roslaunch autoware_mini start_sim.launch
 ```
 
-You should see Rviz window with a default map. You need to give the vehicle initial position with 2D Pose Estimate button and goal using 2D Nav Goal button.
-
-
-## Launching in Lexus
-
-```
-roslaunch autoware_mini start_lexus.launch
-```
+You should see Rviz window with a default map. To start driving you need to give the vehicle initial position with 2D Pose Estimate button and goal using 2D Nav Goal button. Obstacles can be placed or removed with Publish Point button.
 
 ## Launching with Carla
 
@@ -93,7 +89,7 @@ roslaunch autoware_mini start_lexus.launch
 1. In a new terminal, (assuming enviornment variables are exported) Run Carla simulator by entering followig command.
 
    ```
-   $CARLA_ROOT/./CarlaUE4.sh -prefernvidia -quality-level=Low
+   $CARLA_ROOT/CarlaUE4.sh -prefernvidia -quality-level=Low
    ```
 #### Launch using ground-truth detection:
 2. In a new terminal, (assuming enviornment variables are exported) run the following command. This run’s tartu environment of Carla with minimal sensors and our autonomy stack. The detected objects come from Carla directly.
@@ -114,3 +110,9 @@ roslaunch autoware_mini start_lexus.launch
    ```
    python $CARLA_ROOT/PythonAPI/examples/generate_traffic.py --asynch
    ```
+
+## Launching in Lexus
+
+```
+roslaunch autoware_mini start_lexus.launch
+```
