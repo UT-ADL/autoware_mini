@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import copy
@@ -15,6 +15,9 @@ from helpers.timer import Timer
 
 
 CURRENT_POSE_TO_CAR_FRONT_METERS = 4.0  # taken from current_pose to radar transform
+GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.4)
+RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
+YELLOW = ColorRGBA(0.8, 0.8, 0.0, 0.4)
 
 class LocalPlanner:
 
@@ -108,6 +111,7 @@ class LocalPlanner:
         stop_quaternion = None
         obstacle_tree = None
         wp_with_obs = []                    # indexes of local wp where obstacles are found witihn search radius
+        stop_color = GREEN                       # use for stop_point_viz 
 
         if self.global_path_array is None:
             return
@@ -146,6 +150,8 @@ class LocalPlanner:
             obstacle_array = np.array(points_list)
             obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,0:3])
 
+        t('init det_obj_cb')
+
         # KEEP TRACK OF LOCAL PATH
         wp_backward, wp_forward = self.find_two_nearest_waypoint_idx(global_path_tree, self.current_pose[0], self.current_pose[1])
         # TODO: take from array - optimize here!!! Do not create Point object
@@ -169,6 +175,8 @@ class LocalPlanner:
         # path end
         self.closest_object_distance = local_path_distances[-1]
         self.closest_object_velocity = 0.0
+
+        t('local path')
 
         # OBJECT DETECTION
 
@@ -196,17 +204,11 @@ class LocalPlanner:
                 # adding velocity array will contain: [distance, obstacle_array_id, obstacle_id, velocity]
                 obs_on_path = np.vstack((obs_on_path, obstacle_array[obs_on_path[1].astype(int), 3]))
 
-                # calculate closest object in terms of distance, velocity and fixed deceleration
-                # sqrt(v**2 + 2 * a * d)
+                # calculate closest object in terms of distance, velocity and fixed deceleration - sqrt(v**2 + 2 * a * d)
                 obs_on_path = np.vstack((obs_on_path, np.sqrt((obs_on_path[3]**2 + 2 * self.speed_deceleration_limit * obs_on_path[0]))))
-                # sort based on calculated (theoretical target velocity at ego location)
                 obs_on_path = obs_on_path[:, obs_on_path[4].argsort()]
 
-                # TODO viz only if obj causes braking speed_dist combination below map_speed or current speed - otherwise clear
-                # VIZ STOP POINT
                 # find index of point when the value in array exeeds the distance to the nearest obstacle
-                # TODO: somethign is wrong here distance wise or wrong index - stopline does not appear at the right place, some inconsistency visible
-                # possible kd_tree distances - need to find point on path and the distance to that point
                 idx_after_obj = np.where(local_path_distances > obs_on_path[0,0])[0][0]
                 stop_point = interpolate_point_between_two_points(local_path_array[idx_after_obj-1,0:3], local_path_array[idx_after_obj,0:3], local_path_distances[idx_after_obj-1] - obs_on_path[0,0])
                 # TODO: need check if exceeds pi or -pi? what happens (can't just subtract pi/2)
@@ -214,7 +216,8 @@ class LocalPlanner:
                                                         Point(local_path_array[idx_after_obj,0], local_path_array[idx_after_obj,1], local_path_array[idx_after_obj,2])) - np.pi/2
                 stop_quaternion = get_orientation_from_yaw(stop_heading)
 
-        self.visualize_stop_point(stop_point, stop_quaternion)
+        
+        t('obstacle detection')
 
         # LOCAL PATH WAYPOINTS
         # slice waypoints from global path to local path - should be replaced with
@@ -229,6 +232,16 @@ class LocalPlanner:
                 # obj distance corrected with car front and safety distance
                 obj_distance = max(0, obs_on_path[0][0] - local_path_distances[i] - CURRENT_POSE_TO_CAR_FRONT_METERS - self.braking_safety_distance)
                 target_vel = np.sqrt(obs_on_path[3,0]**2 + 2 * self.speed_deceleration_limit * obj_distance)
+                
+                # TODO testing stop_line color change
+                if i == 0:
+                    # if obstacle causes to go slower than map speed in current waypoint then we are braking - yellow line
+                    # and if obstacle is close to 0 speed then red line
+                    if target_vel < local_path_waypoints[i].twist.twist.linear.x:
+                        stop_color = YELLOW
+                        if obs_on_path[3][0] < 0.5:
+                            stop_color = RED
+
                 local_path_waypoints[i].twist.twist.linear.x = min(target_vel, local_path_waypoints[i].twist.twist.linear.x)
 
         # set cost to 1.0 if there is an obstacle
@@ -236,13 +249,16 @@ class LocalPlanner:
             if i in wp_with_obs:
                 wp.cost = 1.0
 
+        t('prep local path')
+
+        self.visualize_stop_point(stop_point, stop_quaternion, stop_color)
         self.publish_local_path_wp(local_path_waypoints)
 
         t('publish')
         print(t)
 
 
-    def visualize_stop_point(self, stop_point, stop_quaternion):
+    def visualize_stop_point(self, stop_point, stop_quaternion, color):
 
         marker = Marker()
         marker.header.frame_id = self.output_frame
@@ -263,7 +279,7 @@ class LocalPlanner:
         marker.scale.x = 5.0
         marker.scale.y = 0.2
         marker.scale.z = 3.0
-        marker.color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
+        marker.color = color
         self.stop_point_visualization_pub.publish(marker)
 
 
