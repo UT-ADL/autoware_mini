@@ -45,10 +45,8 @@ class ClusterDetector:
                 continue
 
             # convert points to ndarray for simpler processing
-            points3d = np.empty((len(points), 3), dtype=np.float32)
-            points3d[:, 0] = points['x']
-            points3d[:, 1] = points['y']
-            points3d[:, 2] = points['z']
+            points = points.view((np.float32, 4))
+            points3d = points[:,:3]
             points2d = np.ascontiguousarray(points3d[:,:2])
 
             if self.bounding_box_type == 'axis_aligned':

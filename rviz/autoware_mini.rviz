@@ -5,11 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Detection1
-        - /Detection1/Lidar center1
-        - /Detection1/Lidar center1/Detected objects1
-        - /Detection1/Lidar center1/Detected objects1/Namespaces1
-        - /Simulation1
+        - /Detection1/Lidar1
       Splitter Ratio: 0.7558823823928833
     Tree Height: 868
   - Class: rviz/Selection
@@ -29,7 +25,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Points raw center
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -315,19 +311,19 @@ Visualization Manager:
               Use Fixed Frame: true
               Use rainbow: true
               Value: false
-            - Class: rviz/MarkerArray
-              Enabled: true
-              Marker Topic: /detection/detected_objects_markers
-              Name: Detected objects
-              Namespaces:
-                bounding_box: true
-                centroid: true
-                convex_hull: true
-                text: true
-              Queue Size: 100
-              Value: true
           Enabled: true
-          Name: Lidar center
+          Name: Lidar
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /detection/detected_objects_markers
+          Name: Detected objects
+          Namespaces:
+            bounding_box: true
+            centroid: true
+            convex_hull: true
+            text: true
+          Queue Size: 100
+          Value: true
       Enabled: true
       Name: Detection
     - Class: rviz/Group
@@ -435,7 +431,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 10
+      Scale: 16.730796813964844
       Target Frame: base_link
       X: 0
       Y: 0
@@ -457,4 +453,4 @@ Window Geometry:
     collapsed: false
   Width: 1865
   X: 72
-  Y: 323
+  Y: 286
