@@ -16,6 +16,7 @@ from novatel_oem7_msgs.msg import INSPVA, BESTPOS, InertialSolutionStatus
 from nav_msgs.msg import Odometry
 import pyproj
 
+
 class CarlaNovatelDriver():
     def __init__(self):
 
@@ -23,14 +24,14 @@ class CarlaNovatelDriver():
         self.geodesic = pyproj.Geod(ellps='WGS84')
 
         # Publishers
-        self.inspva_pub = rospy.Publisher("/novatel/oem7/inspva", INSPVA, queue_size=1)
-        self.bestpos_pub = rospy.Publisher("/novatel/oem7/bestpos", BESTPOS, queue_size=1)
+        self.inspva_pub = rospy.Publisher("/novatel/oem7/inspva", INSPVA, queue_size=2)
+        self.bestpos_pub = rospy.Publisher("/novatel/oem7/bestpos", BESTPOS, queue_size=2)
 
         # Subscribers
-        gnss_sub = message_filters.Subscriber('/gps/fix', NavSatFix, queue_size=1)
-        gnss_forward_sub = message_filters.Subscriber('/gps/fix_forward', NavSatFix, queue_size=1)
-        odometry_sub = message_filters.Subscriber('/localization/odometry', Odometry, queue_size=1)
-        ts = message_filters.ApproximateTimeSynchronizer([gnss_sub, gnss_forward_sub, odometry_sub], queue_size=2, slop=0.05)
+        gnss_sub = message_filters.Subscriber('/gps/fix', NavSatFix, queue_size=2)
+        gnss_forward_sub = message_filters.Subscriber('/gps/fix_forward', NavSatFix, queue_size=2)
+        odometry_sub = message_filters.Subscriber('/carla/odometry', Odometry, queue_size=2)
+        ts = message_filters.ApproximateTimeSynchronizer([gnss_sub, gnss_forward_sub, odometry_sub], queue_size=10, slop=0.05)
         ts.registerCallback(self.sync_callback)
 
     def sync_callback(self, gnss_data, gnss_forward_data, odometry_data):

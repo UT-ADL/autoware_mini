@@ -32,13 +32,13 @@ class CarlaLocalizer:
                                                               origin_lat=utm_origin_lat,
                                                               origin_lon=utm_origin_lon)
         # Publishers
-        self.pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
-        self.twist_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
-        self.odom_pub = rospy.Publisher('odometry', Odometry, queue_size=1)
+        self.pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=2)
+        self.twist_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=2)
+        self.odom_pub = rospy.Publisher('odometry', Odometry, queue_size=2)
         self.br = tf.TransformBroadcaster()
 
         # Subscribers
-        rospy.Subscriber('/carla/odometry', Odometry, self.odometry_callback, queue_size=1)
+        rospy.Subscriber('/carla/odometry', Odometry, self.odometry_callback, queue_size=2)
 
 
     def odometry_callback(self, msg):
