@@ -27,6 +27,7 @@ class LocalPlanner:
         self.local_path_length = rospy.get_param("~local_path_length", 100)
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
         self.braking_safety_distance = rospy.get_param("~braking_safety_distance", 4.0)
+        self.braking_reaction_time = rospy.get_param("~braking_reaction_time", 1.6)
         self.car_safety_width = rospy.get_param("~car_safety_width", 1.3)
         self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_limit", 1.0)
         self.max_speed_limit = rospy.get_param("~max_speed_limit", 40.0) / 3.6
@@ -34,11 +35,9 @@ class LocalPlanner:
         # Internal variables
         self.lock = threading.Lock()
         self.global_path_array = None
-        self.global_path_last_idx = None
         self.global_path_waypoints = None
         self.global_path_tree = None
         self.current_velocity = 0.0
-        self.local_path_start_global_idx = 0
 
         self.closest_object_distance = 0.0
         self.closest_object_velocity = 0.0
@@ -62,16 +61,14 @@ class LocalPlanner:
             self.lock.acquire()
             self.global_path_array = None
             self.global_path_waypoints = None
-            self.global_path_last_idx = None
             self.global_path_tree = None
-            self.local_path_start_global_idx = 0
             self.lock.release()
-            
+
             self.publish_local_path_wp([])
 
             return
 
-        # extract all waypoint attributes with one loop
+        # extract all waypoint attributes
         global_path_waypoints = msg.waypoints
         global_path_array = np.array([(
                 wp.pose.pose.position.x,
@@ -87,8 +84,6 @@ class LocalPlanner:
         self.global_path_array = global_path_array
         self.global_path_waypoints = global_path_waypoints
         self.global_path_tree = global_path_tree
-        self.global_path_last_idx = len(global_path_array) - 1
-        self.local_path_start_global_idx = 0
         self.lock.release()
 
     def current_velocity_callback(self, msg):
@@ -102,8 +97,6 @@ class LocalPlanner:
 
 
     def detect_objects_callback(self, msg):
-
-        t = Timer()
 
         # internal variables
         obstacles_on_local_path = False
@@ -121,7 +114,6 @@ class LocalPlanner:
         global_path_array = self.global_path_array
         global_path_waypoints = self.global_path_waypoints
         global_path_tree = self.global_path_tree
-        global_path_last_idx = self.global_path_last_idx
         self.lock.release()
 
         # CREATE OBSTACLE ARRAY AND TREE
@@ -150,8 +142,6 @@ class LocalPlanner:
             obstacle_array = np.array(points_list)
             obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,0:3])
 
-        t('init det_obj_cb')
-
         # KEEP TRACK OF LOCAL PATH
         wp_backward, wp_forward = self.find_two_nearest_waypoint_idx(global_path_tree, self.current_pose[0], self.current_pose[1])
         # TODO: take from array - optimize here!!! Do not create Point object
@@ -160,8 +150,8 @@ class LocalPlanner:
                                                   global_path_waypoints[wp_forward].pose.pose.position)
 
         end_index = wp_forward + self.local_path_length
-        if end_index > global_path_last_idx:
-            end_index = global_path_last_idx + 1
+        if end_index > len(global_path_array):
+            end_index = len(global_path_array)
 
         local_path_array = global_path_array[wp_forward : end_index,:]
         nearest_point_array = np.array([(nearest_point.x, nearest_point.y, nearest_point.z, 0.0)])
@@ -176,10 +166,7 @@ class LocalPlanner:
         self.closest_object_distance = local_path_distances[-1]
         self.closest_object_velocity = 0.0
 
-        t('local path')
-
         # OBJECT DETECTION
-
         # iterate over local path and check if there is an object within distance from waypoint
         if obstacle_tree is not None:
             # ask closest obstacle points for all local_path waypoints
@@ -201,12 +188,14 @@ class LocalPlanner:
                 # sort by distance and remove all duplicate object points but closest one
                 obs_on_path = obs_on_path[:, obs_on_path[0].argsort()]
                 obs_on_path = obs_on_path[:, np.unique(obs_on_path[2], return_index=True)[1]]
-                # adding velocity array will contain: [distance, obstacle_array_id, obstacle_id, velocity]
+                # adding velocity, array will contain: [distance, obstacle_array_id, obstacle_id, velocity]
                 obs_on_path = np.vstack((obs_on_path, obstacle_array[obs_on_path[1].astype(int), 3]))
 
                 # calculate closest object in terms of distance, velocity and fixed deceleration - sqrt(v**2 + 2 * a * d)
                 obs_on_path = np.vstack((obs_on_path, np.sqrt((obs_on_path[3]**2 + 2 * self.speed_deceleration_limit * obs_on_path[0]))))
                 obs_on_path = obs_on_path[:, obs_on_path[4].argsort()]
+                self.closest_object_distance = obs_on_path[0,0] - CURRENT_POSE_TO_CAR_FRONT_METERS - self.braking_safety_distance
+                self.closest_object_velocity = obs_on_path[3,0]
 
                 # find index of point when the value in array exeeds the distance to the nearest obstacle
                 idx_after_obj = np.where(local_path_distances > obs_on_path[0,0])[0][0]
@@ -216,9 +205,6 @@ class LocalPlanner:
                                                         Point(local_path_array[idx_after_obj,0], local_path_array[idx_after_obj,1], local_path_array[idx_after_obj,2])) - np.pi/2
                 stop_quaternion = get_orientation_from_yaw(stop_heading)
 
-        
-        t('obstacle detection')
-
         # LOCAL PATH WAYPOINTS
         # slice waypoints from global path to local path - should be replaced with
         local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_forward:end_index])
@@ -227,19 +213,16 @@ class LocalPlanner:
         if obstacles_on_local_path:
             # calculate velocity based on distance to obstacle using deceleration limit
             for i in range(len(local_path_waypoints)):
-                # obs_on_path[0][0] - obj distance
-                # obs_on_path[3][0] - obj velocity 
-                # obj distance corrected with car front and safety distance
-                obj_distance = max(0, obs_on_path[0][0] - local_path_distances[i] - CURRENT_POSE_TO_CAR_FRONT_METERS - self.braking_safety_distance)
-                target_vel = np.sqrt(obs_on_path[3,0]**2 + 2 * self.speed_deceleration_limit * obj_distance)
+                # adjust distance based on car speed - following distance increased when obstacle has higher speed
+                object_distance_at_i = max(0, self.closest_object_distance - self.braking_reaction_time * self.closest_object_velocity - local_path_distances[i])
+                target_vel = np.sqrt(self.closest_object_velocity**2 + 2 * self.speed_deceleration_limit * object_distance_at_i)
                 
-                # TODO testing stop_line color change
                 if i == 0:
                     # if obstacle causes to go slower than map speed in current waypoint then we are braking - yellow line
-                    # and if obstacle is close to 0 speed then red line
+                    # and if obstacle is close to 0 speed then red line - braking to stop
                     if target_vel < local_path_waypoints[i].twist.twist.linear.x:
                         stop_color = YELLOW
-                        if obs_on_path[3][0] < 0.5:
+                        if self.closest_object_velocity < 0.5:
                             stop_color = RED
 
                 local_path_waypoints[i].twist.twist.linear.x = min(target_vel, local_path_waypoints[i].twist.twist.linear.x)
@@ -249,13 +232,8 @@ class LocalPlanner:
             if i in wp_with_obs:
                 wp.cost = 1.0
 
-        t('prep local path')
-
         self.visualize_stop_point(stop_point, stop_quaternion, stop_color)
         self.publish_local_path_wp(local_path_waypoints)
-
-        t('publish')
-        print(t)
 
 
     def visualize_stop_point(self, stop_point, stop_quaternion, color):
