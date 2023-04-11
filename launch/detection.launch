@@ -20,6 +20,12 @@
             <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
         </group>
 
+        <group if="$(eval arg('detector')=='vella')">
+<!--        <node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args ="2.11 -->
+<!--        $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen"/> -->
+            <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
+        </group>
+
         <!-- Obstacle simulator -->
         <node if="$(eval arg('detector')=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />
 
