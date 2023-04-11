@@ -18,5 +18,12 @@ lidar:
     bounding_box_type: axis_aligned
     enable_pointcloud: False
     enable_convex_hull: True
+
+  vella_detector:
+    confidence_filter: 0.5
+    track_length_filter: 0
+    lidar_frame: "lidar_center"
+    output_frame: "map"
+
 obstacle_simulation:
   publish_rate: 10

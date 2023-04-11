@@ -5,7 +5,10 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Detection1
         - /Detection1/Lidar1
+        - /Detection1/Detected objects1
+        - /Detection1/Detected objects1/Namespaces1
       Splitter Ratio: 0.7558823823928833
     Tree Height: 868
   - Class: rviz/Selection
@@ -25,7 +28,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: Points raw center
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -158,7 +161,12 @@ Visualization Manager:
           Marker Topic: /planning/lanelet2_map_markers
           Name: Lanelet2 map
           Namespaces:
-            {}
+            Centerline: true
+            Crosswalk: true
+            Left boundary: true
+            Right boundary: true
+            Stop line: true
+            Traffic lights: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -318,7 +326,7 @@ Visualization Manager:
           Marker Topic: /detection/detected_objects_markers
           Name: Detected objects
           Namespaces:
-            bounding_box: true
+            bounding_box: false
             centroid: true
             convex_hull: true
             text: true
@@ -453,4 +461,4 @@ Window Geometry:
     collapsed: false
   Width: 1865
   X: 72
-  Y: 286
+  Y: 249
