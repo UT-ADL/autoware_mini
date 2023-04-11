@@ -35,7 +35,7 @@
     <!-- Vehicle -->
     <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
         <arg name="max_speed" value="$(arg max_speed)" />
-        <arg name="detector"  value="$(arg detector)" />
+        <arg name="use_lidar_center"  value="$(eval arg('detector')!='vella')" />
     </include>
 
     <!-- Rviz -->
