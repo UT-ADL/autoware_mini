@@ -44,7 +44,12 @@ The key modules of Autoware Mini are:
    rosdep install --from-paths . --ignore-src -r -y
    ```
 
-4. Build the workspace
+4. Install Python dependencies
+   ```
+   pip install -r autoware_mini/requirements.txt
+   ```
+
+5. Build the workspace
    ```
    catkin build
    ```
