@@ -92,7 +92,6 @@ class PathSmoothing:
         rw_new = np.interp(new_distances, distances, rw)
 
         # Speed
-        # TODO: when map based speed is implemented check if gives reasonable results
         speed_interpolated = np.interp(new_distances, distances, speed)
         speed_new = speed_interpolated
 

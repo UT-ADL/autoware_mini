@@ -151,6 +151,12 @@ class Lanelet2GlobalPlanner:
             if i == len(lanelet_sequence)-1:
                 last_lanelet = True
 
+            speed = self.speed_limit
+            if 'speed_limit' in lanelet.attributes:
+                speed = min(speed, float(lanelet.attributes['speed_limit']) / 3.6)
+            if 'speed_ref' in lanelet.attributes:
+                speed = min(speed, float(lanelet.attributes['speed_ref']) / 3.6)
+
             # loop over centerline points use enumerate to get index
             for idx, point in enumerate(lanelet.centerline):
                 if not last_lanelet and idx == len(lanelet.centerline)-1:
@@ -174,10 +180,7 @@ class Lanelet2GlobalPlanner:
                 waypoint.pose.pose.orientation.z = z
                 waypoint.pose.pose.orientation.w = w
 
-                # TODO: will be replaced by speed from map
-                waypoint.twist.twist.linear.x = self.speed_limit
-                # TODO: currently LW and RW from our map database are not available in lanelet map
-                # or fiind leftBound and rightBound dist from centerline?
+                waypoint.twist.twist.linear.x = speed
                 waypoint.dtlane.lw = self.wp_left_width
                 waypoint.dtlane.rw = self.wp_right_width
 
