@@ -25,7 +25,7 @@ LANELET_COLOR_TO_MARKER_COLOR = {
     "green": GREEN
 }
 
-class Lanelet2MapLoader:
+class Lanelet2MapVisualizer:
 
     def __init__(self):
     
@@ -50,14 +50,14 @@ class Lanelet2MapLoader:
         map, errors = loadRobust(self.lanelet2_map_name, projector)
 
         if len(errors) > 0:
-            rospy.logwarn("lanelet2_map_loader - Errors while loading map")
+            rospy.logwarn("lanelet2_map_visualizer - Errors while loading map")
             # TODO: errors could be printed, parsed or summarized somehow (counted)
 
         # Visualize the Lanelet2 map
         marker_array = visualize_lanelet2_map(map)
         self.markers_pub.publish(marker_array)
 
-        rospy.loginfo("lanelet2_map_loader - map loaded with %i lanelets and %i regulatory elements from file: %s" % 
+        rospy.loginfo("lanelet2_map_visualizer - map loaded with %i lanelets and %i regulatory elements from file: %s" % 
                       (len(map.laneletLayer), len(map.regulatoryElementLayer), str(self.lanelet2_map_name)))
 
     def run(self):
@@ -141,6 +141,7 @@ def visualize_regulatoryElementLayer(map):
                     marker.pose.position.x = bulb.x
                     marker.pose.position.y = bulb.y
                     marker.pose.position.z = bulb.z
+                    marker.pose.orientation.w = 1.0
 
                     marker_array.markers.append(marker)
 
@@ -194,6 +195,6 @@ def linestring_to_marker(linestring, namespace, id, color, scale, stamp):
 
 
 if __name__ == '__main__':
-    rospy.init_node('lanelet2_map_loader')
-    node = Lanelet2MapLoader()
+    rospy.init_node('lanelet2_map_visualizer')
+    node = Lanelet2MapVisualizer()
     node.run()

@@ -26,9 +26,9 @@ Uses Lanelet2 map to generate the global path. Currently loads map itself. `/cur
 | --- | --- | --- |
 | `global_path` | `autoware_msgs/Lane` | Lane - array of waypoints with global path. Path is visualized using `waypoint_visualizer` node. |
 
-## lanelet2_map_loader and visualizer
+## lanelet2_map_visualizer
 
-`lanelet2_map_loader` will load lanelet2 map and call also the `lanelet2_map_visualizer` that will create the markers for rviz visualization.
+`lanelet2_map_visualizer` will load lanelet2 map and will create the markers for rviz visualization.
 
 ##### Parameters
 

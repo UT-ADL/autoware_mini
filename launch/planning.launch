@@ -19,8 +19,8 @@
             <param name="waypoints_file" value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
         </node>
 
-        <!-- Lanelet2 map loader -->
-        <node pkg="autoware_mini" type="lanelet2_map_loader.py" name="lanelet2_map_loader" output="screen" required="true">
+        <!-- Lanelet2 map visualizer -->
+        <node pkg="autoware_mini" type="lanelet2_map_visualizer.py" name="lanelet2_map_visualizer" output="screen" required="true">
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
         </node>
 
