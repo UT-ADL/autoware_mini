@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="detector"            default="lidar_clusterer"    doc="simplelidar_clusterer,sim" />
+    <arg name="detector"            default="lidar_clusterer"    doc="lidar_clusterer,vella,sim" />
     <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
 
     <group ns="detection">
@@ -15,14 +15,8 @@
         <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
 
         <group if="$(eval arg('detector')=='vella')">
-<!--        <node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args ="2.11 -->
-<!--        $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen"/> -->
-            <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
-        </group>
-
-        <group if="$(eval arg('detector')=='vella')">
-<!--        <node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args ="2.11 -->
-<!--        $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen"/> -->
+<!--        <node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args="2.11
+            $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen" required="true" /> -->
             <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
         </group>
 
