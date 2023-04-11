@@ -119,24 +119,11 @@ class LocalPlanner:
         # CREATE OBSTACLE ARRAY AND TREE
         if len(msg.objects) > 0:
             points_list = []
-            # add into obstacle array center point and convex hull points
+            # add object center point and convex hull points to points list
             for i, obj in enumerate(msg.objects):
-                # Add the position point to the points list
-                points_list.append([
-                    obj.pose.position.x,
-                    obj.pose.position.y,
-                    obj.pose.position.z,
-                    obj.velocity.linear.x,
-                    i
-                ])
+                points_list.append([obj.pose.position.x, obj.pose.position.y, obj.pose.position.z, obj.velocity.linear.x, i])
                 for point in obj.convex_hull.polygon.points:
-                    points_list.append([
-                        point.x,
-                        point.y,
-                        point.z,
-                        obj.velocity.linear.x,
-                        i
-                    ])
+                    points_list.append([point.x, point.y, point.z, obj.velocity.linear.x, i])
 
             # Convert the points list to a numpy array
             obstacle_array = np.array(points_list)
@@ -144,7 +131,6 @@ class LocalPlanner:
 
         # KEEP TRACK OF LOCAL PATH
         wp_backward, wp_forward = self.find_two_nearest_waypoint_idx(global_path_tree, self.current_pose[0], self.current_pose[1])
-        # TODO: take from array - optimize here!!! Do not create Point object
         nearest_point = get_closest_point_on_line(Point(self.current_pose[0], self.current_pose[1], self.current_pose[2]),
                                                   global_path_waypoints[wp_backward].pose.pose.position, 
                                                   global_path_waypoints[wp_forward].pose.pose.position)
@@ -167,12 +153,11 @@ class LocalPlanner:
         self.closest_object_velocity = 0.0
 
         # OBJECT DETECTION
-        # iterate over local path and check if there is an object within distance from waypoint
+        # iterate over local path waypoints and check if there are objects within car_safety_width
         if obstacle_tree is not None:
             # ask closest obstacle points for all local_path waypoints
             obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[1:,0:3], self.car_safety_width, return_distance=True)
 
-            # TODO: might be better way to to it - needed to viz obstacles in whole path!
             # get list of indexes of local_path waypoints where obstacles are found
             wp_with_obs = [i for i in range(len(obstacle_d)) if len(obstacle_d[i]) > 0]
 
@@ -185,10 +170,10 @@ class LocalPlanner:
                 obs_on_path = np.vstack((np.hstack(obstacle_d), np.hstack(obstacle_idx)))
                 # by matching index update array by adding 3rd row that contains object id taken from obstacle_array
                 obs_on_path = np.vstack((obs_on_path, obstacle_array[obs_on_path[1].astype(int), 4]))
-                # sort by distance and remove all duplicate object points but closest one
+                # sort by distance and keep only closest point from each object
                 obs_on_path = obs_on_path[:, obs_on_path[0].argsort()]
                 obs_on_path = obs_on_path[:, np.unique(obs_on_path[2], return_index=True)[1]]
-                # adding velocity, array will contain: [distance, obstacle_array_id, obstacle_id, velocity]
+                # adding velocity, array will contain: distance, obstacle_array_id, obstacle_id, velocity
                 obs_on_path = np.vstack((obs_on_path, obstacle_array[obs_on_path[1].astype(int), 3]))
 
                 # calculate closest object in terms of distance, velocity and fixed deceleration - sqrt(v**2 + 2 * a * d)
@@ -200,7 +185,6 @@ class LocalPlanner:
                 # find index of point when the value in array exeeds the distance to the nearest obstacle
                 idx_after_obj = np.where(local_path_distances > obs_on_path[0,0])[0][0]
                 stop_point = interpolate_point_between_two_points(local_path_array[idx_after_obj-1,0:3], local_path_array[idx_after_obj,0:3], local_path_distances[idx_after_obj-1] - obs_on_path[0,0])
-                # TODO: need check if exceeds pi or -pi? what happens (can't just subtract pi/2)
                 stop_heading = get_heading_between_two_points(Point(local_path_array[idx_after_obj-1,0], local_path_array[idx_after_obj-1,1], local_path_array[idx_after_obj-1,2]),
                                                         Point(local_path_array[idx_after_obj,0], local_path_array[idx_after_obj,1], local_path_array[idx_after_obj,2])) - np.pi/2
                 stop_quaternion = get_orientation_from_yaw(stop_heading)
