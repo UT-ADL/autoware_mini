@@ -81,11 +81,13 @@ Visualization Manager:
               Value: true
             lexus_model:
               Value: true
-            lidar:
+            lidar_0:
               Value: true
             lidar_center:
               Value: true
             lidar_front/os_sensor:
+              Value: true
+            map:
               Value: true
             radar_fc:
               Value: true
@@ -96,32 +98,33 @@ Visualization Manager:
           Show Axes: true
           Show Names: true
           Tree:
-            base_link:
-              base_footprint:
-                {}
-              imu:
-                {}
-              lexus_model:
-                {}
-              lidar_center:
-                camera_fl:
+            map:
+              base_link:
+                base_footprint:
                   {}
-                camera_fr:
+                imu:
                   {}
-                interfacea_link0:
+                lexus_model:
                   {}
-                interfacea_link1:
+                lidar_center:
+                  camera_fl:
+                    {}
+                  camera_fr:
+                    {}
+                  interfacea_link0:
+                    {}
+                  interfacea_link1:
+                    {}
+                  interfacea_link2:
+                    {}
+                  interfacea_link3:
+                    {}
+                  lidar_0:
+                    {}
+                  lidar_front/os_sensor:
+                    {}
+                radar_fc:
                   {}
-                interfacea_link2:
-                  {}
-                interfacea_link3:
-                  {}
-                lidar:
-                  {}
-                lidar_front/os_sensor:
-                  {}
-              radar_fc:
-                {}
           Update Interval: 0
           Value: true
         - Alpha: 1
@@ -221,7 +224,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: false
-      Enabled: true
+      Enabled: false
       Name: Sensing
     - Class: rviz/Group
       Displays:
@@ -382,7 +385,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: lidar
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:

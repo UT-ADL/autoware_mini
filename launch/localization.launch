@@ -6,9 +6,7 @@
 
     <group ns="localization">
     
-        <node if="$(eval arg('localizer')=='novatel')" pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true">
-            <param name="use_vella" value="$(eval arg('detector')=='vella')" />
-        </node>
+        <node if="$(eval arg('localizer')=='novatel')" pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" />
 

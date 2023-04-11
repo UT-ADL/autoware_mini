@@ -3,23 +3,24 @@
 from __future__ import print_function
 from __future__ import division
 
+import math
 import numpy as np
 import cv2
-import math
+
 import rospy
 import tf
 from tf.transformations import quaternion_multiply, euler_from_quaternion
+
+from std_msgs.msg import ColorRGBA
 from vella_msgs.msg import Track3DArray
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from geometry_msgs.msg import PolygonStamped, Point, Pose, Quaternion
 
-
+LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 MPH_TO_MS_MULTIPLIER = 0.447 # if we find out that vella speeds are indeed given in mph then multiply our speed with this constant  to get speeds in m/s
 
 class VellaDetector:
     def __init__(self):
-        rospy.loginfo(self.__class__.__name__ + " - Initializing Vella to Autoware converter")
-
         # Params
         self.confidence_filter = rospy.get_param("~confidence_filter", 0.5) # filter out objects with score less than this threshold
         self.track_length_filter = rospy.get_param("~track_length_filter", 0) # filter out objects with track length less than this threshold
@@ -29,9 +30,11 @@ class VellaDetector:
         # transform listener
         self.tf_listener = tf.TransformListener()
         # Autoware detected objects publisher
-        self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=10)
+        self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         # vella tracks subscriber
-        rospy.Subscriber('vdk/tracks', Track3DArray, self.vella_tracks_callback, queue_size=1)
+        rospy.Subscriber('/vdk/tracks', Track3DArray, self.vella_tracks_callback, queue_size=1)
+
+        rospy.loginfo("vella_detector - initialized")
 
     def vella_tracks_callback(self, vella_tracks):
 
@@ -80,6 +83,7 @@ class VellaDetector:
         detected_object.header.stamp = vella_stamp
         detected_object.id = vella_track.id
         detected_object.label = vella_track.label
+        detected_object.color = LIGHT_BLUE
         detected_object.valid = True
 
         # Transform position and orientation to output frame using the transformation matrix and quaternion saved when callback was received
@@ -114,8 +118,8 @@ class VellaDetector:
         transformed_pose.position = Point(transformed_x, transformed_y, transformed_z)
 
         obj_pose_quat = [obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w]
-        # transform the objects' orientation quaternion to output frame by multiplying it with the transform quaternion. Note: it's not an ordinary
-        # element-wise multiplication
+        # transform the objects' orientation quaternion to output frame by multiplying it with the transform quaternion.
+        # Note: it's not an ordinary element-wise multiplication
         x, y, z, w = quaternion_multiply(tf_rot, obj_pose_quat)
         transformed_pose.orientation = Quaternion(x, y, z, w)
 
@@ -149,6 +153,7 @@ class VellaDetector:
         convex_hull.polygon.points.append(convex_hull.polygon.points[0])
 
         return convex_hull
+
     def run(self):
         rospy.spin()
 

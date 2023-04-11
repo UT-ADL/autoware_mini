@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="max_speed"   default="30"/>
-    <arg name="detector"    default="simple"   doc="simple, vella" />
+    <arg name="max_speed"           default="30" />
+    <arg name="use_lidar_center"    default="false" />
 
     <!-- Vehicle platform -->
-    <include file="$(find vehicle_platform)/launch/platform.launch" >
-        <arg name="use_tf"          value="true" />
-        <arg name="use_lexus_model" value="true" />
-        <arg name="use_gnss"        value="true" />
-        <arg name="use_dbw"         value="true" />
-        <arg name="use_ssc"         value="true" />
-        <arg name="detector"        value="$(arg detector)" />
+    <include file="$(find vehicle_platform)/launch/platform.launch">
+        <arg name="use_tf"              value="true" />
+        <arg name="use_lexus_model"     value="true" />
+        <arg name="use_gnss"            value="true" />
+        <arg name="use_dbw"             value="true" />
+        <arg name="use_ssc"             value="true" />
+        <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
     </include>
 
     <group ns="vehicle">

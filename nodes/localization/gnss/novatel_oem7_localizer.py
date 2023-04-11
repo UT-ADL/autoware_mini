@@ -21,7 +21,6 @@ class NovatelOem7Localizer:
         self.lest97_origin_northing = rospy.get_param("/localization/lest97_origin_northing")
         self.lest97_origin_easting = rospy.get_param("/localization/lest97_origin_easting")
         self.use_msl_height = rospy.get_param("~use_msl_height", True)
-        self.use_vella = rospy.get_param("~use_vella", False)
 
         # variable to store undulation value from bestpos message
         self.undulation = 0.0
@@ -40,9 +39,7 @@ class NovatelOem7Localizer:
         # Publishers
         self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
         self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
-        if self.use_vella:
-            # odometry publisher for vella
-            self.odometry_pub = rospy.Publisher('/odom', Odometry, queue_size=1)
+        self.odometry_pub = rospy.Publisher('odometry', Odometry, queue_size=1)
         
         # Subscribers
         if self.use_msl_height:
@@ -75,9 +72,7 @@ class NovatelOem7Localizer:
         self.publish_current_pose(stamp, x, y, height, orientation)
         self.publish_current_velocity(stamp, velocity)
         self.publish_map_to_baselink_tf(stamp, x, y, height, orientation)
-        if self.use_vella:
-            # odometry publisher for vella
-            self.publish_odometry(stamp, velocity, x, y, height, orientation)
+        self.publish_odometry(stamp, velocity, x, y, height, orientation)
 
     def bestpos_callback(self, bestpos_msg):
         self.undulation = bestpos_msg.undulation
@@ -112,14 +107,14 @@ class NovatelOem7Localizer:
 
         odom_msg = Odometry()
         odom_msg.header.stamp = stamp
-        odom_msg.header.frame_id = 'vehicle'
-        odom_msg.child_frame_id = 'vehicle'
+        odom_msg.header.frame_id = 'map'
+        odom_msg.child_frame_id = 'base_link'
 
         odom_msg.pose.pose.position.x = x
         odom_msg.pose.pose.position.y = y
         odom_msg.pose.pose.position.z = height
 
-        odom_msg.pose.orientation = orientation
+        odom_msg.pose.pose.orientation = orientation
         odom_msg.twist.twist.linear.x = velocity
 
         self.odometry_pub.publish(odom_msg)
