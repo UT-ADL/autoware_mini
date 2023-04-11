@@ -2,12 +2,12 @@
 <launch>
     
     <arg name="bag_file"        default="2021-01-12-15-57-27_r05_demo_route_mpc.bag" doc="bag file to play" />
-    <arg name="localizer"       default="novatel"           doc="novatel, carla"/>
-    <arg name="detector"        default="lidar_clusterer"   doc="lidar_clusterer, sim, carla"/>
-    <arg name="planner"         default="none"              doc="waypoints, lanelet2"/>
-    <arg name="use_detection"   default="true"              doc="use object detection"/>
-    <arg name="use_planning"    default="true"              doc="use planning"/>
-    <arg name="use_tf"          default="false"             doc="replaces tf-s in bag with the current ones"/>
+    <arg name="localizer"       default="novatel"   doc="novatel, carla"/>
+    <arg name="detector"        default="cluster"   doc="cluster, sim, carla"/>
+    <arg name="planner"         default="none"      doc="waypoints, lanelet2"/>
+    <arg name="use_detection"   default="true"      doc="use object detection"/>
+    <arg name="use_planning"    default="true"      doc="use planning"/>
+    <arg name="use_tf"          default="false"     doc="replaces tf-s in bag with the current ones"/>
 
     <!-- Use simulation time from bag -->
     <param name="/use_sim_time" value="true" />

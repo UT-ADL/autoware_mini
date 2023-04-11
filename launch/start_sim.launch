@@ -6,7 +6,7 @@
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
     <arg name="use_detection"           default="true"          doc="use object detection" />
-    <arg name="use_local_planner"       default="false" />
+    <arg name="use_local_planner"       default="true" />
     <arg name="detector"                default="sim"           doc="usually sim" />
 
     <!-- Planner -->
@@ -32,7 +32,7 @@
     <include file="$(find autoware_mini)/launch/platform/simulation.launch" />
 
     <!-- Rviz -->
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini_sim.rviz" required="true" />
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
 
     <!-- Localization params -->
     <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" ns="localization" />

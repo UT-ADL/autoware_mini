@@ -3,7 +3,7 @@
 
     <arg name="planner"                 default="waypoints"     doc="waypoints, lanelet2" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
+    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
     <arg name="use_local_planner"       default="false" />
 
     <group ns="planning">

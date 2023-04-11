@@ -186,6 +186,7 @@ def linestring_to_marker(linestring, namespace, id, color, scale, stamp):
     marker.action = marker.ADD
     marker.scale.x = scale
     marker.color = color
+    marker.pose.orientation.w = 1.0
 
     # Add the points to the marker
     for point in linestring:
