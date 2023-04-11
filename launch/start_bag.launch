@@ -4,7 +4,9 @@
     <arg name="bag_file"        default="2021-01-12-15-57-27_r05_demo_route_mpc.bag" doc="bag file to play" />
     <arg name="localizer"       default="novatel"           doc="novatel, carla"/>
     <arg name="detector"        default="lidar_clusterer"   doc="lidar_clusterer, sim, carla"/>
+    <arg name="planner"         default="none"              doc="waypoints, lanelet2"/>
     <arg name="use_detection"   default="true"              doc="use object detection"/>
+    <arg name="use_planning"    default="true"              doc="use planning"/>
     <arg name="use_tf"          default="false"             doc="replaces tf-s in bag with the current ones"/>
 
     <!-- Use simulation time from bag -->
@@ -31,11 +33,18 @@
     </include>
 
     <!-- Localization -->
-    <include if="$(arg use_tf)" file="$(find autoware_mini)/launch/localization.launch" />
+    <include if="$(arg use_tf)" file="$(find autoware_mini)/launch/localization.launch">
+        <arg name="localizer" value="$(arg localizer)" />
+    </include>
 
     <!-- Detection -->
     <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
         <arg name="detector" value="$(arg detector)" />
+    </include>
+
+    <!-- Planning -->
+    <include if="$(arg use_planning)" file="$(find autoware_mini)/launch/planning.launch">
+        <arg name="planner" value="$(arg planner)" />
     </include>
 
     <!-- Rviz -->
