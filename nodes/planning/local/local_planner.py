@@ -184,7 +184,6 @@ class LocalPlanner:
 
                 # find index of point when the value in array exeeds the distance to the nearest obstacle
                 idx_after_obj = np.where(local_path_distances > obs_on_path[0,0])[0][0]
-                # print(obstacle_array[obs_on_path[1,0].astype(int), 0:3])
                 stop_point = interpolate_obstacle_point_to_path(local_path_array[idx_after_obj-1,0:3],                    # point on path before
                                                                 local_path_array[idx_after_obj,0:3],                      # point on path after                           
                                                                 obstacle_array[obs_on_path[1,0].astype(int), 0:3],        # obstacle point coordinates
@@ -202,9 +201,9 @@ class LocalPlanner:
             # calculate velocity based on distance to obstacle using deceleration limit
             for i in range(len(local_path_waypoints)):
                 # adjust distance based on car speed - following distance increased when obstacle has higher speed
-                object_distance_at_i = max(0, self.closest_object_distance - self.braking_reaction_time * self.closest_object_velocity - local_path_distances[i])
-                target_vel = np.sqrt(self.closest_object_velocity**2 + 2 * self.speed_deceleration_limit * object_distance_at_i)
-                
+                object_distance_at_i = self.closest_object_distance - self.braking_reaction_time * self.closest_object_velocity - local_path_distances[i]
+                target_vel = np.sqrt(max(0, self.closest_object_velocity**2 + 2 * self.speed_deceleration_limit * object_distance_at_i))
+
                 if i == 0:
                     # if obstacle causes to go slower than map speed in current waypoint then we are braking - yellow line
                     # and if obstacle is close to 0 speed then red line - braking to stop
