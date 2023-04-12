@@ -24,7 +24,7 @@
 
     <!-- Follower -->
     <include file="$(find autoware_mini)/launch/control.launch">
-        <arg name="follower"            value="$(arg follower)" />
+        <arg name="follower" value="$(arg follower)" />
     </include>
 
     <!-- Bicycle_model simulator -->
