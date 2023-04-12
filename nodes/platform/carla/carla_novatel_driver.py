@@ -45,8 +45,6 @@ class CarlaNovatelDriver():
         msg.latitude = gnss_data.latitude
         msg.longitude = gnss_data.longitude
 
-        # NOTE: this is wrong, we are using altitude instead of height because the
-        # CARLA simulator doesn't give us height
         msg.height = gnss_data.altitude
         msg.roll = 0
         msg.pitch = 0 
