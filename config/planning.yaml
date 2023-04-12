@@ -18,7 +18,7 @@ path_smoothing:
   adjust_speeds_in_curves: True
   adjust_speeds_using_deceleration: True
   speed_averaging_window: 21              # window size (will be applied only if > 1)
-  adjust_endpoint_speeds_to_zero: True
+  adjust_endpoint_speed_to_zero: True
   speed_deceleration_limit: 1.0           # m/s2
   radius_calc_neighbour_index: 4          # int
   lateral_acceleration_limit: 3.0         # m/s2
