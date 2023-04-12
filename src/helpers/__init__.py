@@ -1,4 +1,5 @@
 import math
+import numpy as np
 import matplotlib.pyplot as plt
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from autoware_msgs.msg import WaypointState
@@ -176,12 +177,16 @@ def get_distance_between_two_points(point1, point2):
 
 
 
-def interpolate_point_between_two_points(point1_array, point2_array, distance):
+def interpolate_obstacle_point_to_path(point1_array, point2_array, obs_point_array, distance):
     """
-    Interpolate point between two points. The point is on the line between point1 and point2
+    Interpolate point between two points (point1 and point2) on the path.
+    Original point is obs_point that is off the path. This function finds the angle between
+    path and obstacle direction and considers the distance as hypothenus of the triangle.
+    Then th angle is used to project the obstacle point to the path.
     :param point1_array: [x, y, z]
     :param point2_array: [x, y, z]
-    :param distance: distance from first point towards second point
+    :param obs_point_array: [x, y, z]
+    :param distance: distance from point1 to obstacle point
     :return: [x, y, z]
     """
     
@@ -191,12 +196,25 @@ def interpolate_point_between_two_points(point1_array, point2_array, distance):
     x2 = point2_array[0]
     y2 = point2_array[1]
     z2 = point2_array[2]
+    x_obs = obs_point_array[0]
+    y_obs = obs_point_array[1]
+    z_obs = obs_point_array[2]
+
+    # find angle defined by 3 points: point1, point 2 and obstacle point
+    v1 = np.array([x2 - x1, y2 - y1])
+    v2 = np.array([x_obs - x1, y_obs - y1])
+    dot = np.dot(v1, v2)
+    cross = np.cross(v1, v2)
+
+    angle = math.atan2(cross, dot)
+
+    projected_distance = distance * math.cos(angle)
 
     # calculate distance between points
     d = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
     # calculate ratio
-    ratio = distance / d
+    ratio = projected_distance / d
 
     # calculate new point
     x = x1 + ratio * (x2 - x1)

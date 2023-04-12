@@ -10,7 +10,7 @@ from geometry_msgs.msg import PoseStamped, TwistStamped, Point
 from visualization_msgs.msg import Marker
 from std_msgs.msg import ColorRGBA
 
-from helpers import get_closest_point_on_line, interpolate_point_between_two_points, get_orientation_from_yaw, get_heading_between_two_points
+from helpers import get_closest_point_on_line, interpolate_obstacle_point_to_path, get_orientation_from_yaw, get_heading_between_two_points
 from helpers.timer import Timer
 
 
@@ -155,7 +155,7 @@ class LocalPlanner:
         # OBJECT DETECTION
         # iterate over local path waypoints and check if there are objects within car_safety_width
         if obstacle_tree is not None:
-            # ask closest obstacle points for all local_path waypoints
+            # ask closest obstacle points to local_path_array, except 1st (current_pose on path) to be in sync later with sliced waypoint idx's
             obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[1:,0:3], self.car_safety_width, return_distance=True)
 
             # get list of indexes of local_path waypoints where obstacles are found
@@ -165,7 +165,7 @@ class LocalPlanner:
                 obstacles_on_local_path = True
 
                 # add corresponding "along path distances" to obstacle_d
-                obstacle_d = [np.add(obstacle_d[i], local_path_distances[i]) for i in range(len(obstacle_d))]
+                obstacle_d = [np.add(obstacle_d[i], local_path_distances[i+1]) for i in range(len(obstacle_d))]
                 # flatten obstacle_d and obstacle_idx and then and stack
                 obs_on_path = np.vstack((np.hstack(obstacle_d), np.hstack(obstacle_idx)))
                 # by matching index update array by adding 3rd row that contains object id taken from obstacle_array
@@ -184,7 +184,11 @@ class LocalPlanner:
 
                 # find index of point when the value in array exeeds the distance to the nearest obstacle
                 idx_after_obj = np.where(local_path_distances > obs_on_path[0,0])[0][0]
-                stop_point = interpolate_point_between_two_points(local_path_array[idx_after_obj-1,0:3], local_path_array[idx_after_obj,0:3], local_path_distances[idx_after_obj-1] - obs_on_path[0,0])
+                # print(obstacle_array[obs_on_path[1,0].astype(int), 0:3])
+                stop_point = interpolate_obstacle_point_to_path(local_path_array[idx_after_obj-1,0:3],                    # point on path before
+                                                                local_path_array[idx_after_obj,0:3],                      # point on path after                           
+                                                                obstacle_array[obs_on_path[1,0].astype(int), 0:3],        # obstacle point coordinates
+                                                                obs_on_path[0,0]- local_path_distances[idx_after_obj-1])  # distance towards obstacle point
                 stop_heading = get_heading_between_two_points(Point(local_path_array[idx_after_obj-1,0], local_path_array[idx_after_obj-1,1], local_path_array[idx_after_obj-1,2]),
                                                         Point(local_path_array[idx_after_obj,0], local_path_array[idx_after_obj,1], local_path_array[idx_after_obj,2])) - np.pi/2
                 stop_quaternion = get_orientation_from_yaw(stop_heading)
