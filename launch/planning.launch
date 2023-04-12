@@ -33,10 +33,12 @@
         <node if="$(eval arg('planner')=='carla')" pkg='autoware_mini' type='carla_waypoints_publisher.py' name='carla_waypoints_publisher' output='screen' required="true" />
 
         <!-- Path smoothing -->
-        <node pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true"/>
+        <node pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true">
+            <remap unless="$(arg use_local_planner)" from="smoothed_path" to="local_path"/>
+        </node>
 
         <!-- Local planner -->
-        <node if="$(eval arg('use_local_planner'))" pkg="autoware_mini" type="local_planner.py" name="local_planner" output="screen" required="true"/>
+        <node if="$(arg use_local_planner)" pkg="autoware_mini" type="local_planner.py" name="local_planner" output="screen" required="true"/>
 
         <!-- Waypoint_visualizer - necessary also for visualizing path from global planner-->
         <node pkg="autoware_mini" type="waypoint_visualizer.py" name="waypoint_visualizer" output="screen" required="true"/>

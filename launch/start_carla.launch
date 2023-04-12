@@ -35,7 +35,6 @@
     <!-- Follower -->
     <include file="$(find autoware_mini)/launch/control.launch">
         <arg name="follower"            value="$(arg follower)" />
-        <arg name="use_local_planner"   value="$(arg use_local_planner)" />
     </include>
 
     <!-- Localization -->
