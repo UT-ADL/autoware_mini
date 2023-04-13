@@ -9,7 +9,7 @@ from sklearn.neighbors import NearestNeighbors
 
 from helpers import get_heading_from_pose_orientation, get_heading_between_two_points, get_blinker_state, \
     normalize_heading_error, get_point_on_path_within_distance, get_closest_point_on_line, \
-    get_cross_track_error
+    get_cross_track_error, interpolate_velocity_between_waypoints
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
@@ -108,7 +108,7 @@ class PurePursuitFollower:
 
         # get nearest point on path from base_link
         nearest_point = get_closest_point_on_line(current_pose.position, waypoints[back_wp_idx].pose.pose.position, waypoints[front_wp_idx].pose.pose.position)
-        
+
         # calc lookahead distance (velocity * planning_time)
         lookahead_distance = current_velocity * self.planning_time
         if lookahead_distance < self.min_lookahead_distance:
@@ -137,7 +137,7 @@ class PurePursuitFollower:
         steering_angle = math.atan(self.wheel_base * curvature)
 
         # target_velocity from map and based on closest object
-        target_velocity = waypoints[front_wp_idx].twist.twist.linear.x
+        target_velocity = interpolate_velocity_between_waypoints(nearest_point, waypoints[back_wp_idx], waypoints[front_wp_idx])
         if self.use_closest_object_info:
             closest_obj_based_vel = math.sqrt(self.closest_object_velocity**2 + (2 * self.speed_deceleration_limit * self.closest_object_distance))
             target_velocity = min(target_velocity, closest_obj_based_vel)

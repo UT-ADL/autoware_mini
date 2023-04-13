@@ -9,7 +9,7 @@ from sklearn.neighbors import NearestNeighbors
 
 from helpers import get_heading_from_pose_orientation, get_blinker_state, get_heading_between_two_points, \
     get_closest_point_on_line, get_point_on_path_within_distance, get_cross_track_error, \
-    get_pose_using_heading_and_distance, normalize_heading_error
+    get_pose_using_heading_and_distance, normalize_heading_error, interpolate_velocity_between_waypoints
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
 from std_msgs.msg import ColorRGBA, Float32MultiArray
@@ -129,7 +129,7 @@ class StanleyFollower:
         steering_angle = heading_error + delta_error
 
         # target_velocity from map and based on closest object
-        target_velocity = waypoints[bl_front_wp_idx].twist.twist.linear.x
+        target_velocity = interpolate_velocity_between_waypoints(bl_nearest_point, waypoints[bl_back_wp_idx], waypoints[bl_front_wp_idx])
         if self.use_closest_object_info:
             closest_obj_based_vel = math.sqrt(self.closest_object_velocity**2 + (2 * self.speed_deceleration_limit * self.closest_object_distance))
             target_velocity = min(target_velocity, closest_obj_based_vel)

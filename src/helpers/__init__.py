@@ -175,6 +175,24 @@ def get_distance_between_two_points(point1, point2):
 
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
+def interpolate_velocity_between_waypoints(point, backward_wp, forward_wp):
+    """
+    Interpolate velocity between two waypoints.
+    :param point: Point - location where the velocity will be interpolated using backward and forward waypoints.
+    :param bacward_wp: Waypoint
+    :param forward_wp: Waypoint
+    :return: velocity
+    """
+
+    # distance to backward waypoint
+    distance_to_backward_wp = get_distance_between_two_points(point, backward_wp.pose.pose.position)
+    # distance to forward waypoint
+    distance_to_forward_wp = get_distance_between_two_points(point, forward_wp.pose.pose.position)
+
+    backward_wp_vel = backward_wp.twist.twist.linear.x * distance_to_forward_wp / (distance_to_backward_wp + distance_to_forward_wp)
+    forward_wp_vel = forward_wp.twist.twist.linear.x * distance_to_backward_wp / (distance_to_backward_wp + distance_to_forward_wp)
+
+    return backward_wp_vel + forward_wp_vel
 
 
 def interpolate_obstacle_point_to_path(point1_array, point2_array, obs_point_array, distance):
