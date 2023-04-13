@@ -135,7 +135,12 @@ def get_closest_point_on_line(ego_point, point1, point2):
     y1 = point1.y
     x2 = point2.x
     y2 = point2.y
- 
+    
+    # create nparry from point coordinates
+    p1 = np.array([x1, y1, 0])
+    p2 = np.array([x2, y2, 0])
+    pego = np.array([x_ego, y_ego, 0])
+
 
     # calculate slope for the first line
 
@@ -157,7 +162,7 @@ def get_closest_point_on_line(ego_point, point1, point2):
 
     # return x and y in Pose
     point = Point(x=x, y=y, z=z)
-    
+
     return point
 
 
@@ -195,16 +200,50 @@ def interpolate_velocity_between_waypoints(point, backward_wp, forward_wp):
     return backward_wp_vel + forward_wp_vel
 
 
-def interpolate_point_to_path(point_array, point1_array, point2_array):
+def create_closest_point_on_path(waypoints, closest_idx, start_point):
+
+    #initialize angles
+    backward_angle = 0
+    forward_angle = 0
+
+    if closest_idx > 0:
+        backward_angle = abs(get_angle_three_points_2d(waypoints[closest_idx - 1].pose.pose.position, start_point, waypoints[closest_idx].pose.pose.position))
+    if closest_idx < len(waypoints) - 1:
+        forward_angle = abs(get_angle_three_points_2d(waypoints[closest_idx].pose.pose.position, start_point, waypoints[closest_idx + 1].pose.pose.position))
+
+    # if backward angle is bigger then project point to the backward section
+    if backward_angle > forward_angle:
+        closest_idx -= 1
+
+    start_position = Point(x=start_point.x, y=start_point.y, z=waypoints[closest_idx].pose.pose.position.z)
+    point = interpolate_point_to_path_point(start_position, waypoints[closest_idx].pose.pose.position, waypoints[closest_idx + 1].pose.pose.position)
+
+    return point
+
+
+def interpolate_point_to_path_point(point, point1, point2):
+
+    # convert points to arrays
+    point_array = np.array([point.x, point.y, point.z])
+    point1_array = np.array([point1.x, point1.y, point1.z])
+    point2_array = np.array([point2.x, point2.y, point2.z])
+
+    # interpolate point
+    point = interpolate_point_to_path_array(point_array, point1_array, point2_array)
+
+    return point
+
+
+def interpolate_point_to_path_array(point_array, point1_array, point2_array):
     """
     Interpolate point between two points (point1 and point2) on the path.
     Original point is obs_point that is off the path. This function finds the angle between
     path and obstacle direction and considers the distance as hypothenus of the triangle.
     Then the angle is used to project the point to the path.
-    :param obs_point_array: [x, y, z]
+    :param point_array: [x, y, z]
     :param point1_array: [x, y, z]
     :param point2_array: [x, y, z]
-    :return: [x, y, z]
+    :return: Point
     """
 
     x = point_array[0]
@@ -222,11 +261,9 @@ def interpolate_point_to_path(point_array, point1_array, point2_array):
     distance_to_forward_wp = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
     # find angle defined by 3 points: point1, point2 and obstacle point
-    v1 = np.array([x2 - x1, y2 - y1])
-    v2 = np.array([x - x1, y - y1])
-    dot = np.dot(v1, v2)
-    cross = np.cross(v1, v2)
-    angle = math.atan2(cross, dot)
+    angle = get_angle_three_points_2d(Point(x=x, y=y, z=z),
+                                      Point(x=x1, y=y1, z=z1),
+                                      Point(x=x2, y=y2, z=z2))
 
     projected_distance = distance_to_obstacle * math.cos(angle)
 
@@ -234,17 +271,34 @@ def interpolate_point_to_path(point_array, point1_array, point2_array):
     ratio = projected_distance / distance_to_forward_wp
 
     # calculate new point
-    x = x1 + ratio * (x2 - x1)
-    y = y1 + ratio * (y2 - y1)
+    x_new = x1 + ratio * (x2 - x1)
+    y_new = y1 + ratio * (y2 - y1)
 
     # calculate z
-    z = (z2 + z1) /2
+    z_new = (z2 + z1) /2
 
     # create_point x, y, z
-    point = Point(x=x, y=y, z=z)
+    point = Point(x=x_new, y=y_new, z=z_new)
 
     return point
 
+
+def get_angle_three_points_2d(point1, point2, point3):
+    """
+    Get angle between three points in 2D, point 2 is the center point.
+    :param point1: Point
+    :param point2: Point
+    :param point3: Point
+    :return: angle
+    """
+
+    v1 = np.array([point1.x - point2.x, point1.y - point2.y])
+    v2 = np.array([point3.x - point2.x, point3.y - point2.y])
+    dot = np.dot(v1, v2)
+    cross = np.cross(v1, v2)
+    angle = math.atan2(cross, dot)
+
+    return angle
 
 def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, distance):
     """

@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import rospy
+import copy
 import lanelet2
 import numpy as np
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 from lanelet2.core import BasicPoint2d
-from lanelet2.geometry import distance, to2D
+from lanelet2.geometry import to2D
 
 from sklearn.neighbors import KDTree
 
@@ -15,7 +16,7 @@ from autoware_msgs.msg import Lane, Waypoint, WaypointState
 from std_msgs.msg import Bool, ColorRGBA
 from visualization_msgs.msg import MarkerArray, Marker
 from tf.transformations import quaternion_from_euler
-from helpers import get_heading_between_two_points
+from helpers import get_heading_between_two_points, create_closest_point_on_path, get_distance_between_two_points
 
 LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
     "straight": WaypointState.STR_STRAIGHT,
@@ -111,20 +112,23 @@ class Lanelet2GlobalPlanner:
 
         waypoints, waypoint_tree = self.convert_to_waypoints(path_no_lane_change)
 
-        # find closest point idx for start and goal
-        d, start_idx = waypoint_tree.query([(start_point.x, start_point.y)], 1)
-        if d[0][0] > self.distance_to_centerline_limit:
+        # create new start and goal waypoints
+        _, start_idx = waypoint_tree.query([(start_point.x, start_point.y)], 1)
+        start_wp = self.create_waypoint_on_path(waypoints, start_idx[0][0], start_point)
+        if get_distance_between_two_points(start_wp.pose.pose.position, start_point) > self.distance_to_centerline_limit:
             rospy.logwarn("lanelet2_global_planner - start point too far (%f) from centerline", d[0][0])
             return
 
-        d, goal_idx = waypoint_tree.query([(new_goal.x, new_goal.y)], 1)
-        if d[0][0] > self.distance_to_centerline_limit:
+        _, goal_idx = waypoint_tree.query([(new_goal.x, new_goal.y)], 1)
+        goal_wp = self.create_waypoint_on_path(waypoints, goal_idx[0][0], new_goal)
+        if get_distance_between_two_points(goal_wp.pose.pose.position, new_goal) > self.distance_to_centerline_limit:
             rospy.logwarn("lanelet2_global_planner - goal point too far (%f) from centerline", d[0][0])
             return
 
         # update goal point and add new waypoints to the existing ones
-        self.goal_point = new_goal
-        self.waypoints += waypoints[start_idx[0][0]:goal_idx[0][0]]
+        self.goal_point = BasicPoint2d(goal_wp.pose.pose.position.x, goal_wp.pose.pose.position.y)
+        # replace first waypoint with start_wp and last waypoint with goal_wp
+        self.waypoints += [start_wp] + waypoints[start_idx[0][0] + 1 : goal_idx[0][0]] + [goal_wp]
 
         self.publish_waypoints(self.waypoints)
         rospy.loginfo("lanelet2_global_planner - path published")
@@ -139,6 +143,13 @@ class Lanelet2GlobalPlanner:
             self.goal_point = None
             self.publish_waypoints(self.waypoints)
             rospy.logwarn("lanelet2_global_planner - global path cancelled!")
+
+    def create_waypoint_on_path(self, waypoints, closest_idx, start_point):
+        wp = copy.deepcopy(waypoints[closest_idx])
+        # interpolate point on path
+        point = create_closest_point_on_path(waypoints, closest_idx, start_point)
+        wp.pose.pose.position = point
+        return wp
 
     def convert_to_waypoints(self, lanelet_sequence):
         waypoints = []
