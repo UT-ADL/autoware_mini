@@ -29,6 +29,8 @@
   <arg if="$(eval arg('detector') != 'carla' and use_cam)"      name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors.json" />
   <arg if="$(eval arg('detector') != 'carla' and not use_cam)"  name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_cam.json" />
 
+  <!-- Generate Traffic -->
+  <arg name='generate_traffic'                                    default='true'/>
   
   <!-- Scenario Runner args -->
   <arg name='use_scenario_runner'                                 default='false'/>
@@ -37,7 +39,7 @@
   <arg name='scenario_name'                                       default='FollowLeadingVehicle'/>
   <arg name='scenario_file'                                       default='$(find autoware_mini)/data/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/>
 
-    
+
   <!--
     ########################
     ## Carla topic remaps ##
@@ -125,15 +127,7 @@
     
     <!-- tune carla ackermann controller parameters -->
     <node name='$(anon dynparam)' pkg='dynamic_reconfigure' type='dynparam'
-      args='set_from_parameters carla/ego_vehicle/ackermann_control'>
-      <param name='speed_Kp' type='double' value='0.15' />
-      <param name='speed_Ki' type='double' value='0.0' />
-      <param name='speed_Kd' type='double' value='0.4' />
-
-      <param name='accel_Kp' type='double' value='0.03' />
-      <param name='accel_Ki' type='double' value='0.0' />
-      <param name='accel_Kd' type='double' value='0.05' />
-    </node>
+      args='set_from_parameters carla/ego_vehicle/ackermann_control'/>
   </group>
 
   <!-- ====================================================================================================== -->
@@ -150,6 +144,12 @@
 
     <node pkg='autoware_mini' type='carla_vehicle_interface.py' name='carla_vehicle_interface' output='screen' required="true" />
     
+    <!-- If traffic is enabled then run traffic generator -->
+    <node if="$(arg generate_traffic)" pkg="autoware_mini" type="carla_traffic_generator.py" name="carla_traffic_generator" output="screen" required="true">
+      <param name="host"               value="$(arg host)"/>
+      <param name="port"               value="$(arg port)"/>
+    </node>
+
     <!-- If localizer is novatel then change child_frame to ego_vehicle and run carla_to_novatel msgs converter -->
     <group if="$(eval localizer.lower() == 'novatel')">
       <param  name="/localization/novatel_oem7_localizer/child_frame" value="ego_vehicle" />
