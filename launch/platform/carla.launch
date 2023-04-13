@@ -124,10 +124,6 @@
   <group unless='$(arg use_manual_control)'>
     <!-- carla ackermann control -->
     <include file='$(find carla_ackermann_control)/launch/carla_ackermann_control.launch' />
-    
-    <!-- tune carla ackermann controller parameters -->
-    <node name='$(anon dynparam)' pkg='dynamic_reconfigure' type='dynparam'
-      args='set_from_parameters carla/ego_vehicle/ackermann_control'/>
   </group>
 
   <!-- ====================================================================================================== -->
@@ -145,10 +141,7 @@
     <node pkg='autoware_mini' type='carla_vehicle_interface.py' name='carla_vehicle_interface' output='screen' required="true" />
     
     <!-- If traffic is enabled then run traffic generator -->
-    <node if="$(arg generate_traffic)" pkg="autoware_mini" type="carla_traffic_generator.py" name="carla_traffic_generator" output="screen" required="true">
-      <param name="host"               value="$(arg host)"/>
-      <param name="port"               value="$(arg port)"/>
-    </node>
+    <node if="$(arg generate_traffic)" pkg="autoware_mini" type="carla_traffic_generator.sh" name="carla_traffic_generator" args="--async end_of_args" output="screen" required="true" />
 
     <!-- If localizer is novatel then change child_frame to ego_vehicle and run carla_to_novatel msgs converter -->
     <group if="$(eval localizer.lower() == 'novatel')">
