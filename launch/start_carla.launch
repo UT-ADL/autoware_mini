@@ -14,7 +14,7 @@
     <arg name="lanelet2_map_name"           default="tartu_demo_l_c_wp.osm"     if="$(eval arg('localizer')=='carla')" />
     <arg name="lanelet2_map_name"           default="tartu_demo_l_c_wp_dem.osm" if="$(eval arg('localizer')!='carla')" />
     <arg name='use_lexus_model'             default='true'/>
-    <arg name='generate_traffic'            default='false'/>
+    <arg name='generate_traffic'            default='true'/>
     
     <!-- Scenario Runner args -->
     <arg name='use_scenario_runner'         default='false'/>
