@@ -10,7 +10,7 @@ from geometry_msgs.msg import PoseStamped, TwistStamped, Point
 from visualization_msgs.msg import Marker
 from std_msgs.msg import ColorRGBA
 
-from helpers import get_closest_point_on_line, interpolate_obstacle_point_to_path, get_orientation_from_yaw, get_heading_between_two_points
+from helpers import get_closest_point_on_line, interpolate_point_to_path, get_orientation_from_yaw, get_heading_between_two_points
 from helpers.timer import Timer
 
 
@@ -184,10 +184,9 @@ class LocalPlanner:
 
                 # find index of point when the value in array exeeds the distance to the nearest obstacle
                 idx_after_obj = np.where(local_path_distances > obs_on_path[0,0])[0][0]
-                stop_point = interpolate_obstacle_point_to_path(local_path_array[idx_after_obj-1,0:3],                    # point on path before
-                                                                local_path_array[idx_after_obj,0:3],                      # point on path after                           
-                                                                obstacle_array[obs_on_path[1,0].astype(int), 0:3],        # obstacle point coordinates
-                                                                obs_on_path[0,0]- local_path_distances[idx_after_obj-1])  # distance towards obstacle point
+                stop_point = interpolate_point_to_path(obstacle_array[obs_on_path[1,0].astype(int), 0:3],        # obstacle point coordinates
+                                                        local_path_array[idx_after_obj-1,0:3],                   # point on path before
+                                                        local_path_array[idx_after_obj,0:3])                     # point on path after
                 stop_heading = get_heading_between_two_points(Point(local_path_array[idx_after_obj-1,0], local_path_array[idx_after_obj-1,1], local_path_array[idx_after_obj-1,2]),
                                                         Point(local_path_array[idx_after_obj,0], local_path_array[idx_after_obj,1], local_path_array[idx_after_obj,2])) - np.pi/2
                 stop_quaternion = get_orientation_from_yaw(stop_heading)
