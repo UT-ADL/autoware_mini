@@ -125,6 +125,10 @@ class Lanelet2GlobalPlanner:
             rospy.logwarn("lanelet2_global_planner - goal point too far (%f) from centerline", d[0][0])
             return
 
+        if start_lanelet.id == goal_lanelet.id and start_idx[0][0] > goal_idx[0][0]:
+            rospy.logwarn("lanelet2_global_planner - goal point can't be before the start point on the same lanelet")
+            return
+
         # update goal point and add new waypoints to the existing ones
         self.goal_point = BasicPoint2d(goal_wp.pose.pose.position.x, goal_wp.pose.pose.position.y)
         # replace first waypoint with start_wp and last waypoint with goal_wp
