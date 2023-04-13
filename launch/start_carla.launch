@@ -14,15 +14,13 @@
     <arg name="lanelet2_map_name"           default="tartu_demo_l_c_wp.osm"     if="$(eval arg('localizer')=='carla')" />
     <arg name="lanelet2_map_name"           default="tartu_demo_l_c_wp_dem.osm" if="$(eval arg('localizer')!='carla')" />
     <arg name='use_lexus_model'             default='true'/>
+    <arg name='generate_traffic'            default='true'/>
     
     <!-- Scenario Runner args -->
     <arg name='use_scenario_runner'         default='false'/>
     <arg name='scenario_runner_path'        default='$(optenv SCENARIO_RUNNER_ROOT)'/>
     <arg name='scenario_name'               default='FollowLeadingVehicle'/>
     <arg name='scenario_file'               default='$(find autoware_mini)/data/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/>
-
-    <!-- Lexus model -->
-    <!-- <include if="$(arg use_lexus_model)" file="$(find vehicle_platform)/launch/sensors/lexus_model.launch" /> -->
 
     <!-- Planner -->
     <include file="$(find autoware_mini)/launch/planning.launch">
@@ -59,6 +57,7 @@
         <arg name="use_cam"                             value="$(arg use_cam)" />
         <arg name="detector"                            value="$(arg detector)" />
         <arg name="localizer"                           value="$(arg localizer)" />
+        <arg name="generate_traffic"                    value="$(arg generate_traffic)" />
         <arg name="scenario_runner_path"                value="$(arg scenario_runner_path)" />
         <arg name="use_scenario_runner"                 value="$(arg use_scenario_runner)" />
         <arg name="scenario_name"                       value="$(arg scenario_name)" />
