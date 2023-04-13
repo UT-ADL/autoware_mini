@@ -182,13 +182,15 @@ class LocalPlanner:
                 self.closest_object_distance = obs_on_path[0,0] - CURRENT_POSE_TO_CAR_FRONT_METERS - self.braking_safety_distance
                 self.closest_object_velocity = obs_on_path[3,0]
 
-                # find index of point when the value in array exeeds the distance to the nearest obstacle
-                idx_after_obj = np.where(local_path_distances > obs_on_path[0,0])[0][0]
-                stop_point = interpolate_point_to_path(obstacle_array[obs_on_path[1,0].astype(int), 0:3],        # obstacle point coordinates
-                                                        local_path_array[idx_after_obj-1,0:3],                   # point on path before
-                                                        local_path_array[idx_after_obj,0:3])                     # point on path after
-                stop_heading = get_heading_between_two_points(Point(local_path_array[idx_after_obj-1,0], local_path_array[idx_after_obj-1,1], local_path_array[idx_after_obj-1,2]),
-                                                        Point(local_path_array[idx_after_obj,0], local_path_array[idx_after_obj,1], local_path_array[idx_after_obj,2])) - np.pi/2
+                # find index with closest distance to the nearest obstacle and correct if point after obstacle (positive difference)
+                index = np.argmin(np.abs(local_path_distances - obs_on_path[0,0]))
+                if local_path_distances[index] - obs_on_path[0,0] > 0 or index == len(local_path_distances)-1:
+                    index = index - 1
+                stop_point = interpolate_point_to_path(obstacle_array[obs_on_path[1,0].astype(int), 0:3],   # obstacle point coordinates
+                                                        local_path_array[index,0:3],                        # point on path before
+                                                        local_path_array[index + 1,0:3])                    # point on path after
+                stop_heading = get_heading_between_two_points(Point(local_path_array[index,0], local_path_array[index,1], local_path_array[index,2]),
+                                                        Point(local_path_array[index + 1,0], local_path_array[index + 1,1], local_path_array[index + 1,2])) - np.pi/2
                 stop_quaternion = get_orientation_from_yaw(stop_heading)
 
         # LOCAL PATH WAYPOINTS
