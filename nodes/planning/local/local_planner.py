@@ -10,7 +10,7 @@ from geometry_msgs.msg import PoseStamped, TwistStamped, Point
 from visualization_msgs.msg import Marker
 from std_msgs.msg import ColorRGBA
 
-from helpers import get_closest_point_on_line, interpolate_point_to_path, get_orientation_from_yaw, get_heading_between_two_points
+from helpers import get_closest_point_on_line, interpolate_point_to_path_array, get_orientation_from_yaw, get_heading_between_two_points
 from helpers.timer import Timer
 
 
@@ -186,7 +186,7 @@ class LocalPlanner:
                 index = np.argmin(np.abs(local_path_distances - obs_on_path[0,0]))
                 if local_path_distances[index] - obs_on_path[0,0] > 0 or index == len(local_path_distances)-1:
                     index = index - 1
-                stop_point = interpolate_point_to_path(obstacle_array[obs_on_path[1,0].astype(int), 0:3],   # obstacle point coordinates
+                stop_point = interpolate_point_to_path_array(obstacle_array[obs_on_path[1,0].astype(int), 0:3],   # obstacle point coordinates
                                                         local_path_array[index,0:3],                        # point on path before
                                                         local_path_array[index + 1,0:3])                    # point on path after
                 stop_heading = get_heading_between_two_points(Point(local_path_array[index,0], local_path_array[index,1], local_path_array[index,2]),
