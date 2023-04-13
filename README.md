@@ -92,25 +92,18 @@ You should see Rviz window with a default map. To start driving you need to give
    $CARLA_ROOT/CarlaUE4.sh -prefernvidia -quality-level=Low
    ```
 #### Launch using ground-truth detection:
-2. In a new terminal, (assuming enviornment variables are exported) run the following command. This run’s tartu environment of Carla with minimal sensors and our autonomy stack. The detected objects come from Carla directly.
+2. In a new terminal, (assuming enviornment variables are exported) run the following command. This run’s tartu environment of Carla with minimal sensors and our autonomy stack. The detected objects come from Carla directly. Additionally, here we pass an additional argument `generate_traffic`, this spawns traffic inside carla simulation. You can toggle this arugment true/false depending on your use case.
 
    ```
-   roslaunch autoware_mini start_carla.launch
+   roslaunch autoware_mini start_carla.launch generate_traffic=:true
    ```
 #### OR
 #### Launch using lidar based detector:
-2. In a new terminal, (assuming enviornment variables are exported) run the following command. This run’s tartu environment of Carla with lidar sensors and our autonomy stack. The detection is performed using Lidar based euclidean cluster detector.
+2. In a new terminal, (assuming enviornment variables are exported) run the following command. This run’s tartu environment of Carla with lidar sensors and our autonomy stack. The detection is performed using Lidar based euclidean cluster detector. Additionally, here we pass an additional argument `generate_traffic`, this spawns traffic inside carla simulation. You can toggle this arugment true/false depending on your use case.
 
    ```
-   roslaunch autoware_mini start_carla.launch detector:=simple
+   roslaunch autoware_mini start_carla.launch generate_traffic=:true detector:=cluster
    ```
-#### Generate Traffic
-3. In a new terminal, (assuming enviornment variables are exported) generate random traffic by entering following command.
-
-   ```
-   python $CARLA_ROOT/PythonAPI/examples/generate_traffic.py --asynch
-   ```
-
 ## Launching in Lexus
 
 ```
