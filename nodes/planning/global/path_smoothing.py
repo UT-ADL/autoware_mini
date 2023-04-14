@@ -119,8 +119,7 @@ class PathSmoothing:
             speed_new[-int(self.speed_averaging_window/2):] = speed_new[-int(self.speed_averaging_window/2)-1]
 
         if self.adjust_endpoint_speed_to_zero:
-            # set first and last speed to zero
-            speed_new[0] = 0
+            # set last point speed to zero
             speed_new[-1] = 0
 
             # adjust speed graphs using deceleartion limit and waypoint interval
