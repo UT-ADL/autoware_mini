@@ -9,7 +9,7 @@ from sklearn.neighbors import NearestNeighbors
 
 from helpers import get_heading_from_pose_orientation, get_heading_between_two_points, get_blinker_state, \
     normalize_heading_error, get_point_on_path_within_distance, get_closest_point_on_line, \
-    get_cross_track_error, interpolate_velocity_between_waypoints
+    get_cross_track_error, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
@@ -99,7 +99,7 @@ class PurePursuitFollower:
             start_time = rospy.get_time()
 
         # Find 2 nearest waypoint idx's on path (from base_link)
-        back_wp_idx, front_wp_idx = self.find_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
+        back_wp_idx, front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
 
         if front_wp_idx == len(waypoints)-1:
             # stop vehicle - last waypoint is reached
@@ -151,13 +151,6 @@ class PurePursuitFollower:
         if self.publish_debug_info:
             self.publish_pure_pursuit_markers(stamp, current_pose, lookahead_point, heading_angle_difference)
             self.follower_debug_pub.publish(Float32MultiArray(data=[1.0 / (rospy.get_time() - start_time), current_heading, lookahead_heading, heading_error, cross_track_error, target_velocity]))
-
-
-    def find_two_nearest_waypoint_idx(self, waypoint_tree, x, y):
-        idx = waypoint_tree.kneighbors([(x, y)], 2, return_distance=False)
-        # sort to get them in ascending order - follow along path
-        idx[0].sort()
-        return idx[0][0], idx[0][1]
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):

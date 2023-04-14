@@ -9,7 +9,8 @@ from sklearn.neighbors import NearestNeighbors
 
 from helpers import get_heading_from_pose_orientation, get_blinker_state, get_heading_between_two_points, \
     get_closest_point_on_line, get_point_on_path_within_distance, get_cross_track_error, \
-    get_pose_using_heading_and_distance, normalize_heading_error, interpolate_velocity_between_waypoints
+    get_pose_using_heading_and_distance, normalize_heading_error, interpolate_velocity_between_waypoints, \
+    get_two_nearest_waypoint_idx
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
 from std_msgs.msg import ColorRGBA, Float32MultiArray
@@ -100,11 +101,11 @@ class StanleyFollower:
         
         # Find pose for the front wheel and 2 closest waypoint idx (fw_)
         front_wheel_pose = get_pose_using_heading_and_distance(current_pose, current_heading, self.wheel_base)
-        fw_back_wp_idx, fw_front_wp_idx = self.find_two_nearest_waypoint_idx(waypoint_tree, front_wheel_pose.position.x, front_wheel_pose.position.y)
+        fw_back_wp_idx, fw_front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, front_wheel_pose.position.x, front_wheel_pose.position.y)
         cross_track_error = get_cross_track_error(front_wheel_pose, waypoints[fw_back_wp_idx].pose.pose, waypoints[fw_front_wp_idx].pose.pose)
 
         # get closest point to base_link on path (line defined by 2 closest waypoints) - (bl_)
-        bl_back_wp_idx, bl_front_wp_idx = self.find_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
+        bl_back_wp_idx, bl_front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
 
         if bl_front_wp_idx == len(waypoints)-1:
             # stop vehicle if last waypoint is reached
@@ -142,12 +143,6 @@ class StanleyFollower:
         if self.publish_debug_info:
             self.publish_stanley_markers(stamp, bl_nearest_point, lookahead_point, front_wheel_pose, heading_error)
             self.follower_debug_pub.publish(Float32MultiArray(data=[(rospy.get_time() - start_time), current_heading, track_heading, heading_error, cross_track_error, target_velocity]))
-
-    def find_two_nearest_waypoint_idx(self, waypoint_tree, x, y):
-        idx = waypoint_tree.kneighbors([(x, y)], 2, return_distance=False)
-        # sort to get them in ascending order - follow along path
-        idx[0].sort()
-        return idx[0][0], idx[0][1]
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):

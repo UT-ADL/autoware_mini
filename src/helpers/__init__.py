@@ -58,6 +58,21 @@ def get_blinker_state(steering_state):
         return 0, 0
 
 
+def get_two_nearest_waypoint_idx(waypoint_tree, x, y):
+    """
+    Find 2 cloest waypoint index values from the waypoint_tree
+    :param waypoint_tree:
+    :param x
+    :param y
+    """
+
+    idx = waypoint_tree.kneighbors([(x, y)], 2, return_distance=False)
+
+    # sort to get them in ascending order - follow along path
+    idx[0].sort()
+    return idx[0][0], idx[0][1]
+
+
 def get_cross_track_error(ego_pose, pose1, pose2):
     """
     Get cross track error from ego pose and two poses
