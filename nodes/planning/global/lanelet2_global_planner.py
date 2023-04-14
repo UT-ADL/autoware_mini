@@ -34,6 +34,7 @@ class Lanelet2GlobalPlanner:
         # Parameters
         self.lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         self.output_frame = rospy.get_param("~output_frame", map)
+        self.distance_to_goal_limit = rospy.get_param("~distance_to_goal_limit", 2.0)
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
         self.speed_limit = rospy.get_param("~speed_limit", 40.0) / 3.6
         self.wp_left_width = rospy.get_param("~wp_left_width", 1.4)
@@ -140,6 +141,14 @@ class Lanelet2GlobalPlanner:
 
     def current_pose_callback(self, msg):
         self.current_location = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
+
+        if self.goal_point != None:
+            d = get_distance_between_two_points(self.current_location, self.goal_point)
+            if d < self.distance_to_goal_limit:
+                self.waypoints = []
+                self.goal_point = None
+                self.publish_waypoints(self.waypoints)
+                rospy.logwarn("lanelet2_global_planner - goal reached, clearing path!")
 
     def cancel_global_path_callback(self, msg):
         if msg.data:

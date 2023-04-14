@@ -56,7 +56,7 @@ class StanleyFollower:
 
         if len(path_msg.waypoints) < 2:
             # if path is cancelled and empty waypoints received
-            rospy.logwarn_throttle(30, "stanley_follower - not enough waypoints received, stopping!")
+            rospy.logwarn_throttle(30, "stanley_follower - no waypoints, stopping!")
             self.lock.acquire()
             self.waypoint_tree = None
             self.waypoints = None
