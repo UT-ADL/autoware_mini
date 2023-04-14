@@ -116,14 +116,16 @@ class Lanelet2GlobalPlanner:
         # create new start and goal waypoints
         _, start_idx = waypoint_tree.query([(start_point.x, start_point.y)], 1)
         start_wp = self.create_waypoint_on_path(waypoints, start_idx[0][0], start_point)
-        if get_distance_between_two_points(start_wp.pose.pose.position, start_point) > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - start point too far (%f) from centerline", d[0][0])
+        d = get_distance_between_two_points(start_wp.pose.pose.position, start_point)
+        if d > self.distance_to_centerline_limit:
+            rospy.logwarn("lanelet2_global_planner - start point too far (%f) from centerline", d)
             return
 
         _, goal_idx = waypoint_tree.query([(new_goal.x, new_goal.y)], 1)
         goal_wp = self.create_waypoint_on_path(waypoints, goal_idx[0][0], new_goal)
-        if get_distance_between_two_points(goal_wp.pose.pose.position, new_goal) > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - goal point too far (%f) from centerline", d[0][0])
+        d = get_distance_between_two_points(goal_wp.pose.pose.position, new_goal)
+        if d > self.distance_to_centerline_limit:
+            rospy.logwarn("lanelet2_global_planner - goal point too far (%f) from centerline", d)
             return
 
         if start_lanelet.id == goal_lanelet.id and start_idx[0][0] > goal_idx[0][0]:
