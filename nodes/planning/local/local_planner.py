@@ -8,7 +8,7 @@ from sklearn.neighbors import NearestNeighbors
 from autoware_msgs.msg import Lane, DetectedObjectArray
 from geometry_msgs.msg import PoseStamped, TwistStamped, Point
 from visualization_msgs.msg import Marker
-from std_msgs.msg import ColorRGBA
+from std_msgs.msg import ColorRGBA, Bool
 
 from helpers import get_closest_point_on_line, interpolate_point_to_path_array, get_orientation_from_yaw, get_heading_between_two_points
 from helpers.timer import Timer
@@ -195,7 +195,7 @@ class LocalPlanner:
 
         # LOCAL PATH WAYPOINTS
         # slice waypoints from global path to local path - should be replaced with
-        local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_forward:end_index])
+        local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_backward:end_index])
 
         # Calculate velocity profile in local path waypoints
         if obstacles_on_local_path:
@@ -222,7 +222,6 @@ class LocalPlanner:
 
         self.visualize_stop_point(stop_point, stop_quaternion, stop_color)
         self.publish_local_path_wp(local_path_waypoints)
-
 
     def visualize_stop_point(self, stop_point, stop_quaternion, color):
 
