@@ -121,10 +121,10 @@ def get_closest_point_on_line(ego_point, point1, point2):
     Calculates closest point on path. Constructs one line that is given by two points and
     the other line is given by a point and is known to be perpendicular to the first line.
     Closest point is the intersection of these lines.
-    :param ego_pose: Pose
-    :param pose2: Pose backward
-    :param pose3: Pose forward
-    :return: Point
+    :param ego_point: Point
+    :param point1: Point
+    :param point2: Point
+    :return: Point 
     """
     # ego_pose (front wheel)
     x_ego = ego_point.x
@@ -135,21 +135,13 @@ def get_closest_point_on_line(ego_point, point1, point2):
     y1 = point1.y
     x2 = point2.x
     y2 = point2.y
-    
-    # create nparry from point coordinates
-    p1 = np.array([x1, y1, 0])
-    p2 = np.array([x2, y2, 0])
-    pego = np.array([x_ego, y_ego, 0])
 
-
-    # calculate slope for the first line
-
-    # no slope - horizontal line
-    if (y2 - y1) == 0:
+    # very small slope - almost horizontal line
+    if (y2 - y1) < 0.0001:
         x = x_ego
         y = y2
-    # infinite slope - vertical line
-    elif (x2 - x1) == 0:
+    # infinite slope - almost vertical line
+    elif (x2 - x1) < 0.0001:
         x = x2
         y = y_ego
     else:
@@ -160,10 +152,11 @@ def get_closest_point_on_line(ego_point, point1, point2):
         x = (m * x1 - m_perp * x_ego + y_ego - y1) / (m - m_perp)
         y = m * (x - x1) + y1
 
-    # return x and y in Pose
-    point = Point(x=x, y=y, z=z)
+    # clip output to be within the line segment
+    x = np.clip(x, min(x1, x2), max(x1, x2))
+    y = np.clip(y, min(y1, y2), max(y1, y2))
 
-    return point
+    return Point(x = x, y = y, z=z)
 
 
 def get_distance_between_two_points(point1, point2):
