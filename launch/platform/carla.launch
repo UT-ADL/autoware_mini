@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <launch>
 
+  <!-- Module type -->
+  <arg name="detector"                                            default="carla"/>
+  <arg name="localizer"                                           default="carla"/>
+  <arg name="use_cam"                                             default="false" />
     
   <arg name='host'                                                default='localhost' />
   <arg name='port'                                                default='2000' />
@@ -15,13 +19,8 @@
   <!-- Control -->
   <arg name='passive'                                             default='' />     <!-- Enable/disable passive mode -->
   <arg name='synchronous_mode_wait_for_vehicle_control_command'   default='false' /><!-- Synchronous mode-->
-  <arg name='fixed_delta_seconds'                                 default='0.1' />
+  <arg name='fixed_delta_seconds'                                 default="$(eval 0.05 if arg('detector') == 'carla' else 0.1)" />
   <arg name='use_manual_control'                                  default='false' /><!-- Toggle manual control-->
-
-  <!-- Module type -->
-  <arg name="detector"                                            default="carla"/>
-  <arg name="localizer"                                           default="carla"/>
-  <arg name="use_cam"                                             default="false" />
 
   <!-- Load correct sensor configurations-->
   <arg if="$(eval arg('detector') == 'carla' and use_cam)"      name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_lidars_and_radars.json" />

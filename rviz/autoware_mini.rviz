@@ -8,6 +8,7 @@ Panels:
         - /Detection1/Lidar1
         - /Detection1/Detected objects1
         - /Planning1
+        - /Planning1/Global path1/Namespaces1
         - /Planning1/Smoothed path1/Namespaces1
         - /Planning1/Local path1/Namespaces1
         - /Simulation1
@@ -30,7 +31,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Carla camera view
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -182,9 +183,7 @@ Visualization Manager:
               Points raw center: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -227,9 +226,7 @@ Visualization Manager:
               Points raw center: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -345,27 +342,30 @@ Visualization Manager:
     - Class: rviz/Group
       Displays:
         - Class: rviz/MarkerArray
-          Enabled: false
+          Enabled: true
           Marker Topic: /planning/global_path_markers
           Name: Global path
+          Namespaces:
+            Path: true
+            Velocity label: false
+            Waypoint pose: false
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: false
+          Marker Topic: /planning/smoothed_path_markers
+          Name: Smoothed path
           Namespaces:
             {}
           Queue Size: 100
           Value: false
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /planning/smoothed_path_markers
-          Name: Smoothed path
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
           Marker Topic: /planning/local_path_markers
           Name: Local path
           Namespaces:
-            {}
+            Velocity label: true
+            Waypoints: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -436,7 +436,8 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              "": true
+              Current pose: true
+              Follower markers: true
               Value: true
             Detection:
               Detected objects: true
@@ -451,10 +452,16 @@ Visualization Manager:
               Lanelet2 map: true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
-              "": true
+              Camera Left: true
+              Camera Right: true
+              Points raw center: true
               Value: true
             Simulation:
               Bicycle markers: true
