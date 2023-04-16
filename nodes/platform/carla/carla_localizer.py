@@ -45,28 +45,32 @@ class CarlaLocalizer:
         """
         callback odometry
         """
-        # Odometry Pose
+
+        if self.use_offset:
+            new_pose = self.sim2utm_transformer.transform_pose(msg.pose.pose)
+        else:
+            new_pose = msg.pose.pose
+
+        # Publish Transform
+        self.br.sendTransform((new_pose.position.x, new_pose.position.y, new_pose.position.z),
+                              (new_pose.orientation.x, new_pose.orientation.y, new_pose.orientation.z, new_pose.orientation.w),
+                               msg.header.stamp, 'ego_vehicle', 'map')
+
+        # Publish current pose
         current_pose = PoseStamped()
         current_pose.header.frame_id = "map"
         current_pose.header.stamp = msg.header.stamp
-
-        if self.use_offset:
-            current_pose.pose = self.sim2utm_transformer.transform_pose(msg.pose.pose)
-        else:
-            current_pose.pose = msg.pose
-
-        # Publish current pose
+        current_pose.pose = new_pose
         self.pose_pub.publish(current_pose)
 
         # Publish current velocity
         current_velocity = TwistStamped()
-        current_velocity.header.stamp = msg.header.stamp
         current_velocity.header.frame_id = "ego_vehicle"
-        speed = msg.twist.twist.linear
-        current_velocity.twist.linear.x = math.sqrt(speed.x**2 + speed.y**2 + speed.z**2)
-        current_velocity.twist.angular = msg.twist.twist.angular
+        current_velocity.header.stamp = msg.header.stamp
+        current_velocity.twist = msg.twist.twist
         self.twist_pub.publish(current_velocity)
 
+        # Publish odometry
         odom = Odometry()
         odom.header.stamp = msg.header.stamp
         odom.header.frame_id = current_pose.header.frame_id
@@ -75,10 +79,6 @@ class CarlaLocalizer:
         odom.twist.twist = current_velocity.twist
         self.odom_pub.publish(odom)
 
-        # Publish Transform
-        self.br.sendTransform((current_pose.pose.position.x, current_pose.pose.position.y, current_pose.pose.position.z),
-                              (current_pose.pose.orientation.x, current_pose.pose.orientation.y, current_pose.pose.orientation.z, current_pose.pose.orientation.w),
-                               current_pose.header.stamp, 'ego_vehicle', 'map')
 
     def run(self):
         rospy.spin()

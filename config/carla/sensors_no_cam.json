@@ -77,10 +77,11 @@
                             "range": 200,
                             "channels": 32,
                             "points_per_second": 600000,
-                            "upper_fov": 20.0,
-                            "lower_fov": -20.0,
-                            "rotation_frequency": 20,
-                            "noise_stddev": 0.0,
+                            "upper_fov": 15.0,
+                            "lower_fov": -25.0,
+                            "rotation_frequency": 10,
+                            "noise_stddev": 0.03,
+                            "dropoff_general_rate": 0.1,
                             "attached_objects":
                             [
                                 {

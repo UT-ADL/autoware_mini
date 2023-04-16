@@ -15,7 +15,7 @@
   <!-- Control -->
   <arg name='passive'                                             default='' />     <!-- Enable/disable passive mode -->
   <arg name='synchronous_mode_wait_for_vehicle_control_command'   default='false' /><!-- Synchronous mode-->
-  <arg name='fixed_delta_seconds'                                 default='0.05' />
+  <arg name='fixed_delta_seconds'                                 default='0.1' />
   <arg name='use_manual_control'                                  default='false' /><!-- Toggle manual control-->
 
   <!-- Module type -->

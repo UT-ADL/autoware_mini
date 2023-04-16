@@ -5,6 +5,7 @@ import rospy
 import numpy as np
 import cv2
 
+import tf
 from ros_numpy import numpify, msgify
 from tf.transformations import quaternion_from_euler
 
@@ -21,6 +22,10 @@ class ClusterDetector:
         self.bounding_box_type = rospy.get_param('~bounding_box_type', 'axis_aligned')
         self.enable_pointcloud = rospy.get_param('~enable_pointcloud', False)
         self.enable_convex_hull = rospy.get_param('~enable_convex_hull', True)
+        self.target_frame = rospy.get_param('~target_frame', 'map')
+        self.transform_timeout = rospy.get_param('~transform_timeout', 0.05)
+
+        self.tf = tf.TransformListener()
 
         self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         rospy.Subscriber('points_clustered', PointCloud2, self.cluster_callback, queue_size=1, buff_size=1024*1024)
@@ -30,23 +35,44 @@ class ClusterDetector:
     def cluster_callback(self, msg):
         data = numpify(msg)
 
-        # prepare header for all objects
-        header = Header(stamp=msg.header.stamp, frame_id=msg.header.frame_id)
-
+        # make copy of labels
         labels = data['label']
-        objects = DetectedObjectArray(header=header)
+        # convert data to ndarray
+        points = data.view((np.float32, 4))
 
+        # if target frame does not match the header frame
+        if msg.header.frame_id != self.target_frame:
+            try:
+                # wait for target frame transform to be available
+                self.tf.waitForTransform(self.target_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
+                # fetch transform for target frame
+                tf_matrix = self.tf.asMatrix(self.target_frame, msg.header).astype(np.float32)
+            except Exception as e:
+                rospy.logerr(str(e))
+                return
+            # make copy of points
+            points = points.copy()
+            # turn into homogeneous coordinates
+            points[:,3] = 1
+            # transform points to target frame
+            points = points.dot(tf_matrix.T)
+
+        # prepare header for all objects
+        header = Header(stamp=msg.header.stamp, frame_id=self.target_frame)
+
+        # create detected objects
+        objects = DetectedObjectArray(header=header)
         for i in range(np.max(labels) + 1):
-            # fetch points for this cluster
-            points = data[labels == i]
+            # filter points for this cluster
+            mask = (labels == i)
 
             # ignore clusters smaller than certain size
-            if len(points) < self.min_cluster_size:
+            if np.sum(mask) < self.min_cluster_size:
                 continue
 
-            # convert points to ndarray for simpler processing
-            points = points.view((np.float32, 4))
-            points3d = points[:,:3]
+            # fetch points for this cluster
+            points3d = points[mask,:3]
+            # cv2.convexHull needs contiguous array of 2D points
             points2d = np.ascontiguousarray(points3d[:,:2])
 
             if self.bounding_box_type == 'axis_aligned':
@@ -67,8 +93,8 @@ class ClusterDetector:
                 qx, qy, qz, qw = quaternion_from_euler(0.0, 0.0, math.radians(heading_angle))
 
                 # calculate height and vertical position
-                max_z = np.max(points['z'])
-                min_z = np.min(points['z'])
+                max_z = np.max(points3d[:,2])
+                min_z = np.min(points3d[:,2])
                 dim_z = max_z - min_z
                 center_z = (max_z + min_z) / 2.0
             else:
@@ -80,7 +106,7 @@ class ClusterDetector:
             object.label = "unknown"
             object.color = BLUE80P
             object.valid = True
-            object.space_frame = msg.header.frame_id
+            object.space_frame = self.target_frame
             object.pose.position.x = center_x
             object.pose.position.y = center_y
             object.pose.position.z = center_z
