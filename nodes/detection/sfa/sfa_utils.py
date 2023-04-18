@@ -17,18 +17,20 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 
+
 # from tqdm import tqdm
 # from data_process.transformation import lidar_to_camera_box
 # import kitti_common
 # import box_np_ops
-
-
+#
+#
 # import config.kitti_config as cnf
 # from data_process.kitti_bev_utils import drawRotatedBox
 
 
 def _sigmoid(x):
     return torch.clamp(x.sigmoid_(), min=1e-4, max=1 - 1e-4)
+
 
 def _nms(heat, kernel=3):
     pad = (kernel - 1) // 2
@@ -121,7 +123,7 @@ def get_yaw(direction):
     return np.arctan2(direction[:, 0:1], direction[:, 1:2])
 
 
-def post_processing(detections, bound_size_x, bound_size_y, BEV_WIDTH, BEV_HEIGHT, num_classes, peak_thresh, down_ratio,):
+def post_processing(detections, bound_size_x, bound_size_y, BEV_WIDTH, BEV_HEIGHT, num_classes=3, down_ratio=4, peak_thresh=0.2):
     """
     :param detections: [batch_size, K, 10]
     # (scores x 1, xs x 1, ys x 1, z_coor x 1, dim x 3, direction x 2, clses x 1)
@@ -155,17 +157,17 @@ def post_processing(detections, bound_size_x, bound_size_y, BEV_WIDTH, BEV_HEIGH
     return ret
 
 
-def draw_predictions(img, detections, num_classes=3):
-    for j in range(num_classes):
-        if len(detections[j]) > 0:
-            for det in detections[j]:
-                # (scores-0:1, x-1:2, y-2:3, z-3:4, dim-4:7, yaw-7:8)
-                _score, _x, _y, _z, _h, _w, _l, _yaw = det
-                drawRotatedBox(img, _x, _y, _w, _l, _yaw, cnf.colors[int(j)])
+# def draw_predictions(img, detections, num_classes=3):
+#     for j in range(num_classes):
+#         if len(detections[j]) > 0:
+#             for det in detections[j]:
+#                 # (scores-0:1, x-1:2, y-2:3, z-3:4, dim-4:7, yaw-7:8)
+#                 _score, _x, _y, _z, _h, _w, _l, _yaw = det
+#                 drawRotatedBox(img, _x, _y, _w, _l, _yaw, cnf.colors[int(j)])
+#
+#     return img
 
-    return img
-
-def convert_det_to_real_values(detections, num_classes=3, add_score=False):
+def convert_det_to_real_values(detections, BEV_WIDTH, BEV_HEIGHT, bound_size_x, bound_size_y, boundary_min_x, boundary_min_y, boundary_min_z,  num_classes=3, add_score=False):
     kitti_dets = []
     for cls_id in range(num_classes):
         if len(detections[cls_id]) > 0:
@@ -173,11 +175,11 @@ def convert_det_to_real_values(detections, num_classes=3, add_score=False):
                 # (scores-0:1, x-1:2, y-2:3, z-3:4, dim-4:7, yaw-7:8)
                 _score, _x, _y, _z, _h, _w, _l, _yaw = det
                 _yaw = -_yaw
-                x = _y / cnf.BEV_HEIGHT * cnf.bound_size_x + cnf.boundary['minX']
-                y = _x / cnf.BEV_WIDTH * cnf.bound_size_y + cnf.boundary['minY']
-                z = _z + cnf.boundary['minZ']
-                w = _w / cnf.BEV_WIDTH * cnf.bound_size_y
-                l = _l / cnf.BEV_HEIGHT * cnf.bound_size_x
+                x = _y / BEV_HEIGHT * bound_size_x + boundary_min_x
+                y = _x / BEV_WIDTH * bound_size_y + boundary_min_y
+                z = _z + boundary_min_z
+                w = _w / BEV_WIDTH * bound_size_y
+                l = _l / BEV_HEIGHT * bound_size_x
                 if not add_score:
                     kitti_dets.append([cls_id, x, y, z, _h, w, l, _yaw])
                 else:
