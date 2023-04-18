@@ -1,3 +1,4 @@
+import fpn_resnet
 def create_model(configs):
     """Create model based on architecture name"""
     try:

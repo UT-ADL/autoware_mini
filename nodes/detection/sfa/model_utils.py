@@ -72,6 +72,7 @@ def do_detect(device, bound_size_x, bound_size_y, BEV_WIDTH, BEV_HEIGHT, K, num_
     detections = decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'],
                         outputs['dim'], K=K)
     detections = detections.cpu().numpy().astype(np.float32)
+    # print(detections)
     detections = post_processing(detections, bound_size_x, bound_size_y, BEV_WIDTH, BEV_HEIGHT, num_classes, down_ratio, peak_thresh)
     # not removing this call at the moment. Not sure if needed or not. this function calls torch.cuda.synchronize()
     # t2 = time_synchronized()

@@ -6,8 +6,10 @@ from __future__ import division
 import rospy
 import tf
 from sensor_msgs.msg import PointCloud2
-from autoware_msgs.msg import DetectedObjectArray
+from geometry_msgs.msg  import Point, PolygonStamped, Vector3, Quaternion, PoseStamped
+from autoware_msgs.msg import DetectedObject, DetectedObjectArray
 from  ros_numpy import numpify
+from tf.transformations import quaternion_from_euler, quaternion_matrix
 
 import warnings
 
@@ -19,6 +21,7 @@ import torch
 from model_utils import get_num_parameters, get_filtered_lidar, makeBEVMap, do_detect
 from sfa_utils import convert_det_to_real_values
 
+
 import os
 
 from save_model import create_model
@@ -28,7 +31,7 @@ class SFAInference:
     def __init__(self):
 
         # Params
-        self.model_path = rospy.get_param("~model_path", './kilynuaronwa_model.pth')  # path of the trained model
+        self.model_path = rospy.get_param("~model_path", './kilynuaron_model.pth')  # path of the trained model
         self.front_only = rospy.get_param("~front_only", True) # Enable detections for only front FOV. Setting it to false runs detections on 360 FOV
 
         self.boundary_min_x = rospy.get_param("~minX", 0)  # minimum distance on lidar x-axis to process points at
@@ -50,15 +53,14 @@ class SFAInference:
 
         self.bound_size_x = self.boundary_max_x - self.boundary_min_x
         self.bound_size_y = self.boundary_max_y - self.boundary_min_y
-        self.bound_size_z = self.boundary_max_z - self.boundary_min_z
 
         self.device = torch.device('cuda:0')
         # self.lidar_frame = rospy.get_param("~lidar_frame", 'lidar_center')  # frame_id for tracks published by vella - vella does not populate frame_id of vdk/tracks messages
         # self.output_frame = rospy.get_param("~output_frame", 'map')  # transform vella tracks from lidar frame to this frame
 
-        self.configs = self.parse_config()
-        # self.model = self.get_model(self.model_path)
-        self.model = self.get_model()
+        # self.configs = self.parse_config()
+        self.model = self.get_model(self.model_path)
+        # self.model = self.get_model()
 
         self.class_names = {0: "pedestrian",
                             1: "car",
@@ -141,30 +143,30 @@ class SFAInference:
 
         return configs
 
-    def get_model(self):
-        model = create_model(self.configs)
-        print('\n\n' + '-*=' * 30 + '\n\n')
-        assert os.path.isfile(self.configs.pretrained_path), "No file at {}".format(self.configs.pretrained_path)
-        model.load_state_dict(torch.load(self.configs.pretrained_path, map_location='cpu'))
-        print('Loaded weights from {}\n'.format(self.configs.pretrained_path))
-
-        self.configs.device = torch.device('cpu' if self.configs.no_cuda else 'cuda:{}'.format(self.configs.gpu_idx))
-        model = model.to(device=self.configs.device)
-        # torch.save(model, "./kilynuaronwa_model.pth")
-        model.eval()
+    # def get_model(self):
+    #     model = create_model(self.configs)
+    #     print('\n\n' + '-*=' * 30 + '\n\n')
+    #     assert os.path.isfile(self.configs.pretrained_path), "No file at {}".format(self.configs.pretrained_path)
+    #     model.load_state_dict(torch.load(self.configs.pretrained_path, map_location='cpu'))
+    #     print('Loaded weights from {}\n'.format(self.configs.pretrained_path))
+    #
+    #     self.configs.device = torch.device('cpu' if self.configs.no_cuda else 'cuda:{}'.format(self.configs.gpu_idx))
+    #     model = model.to(device=self.configs.device)
+    #     torch.save(model, "./kilynuaron_model.pth")
+    #     model.eval()
 
         return  model
 
-    # def get_model(self, model_path):
-    #     """
-    #     model_path: path of the loaded model
-    #     return: Loaded model with its trained parameters. In inference mode
-    #     """
-    #     model = torch.load(model_path)
-    #     model.eval()
-    #     rospy.loginfo(self.__class__.__name__ + " - Model Loaded with {} parameters".format(get_num_parameters(model)))
-    #
-    #     return model
+    def get_model(self, model_path):
+        """
+        model_path: path of the loaded model
+        return: Loaded model with its trained parameters. In inference mode
+        """
+        model = torch.load(model_path)
+        model.eval()
+        rospy.loginfo(self.__class__.__name__ + " - Model Loaded with {} parameters".format(get_num_parameters(model)))
+
+        return model
 
     def pointcloud_callback(self, pointcloud):
         """
@@ -193,19 +195,18 @@ class SFAInference:
             detected_objects_array.objects += self.generate_detected_objects(back_dets, pointcloud.header)
         else:
             front_dets = self.detect(points, front_only=True)
-            print(front_dets)
-            # detected_objects_array.objects += self.generate_detected_objects(front_dets, pointcloud.header)
+            detected_objects_array.objects += self.generate_detected_objects(front_dets, pointcloud.header)
 
-        # self.detected_object_array_pub.publish(detected_objects_array)
+        self.detected_object_array_pub.publish(detected_objects_array)
 
     def detect(self, points, front_only):
         with torch.no_grad():
             front_lidar = get_filtered_lidar(points, self.boundary_min_x, self.boundary_max_x, self.boundary_min_y, self.boundary_max_y, self.boundary_min_z, self.boundary_max_z)
             front_bev_map = makeBEVMap(front_lidar, self.bev_height, self.bev_width, self.discretization, self.boundary_min_z, self.boundary_max_z)
             front_bev_map = torch.from_numpy(front_bev_map)
-            front_detections, front_bevmap = do_detect(self.device, self.bound_size_x, self.bound_size_y, self.bev_width, self.bev_height, self.K, self.num_classes, self.down_ratio, self.peak_thresh, self.model, front_bev_map, is_front=True)
-            print(front_detections)
-            front_final_dets = convert_det_to_real_values(front_detections)
+            front_detections, front_bevmap = do_detect(self.device, self.bound_size_x, self.bound_size_y,
+            self.bev_width, self.bev_height, self.K, self.num_classes, self.down_ratio, self.peak_thresh, self.model, front_bev_map, is_front=True)
+            front_final_dets = convert_det_to_real_values(front_detections, self.bev_width, self.bev_height, self.bound_size_x, self.bound_size_y, self.boundary_min_x, self.boundary_min_y, self.boundary_min_z)
             return front_final_dets
 
             # if not front_only:
@@ -221,6 +222,73 @@ class SFAInference:
             #     return front_final_dets , back_final_dets
             # else:
             #     return front_final_dets
+    def generate_detected_objects(self, detections, sensor_header):
+        """
+        Generate  DetectedObjects to be used by OP.
+
+        """
+        detected_objects_list = []
+        for object in detections:
+
+            detected_object = DetectedObject()
+            detected_object.header.frame_id = 'lidar_center'
+            detected_object.header.stamp = sensor_header.stamp
+            detected_object.label =  'unknown' #self.class_names[object[0]]
+
+            detected_object.space_frame = 'lidar_center'
+
+            ## 3D bounding box position and orientation
+            pose_in_lidar = PoseStamped()
+            pose_in_lidar.header.frame_id = 'lidar_center'
+            pose_in_lidar.header.stamp = sensor_header.stamp
+            pose_in_lidar.pose.position = Point(object[1], object[2], object[3])
+
+            quat = quaternion_from_euler(0, 0, object[7])
+            pose_in_lidar.pose.orientation = Quaternion(x=quat[0], y=quat[1], z=quat[2], w=quat[3])
+            # pose_in_map = self.transform_pose(pose_in_lidar)
+
+            detected_object.pose_reliable = True
+            detected_object.pose = pose_in_lidar.pose
+
+            detected_object.dimensions = Vector3(object[6], object[5], object[4])
+            # Populate convex hull
+            detected_object.convex_hull = self.produce_hull(detected_object.pose.position, detected_object.dimensions, detected_object.header, detected_object.pose.orientation)
+
+            detected_object.valid = True
+            detected_objects_list.append(detected_object)
+
+        return detected_objects_list
+
+    def produce_hull(self, centroid, dimension_vector, header, yaw_quaternion):
+
+        convex_hull = PolygonStamped()
+        convex_hull.header = header
+
+
+        rot_mat = quaternion_matrix([yaw_quaternion.x, yaw_quaternion.y, yaw_quaternion.z, yaw_quaternion.w])
+        # rotation_mat = np.array([[np.cos(yaw), -np.sin(yaw), 0, 0],
+        #                 [np.sin(yaw), np.cos(yaw), 0, 0],
+        #                 [0, 0, 0, 1]])
+
+        # # compute dimension vector in map frame
+        # dim_vector = self.tf_listener.transformVector3(header.frame_id, dim_vector)
+        dim_vector = dimension_vector
+        halved_dim = [dim_vector.x/2, dim_vector.y/2, dim_vector.z/2]
+
+        point_1 = [halved_dim[0], halved_dim[1], halved_dim[2]]
+        point_2 = [- halved_dim[0], halved_dim[1], halved_dim[2]]
+        point_3 = [-halved_dim[0], -halved_dim[1], halved_dim[2]]
+        point_4 = [ halved_dim[0],  - halved_dim[1], halved_dim[2]]
+
+        corner_points= np.array([point_1, point_4, point_3, point_2, point_1])
+
+        corner_points = np.c_[corner_points, np.ones((corner_points.shape[0]))]
+        rotated_corners = np.dot(rot_mat, corner_points.T).T
+
+        for corner_point in rotated_corners:
+            convex_hull.polygon.points.append(Point(centroid.x + corner_point[0], centroid.y + corner_point[1], centroid.z + corner_point[2]))
+
+        return convex_hull
 
     @staticmethod
     def run():
