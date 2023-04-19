@@ -10,11 +10,11 @@ from geometry_msgs.msg import PoseStamped, TwistStamped, Point
 from visualization_msgs.msg import Marker
 from std_msgs.msg import ColorRGBA, Bool
 
-from helpers import get_closest_point_on_line, interpolate_point_to_path_array, get_orientation_from_yaw, get_heading_between_two_points
+from helpers import get_closest_point_on_line, interpolate_point_to_path_array, get_orientation_from_yaw, \
+                    get_heading_between_two_points, get_two_nearest_waypoint_idx
 from helpers.timer import Timer
 
 
-CURRENT_POSE_TO_CAR_FRONT_METERS = 4.0  # taken from current_pose to radar transform
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.4)
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
 YELLOW = ColorRGBA(0.8, 0.8, 0.0, 0.4)
@@ -28,9 +28,9 @@ class LocalPlanner:
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
         self.braking_safety_distance = rospy.get_param("~braking_safety_distance", 4.0)
         self.braking_reaction_time = rospy.get_param("~braking_reaction_time", 1.6)
-        self.car_safety_width = rospy.get_param("~car_safety_width", 1.3)
+        self.car_safety_radius = rospy.get_param("~car_safety_radius", 1.3)
+        self.current_pose_to_car_front = rospy.get_param("~current_pose_to_car_front", 4.0)
         self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_limit", 1.0)
-        self.max_speed_limit = rospy.get_param("~max_speed_limit", 40.0) / 3.6
 
         # Internal variables
         self.lock = threading.Lock()
@@ -47,10 +47,10 @@ class LocalPlanner:
         self.stop_point_visualization_pub = rospy.Publisher('stop_point_visualization', Marker, queue_size=1)
 
         # Subscribers
-        self.path_sub = rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)
-        self.current_pose_sub = rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
-        self.current_velocity_sub = rospy.Subscriber('current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1)
-        self.detect_objects_sub = rospy.Subscriber('detected_objects', DetectedObjectArray, self.detect_objects_callback, queue_size=1)
+        rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)
+        rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
+        rospy.Subscriber('current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1)
+        rospy.Subscriber('detected_objects', DetectedObjectArray, self.detect_objects_callback, queue_size=1)
 
 
     def path_callback(self, msg):
@@ -130,7 +130,7 @@ class LocalPlanner:
             obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,0:3])
 
         # KEEP TRACK OF LOCAL PATH
-        wp_backward, wp_forward = self.find_two_nearest_waypoint_idx(global_path_tree, self.current_pose[0], self.current_pose[1])
+        wp_backward, wp_forward = get_two_nearest_waypoint_idx(global_path_tree, self.current_pose[0], self.current_pose[1])
         nearest_point = get_closest_point_on_line(Point(self.current_pose[0], self.current_pose[1], self.current_pose[2]),
                                                   global_path_waypoints[wp_backward].pose.pose.position, 
                                                   global_path_waypoints[wp_forward].pose.pose.position)
@@ -147,19 +147,23 @@ class LocalPlanner:
 
         # calc local path distances and insert 0 in front for 1st waypoint
         local_path_distances = np.cumsum(np.sqrt(np.diff(local_path_array[:,0])**2 + np.diff(local_path_array[:,1])**2))
+        local_path_distances2 = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
+        assert np.allclose(local_path_distances, local_path_distances2)
         local_path_distances = np.insert(local_path_distances, 0, 0.0)
         # path end
         self.closest_object_distance = local_path_distances[-1]
         self.closest_object_velocity = 0.0
 
         # OBJECT DETECTION
-        # iterate over local path waypoints and check if there are objects within car_safety_width
+        # iterate over local path waypoints and check if there are objects within car_safety_radius
         if obstacle_tree is not None:
-            # ask closest obstacle points to local_path_array, except 1st (current_pose on path) to be in sync later with sliced waypoint idx's
-            obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[1:,0:3], self.car_safety_width, return_distance=True)
+            # ask closest obstacle points to local_path_array, except 1st (local_path_discurrent_pose on path) to be in sync later with sliced waypoint idx's
+            obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[1:,0:3], self.car_safety_radius, return_distance=True)
 
             # get list of indexes of local_path waypoints where obstacles are found
             wp_with_obs = [i for i in range(len(obstacle_d)) if len(obstacle_d[i]) > 0]
+            wp_with_obs2 = [i for i, d in enumerate(obstacle_d) if len(d) > 0]
+            assert wp_with_obs == wp_with_obs2
 
             if len(wp_with_obs) > 0:
                 obstacles_on_local_path = True
@@ -179,7 +183,7 @@ class LocalPlanner:
                 # calculate closest object in terms of distance, velocity and fixed deceleration - sqrt(v**2 + 2 * a * d)
                 obs_on_path = np.vstack((obs_on_path, np.sqrt((obs_on_path[3]**2 + 2 * self.speed_deceleration_limit * obs_on_path[0]))))
                 obs_on_path = obs_on_path[:, obs_on_path[4].argsort()]
-                self.closest_object_distance = obs_on_path[0,0] - CURRENT_POSE_TO_CAR_FRONT_METERS - self.braking_safety_distance
+                self.closest_object_distance = obs_on_path[0,0] - self.current_pose_to_car_front - self.braking_safety_distance
                 self.closest_object_velocity = obs_on_path[3,0]
 
                 # find index with closest distance to the nearest obstacle and correct if point after obstacle (positive difference)
@@ -259,11 +263,6 @@ class LocalPlanner:
         
         self.local_path_pub.publish(lane)
 
-    def find_two_nearest_waypoint_idx(self, waypoint_tree, x, y):
-        idx = waypoint_tree.kneighbors([(x, y)], 2, return_distance=False)
-        # sort to get them in ascending order - follow along path
-        idx[0].sort()
-        return idx[0][0], idx[0][1]
 
     def run(self):
         rospy.spin()

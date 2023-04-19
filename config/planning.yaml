@@ -30,6 +30,6 @@ local_planner:
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   braking_safety_distance: 2.0
   braking_reaction_time: 1.6
-  car_safety_width : 1.2
+  car_safety_radius: 1.2
+  current_pose_to_car_front: 4.0  # m
   speed_deceleration_limit: 1.0
-  max_speed_limit: 40.0

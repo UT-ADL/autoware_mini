@@ -25,7 +25,7 @@ class PathSmoothing:
         self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1, latch=True)
 
         # Subscribers
-        self.global_path_sub = rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=1)
+        rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=1)
 
 
     def global_path_callback(self, msg):
@@ -98,7 +98,7 @@ class PathSmoothing:
         if self.adjust_speeds_in_curves:
             # Calculate speed limit based on lateral acceleration limit
             radius = calculate_radius_step_n_triangle_equation(x_new, y_new, self.radius_calc_neighbour_index)
-            speed_radius = np.sqrt(self.lateral_acceleration_limit * np.abs(radius))
+            speed_radius = np.sqrt(self.lateral_acceleration_limit * radius)
             speed_new = np.fmin(speed_interpolated, speed_radius)
 
         # loop over array backwards and forwards to adjust speeds using the deceleration limit
@@ -111,7 +111,7 @@ class PathSmoothing:
             for i in range(1, len(speed_new) ):
                 speed_new[i] = min(speed_new[i], np.sqrt(speed_new[i - 1]**2 + accel_constant))
 
-        if self.speed_averaging_window > 1:
+        if self.speed_averaging_window > 1 and len(speed_new) >= self.speed_averaging_window:
             # average array values using window size of n
             speed_new = np.convolve(speed_new, np.ones((self.speed_averaging_window,))/self.speed_averaging_window, mode='same')
             # replace n/2 values at the beginning and end of the array with the n+1 and n-1 values respectively

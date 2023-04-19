@@ -9,7 +9,7 @@ from lanelet2.projection import UtmProjector
 from lanelet2.core import BasicPoint2d
 from lanelet2.geometry import to2D
 
-from sklearn.neighbors import KDTree
+from sklearn.neighbors import NearestNeighbors
 
 from geometry_msgs.msg import PoseStamped, Point
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
@@ -33,12 +33,13 @@ class Lanelet2GlobalPlanner:
 
         # Parameters
         self.lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
-        self.output_frame = rospy.get_param("~output_frame", map)
+        self.output_frame = rospy.get_param("~output_frame", "map")
         self.distance_to_goal_limit = rospy.get_param("~distance_to_goal_limit", 2.0)
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
-        self.speed_limit = rospy.get_param("~speed_limit", 40.0) / 3.6
+        self.speed_limit = rospy.get_param("~speed_limit", 40.0)
         self.wp_left_width = rospy.get_param("~wp_left_width", 1.4)
         self.wp_right_width = rospy.get_param("~wp_right_width", 1.4)
+        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
 
         self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
         self.use_custom_origin = rospy.get_param("/localization/use_custom_origin")
@@ -49,7 +50,6 @@ class Lanelet2GlobalPlanner:
         self.current_location = None
         self.goal_point = None
         self.waypoints = []
-        self.Lanelet2_map = None
 
         # Load lanelet map
         if self.coordinate_transformer == "utm" and self.use_custom_origin:
@@ -64,14 +64,17 @@ class Lanelet2GlobalPlanner:
         self.traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
                                                   lanelet2.traffic_rules.Participants.Vehicle)
 
-        #Publishers
+        # routing graph
+        self.graph = lanelet2.routing.RoutingGraph(self.lanelet2_map, self.traffic_rules)
+
+        # Publishers
         self.waypoints_pub = rospy.Publisher('global_path', Lane, queue_size=1, latch=True)
         self.target_lane_pub = rospy.Publisher('target_lane_markers', MarkerArray, queue_size=1, latch=True)
 
-        #Subscribers
-        self.sub = rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
-        self.sub = rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
-        self.sub = rospy.Subscriber('cancel_global_path', Bool, self.cancel_global_path_callback, queue_size=1)
+        # Subscribers
+        rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
+        rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
+        rospy.Subscriber('cancel_route', Bool, self.cancel_route_callback, queue_size=1)
 
     def goal_callback(self, msg):
         rospy.loginfo("lanelet2_global_planner - goal position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame",
@@ -97,8 +100,7 @@ class Lanelet2GlobalPlanner:
         start_lanelet = self.lanelet2_map.laneletLayer.nearest(start_point, 1)[0]
         self.publish_target_lanelets(start_lanelet, goal_lanelet)
 
-        graph = lanelet2.routing.RoutingGraph(self.lanelet2_map, self.traffic_rules)
-        route = graph.getRoute(start_lanelet, goal_lanelet, 0, True)        # lanelet2.routing.Route
+        route = self.graph.getRoute(start_lanelet, goal_lanelet, 0, True)        # lanelet2.routing.Route
         if route == None:
             rospy.logwarn("lanelet2_global_planner - no route found, try new goal!")
             return
@@ -111,17 +113,21 @@ class Lanelet2GlobalPlanner:
             rospy.logwarn("lanelet2_global_planner - last lanelet in path (%d) is not goal lanelet (%d)", path_no_lane_change[len(path_no_lane_change)-1].id, goal_lanelet.id)
             return
 
-        waypoints, waypoint_tree = self.convert_to_waypoints(path_no_lane_change)
+        waypoints = self.convert_to_waypoints(path_no_lane_change)
+
+        # build KDTree for nearest neighbour search
+        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in waypoints])
+        waypoint_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(waypoints_xy)
 
         # create new start and goal waypoints
-        _, start_idx = waypoint_tree.query([(start_point.x, start_point.y)], 1)
+        start_idx = waypoint_tree.kneighbors([(start_point.x, start_point.y)], 1, return_distance=False)
         start_wp = self.create_waypoint_on_path(waypoints, start_idx[0][0], start_point)
         d = get_distance_between_two_points(start_wp.pose.pose.position, start_point)
         if d > self.distance_to_centerline_limit:
             rospy.logwarn("lanelet2_global_planner - start point too far (%f) from centerline", d)
             return
 
-        _, goal_idx = waypoint_tree.query([(new_goal.x, new_goal.y)], 1)
+        goal_idx = waypoint_tree.kneighbors([(new_goal.x, new_goal.y)], 1, return_distance=False)
         goal_wp = self.create_waypoint_on_path(waypoints, goal_idx[0][0], new_goal)
         d = get_distance_between_two_points(goal_wp.pose.pose.position, new_goal)
         if d > self.distance_to_centerline_limit:
@@ -152,12 +158,12 @@ class Lanelet2GlobalPlanner:
                 self.publish_waypoints(self.waypoints)
                 rospy.logwarn("lanelet2_global_planner - goal reached, clearing path!")
 
-    def cancel_global_path_callback(self, msg):
+    def cancel_route_callback(self, msg):
         if msg.data:
             self.waypoints = []
             self.goal_point = None
             self.publish_waypoints(self.waypoints)
-            rospy.logwarn("lanelet2_global_planner - global path cancelled!")
+            rospy.logwarn("lanelet2_global_planner - route cancelled!")
 
     def create_waypoint_on_path(self, waypoints, closest_idx, start_point):
         wp = copy.deepcopy(waypoints[closest_idx])
@@ -177,7 +183,7 @@ class Lanelet2GlobalPlanner:
             if i == len(lanelet_sequence)-1:
                 last_lanelet = True
 
-            speed = self.speed_limit
+            speed = self.speed_limit / 3.6
             if 'speed_limit' in lanelet.attributes:
                 speed = min(speed, float(lanelet.attributes['speed_limit']) / 3.6)
             if 'speed_ref' in lanelet.attributes:
@@ -212,11 +218,7 @@ class Lanelet2GlobalPlanner:
 
                 waypoints.append(waypoint)
 
-        # build KDTree for nearest neighbour search
-        waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in waypoints])
-        waypoint_tree = KDTree(waypoints_xy)
-
-        return waypoints, waypoint_tree
+        return waypoints
 
 
     def publish_waypoints(self, waypoints):

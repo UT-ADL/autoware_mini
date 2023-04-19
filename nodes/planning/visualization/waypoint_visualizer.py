@@ -9,7 +9,7 @@ class WaypointVisualizer:
     def __init__(self):
 
         # Parameters
-        self.car_safety_width = rospy.get_param("/planning/local_planner/car_safety_width", 1.3)
+        self.car_safety_radius = rospy.get_param("/planning/local_planner/car_safety_radius", 1.3)
 
         # will be taken from the received path message: lane.header.frame_id
         self.output_frame = None
@@ -135,8 +135,8 @@ class WaypointVisualizer:
             marker.type = marker.CYLINDER
             marker.action = marker.ADD
             marker.pose = waypoint.pose.pose
-            marker.scale.x = 2 * self.car_safety_width
-            marker.scale.y = 2 * self.car_safety_width
+            marker.scale.x = 2 * self.car_safety_radius
+            marker.scale.y = 2 * self.car_safety_radius
             marker.scale.z = 0.3
             marker.color = ColorRGBA(waypoint.cost, 1.0 - waypoint.cost, 0.0, 0.2)
             marker_array.markers.append(marker)
