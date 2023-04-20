@@ -18,6 +18,8 @@ from sensor_msgs.msg import PointCloud2
 from std_msgs.msg import ColorRGBA
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 
+import fpn_resnet
+
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 
 class SFAInference:
@@ -25,7 +27,7 @@ class SFAInference:
         rospy.loginfo(self.__class__.__name__ + " - Initializing")
 
         # Params
-        self.model_path = rospy.get_param("~model_path", './kilynuaron_model.pth')  # path of the trained model
+        self.model_path = rospy.get_param("~model_path", './kilynuaron_weights_70.pth')  # path of the trained model
         self.front_only = rospy.get_param("~front_only", True) # Enable detections for only front FOV. Setting it to false runs detections on 360 FOV
 
         self.MIN_FRONT_X = rospy.get_param("~minX", 0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
@@ -54,6 +56,18 @@ class SFAInference:
         self.BOUND_SIZE_Y = self.MAX_Y - self.MIN_Y
 
         self.device = torch.device('cuda:0') # device to run inference on
+
+        # model configs
+        self.NUM_LAYERS = 18
+        self.HEAD_CONV = 64
+        self.HEADS = {
+            'hm_cen': self.NUM_CLASSES,
+            'cen_offset': 2,
+            'direction': 2,
+            'z_coor': 1,
+            'dim': 3
+        }
+
         self.model = self.get_model(self.model_path) # Get saved model from path
 
         # KITTI class names
@@ -68,12 +82,17 @@ class SFAInference:
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1)
 
-    def get_model(self, model_path):
+    def get_model(self, weights_path):
         """
         model_path: path of the loaded model
         return: Loaded model with its trained parameters. In inference mode
         """
-        model = torch.load(model_path)
+
+        model = fpn_resnet.get_pose_net(num_layers=self.NUM_LAYERS, heads=self.HEADS, head_conv=self.HEAD_CONV, imagenet_pretrained=False)
+        model.load_state_dict(torch.load(weights_path, map_location='cpu'))
+        rospy.loginfo(self.__class__.__name__ + "- Loaded weights from {}\n".format(weights_path))
+
+        model = model.to(device=self.device)
         model.eval()
 
         return model
