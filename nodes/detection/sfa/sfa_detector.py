@@ -107,7 +107,6 @@ class SFAInference:
         trans, tf_rot = self.tf_listener.lookupTransform(self.output_frame, self.lidar_frame, pointcloud.header.stamp)
         # convert the looked up transform to a 4x4 homogenous transformation matrix.
         tf_matrix = self.tf_listener.fromTranslationRotation(trans, tf_rot)
-        print(tf_matrix)
         # Unpack pointcloud2 msg ype to numpy array
         pcd_array = ros_numpy.numpify(pointcloud)
 
