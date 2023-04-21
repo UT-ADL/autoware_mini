@@ -124,7 +124,6 @@ class LocalPlanner:
         if len(msg.objects) > 0:
             points_list = []
             for obj in msg.objects:
-
                 # project object velocity to base_link frame to get longitudinal speed
                 velocity = Vector3Stamped(header=msg.header, vector=obj.velocity.linear)
                 try:
@@ -133,7 +132,6 @@ class LocalPlanner:
                     rospy.logerr(str(e))
                     # safe option - assume the object is not moving
                     velocity.vector.x = 0.0
-
                 # add object center point and convex hull points to the points list
                 points_list.append([obj.pose.position.x, obj.pose.position.y, obj.pose.position.z, velocity.vector.x])
                 for point in obj.convex_hull.polygon.points:
