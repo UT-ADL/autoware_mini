@@ -115,6 +115,11 @@ class LocalPlanner:
         # slice waypoints from global path to local path
         local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_backward:end_index])
 
+        # initialize closest object distance and velocity
+        closest_object_distance = 0.0 
+        closest_object_velocity = 0.0
+        blocked = False
+
         # react to objects on the local path
         if len(msg.objects) > 0:
             points_list = []
@@ -142,7 +147,6 @@ class LocalPlanner:
             obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:3], self.car_safety_radius, return_distance=False)
 
             # calculate velocity based on distance to obstacle using deceleration limit
-            stopped = False
             for i, wp in enumerate(local_path_waypoints):
 
                 # mark waypoints with obstacles for visualizer
@@ -150,7 +154,7 @@ class LocalPlanner:
                     wp.cost = 1.0
 
                 # once we get zero speed, keep it that way
-                if stopped:
+                if blocked:
                     wp.twist.twist.linear.x = 0.0
                     continue
 
@@ -172,12 +176,19 @@ class LocalPlanner:
                     wp.twist.twist.linear.x = min(target_vel, wp.twist.twist.linear.x)
                     # from stop point onwards all speeds are zero
                     if math.isclose(wp.twist.twist.linear.x, 0.0):
-                        stopped = True
+                        blocked = True
+                    # record the closest object from the first waypoint
+                    if i == 0:
+                        obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - np.array([self.current_pose.x, self.current_pose.y, self.current_pose.z]), axis=1)
+                        closest_object_idx = np.argmin(obstacles_ahead_dists)
+                        # closest object distance is calculated from the front of the car
+                        closest_object_distance = obstacles_ahead_dists[closest_object_idx] - self.current_pose_to_car_front
+                        closest_object_velocity = obstacles_ahead_speeds[closest_object_idx]
 
-        self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame)
+        self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked)
 
 
-    def publish_local_path_wp(self, local_path_waypoints, stamp, output_frame, closest_object_distance=0, closest_object_velocity=0):
+    def publish_local_path_wp(self, local_path_waypoints, stamp, output_frame, closest_object_distance=0, closest_object_velocity=0, blocked=False):
         # create lane message
         lane = Lane()
         lane.header.frame_id = output_frame
@@ -185,6 +196,7 @@ class LocalPlanner:
         lane.waypoints = local_path_waypoints
         lane.closest_object_distance = closest_object_distance
         lane.closest_object_velocity = closest_object_velocity
+        lane.is_blocked = blocked
         
         self.local_path_pub.publish(lane)
 
