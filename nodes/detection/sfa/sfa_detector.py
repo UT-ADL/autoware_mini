@@ -27,11 +27,11 @@ class SFAInference:
         rospy.loginfo(self.__class__.__name__ + " - Initializing")
 
         # Params
-        self.model_path = rospy.get_param("~model_path", './kilynuaron_weights_70.pth')  # path of the trained model
+        self.model_path = rospy.get_param("~model_weights_path", './kilynuaron_weights_70.pth')  # path of the trained model
         self.front_only = rospy.get_param("~front_only", True) # Enable detections for only front FOV. Setting it to false runs detections on 360 FOV
 
-        self.MIN_FRONT_X = rospy.get_param("~minX", 0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
-        self.MAX_FRONT_X = rospy.get_param("~maxX", 50)  # maximum distance on lidar +ve x-axis to process points at (back detections)
+        self.MIN_FRONT_X = rospy.get_param("~minFrontX", 0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
+        self.MAX_FRONT_X = rospy.get_param("~maxFrontX", 50)  # maximum distance on lidar +ve x-axis to process points at (back detections)
         self.MIN_BACK_X = rospy.get_param("~maxBackX", -50)  # maxmimum distance on lidar -ve x-axis to process points at
         self.MAX_BACK_X = rospy.get_param("~maxBackX", 0)  # minimum distance on lidar -ve x-axis to process points at
         self.MIN_Y = rospy.get_param("~minY", -25)  # maxmimum distance on lidar -ve y-axis to process points at
@@ -47,7 +47,7 @@ class SFAInference:
         self.NUM_CLASSES = rospy.get_param("~num_classes", 3) # number of classes to detect
         self.PEAK_THRESH = rospy.get_param("~peak_thresh", 0.2) # score filter
 
-        self.only_front = rospy.get_param("~only_front", True)   # only front detections. If False, both front and back detections enabled
+        self.only_front = rospy.get_param("~sfa_only_front", True)   # only front detections. If False, both front and back detections enabled
         self.output_frame = rospy.get_param("~output_frame", 'map')  # transform detected objects from lidar frame to this frame
         self.lidar_frame = rospy.get_param("~lidar_frame", 'lidar_center') # frame_id in which objects are published
 
@@ -93,6 +93,7 @@ class SFAInference:
         rospy.loginfo(self.__class__.__name__ + "- Loaded weights from {}\n".format(weights_path))
 
         model = model.to(device=self.device)
+        rospy.loginfo(self.__class__.__name__ + "- Loaded model to GPU")
         model.eval()
 
         return model
