@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Detection1
         - /Detection1/Lidar1
-        - /Detection1/Detected objects1
         - /Planning1
         - /Planning1/Global path1/Namespaces1
         - /Planning1/Smoothed path1/Namespaces1
@@ -84,6 +83,15 @@ Visualization Manager:
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            lexus_model:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
           Name: Lexus model
           Robot Description: robot_description
           TF Prefix: ""
@@ -151,37 +159,27 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Detection:
-              Detected objects: true
-              Lidar:
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
+              "": true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               "": true
-              MarkerArray: true
               Value: true
             Sensing:
               Camera Right: true
               Points raw center: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -197,37 +195,27 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Detection:
-              Detected objects: true
-              Lidar:
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
+              "": true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               "": true
-              MarkerArray: true
               Value: true
             Sensing:
               Camera Left: true
               Points raw center: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -328,7 +316,10 @@ Visualization Manager:
           Marker Topic: /detection/detected_objects_markers
           Name: Detected objects
           Namespaces:
-            {}
+            bounding_box: false
+            centroid: true
+            convex_hull: true
+            text: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -415,7 +406,7 @@ Visualization Manager:
           Marker Topic: /vehicle/bicycle_markers
           Name: Bicycle markers
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Camera
@@ -430,10 +421,16 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              "": true
+              Current pose: true
+              Follower markers: true
               Value: true
             Detection:
-              "": true
+              Detected objects: true
+              Lidar:
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
               Value: true
             Grid: true
             Map:
@@ -441,10 +438,11 @@ Visualization Manager:
               Value: true
             Planning:
               "": true
-              MarkerArray: true
               Value: true
             Sensing:
-              "": true
+              Camera Left: true
+              Camera Right: true
+              Points raw center: true
               Value: true
             Simulation:
               Bicycle markers: true
