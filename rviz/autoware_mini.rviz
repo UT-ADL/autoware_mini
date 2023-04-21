@@ -30,7 +30,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Carla camera view
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -169,7 +169,11 @@ Visualization Manager:
               "": true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Right: true
@@ -205,7 +209,11 @@ Visualization Manager:
               "": true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Left: true
@@ -437,7 +445,11 @@ Visualization Manager:
               Lanelet2 map: true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Left: true
