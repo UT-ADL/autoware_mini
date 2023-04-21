@@ -58,11 +58,10 @@ class LocalPlanner:
         self.output_frame = msg.header.frame_id
         
         if len(msg.waypoints) == 0:
-            self.lock.acquire()
-            self.global_path_array = None
-            self.global_path_waypoints = None
-            self.global_path_tree = None
-            self.lock.release()
+            with self.lock:
+                self.global_path_array = None
+                self.global_path_waypoints = None
+                self.global_path_tree = None
 
             self.publish_local_path_wp([])
 
@@ -80,11 +79,10 @@ class LocalPlanner:
         # create global_wp_tree
         global_path_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(global_path_array[:,0:2])
 
-        self.lock.acquire()
-        self.global_path_array = global_path_array
-        self.global_path_waypoints = global_path_waypoints
-        self.global_path_tree = global_path_tree
-        self.lock.release()
+        with self.lock:
+            self.global_path_array = global_path_array
+            self.global_path_waypoints = global_path_waypoints
+            self.global_path_tree = global_path_tree
 
     def current_velocity_callback(self, msg):
         self.current_velocity = msg.twist.linear.x
@@ -98,6 +96,15 @@ class LocalPlanner:
 
     def detect_objects_callback(self, msg):
 
+        # get global path
+        with self.lock:
+            if self.global_path_array is None:
+                return
+
+            global_path_array = self.global_path_array
+            global_path_waypoints = self.global_path_waypoints
+            global_path_tree = self.global_path_tree
+
         # internal variables
         obstacles_on_local_path = False
         stop_point = None
@@ -105,16 +112,6 @@ class LocalPlanner:
         obstacle_tree = None
         wp_with_obs = []                    # indexes of local wp where obstacles are found witihn search radius
         stop_color = GREEN                       # use for stop_point_viz 
-
-        if self.global_path_array is None:
-            return
-
-        # get global path
-        self.lock.acquire()
-        global_path_array = self.global_path_array
-        global_path_waypoints = self.global_path_waypoints
-        global_path_tree = self.global_path_tree
-        self.lock.release()
 
         # CREATE OBSTACLE ARRAY AND TREE
         if len(msg.objects) > 0:

@@ -55,19 +55,17 @@ class PurePursuitFollower:
         if len(path_msg.waypoints) < 2:
             # if path is cancelled and empty waypoints received
             rospy.logwarn_throttle(30, "pure_pursuit_follower - no waypoints, stopping!")
-            self.lock.acquire()
-            self.waypoint_tree = None
-            self.waypoints = None
-            self.lock.release()
+            with self.lock:
+                self.waypoint_tree = None
+                self.waypoints = None
             return
 
         # prepare waypoints for nearest neighbor search
         waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in path_msg.waypoints])
         waypoint_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(waypoints_xy)
-        self.lock.acquire()
-        self.waypoint_tree = waypoint_tree
-        self.waypoints = path_msg.waypoints
-        self.lock.release()
+        with self.lock:
+            self.waypoint_tree = waypoint_tree
+            self.waypoints = path_msg.waypoints
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
@@ -76,10 +74,9 @@ class PurePursuitFollower:
         if self.publish_debug_info:
             start_time = rospy.get_time()
 
-        self.lock.acquire()
-        waypoints = self.waypoints
-        waypoint_tree = self.waypoint_tree
-        self.lock.release()
+        with self.lock:
+            waypoints = self.waypoints
+            waypoint_tree = self.waypoint_tree
 
         stamp = current_pose_msg.header.stamp
         current_pose = current_pose_msg.pose
