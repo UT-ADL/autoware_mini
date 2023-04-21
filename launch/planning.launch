@@ -49,6 +49,8 @@
             <node pkg="autoware_mini" type="local_path_visualizer.py" name="local_path_visualizer" output="screen" required="true"/>
         </group>
 
+        <node pkg="autoware_mini" type="speed_obstacle_visualizer.py" name="speed_obstacle_visualizer" output="screen" required="true"/>
+
         <rosparam command="load" file="$(find autoware_mini)/config/planning.yaml" />
 
     </group>
