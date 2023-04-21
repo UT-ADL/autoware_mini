@@ -163,7 +163,12 @@ class LocalPlanner:
                     # get coordinates of obstacles ahead
                     obstacles_ahead = obstacle_array[obstacles_ahead_idx]
                     # get distances to those obstacles
-                    obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - local_path_array[i,:3], axis=1)
+                    if i == 0:
+                        # for the first waypoint, use distance from the car actual position
+                        obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - np.array([self.current_pose.x, self.current_pose.y, self.current_pose.z]), axis=1)
+                    else:
+                        # for the rest of the waypoints, use distance from the waypoint position
+                        obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - local_path_array[i,:3], axis=1)
                     # get speeds of those obstacles
                     obstacles_ahead_speeds = obstacles_ahead[:,3]
                     # calculate stopping distances - following distance increased when obstacle has higher speed
@@ -177,7 +182,6 @@ class LocalPlanner:
                         blocked = True
                     # record the closest object from the first waypoint
                     if i == 0:
-                        obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - np.array([self.current_pose.x, self.current_pose.y, self.current_pose.z]), axis=1)
                         closest_object_idx = np.argmin(obstacles_ahead_dists)
                         # closest object distance is calculated from the front of the car
                         closest_object_distance = obstacles_ahead_dists[closest_object_idx] - self.current_pose_to_car_front
