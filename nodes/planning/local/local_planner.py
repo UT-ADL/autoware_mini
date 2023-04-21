@@ -2,6 +2,7 @@
 
 import rospy
 import copy
+import math
 import threading
 import tf
 
@@ -13,7 +14,6 @@ from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped
 from std_msgs.msg import ColorRGBA
 
 from helpers import get_two_nearest_waypoint_idx
-from helpers.timer import Timer
 
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.4)
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
@@ -119,6 +119,7 @@ class LocalPlanner:
         if len(msg.objects) > 0:
             points_list = []
             for obj in msg.objects:
+
                 # project object velocity to base_link frame to get longitudinal speed
                 velocity = Vector3Stamped(header=msg.header, vector=obj.velocity.linear)
                 try:
@@ -127,6 +128,7 @@ class LocalPlanner:
                     rospy.logerr(str(e))
                     # safe option - assume the object is not moving
                     velocity.vector.x = 0.0
+
                 # add object center point and convex hull points to the points list
                 points_list.append([obj.pose.position.x, obj.pose.position.y, obj.pose.position.z, velocity.vector.x])
                 for point in obj.convex_hull.polygon.points:
@@ -166,6 +168,10 @@ class LocalPlanner:
                     # calculate target velocity based on stopping distance and deceleration limit
                     target_vel = np.min(np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.speed_deceleration_limit * stopping_distances)))
                     wp.twist.twist.linear.x = min(target_vel, wp.twist.twist.linear.x)
+                    # end path if need to stop
+                    if math.isclose(wp.twist.twist.linear.x, 0.0):
+                        local_path_waypoints = local_path_waypoints[:i+1]
+                        break
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame)
 
