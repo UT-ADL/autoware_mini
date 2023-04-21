@@ -21,7 +21,7 @@ class SpeedObstacleVisualizer:
 
     def local_path_callback(self, msg):
         self.closest_object_distance_pub.publish(Float32(msg.closest_object_distance))
-        self.closest_object_speed_pub.publish(Float32(msg.closest_object_velocity))
+        self.closest_object_speed_pub.publish(Float32(msg.closest_object_velocity * 3.6))
 
     def vehicle_cmd_callback(self, msg):
         self.target_speed_pub.publish(Float32(msg.ctrl_cmd.linear_velocity * 3.6))
