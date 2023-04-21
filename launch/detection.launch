@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="detector"            default="cluster"   doc="cluster,vella,carla,sim" />
-    <arg name="tfl_detector"        default="none"      doc="carla" />
-    <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
+    <arg name="detector"            default="cluster"   doc="cluster,vella,sim" />
     <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
 
     <group ns="detection">
@@ -11,6 +9,11 @@
             <remap from="detected_objects" to="/detection/detected_objects" />
             
             <include if="$(eval arg('detector')=='cluster')" file="$(find autoware_mini)/launch/detection/lidar_cluster.launch" />
+
+            <node if="$(eval arg('detector')=='sfa')" pkg="autoware_mini" type="sfa_detector.py" name="sfa_detector" output="screen" required="true">
+                <param name="model_weights_path"   value="$(find autoware_mini)/data/sfa_weights/kilynuaron_weights_70.pth"/>
+                <param name="sfa_only_front" value="$ sfa_only_front"/>
+            </node>
         </group>
         
         <!-- Carla's ground truth objects -->
