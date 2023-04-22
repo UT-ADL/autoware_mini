@@ -13,6 +13,7 @@
         <remap from="current_velocity"      to="/localization/current_velocity" />
         <remap from="goal"                  to="/move_base_simple/goal" />
         <remap from="detected_objects"      to="/detection/detected_objects" />
+        <remap from="traffic_light_status"  to="/detection/traffic_light_status" />
 
         <!-- Waypoint loader -->
         <node if="$(eval arg('planner')=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
@@ -45,7 +46,9 @@
 
         <!-- Local planner -->
         <group if="$(arg use_local_planner)">
-            <node pkg="autoware_mini" type="local_planner.py" name="local_planner" output="screen" required="true"/>
+            <node pkg="autoware_mini" type="local_planner.py" name="local_planner" output="screen" required="true">
+                <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+            </node>
             <node pkg="autoware_mini" type="local_path_visualizer.py" name="local_path_visualizer" output="screen" required="true"/>
         </group>
 

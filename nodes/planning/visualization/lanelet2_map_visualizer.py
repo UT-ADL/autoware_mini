@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 import rospy
-from lanelet2.io import Origin, loadRobust
+from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 
+from autoware_msgs.msg import TrafficLightResultArray
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 
@@ -30,35 +31,63 @@ class Lanelet2MapVisualizer:
     def __init__(self):
     
         # Parameters
-        self.lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
+        lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         
-        self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
-        self.use_custom_origin = rospy.get_param("/localization/use_custom_origin")
-        self.utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
-        self.utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
-
-        # create MarkerArray publisher
-        self.markers_pub = rospy.Publisher('lanelet2_map_markers', MarkerArray, queue_size=1, latch=True)
+        coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
+        utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
+        utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
         # Load the map using Lanelet2
-        if self.coordinate_transformer == "utm" and self.use_custom_origin:
-                projector = UtmProjector(Origin(self.utm_origin_lat, self.utm_origin_lon))
+        if coordinate_transformer == "utm":
+            projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
             rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
             exit(1)
 
-        map, errors = loadRobust(self.lanelet2_map_name, projector)
-
-        if len(errors) > 0:
-            rospy.logwarn("lanelet2_map_visualizer - Errors while loading map")
-            # TODO: errors could be printed, parsed or summarized somehow (counted)
+        self.lanelet2_map = load(lanelet2_map_name, projector)
 
         # Visualize the Lanelet2 map
-        marker_array = visualize_lanelet2_map(map)
-        self.markers_pub.publish(marker_array)
+        marker_array = visualize_lanelet2_map(self.lanelet2_map)
 
-        rospy.loginfo("lanelet2_map_visualizer - map loaded with %i lanelets and %i regulatory elements from file: %s" % 
-                      (len(map.laneletLayer), len(map.regulatoryElementLayer), str(self.lanelet2_map_name)))
+        # create MarkerArray publisher
+        markers_pub = rospy.Publisher('lanelet2_map_markers', MarkerArray, queue_size=1, latch=True)
+        markers_pub.publish(marker_array)
+
+        # Special publisher for stop line markers
+        self.stop_line_markers_pub = rospy.Publisher('stop_line_markers', MarkerArray, queue_size=1, latch=True)
+        rospy.Subscriber("/detection/traffic_light_status", TrafficLightResultArray, self.traffic_light_status_callback)
+
+        rospy.loginfo("lanelet2_map_visualizer - map loaded with %i lanelets and %i regulatory elements from file: %s",
+                      len(self.lanelet2_map.laneletLayer), len(self.lanelet2_map.regulatoryElementLayer), lanelet2_map_name)
+
+    def traffic_light_status_callback(self, msg):
+        marker_array = MarkerArray()
+        states = {}
+        for result in msg.results:
+            # check if we have already outputted the status of this stopline
+            if result.lane_id in states:
+                assert states[result.lane_id] == result.recognition_result_str, "Multiple traffic lights with different states on the same stop line"
+                continue
+
+            # fetch the stop line data
+            stop_line = self.lanelet2_map.lineStringLayer.get(result.lane_id)
+            points = [point for point in stop_line]
+
+            # choose the color of stopline based on the traffic light state
+            if result.recognition_result_str in LANELET_COLOR_TO_MARKER_COLOR:
+                color = LANELET_COLOR_TO_MARKER_COLOR[result.recognition_result_str]
+            else:
+                color = WHITE
+
+            # create linestring marker
+            stopline_marker = linestring_to_marker(points, "Stop line", stop_line.id, color, 0.5, rospy.Time.now())
+            marker_array.markers.append(stopline_marker)
+
+            # record the state of this stop line
+            states[result.lane_id] = result.recognition_result_str
+
+        self.stop_line_markers_pub.publish(marker_array)
 
     def run(self):
         rospy.spin()
