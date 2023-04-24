@@ -171,6 +171,10 @@ def calculate_radius_step_n_triangle_equation(x, y, n):
     # https://en.wikipedia.org/wiki/Circumscribed_circle#Other_properties
     # diameter = a*b*c / 2*area
 
+    # adjust n for very short paths
+    if x.shape[0] - 2 * n < n:
+        n = int(x.shape[0] / 3)
+
     # find the lengths of the 3 edges for the triangle
     a = np.sqrt((x[n:-n] - x[:-2*n])**2 + (y[n:-n] - y[:-2*n])**2)
     b = np.sqrt((x[:-2*n] - x[2*n:])**2 + (y[:-2*n] - y[2*n:])**2)
