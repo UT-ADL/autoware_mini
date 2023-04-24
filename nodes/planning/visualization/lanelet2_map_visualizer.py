@@ -6,6 +6,7 @@ from lanelet2.projection import UtmProjector
 
 from autoware_msgs.msg import TrafficLightResultArray
 from visualization_msgs.msg import MarkerArray, Marker
+from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
 
 
@@ -72,7 +73,7 @@ class Lanelet2MapVisualizer:
 
             # fetch the stop line data
             stop_line = self.lanelet2_map.lineStringLayer.get(result.lane_id)
-            points = [point for point in stop_line]
+            points = [Point(x=p.x, y=p.y, z=p.z + 0.01) for p in stop_line]
 
             # choose the color of stopline based on the traffic light state
             if result.recognition_result_str in LANELET_COLOR_TO_MARKER_COLOR:

@@ -106,7 +106,7 @@ class CarlaTrafficLightDetector:
             try:
                 light_id, lane_id = self.classifier.predict([tfl_coords])[0]
             except ValueError:
-                rospy.logwarn("Traffic light %d at coordinates (%f, %f) not found in map", light.id, tfl_coords[0], tfl_coords[1])
+                rospy.logdebug("Traffic light %d at coordinates (%f, %f) not found in map", light.id, tfl_coords[0], tfl_coords[1])
                 continue
 
             tfl_result = TrafficLightResult()

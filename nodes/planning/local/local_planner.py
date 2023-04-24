@@ -116,7 +116,7 @@ class LocalPlanner:
         for result in msg.results:
             # check if we have already outputted the status of this stopline
             if result.lane_id in stop_lines:
-                assert result.recognition_result == 0, "traffic light status callback - multiple stoplines with same id"
+                assert result.recognition_result == 0, "traffic light status callback - multiple stoplines with different status"
                 continue
 
             # add stop line points to the list if the traffic light is red or yellow
