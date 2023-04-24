@@ -95,7 +95,7 @@ class PathSmoothing:
         speed_interpolated = np.interp(new_distances, distances, speed)
         speed_new = speed_interpolated
 
-        if self.adjust_speeds_in_curves and len(speed_interpolated) > 2 * self.radius_calc_neighbour_index:
+        if self.adjust_speeds_in_curves and len(speed_new) >= 3:
             # Calculate speed limit based on lateral acceleration limit
             radius = calculate_radius_step_n_triangle_equation(x_new, y_new, self.radius_calc_neighbour_index)
             speed_radius = np.sqrt(self.lateral_acceleration_limit * radius)
@@ -172,8 +172,8 @@ def calculate_radius_step_n_triangle_equation(x, y, n):
     # diameter = a*b*c / 2*area
 
     # adjust n for very short paths
-    if x.shape[0] - 2 * n < n:
-        n = int(x.shape[0] / 3)
+    if len(x) < 2 * n + 1:
+        n = int((len(x) - 1) / 2)
 
     # find the lengths of the 3 edges for the triangle
     a = np.sqrt((x[n:-n] - x[:-2*n])**2 + (y[n:-n] - y[:-2*n])**2)
@@ -190,9 +190,9 @@ def calculate_radius_step_n_triangle_equation(x, y, n):
     radius = (a * b * c) / (4 * area)
 
     # append n values to the beginning of the array with the first value
-    radius = np.append(radius[:n], radius)
+    radius = np.append(np.repeat(radius[0], n), radius)
     # append n values to the end of the array with the last value
-    radius = np.append(radius, radius[-n:])
+    radius = np.append(radius, np.repeat(radius[-1], n))
 
     return radius
 
