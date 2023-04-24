@@ -150,6 +150,13 @@ class LocalPlanner:
             end_index = len(global_path_array)
         local_path_array = global_path_array[wp_backward : end_index,:]
 
+        # for all calculations consider the current pose as the first point of the local path
+        local_path_array[0] = [self.current_pose.x, self.current_pose.y, self.current_pose.z, self.current_velocity]
+
+        # calculate distances up to each waypoint
+        local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
+        local_path_dists = np.insert(local_path_dists, 0, 0.0)
+
         # slice waypoints from global path to local path
         local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_backward:end_index])
 
@@ -166,7 +173,7 @@ class LocalPlanner:
             try:
                 velocity = self.tf.transformVector3("base_link", velocity)
             except Exception as e:
-                rospy.logerr(str(e))
+                rospy.logdebug(str(e))
                 # safe option - assume the object is not moving
                 velocity.vector.x = 0.0
             # add object center point and convex hull points to the points list
@@ -183,9 +190,11 @@ class LocalPlanner:
             # convert the points list to a numpy array
             obstacle_array = np.array(points_list)
             # create spatial index over obstacles for quick search
-            obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,:3])
+            obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,:2])
             # find closest obstacle points to local path
-            obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:3], self.car_safety_radius, return_distance=False)
+            obstacle_dists, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:2], self.car_safety_radius, return_distance=True)
+            # calculate obstacle distances from the start of the local path
+            obstacle_dists = [local_path_dists[i] + d for i, d in enumerate(obstacle_dists)]
 
             # calculate velocity based on distance to obstacle using deceleration limit
             for i, wp in enumerate(local_path_waypoints):
@@ -201,22 +210,15 @@ class LocalPlanner:
 
                 # list of points on path from the current waypoint
                 obstacles_ahead_idx = np.concatenate(obstacle_idx[i:])
-                obstacles_ahead_idx = np.unique(obstacles_ahead_idx)
                 if len(obstacles_ahead_idx) > 0:
+                    # distances of obstacles ahead
+                    obstacles_ahead_dists = np.concatenate(obstacle_dists[i:])
 
-                    # get coordinates of obstacles ahead
-                    obstacles_ahead = obstacle_array[obstacles_ahead_idx]
-
-                    # get distances to those obstacles
-                    if i == 0:
-                        # for the first waypoint, use distance from the car actual position
-                        obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - np.array([self.current_pose.x, self.current_pose.y, self.current_pose.z]), axis=1)
-                    else:
-                        # for the rest of the waypoints, use distance from the waypoint position
-                        obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - local_path_array[i,:3], axis=1)
+                    # subtract current waypoint distance from ahead distances
+                    obstacles_ahead_dists -= local_path_dists[i]
 
                     # get speeds of those obstacles
-                    obstacles_ahead_speeds = obstacles_ahead[:,3]
+                    obstacles_ahead_speeds = obstacle_array[obstacles_ahead_idx, 3]
 
                     # calculate stopping distances - following distance increased when obstacle has higher speed
                     stopping_distances = obstacles_ahead_dists - self.current_pose_to_car_front - self.braking_safety_distance \
