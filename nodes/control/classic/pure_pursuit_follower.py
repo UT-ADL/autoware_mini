@@ -23,9 +23,9 @@ class PurePursuitFollower:
         # Parameters
         self.planning_time = rospy.get_param("~planning_time", 2.0)
         self.min_lookahead_distance = rospy.get_param("~min_lookahead_distance", 6.0)
-        self.wheel_base = rospy.get_param("~wheel_base", 2.789)
-        self.heading_angle_limit = rospy.get_param("~heading_angle_limit", 90.0)
-        self.lateral_error_limit = rospy.get_param("~lateral_error_limit", 2.0)
+        self.wheel_base = rospy.get_param("/vehicle/wheel_base", 2.789)
+        self.heading_angle_limit = rospy.get_param("heading_angle_limit", 90.0)
+        self.lateral_error_limit = rospy.get_param("lateral_error_limit", 2.0)
         self.publish_debug_info = rospy.get_param("~publish_debug_info", False)
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
 
@@ -41,10 +41,10 @@ class PurePursuitFollower:
             self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('path', Lane, self.path_callback)
-        current_pose_sub = message_filters.Subscriber('current_pose', PoseStamped)
-        current_velocity_sub = message_filters.Subscriber('current_velocity', TwistStamped)
-        ts = message_filters.ApproximateTimeSynchronizer([current_pose_sub, current_velocity_sub], queue_size=2, slop=0.05)
+        rospy.Subscriber('/planning/local_path', Lane, self.path_callback)
+        current_pose_sub = message_filters.Subscriber('/localization/current_pose', PoseStamped)
+        current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped)
+        ts = message_filters.ApproximateTimeSynchronizer([current_pose_sub, current_velocity_sub], queue_size=2, slop=0.02)
         ts.registerCallback(self.current_status_callback)
 
         # output information to console

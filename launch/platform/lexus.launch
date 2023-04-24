@@ -15,10 +15,6 @@
 
     <group ns="vehicle">
 
-        <!-- Remap topics -->
-        <remap from="current_pose"     to="/localization/current_pose" />
-        <remap from="vehicle_cmd"      to="/control/vehicle_cmd" />
-
         <!-- SSC interface -->
         <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true" >
             <param name="max_speed" value="$(arg max_speed)"/>

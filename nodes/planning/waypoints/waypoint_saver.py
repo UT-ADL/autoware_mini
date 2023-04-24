@@ -5,6 +5,7 @@ import csv
 import rospy
 import message_filters
 import tf
+
 from autoware_msgs.msg import WaypointState, VehicleStatus
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3
 from visualization_msgs.msg import Marker, MarkerArray
@@ -40,12 +41,12 @@ class WaypointSaver:
         self.waypoint_marker_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1)
 
         # Subscribers
-        self.current_pose_sub = message_filters.Subscriber('current_pose', PoseStamped)
-        self.current_velocity_sub = message_filters.Subscriber('current_velocity', TwistStamped)
-        self.turn_rpt_sub = rospy.Subscriber('vehicle_status', VehicleStatus, self.vehicle_status_callback)
+        self.current_pose_sub = message_filters.Subscriber('/localization/current_pose', PoseStamped, queue_size=1)
+        self.current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1)
+        self.turn_rpt_sub = rospy.Subscriber('/vehicle/vehicle_status', VehicleStatus, self.vehicle_status_callback, queue_size=1)
 
         # Sync 2 source topics in callback
-        ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=10, slop=0.1)
+        ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=2, slop=0.02)
         ts.registerCallback(self.data_callback)
 
         # loginfo

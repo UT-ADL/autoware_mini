@@ -72,8 +72,8 @@ class Lanelet2GlobalPlanner:
         self.target_lane_pub = rospy.Publisher('target_lane_markers', MarkerArray, queue_size=1, latch=True)
 
         # Subscribers
-        rospy.Subscriber('goal', PoseStamped, self.goal_callback, queue_size=1)
-        rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
+        rospy.Subscriber('/move_base_simple/goal', PoseStamped, self.goal_callback, queue_size=1)
+        rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
         rospy.Subscriber('cancel_route', Bool, self.cancel_route_callback, queue_size=1)
 
     def goal_callback(self, msg):

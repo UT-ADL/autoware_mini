@@ -272,8 +272,7 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               Closest obj dist: true
@@ -282,33 +281,21 @@ Visualization Manager:
               Target speed: true
               Value: true
             Detection:
-              Detected objects: true
-              Lidar:
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
+              "": true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
-              Stop line status: true
+              "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Right: true
               Points raw center: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -328,8 +315,7 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               Closest obj dist: true
@@ -338,33 +324,21 @@ Visualization Manager:
               Target speed: true
               Value: true
             Detection:
-              Detected objects: true
-              Lidar:
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
+              "": true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
-              Stop line status: true
+              "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Left: true
               Points raw center: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -469,7 +443,7 @@ Visualization Manager:
           Marker Topic: /detection/detected_objects_markers
           Name: Detected objects
           Namespaces:
-            bounding_box: true
+            bounding_box: false
             centroid: true
             convex_hull: true
             text: true
@@ -722,6 +696,20 @@ Visualization Manager:
         Target Frame: map
         X: 91.94154357910156
         Y: -336.5230712890625
+      - Angle: 0
+        Class: rviz/TopDownOrtho
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.05999999865889549
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Invert Z Axis: false
+        Name: RaadiParkingLot
+        Near Clip Distance: 0.0010000000474974513
+        Scale: 5.084094047546387
+        Target Frame: map
+        X: 1578.68505859375
+        Y: 1319.7745361328125
 Window Geometry:
   Camera Left:
     collapsed: false
@@ -746,5 +734,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 2488
-  X: 2632
+  X: 72
   Y: 34

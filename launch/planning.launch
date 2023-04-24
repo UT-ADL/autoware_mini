@@ -1,19 +1,12 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="planner"                 default="waypoints"     doc="waypoints, lanelet2" />
+    <arg name="planner"                 default="waypoints"     doc="waypoints, lanelet2, carla" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
     <arg name="use_local_planner"       default="false" />
 
     <group ns="planning">
-
-        <!-- Remap topics -->
-        <remap from="current_pose"          to="/localization/current_pose" />
-        <remap from="current_velocity"      to="/localization/current_velocity" />
-        <remap from="goal"                  to="/move_base_simple/goal" />
-        <remap from="detected_objects"      to="/detection/detected_objects" />
-        <remap from="traffic_light_status"  to="/detection/traffic_light_status" />
 
         <!-- Waypoint loader -->
         <node if="$(eval arg('planner')=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">

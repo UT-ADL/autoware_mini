@@ -17,10 +17,10 @@ class BicycleSimulation:
 
     def __init__(self):
         # get parameters
-        self.publish_rate = rospy.get_param("publish_rate", 50)
+        self.publish_rate = rospy.get_param("~publish_rate", 50)
         self.wheel_base = rospy.get_param("wheel_base", 2.789)
-        self.acceleration_limit = rospy.get_param("acceleration_limit", 3.0)
-        self.deceleration_limit = rospy.get_param("deceleration_limit", 3.0)
+        self.acceleration_limit = rospy.get_param("~acceleration_limit", 3.0)
+        self.deceleration_limit = rospy.get_param("~deceleration_limit", 3.0)
 
         # internal state of bicycle model
         self.x = 0
@@ -33,17 +33,17 @@ class BicycleSimulation:
         self.blinkers = 0
 
         # localization publishers
-        self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
-        self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
-        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=10)
+        self.current_pose_pub = rospy.Publisher('/localization/current_pose', PoseStamped, queue_size=1)
+        self.current_velocity_pub = rospy.Publisher('/localization/current_velocity', TwistStamped, queue_size=1)
+        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1)
         self.br = TransformBroadcaster()
 
         # visualization of the bicycle model
-        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=10)
+        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=1)
 
         # initial position and vehicle command from outside
         rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
-        rospy.Subscriber('vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
+        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
 
         rospy.loginfo("bicycle_simulation - initialized")
 
@@ -207,11 +207,12 @@ class BicycleSimulation:
         marker.action = marker.ADD
         marker.id = 0
         marker.scale.x = 0.2
-        marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.8)
+        marker.color = ColorRGBA(0.0, 1.0, 0.0, 1.0)
 
         # the location of the marker is current pose
         marker.pose.position.x = self.x
         marker.pose.position.y = self.y
+        marker.pose.position.z = 1.0 # raise a bit above map
         marker.pose.orientation = self.orientation
 
         # draw wheel base
@@ -227,11 +228,12 @@ class BicycleSimulation:
         marker.action = marker.ADD
         marker.id = 1
         marker.scale.x = 0.4
-        marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.8)
+        marker.color = ColorRGBA(0.0, 1.0, 0.0, 1.0)
 
         # the location of the marker is current pose
         marker.pose.position.x = self.x
         marker.pose.position.y = self.y
+        marker.pose.position.z = 1.0 # raise a bit above map
         marker.pose.orientation = self.orientation
 
         wheel_length = 0.4

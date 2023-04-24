@@ -6,9 +6,6 @@
     <arg name="launch_rviz"     default="false"               doc="" />
 
     <group ns="planning">
-        <!-- Remap topics -->
-        <remap from="current_pose"     to="/localization/current_pose" />
-        <remap from="current_velocity" to="/localization/current_velocity" />
 
         <node pkg="autoware_mini" type="waypoint_saver.py" name="waypoint_saver" output="screen" >
             <param name="interval"          value="$(arg interval)" />

@@ -57,6 +57,7 @@ class LocalPlanner:
         self.global_path_array = None
         self.global_path_waypoints = None
         self.global_path_tree = None
+        self.current_pose = None
         self.current_velocity = 0.0
         self.stop_lines = {}
         self.tf = tf.TransformListener()
@@ -66,10 +67,10 @@ class LocalPlanner:
 
         # Subscribers
         rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)
-        rospy.Subscriber('current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
-        rospy.Subscriber('current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1)
-        rospy.Subscriber('detected_objects', DetectedObjectArray, self.detected_objects_callback, queue_size=1)
-        rospy.Subscriber('traffic_light_status', TrafficLightResultArray, self.traffic_light_status_callback, queue_size=1)
+        rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
+        rospy.Subscriber('/localization/current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1)
+        rospy.Subscriber('/detection/detected_objects', DetectedObjectArray, self.detected_objects_callback, queue_size=1)
+        rospy.Subscriber('/detection/traffic_light_status', TrafficLightResultArray, self.traffic_light_status_callback, queue_size=1)
 
 
     def path_callback(self, msg):
@@ -137,21 +138,23 @@ class LocalPlanner:
             global_path_tree = self.global_path_tree
 
         stop_lines = self.stop_lines
+        current_pose = self.current_pose
+        current_velocity = self.current_velocity
 
-        # if global path is empty, publish empty local path, which stops the vehicle
-        if global_path_array is None:
+        # if global path or current pose is empty, publish empty local path, which stops the vehicle
+        if global_path_array is None or current_pose is None:
             self.publish_local_path_wp([], msg.header.stamp, output_frame)
             return
 
         # extract local path points from global path
-        wp_backward, _ = get_two_nearest_waypoint_idx(global_path_tree, self.current_pose.x, self.current_pose.y)
+        wp_backward, _ = get_two_nearest_waypoint_idx(global_path_tree, current_pose.x, current_pose.y)
         end_index = wp_backward + self.local_path_length
         if end_index > len(global_path_array):
             end_index = len(global_path_array)
         local_path_array = global_path_array[wp_backward : end_index,:]
 
         # for all calculations consider the current pose as the first point of the local path
-        local_path_array[0] = [self.current_pose.x, self.current_pose.y, self.current_pose.z, self.current_velocity]
+        local_path_array[0] = [current_pose.x, current_pose.y, current_pose.z, current_velocity]
 
         # calculate distances up to each waypoint
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
@@ -173,7 +176,7 @@ class LocalPlanner:
             try:
                 velocity = self.tf.transformVector3("base_link", velocity)
             except Exception as e:
-                rospy.logdebug(str(e))
+                rospy.logerr(str(e))
                 # safe option - assume the object is not moving
                 velocity.vector.x = 0.0
             # add object center point and convex hull points to the points list

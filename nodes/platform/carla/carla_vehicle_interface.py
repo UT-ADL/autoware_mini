@@ -34,10 +34,10 @@ class CarlaVehicleInterface:
         self.target_speed_pub = rospy.Publisher(
             '/carla/ego_vehicle/target_speed', Float64, queue_size=1)
         self.vehicle_status_pub = rospy.Publisher(
-            'vehicle_status', VehicleStatus, queue_size=1)
+            '/vehicle/vehicle_status', VehicleStatus, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('vehicle_cmd', VehicleCmd,
+        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd,
                          self.vehicle_cmd_callback, queue_size=1)
         rospy.Subscriber('/carla/ego_vehicle/vehicle_info', CarlaEgoVehicleInfo,
                          self.vehicle_info_callback, queue_size=1)
