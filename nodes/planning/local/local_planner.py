@@ -179,62 +179,63 @@ class LocalPlanner:
             for point in stop_line:
                 points_list.append([point.x, point.y, point.z, 0.0])
 
-        # convert the points list to a numpy array
-        obstacle_array = np.array(points_list)
-        # create spatial index over obstacles for quick search
-        obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,:3])
-        # find closest obstacle points to local path
-        obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:3], self.car_safety_radius, return_distance=False)
+        if len(points_list) > 0:
+            # convert the points list to a numpy array
+            obstacle_array = np.array(points_list)
+            # create spatial index over obstacles for quick search
+            obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,:3])
+            # find closest obstacle points to local path
+            obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:3], self.car_safety_radius, return_distance=False)
 
-        # calculate velocity based on distance to obstacle using deceleration limit
-        for i, wp in enumerate(local_path_waypoints):
+            # calculate velocity based on distance to obstacle using deceleration limit
+            for i, wp in enumerate(local_path_waypoints):
 
-            # mark waypoints with obstacles for visualizer
-            if len(obstacle_idx[i]) > 0:
-                wp.cost = 1.0
+                # mark waypoints with obstacles for visualizer
+                if len(obstacle_idx[i]) > 0:
+                    wp.cost = 1.0
 
-            # once we get zero speed, keep it that way
-            if blocked:
-                wp.twist.twist.linear.x = 0.0
-                continue
+                # once we get zero speed, keep it that way
+                if blocked:
+                    wp.twist.twist.linear.x = 0.0
+                    continue
 
-            # list of points on path from the current waypoint
-            obstacles_ahead_idx = np.concatenate(obstacle_idx[i:])
-            obstacles_ahead_idx = np.unique(obstacles_ahead_idx)
-            if len(obstacles_ahead_idx) > 0:
+                # list of points on path from the current waypoint
+                obstacles_ahead_idx = np.concatenate(obstacle_idx[i:])
+                obstacles_ahead_idx = np.unique(obstacles_ahead_idx)
+                if len(obstacles_ahead_idx) > 0:
 
-                # get coordinates of obstacles ahead
-                obstacles_ahead = obstacle_array[obstacles_ahead_idx]
+                    # get coordinates of obstacles ahead
+                    obstacles_ahead = obstacle_array[obstacles_ahead_idx]
 
-                # get distances to those obstacles
-                if i == 0:
-                    # for the first waypoint, use distance from the car actual position
-                    obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - np.array([self.current_pose.x, self.current_pose.y, self.current_pose.z]), axis=1)
-                else:
-                    # for the rest of the waypoints, use distance from the waypoint position
-                    obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - local_path_array[i,:3], axis=1)
+                    # get distances to those obstacles
+                    if i == 0:
+                        # for the first waypoint, use distance from the car actual position
+                        obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - np.array([self.current_pose.x, self.current_pose.y, self.current_pose.z]), axis=1)
+                    else:
+                        # for the rest of the waypoints, use distance from the waypoint position
+                        obstacles_ahead_dists = np.linalg.norm(obstacles_ahead[:,:3] - local_path_array[i,:3], axis=1)
 
-                # get speeds of those obstacles
-                obstacles_ahead_speeds = obstacles_ahead[:,3]
+                    # get speeds of those obstacles
+                    obstacles_ahead_speeds = obstacles_ahead[:,3]
 
-                # calculate stopping distances - following distance increased when obstacle has higher speed
-                stopping_distances = obstacles_ahead_dists - self.current_pose_to_car_front - self.braking_safety_distance \
-                                        - self.braking_reaction_time * obstacles_ahead_speeds
+                    # calculate stopping distances - following distance increased when obstacle has higher speed
+                    stopping_distances = obstacles_ahead_dists - self.current_pose_to_car_front - self.braking_safety_distance \
+                                            - self.braking_reaction_time * obstacles_ahead_speeds
 
-                # calculate target velocity based on stopping distance and deceleration limit
-                target_vel = np.min(np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.speed_deceleration_limit * stopping_distances)))
-                wp.twist.twist.linear.x = min(target_vel, wp.twist.twist.linear.x)
+                    # calculate target velocity based on stopping distance and deceleration limit
+                    target_vel = np.min(np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.speed_deceleration_limit * stopping_distances)))
+                    wp.twist.twist.linear.x = min(target_vel, wp.twist.twist.linear.x)
 
-                # from stop point onwards all speeds are zero
-                if math.isclose(wp.twist.twist.linear.x, 0.0):
-                    blocked = True
+                    # from stop point onwards all speeds are zero
+                    if math.isclose(wp.twist.twist.linear.x, 0.0):
+                        blocked = True
 
-                # record the closest object from the first waypoint
-                if i == 0:
-                    closest_object_idx = np.argmin(obstacles_ahead_dists)
-                    # closest object distance is calculated from the front of the car
-                    closest_object_distance = obstacles_ahead_dists[closest_object_idx] - self.current_pose_to_car_front
-                    closest_object_velocity = obstacles_ahead_speeds[closest_object_idx]
+                    # record the closest object from the first waypoint
+                    if i == 0:
+                        closest_object_idx = np.argmin(obstacles_ahead_dists)
+                        # closest object distance is calculated from the front of the car
+                        closest_object_distance = obstacles_ahead_dists[closest_object_idx] - self.current_pose_to_car_front
+                        closest_object_velocity = obstacles_ahead_speeds[closest_object_idx]
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked)
 
