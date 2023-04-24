@@ -7,7 +7,7 @@ import numpy as np
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 from lanelet2.core import BasicPoint2d
-from lanelet2.geometry import to2D
+from lanelet2.geometry import to2D, findNearest
 
 from sklearn.neighbors import NearestNeighbors
 
@@ -96,8 +96,8 @@ class Lanelet2GlobalPlanner:
         new_goal = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
 
         # Get nearest lanelets
-        goal_lanelet = self.lanelet2_map.laneletLayer.nearest(new_goal, 1)[0]
-        start_lanelet = self.lanelet2_map.laneletLayer.nearest(start_point, 1)[0]
+        goal_lanelet = findNearest(self.lanelet2_map.laneletLayer, new_goal, 1)[0][1]
+        start_lanelet = findNearest(self.lanelet2_map.laneletLayer, start_point, 1)[0][1]
         self.publish_target_lanelets(start_lanelet, goal_lanelet)
 
         route = self.graph.getRoute(start_lanelet, goal_lanelet, 0, True)        # lanelet2.routing.Route
