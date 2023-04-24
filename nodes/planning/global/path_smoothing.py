@@ -95,7 +95,7 @@ class PathSmoothing:
         speed_interpolated = np.interp(new_distances, distances, speed)
         speed_new = speed_interpolated
 
-        if self.adjust_speeds_in_curves:
+        if self.adjust_speeds_in_curves and len(speed_interpolated) > 2 * self.radius_calc_neighbour_index:
             # Calculate speed limit based on lateral acceleration limit
             radius = calculate_radius_step_n_triangle_equation(x_new, y_new, self.radius_calc_neighbour_index)
             speed_radius = np.sqrt(self.lateral_acceleration_limit * radius)

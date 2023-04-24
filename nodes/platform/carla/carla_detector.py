@@ -16,23 +16,23 @@ from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import PolygonStamped, Point
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from tf.transformations import euler_from_quaternion
-from derived_object_msgs.msg import ObjectArray
+from derived_object_msgs.msg import ObjectArray, Object
 from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 
 
 CLASS_ID_TO_LABEL = {
-    0: 'unknown',
-    1: 'unknown_small',
-    2: 'unknown_medium',
-    3: 'unknown_big',
-    4: 'pedestrian',
-    5: 'bike',
-    6: 'car',
-    7: 'truck',
-    8: 'motorcycle',
-    9: 'other_vehicle',
-    10: 'barrier',
-    11: 'sign'
+    Object.CLASSIFICATION_UNKNOWN: 'unknown',
+    Object.CLASSIFICATION_UNKNOWN_SMALL: 'unknown_small',
+    Object.CLASSIFICATION_UNKNOWN_MEDIUM: 'unknown_medium',
+    Object.CLASSIFICATION_UNKNOWN_BIG: 'unknown_big',
+    Object.CLASSIFICATION_PEDESTRIAN: 'pedestrian',
+    Object.CLASSIFICATION_BIKE: 'bike',
+    Object.CLASSIFICATION_CAR: 'car',
+    Object.CLASSIFICATION_TRUCK: 'truck',
+    Object.CLASSIFICATION_MOTORCYCLE: 'motorcycle',
+    Object.CLASSIFICATION_OTHER_VEHICLE: 'other_vehicle',
+    Object.CLASSIFICATION_BARRIER: 'barrier',
+    Object.CLASSIFICATION_SIGN: 'sign'
 }
 
 YELLOW80P = ColorRGBA(1.0, 1.0, 0.0, 0.8)

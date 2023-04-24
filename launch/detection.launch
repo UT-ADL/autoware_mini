@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="detector"            default="cluster"   doc="cluster,vella,sim" />
+    <arg name="detector"            default="cluster"   doc="cluster,vella,carla,sim" />
+    <arg name="tfl_detector"        default="none"      doc="carla" />
+    <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
     <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
 
     <group ns="detection">
@@ -11,9 +13,15 @@
             <include if="$(eval arg('detector')=='cluster')" file="$(find autoware_mini)/launch/detection/lidar_cluster.launch" />
         </group>
         
-        <!-- Carla's ground truth as detection -->
+        <!-- Carla's ground truth objects -->
         <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
 
+        <!-- Carla's ground truth traffic lights -->
+        <node if="$(eval arg('tfl_detector')=='carla')" pkg="autoware_mini" type="carla_traffic_light_detector.py" name="carla_traffic_light_detector" output="screen" required="true">
+            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+        </node>
+
+        <!-- Velodyne Vella detections -->
         <group if="$(eval arg('detector')=='vella')">
 <!--        <node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args="2.11
             $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen" required="true" /> -->

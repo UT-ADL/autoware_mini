@@ -32,7 +32,6 @@ class Lanelet2GlobalPlanner:
     def __init__(self):
 
         # Parameters
-        self.lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         self.output_frame = rospy.get_param("~output_frame", "map")
         self.distance_to_goal_limit = rospy.get_param("~distance_to_goal_limit", 2.0)
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
@@ -41,10 +40,11 @@ class Lanelet2GlobalPlanner:
         self.wp_right_width = rospy.get_param("~wp_right_width", 1.4)
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
 
-        self.coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
-        self.use_custom_origin = rospy.get_param("/localization/use_custom_origin")
-        self.utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
-        self.utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
+        lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
+        coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
+        utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
+        utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
         # Internal variables
         self.current_location = None
@@ -52,20 +52,20 @@ class Lanelet2GlobalPlanner:
         self.waypoints = []
 
         # Load lanelet map
-        if self.coordinate_transformer == "utm" and self.use_custom_origin:
-                projector = UtmProjector(Origin(self.utm_origin_lat, self.utm_origin_lon))
+        if coordinate_transformer == "utm":
+                projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
             rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
             exit(1)
 
-        self.lanelet2_map = load(self.lanelet2_map_name, projector)
+        self.lanelet2_map = load(lanelet2_map_name, projector)
 
         # traffic rules
-        self.traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
+        traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
                                                   lanelet2.traffic_rules.Participants.Vehicle)
 
         # routing graph
-        self.graph = lanelet2.routing.RoutingGraph(self.lanelet2_map, self.traffic_rules)
+        self.graph = lanelet2.routing.RoutingGraph(self.lanelet2_map, traffic_rules)
 
         # Publishers
         self.waypoints_pub = rospy.Publisher('global_path', Lane, queue_size=1, latch=True)
