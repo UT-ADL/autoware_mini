@@ -12,7 +12,8 @@ class LocalPathVisualizer:
 
         # Parameters
         self.car_safety_radius = rospy.get_param("/planning/local_planner/car_safety_radius", 1.3)
-        self.current_pose_to_car_front = rospy.get_param("/planning/local_planner/current_pose_to_car_front", 2.0)
+        self.current_pose_to_car_front = rospy.get_param("/planning/local_planner/current_pose_to_car_front", 4.0)
+        self.braking_safety_distance = rospy.get_param("/planning/local_planner/braking_safety_distance", 2.0)
 
         # Publishers
         self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, latch=True)
@@ -62,18 +63,17 @@ class LocalPathVisualizer:
         # stop position visualization
         if len(lane.waypoints) > 1 and lane.closest_object_distance > 0:
 
-            print("closest_object_distance + front: ", lane.closest_object_distance + self.current_pose_to_car_front)
-            stop_position = get_point_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front)
+            stop_position = get_point_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance)
 
             d = 0
             for i, waypoint in enumerate(lane.waypoints):
                 if i == 0:
                     continue
                 d += get_distance_between_two_points(lane.waypoints[i-1].pose.pose.position, lane.waypoints[i].pose.pose.position)
-                if d > lane.closest_object_distance:
+                if d > lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance:
                     idx = i
                     break
-            # take orientation fro stop line from close by waypoint
+            # take orientation for stop point from close by waypoint
             stop_orientation = lane.waypoints[idx].pose.pose.orientation
 
             if lane.is_blocked:
