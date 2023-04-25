@@ -37,7 +37,6 @@ lidar:
     down_ratio: 4
     num_classes: 3
     peak_thresh: 0.2
-    lidar_frame: "lidar_center"
     output_frame: "map"
 
 vella_detector:

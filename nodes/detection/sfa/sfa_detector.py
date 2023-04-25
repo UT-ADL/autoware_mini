@@ -6,19 +6,18 @@ from __future__ import division
 import rospy
 import ros_numpy
 import math
-import torch
-import torch.nn.functional as F
 import numpy as np
 import cv2
 import tf
 from tf.transformations import quaternion_multiply, quaternion_from_euler, euler_from_quaternion
+
 from geometry_msgs.msg import Quaternion, Point, PolygonStamped, Pose
 from sensor_msgs.msg import PointCloud2
-
 from std_msgs.msg import ColorRGBA
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 
-import fpn_resnet
+import onnxruntime
+from scipy.ndimage.filters import maximum_filter
 
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 
@@ -27,12 +26,11 @@ class SFAInference:
         rospy.loginfo(self.__class__.__name__ + " - Initializing")
 
         # Params
-        self.model_path = rospy.get_param("~model_weights_path", './kilynuaron_weights_70.pth')  # path of the trained model
-        self.front_only = rospy.get_param("~front_only", True) # Enable detections for only front FOV. Setting it to false runs detections on 360 FOV
+        self.onnx_path = rospy.get_param("~onnx_path", './kilynuaron_model.onnx')  # path of the trained model
 
         self.MIN_FRONT_X = rospy.get_param("~minFrontX", 0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
         self.MAX_FRONT_X = rospy.get_param("~maxFrontX", 50)  # maximum distance on lidar +ve x-axis to process points at (back detections)
-        self.MIN_BACK_X = rospy.get_param("~maxBackX", -50)  # maxmimum distance on lidar -ve x-axis to process points at
+        self.MIN_BACK_X = rospy.get_param("~minBackX", -50)  # maxmimum distance on lidar -ve x-axis to process points at
         self.MAX_BACK_X = rospy.get_param("~maxBackX", 0)  # minimum distance on lidar -ve x-axis to process points at
         self.MIN_Y = rospy.get_param("~minY", -25)  # maxmimum distance on lidar -ve y-axis to process points at
         self.MAX_Y = rospy.get_param("~maxY", 25)  # maxmimum distance on lidar +ve y-axis to process points at
@@ -47,15 +45,15 @@ class SFAInference:
         self.NUM_CLASSES = rospy.get_param("~num_classes", 3) # number of classes to detect
         self.PEAK_THRESH = rospy.get_param("~peak_thresh", 0.2) # score filter
 
-        self.only_front = rospy.get_param("~sfa_only_front", True)   # only front detections. If False, both front and back detections enabled
+        self.only_front = rospy.get_param("~sfa_only_front", False)   # only front detections. If False, both front and back detections enabled
         self.output_frame = rospy.get_param("~output_frame", 'map')  # transform detected objects from lidar frame to this frame
-        self.lidar_frame = rospy.get_param("~lidar_frame", 'lidar_center') # frame_id in which objects are published
+        self.transform_timeout = rospy.get_param('~transform_timeout', 0.05)
 
         self.DISCRETIZATION = (self.MAX_FRONT_X - self.MIN_FRONT_X) / self.BEV_HEIGHT # 3D world discretization to 2D image: distance encoded by 1 pixel
         self.BOUND_SIZE_X = self.MAX_FRONT_X - self.MIN_FRONT_X
         self.BOUND_SIZE_Y = self.MAX_Y - self.MIN_Y
 
-        self.device = torch.device('cuda:0') # device to run inference on
+        self.model = self.load_onnx(self.onnx_path) # get onnx model
 
         # model configs
         self.NUM_LAYERS = 18
@@ -67,8 +65,6 @@ class SFAInference:
             'z_coor': 1,
             'dim': 3
         }
-
-        self.model = self.get_model(self.model_path) # Get saved model from path
 
         # KITTI class names
         self.class_names = {0: "pedestrian",
@@ -82,19 +78,10 @@ class SFAInference:
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1)
 
-    def get_model(self, weights_path):
-        """
-        model_path: path of the loaded model
-        return: Loaded model with its trained parameters. In inference mode
-        """
+    def load_onnx(self, onnx_path):
 
-        model = fpn_resnet.get_pose_net(num_layers=self.NUM_LAYERS, heads=self.HEADS, head_conv=self.HEAD_CONV, imagenet_pretrained=False)
-        model.load_state_dict(torch.load(weights_path, map_location='cpu'))
-        rospy.loginfo(self.__class__.__name__ + "- Loaded weights from {}\n".format(weights_path))
-
-        model = model.to(device=self.device)
-        rospy.loginfo(self.__class__.__name__ + "- Loaded model to GPU")
-        model.eval()
+        model = onnxruntime.InferenceSession(onnx_path, providers=['CUDAExecutionProvider'])
+        rospy.loginfo(self.__class__.__name__ + "- Loaded ONNX model file")
 
         return model
 
@@ -104,8 +91,9 @@ class SFAInference:
         pointcloud: raw lidar data points
         return: None - publish autoware DetectedObjects
         """
+        self.tf_listener.waitForTransform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp, rospy.Duration(self.transform_timeout))
         # get the transform (translation and rotation) from lidar_frame to output frame at the time when the poinctloud msg was published
-        trans, tf_rot = self.tf_listener.lookupTransform(self.output_frame, self.lidar_frame, pointcloud.header.stamp)
+        trans, tf_rot = self.tf_listener.lookupTransform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp)
         # convert the looked up transform to a 4x4 homogenous transformation matrix.
         tf_matrix = self.tf_listener.fromTranslationRotation(trans, tf_rot)
         # Unpack pointcloud2 msg ype to numpy array
@@ -126,38 +114,36 @@ class SFAInference:
         if not self.only_front:
             # run the detection pipline
             front_dets, back_dets = self.detect(points, only_front=False)
-            detected_objects_array.objects += self.generate_autoware_objects(front_dets, pointcloud.header, tf_matrix, tf_rot)
-            detected_objects_array.objects += self.generate_autoware_objects(back_dets, pointcloud.header, tf_matrix, tf_rot)
+            detected_objects_array.objects += self.generate_autoware_objects(front_dets, pointcloud.header, tf_matrix, tf_rot, len(detected_objects_array.objects))
+            detected_objects_array.objects += self.generate_autoware_objects(back_dets, pointcloud.header, tf_matrix, tf_rot, len(detected_objects_array.objects))
         else:
             front_dets = self.detect(points, only_front=True)
-            detected_objects_array.objects += self.generate_autoware_objects(front_dets, pointcloud.header, tf_matrix, tf_rot)
+            detected_objects_array.objects += self.generate_autoware_objects(front_dets, pointcloud.header, tf_matrix, tf_rot, len(detected_objects_array.objects))
 
         # publish detected objects
         self.detected_object_array_pub.publish(detected_objects_array)
 
 
     def detect(self, points, only_front):
-        with torch.no_grad():
-            front_lidar = self.get_filtered_lidar(points)
-            front_bev_map = self.make_bev_map(front_lidar)
-            front_bev_map = torch.from_numpy(front_bev_map)
 
-            front_detections, front_bevmap = self.do_detection(front_bev_map, is_front=True)
-            front_final_dets = self.convert_det_to_real_values(front_detections)
+        front_lidar = self.get_filtered_lidar(points)
+        front_bev_map = self.make_bev_map(front_lidar)
 
-            if not only_front:
-                back_lidar = self.get_filtered_lidar(points, is_front=False)
-                back_bev_map = self.make_bev_map(back_lidar)
-                back_bev_map = torch.from_numpy(back_bev_map)
-                back_detections, back_bevmap, = self.do_detection(back_bev_map, is_front=False)
-                back_final_dets = self.convert_det_to_real_values(back_detections)
-                if back_final_dets.shape[0] != 0:
-                    back_final_dets[:, 1] = back_final_dets[:, 1] * -1
-                    back_final_dets[:, 2] = back_final_dets[:, 2] * -1
+        front_detections, front_bevmap = self.do_detection(front_bev_map, is_front=True)
+        front_final_dets = self.convert_det_to_real_values(front_detections)
 
-                return front_final_dets , back_final_dets
-            else:
-                return front_final_dets
+        if not only_front:
+            back_lidar = self.get_filtered_lidar(points, is_front=False)
+            back_bev_map = self.make_bev_map(back_lidar)
+            back_detections, back_bevmap, = self.do_detection(back_bev_map, is_front=False)
+            back_final_dets = self.convert_det_to_real_values(back_detections)
+            if back_final_dets.shape[0] != 0:
+                back_final_dets[:, 1] = back_final_dets[:, 1] * -1
+                back_final_dets[:, 2] = back_final_dets[:, 2] * -1
+
+            return front_final_dets, back_final_dets
+        else:
+            return front_final_dets
 
     def get_filtered_lidar(self, lidar, is_front=True):
 
@@ -214,91 +200,126 @@ class SFAInference:
 
     def do_detection(self, bevmap, is_front):
         if not is_front:
-            bevmap = torch.flip(bevmap, [1, 2])
+            bevmap = np.flip(bevmap, (1, 2))
 
-        input_bev_maps = bevmap.unsqueeze(0).to(self.device, non_blocking=True).float()
-        outputs = self.model(input_bev_maps)
+        input_bev_maps = np.expand_dims(bevmap, axis=0).astype(np.float32)
+        onnx_outputs = self.model.run([], {"input":input_bev_maps})
+        dict_keys = ['hm_cen', 'cen_offset', 'direction', 'z_coor', 'dim']
+        outputs = {}
+        for onnx_output, dict_key in zip(onnx_outputs, dict_keys):
+            outputs[dict_key] = onnx_output
 
         outputs['hm_cen'] = self._sigmoid(outputs['hm_cen'])
         outputs['cen_offset'] = self._sigmoid(outputs['cen_offset'])
+
         # detections size (batch_size, K, 10)
         detections = self.decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'], outputs['dim'], self.K)
-        detections = detections.cpu().numpy().astype(np.float32)
         detections = self.post_processing(detections)
 
         return detections[0], bevmap
 
     def _sigmoid(self, x):
-        return torch.clamp(x.sigmoid_(), min=1e-4, max=1 - 1e-4)
+        # Apply the sigmoid function element-wise to the input array
+        sig_x = 1 / (1 + np.exp(-x))
+        # Clamp the output values to be within the range [1e-4, 1 - 1e-4]
+        sig_x = np.clip(sig_x, a_min=1e-4, a_max=1 - 1e-4)
+
+        return sig_x
 
     def decode(self, hm_cen, cen_offset, direction, z_coor, dim, K=40):
-        batch_size, num_classes, height, width = hm_cen.size()
-
+        batch_size, num_classes, height, width = hm_cen.shape
         hm_cen = self._nms(hm_cen)
         scores, inds, clses, ys, xs = self._topk(hm_cen, K=K)
         if cen_offset is not None:
-            cen_offset = self._transpose_and_gather_feat(cen_offset, inds)
-            cen_offset = cen_offset.view(batch_size, K, 2)
-            xs = xs.view(batch_size, K, 1) + cen_offset[:, :, 0:1]
-            ys = ys.view(batch_size, K, 1) + cen_offset[:, :, 1:2]
+            cen_offset = self.transpose_and_gather_feat(cen_offset, inds)
+            cen_offset = cen_offset.reshape(batch_size, K, 2)
+            xs = xs.reshape(batch_size, K, 1) + cen_offset[:, :, 0:1]
+            ys = ys.reshape(batch_size, K, 1) + cen_offset[:, :, 1:2]
         else:
-            xs = xs.view(batch_size, K, 1) + 0.5
-            ys = ys.view(batch_size, K, 1) + 0.5
+            xs = xs.reshape(batch_size, K, 1) + 0.5
+            ys = ys.reshape(batch_size, K, 1) + 0.5
 
-        direction = self._transpose_and_gather_feat(direction, inds)
-        direction = direction.view(batch_size, K, 2)
-        z_coor = self._transpose_and_gather_feat(z_coor, inds)
-        z_coor = z_coor.view(batch_size, K, 1)
-        dim = self._transpose_and_gather_feat(dim, inds)
-        dim = dim.view(batch_size, K, 3)
-        clses = clses.view(batch_size, K, 1).float()
-        scores = scores.view(batch_size, K, 1)
-
+        direction = self.transpose_and_gather_feat(direction, inds)
+        direction = direction.reshape(batch_size, K, 2)
+        z_coor = self.transpose_and_gather_feat(z_coor, inds)
+        z_coor = z_coor.reshape(batch_size, K, 1)
+        dim = self.transpose_and_gather_feat(dim, inds)
+        dim = dim.reshape(batch_size, K, 3)
+        clses = clses.reshape(batch_size, K, 1).astype(np.float32)
+        scores = scores.reshape(batch_size, K, 1)
         # (scores x 1, ys x 1, xs x 1, z_coor x 1, dim x 3, direction x 2, clses x 1)
         # (scores-0:1, ys-1:2, xs-2:3, z_coor-3:4, dim-4:7, direction-7:9, clses-9:10)
         # detections: [batch_size, K, 10]
-        detections = torch.cat([scores, xs, ys, z_coor, dim, direction, clses], dim=2)
+        detections = np.concatenate([scores, xs, ys, z_coor, dim, direction, clses], axis=2)
 
         return detections
 
     def _nms(self, heat, kernel=3):
         pad = (kernel - 1) // 2
-        hmax = F.max_pool2d(heat, (kernel, kernel), stride=1, padding=pad)
-        keep = (hmax == heat).float()
 
+        # Compute max pooling operation using SciPy
+        hmax = maximum_filter(heat, size=kernel, mode='constant', cval=-np.inf)
+
+        # Compute keep mask
+        keep = (hmax == heat).astype(np.float32)
+
+        # Apply keep mask to input tensor
         return heat * keep
 
     def _topk(self, scores, K=40):
-        batch, cat, height, width = scores.size()
-
-        topk_scores, topk_inds = torch.topk(scores.view(batch, cat, -1), K)
+        batch, cat, height, width = scores.shape
+        scores_reshaped = scores.reshape(batch, cat, -1)
+        topk_scores, topk_inds = self.topk(scores_reshaped, K)
 
         topk_inds = topk_inds % (height * width)
-        topk_ys = (torch.floor_divide(topk_inds, width)).float()
-        topk_xs = (topk_inds % width).int().float()
+        topk_ys = np.floor_divide(topk_inds, width).astype(np.float32)
+        topk_xs = (topk_inds % width).astype(np.float32)
 
-        topk_score, topk_ind = torch.topk(topk_scores.view(batch, -1), K)
-        topk_clses = (torch.floor_divide(topk_ind, K)).int()
-        topk_inds = self._gather_feat(topk_inds.view(batch, -1, 1), topk_ind).view(batch, K)
-        topk_ys = self._gather_feat(topk_ys.view(batch, -1, 1), topk_ind).view(batch, K)
-        topk_xs = self._gather_feat(topk_xs.view(batch, -1, 1), topk_ind).view(batch, K)
+        topk_scores_reshaped = topk_scores.reshape(batch, -1)
+        topk_score, topk_ind = self.topk(topk_scores_reshaped, K)
+        topk_clses = np.floor_divide(topk_ind, K).astype(np.int32)
+
+        topk_inds = self.gather_feat(topk_inds.reshape(batch, -1, 1), topk_ind).reshape(batch, K)
+        topk_ys = self.gather_feat(topk_ys.reshape(batch, -1, 1), topk_ind).reshape(batch, K)
+        topk_xs = self.gather_feat(topk_xs.reshape(batch, -1, 1), topk_ind).reshape(batch, K)
 
         return topk_score, topk_inds, topk_clses, topk_ys, topk_xs
 
-    def _gather_feat(self, feat, ind, mask=None):
-        dim = feat.size(2)
-        ind = ind.unsqueeze(2).expand(ind.size(0), ind.size(1), dim)
-        feat = feat.gather(1, ind)
+    def topk(self,scores, K, dim=-1):
+        # Compute the number of dimensions in the input array
+        ndim = scores.ndim
+        # Convert the specified dimension to a positive index
+        dim = dim if dim >= 0 else ndim + dim
+        # Compute the top K values and indices along the specified dimension
+        topk_inds = np.argpartition(-scores, K, axis=dim)
+        if ndim == 1:
+            topk_inds = topk_inds[:K]
+        else:
+            topk_inds = topk_inds[(slice(None),) * dim + (slice(None, K),)]
+        topk_vals = np.take_along_axis(scores, topk_inds, axis=dim)
+        # Sort the top K values and indices along the specified dimension
+        sort_inds = np.argsort(-topk_vals, axis=dim)
+        topk_inds = np.take_along_axis(topk_inds, sort_inds, axis=dim)
+        topk_vals = np.take_along_axis(topk_vals, sort_inds, axis=dim)
+        # Return the top K values and indices
+        return topk_vals, topk_inds
+
+    def gather_feat(self, feat, ind, mask=None):
+        dim = feat.shape[2]
+        ind = np.repeat(ind[..., np.newaxis], dim, axis=2)
+        feat = np.take_along_axis(feat, ind, axis=1)
         if mask is not None:
-            mask = mask.unsqueeze(2).expand_as(feat)
+            mask = np.repeat(mask[..., np.newaxis], dim, axis=2)
             feat = feat[mask]
-            feat = feat.view(-1, dim)
+            feat = feat.reshape(-1, dim)
         return feat
 
-    def _transpose_and_gather_feat(self, feat, ind):
-        feat = feat.permute(0, 2, 3, 1).contiguous()
-        feat = feat.view(feat.size(0), -1, feat.size(3))
-        feat = self._gather_feat(feat, ind)
+    def transpose_and_gather_feat(self, feat, ind):
+        feat = feat.transpose(0, 2, 3, 1)
+        # make sure the array has a contiguous memory layout
+        feat = np.ascontiguousarray(feat)
+        feat = feat.reshape(feat.shape[0], -1, feat.shape[3])
+        feat = self.gather_feat(feat, ind)
         return feat
 
     def post_processing(self,detections):
@@ -357,7 +378,7 @@ class SFAInference:
 
         return np.array(kitti_dets)
 
-    def generate_autoware_objects(self, detections, header, tf_matrix, tf_rot):
+    def generate_autoware_objects(self, detections, header, tf_matrix, tf_rot, base=0):
 
         """
         Generate Autoware DetectedObject from Detections
@@ -368,9 +389,10 @@ class SFAInference:
         :return: AutowareDetectedObject
         """
         detected_objects_list = []
-        for object in detections:
+        for i, object in enumerate(detections):
 
             detected_object = DetectedObject()
+            detected_object.id = i + base
             detected_object.header.frame_id = self.output_frame
             detected_object.header.stamp = header.stamp
             detected_object.label = self.class_names[object[0]]
