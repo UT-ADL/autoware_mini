@@ -13,10 +13,10 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 from autoware_msgs.msg import Lane, DetectedObjectArray, TrafficLightResultArray
-from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped
+from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped, Point
 from std_msgs.msg import ColorRGBA
 
-from helpers import get_two_nearest_waypoint_idx
+from helpers import get_two_nearest_waypoint_idx, get_closest_point_on_line
 
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.4)
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
@@ -151,17 +151,23 @@ class LocalPlanner:
         end_index = wp_backward + self.local_path_length
         if end_index > len(global_path_array):
             end_index = len(global_path_array)
-        local_path_array = global_path_array[wp_backward : end_index,:]
+        local_path_array = global_path_array[wp_backward : end_index,:].copy()
+
+        # project current_pose to the local path
+        current_pose_on_path = get_closest_point_on_line(Point(x = current_pose.x, y = current_pose.y, z = current_pose.z),
+                                                         Point(x = local_path_array[0,0], y = local_path_array[0,1], z = local_path_array[0,2]),
+                                                         Point(x = local_path_array[1,0], y = local_path_array[1,1], z = local_path_array[1,2]))
 
         # for all calculations consider the current pose as the first point of the local path
-        local_path_array[0] = [current_pose.x, current_pose.y, current_pose.z, current_velocity]
+        local_path_array[0] = [current_pose_on_path.x, current_pose_on_path.y, current_pose_on_path.z, current_velocity]
 
         # calculate distances up to each waypoint
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
         local_path_dists = np.insert(local_path_dists, 0, 0.0)
 
-        # slice waypoints from global path to local path
+        # slice waypoints from global path to local path and overwrite the first waypoint with the current_pose_on_path
         local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_backward:end_index])
+        local_path_waypoints[0].pose.pose.position = current_pose_on_path
 
         # initialize closest object distance and velocity
         closest_object_distance = 0.0 
@@ -228,7 +234,9 @@ class LocalPlanner:
                                             - self.braking_reaction_time * obstacles_ahead_speeds
 
                     # calculate target velocity based on stopping distance and deceleration limit
-                    target_vel = np.min(np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.speed_deceleration_limit * stopping_distances)))
+                    target_velocities = (np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.speed_deceleration_limit * stopping_distances)))
+                    lowest_target_velocity_idx = np.argmin(target_velocities)
+                    target_vel = target_velocities[lowest_target_velocity_idx]
                     wp.twist.twist.linear.x = min(target_vel, wp.twist.twist.linear.x)
 
                     # from stop point onwards all speeds are zero
@@ -239,8 +247,8 @@ class LocalPlanner:
                     if i == 0:
                         closest_object_idx = np.argmin(obstacles_ahead_dists)
                         # closest object distance is calculated from the front of the car
-                        closest_object_distance = obstacles_ahead_dists[closest_object_idx] - self.current_pose_to_car_front
-                        closest_object_velocity = obstacles_ahead_speeds[closest_object_idx]
+                        closest_object_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - self.current_pose_to_car_front
+                        closest_object_velocity = obstacles_ahead_speeds[lowest_target_velocity_idx]
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked)
 
