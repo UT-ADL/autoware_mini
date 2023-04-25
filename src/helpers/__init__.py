@@ -152,11 +152,11 @@ def get_closest_point_on_line(ego_point, point1, point2):
     y2 = point2.y
 
     # very small slope - almost horizontal line
-    if (y2 - y1) < 0.0001:
+    if abs(y2 - y1) < 0.0001:
         x = x_ego
         y = y2
     # infinite slope - almost vertical line
-    elif (x2 - x1) < 0.0001:
+    elif abs(x2 - x1) < 0.0001:
         x = x2
         y = y_ego
     else:
@@ -312,7 +312,6 @@ def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, dist
     """
     Get point on path within distance from ego pose
     :param waypoints: waypoints
-    :param last_idx: last wp index
     :param front_wp_idx: wp index from where to start calculate the distance
     :param start_point: starting point for distance calculation
     :param distance: distance where to find the point on the path
