@@ -151,7 +151,7 @@ This node receives Autoware messages and Carla messages, and publishes Ackermann
 
 ## carla_waypoints_publisher
 
-Receive a path from carla_ros_waypoint_publisher and convert it to autoware format.
+Receive a path from carla_ros_waypoint_publisher and convert it to Autoware format.
 
 
 #### Parameters

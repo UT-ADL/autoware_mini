@@ -4,7 +4,7 @@
 ## waypoint_loader
 
 
-ROS node to load waypoints from a CSV file and publish them on a ROS topic. Waypoint file should have the following strcture (header row):
+ROS node to load waypoints from a CSV file and publish them on a ROS topic. Waypoint file should have the following structure (header row):
 ```wp_id, x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag```
 
 
@@ -33,7 +33,7 @@ None.
 
 ## waypoint_saver
 
-This node saves the current position and velocity of a vehicle as waypoints in a csv file with the following format: wp_id x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag. It also publishes markers of the waypoints on the "path_markers" topic. More detailed explanation of saved fields:
+This node saves the current position and velocity of a vehicle as waypoints in a csv file with the following format: wp_id x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag. It also publishes markers of the waypoints on the "path_markers" topic. A more detailed explanation of saved fields:
 
 * `wp_id` - waypoint id automatically incremented
 * `x`, `y`, `z` - coordinates from `current_pose` message

@@ -1,4 +1,4 @@
-# Global plannning
+# Global planning
 
 
 ## lanelet2_global_planner
@@ -32,7 +32,7 @@ A ROS node that implements a global planner for autonomous vehicles based on Lan
 | Name | Type | Description |
 |------|------|-------------|
 | `global_path` | `autoware_msgs/Lane` | The generated global path |
-| `target_lane_markers` | `visualization_msgs/MarkerArray` | The markers for the target lane (mainly debugging purpose) |
+| `target_lane_markers` | `visualization_msgs/MarkerArray` | The markers for the target lane (mainly for debugging purpose) |
 
 
 
@@ -46,14 +46,14 @@ A ROS node for smoothing global path using interpolation and optional speed adju
 | Name | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | `~waypoint_interval` | float | `1.0` | Distance between waypoints after path smoothing (m)|
-| `~adjust_speeds_in_curves` | bool | `True` | Whether to adjust speeds based on curvature of the path. |
+| `~adjust_speeds_in_curves` | bool | `True` | Whether to adjust speeds based on the curvature of the path. |
 | `~adjust_speeds_using_deceleration` | bool | `True` | Whether to adjust speeds based on maximum deceleration. |
 | `~adjust_endpoint_speed_to_zero` | bool | `True` | Whether to adjust the speeds at the end of the path to decelerate to zero. |
-| `~speed_deceleration_limit` | float | `1.0` | Deceleration limit used in speed adjusment (m/s2) |
+| `~speed_deceleration_limit` | float | `1.0` | Deceleration limit used in speed adjustment (m/s2) |
 | `~speed_averaging_window` | int | `21` | Number of points used to calculate average speed. |
 | `~radius_calc_neighbour_index` | int | `4` | Index of points (+/- from center point) used to calculate radius for the path. |
 | `~lateral_acceleration_limit` | float | `3.0` | Maximum allowed lateral acceleration limit (m/s2) |
-| `~output_debug_info` | bool | `False` | Whether to output debug information. Debug information will draw graphs using function in helpers. |
+| `~output_debug_info` | bool | `False` | Whether to output debug information. Debug information will draw graphs using a function from helpers. |
 
 
 #### Subscribed Topics

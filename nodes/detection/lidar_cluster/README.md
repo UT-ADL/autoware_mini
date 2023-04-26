@@ -11,7 +11,7 @@ ROS node that clusters point cloud data and publishes detected objects.
 | Name | Type | Default Value | Description |
 | ----- | ----- | ------------- | ------------ |
 | `min_cluster_size` | int | `5` | Minimum number of points in a cluster. Clusters smaller than this will be ignored. |
-| `bounding_box_type` | string | `"axis_aligned"` | Type of bounding box. Can be `"axis_aligned"` for axis-aligned bounding box, or `"min_area"` for minimum area bounding box. |
+| `bounding_box_type` | string | `"axis_aligned"` | Type of bounding box. It can be `"axis_aligned"` for axis-aligned bounding box, or `"min_area"` for minimum area bounding box. |
 | `enable_pointcloud` | bool | `False` | Whether to publish point cloud data for each detected object. |
 | `enable_convex_hull` | bool | `True` | Whether to calculate a convex hull for the cluster points. |
 | `target_frame` | string | `"map"` | Target frame for the detected objects. |

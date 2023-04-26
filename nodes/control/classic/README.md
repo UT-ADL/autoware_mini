@@ -1,11 +1,11 @@
 # Control
 
-This folder contains classical controllers - nodes that do waypoint following. Source of the waypoints can be the waypoint file or outputs from the local or global planner.
+This folder contains classical controllers - nodes that do waypoint following. The source of the waypoints can be the waypoint file or outputs from the local or global planner.
 
 
 ## pure_pursuit_follower
 
-A ROS node which implements the pure pursuit control algorithm. The node subscribes to the topic `/planning/local_path` to get the planned path and subscribes to the topics `/localization/current_pose` and `/localization/current_velocity` to get the current pose and velocity of the vehicle. It publishes to the topic `/vehicle_cmd` the vehicle commands such as steering angle and velocity. The implementation is based from the blog post [Three Methods of Vehicle Lateral Control: Pure Pursuit, Stanley and MPC](https://www.shuffleai.blog/blog/Three_Methods_of_Vehicle_Lateral_Control.html).
+A ROS node which implements the pure pursuit control algorithm. The node subscribes to the topic `/planning/local_path` to get the planned path and subscribes to the topics `/localization/current_pose` and `/localization/current_velocity` to get the current pose and velocity of the vehicle. It publishes to the topic `/vehicle_cmd` the vehicle commands such as steering angle and velocity. The implementation is based on the blog post [Three Methods of Vehicle Lateral Control: Pure Pursuit, Stanley and MPC](https://www.shuffleai.blog/blog/Three_Methods_of_Vehicle_Lateral_Control.html).
 
 #### Parameters
 
@@ -32,13 +32,13 @@ A ROS node which implements the pure pursuit control algorithm. The node subscri
 | Name                  | Type                      | Description                                            |
 | ----------------------| -------------------------| ------------------------------------------------------ |
 | `vehicle_cmd`        | `autoware_msgs/VehicleCmd` | The vehicle commands (steering angle and velocity).    |
-| `follower_markers`   | `visualization_msgs/MarkerArray` | if `publish_debug_info` is enabled: follower specific visualization topic that helps to understand some basic internal workings |
+| `follower_markers`   | `visualization_msgs/MarkerArray` | if `publish_debug_info` is enabled: follower-specific visualization topic that helps to understand some basic internal workings |
 | `follower_debug`     | `Float32MultiArray` | if `publish_debug_info` is enabled: `processing time`, `current_heading`, `lookahead_heading`, `heading_error`, `cross_track_error` and `target_velocity` are outputted |
 
 
 #### Output to `vehicle_cmd`
 * `ctrl_cmd/linear_velocity` - taken from the waypoints closest to `base_link` and interpolated between the waypoints
-* `ctrl_cmd/linear_acceleration` - currently constant 0.0 is used
+* `ctrl_cmd/linear_acceleration` - currently, constant 0.0 is used
 * `ctrl_cmd/steering_angle` - calculated using pure_pursuit algorithm
 * `lamp_cmd/l` and `lamp_cmd/r` - blinker commands for left and right blinker (1 - on, 0 - off)
 
@@ -46,7 +46,7 @@ A ROS node which implements the pure pursuit control algorithm. The node subscri
 
 ## stanley_follower
 
-ROS node that receives a local path (Lane message) and a vehicle status (current_pose and current_velocity) and calculates the desired vehicle steering angle and throttle/brake command using Stanley control law. The implementation is based from the blog post [Three Methods of Vehicle Lateral Control: Pure Pursuit, Stanley and MPC](https://www.shuffleai.blog/blog/Three_Methods_of_Vehicle_Lateral_Control.html).
+ROS node that receives a local path (Lane message) and a vehicle status (current_pose and current_velocity) and calculates the desired vehicle steering angle and throttle/brake command using Stanley control law. The implementation is based on the blog post [Three Methods of Vehicle Lateral Control: Pure Pursuit, Stanley and MPC](https://www.shuffleai.blog/blog/Three_Methods_of_Vehicle_Lateral_Control.html).
 
 #### Parameters
 

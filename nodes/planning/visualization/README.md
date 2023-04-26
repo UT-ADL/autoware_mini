@@ -46,7 +46,7 @@ This node visualizes the Lanelet2 map. It loads the map using Lanelet2 and creat
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| `/detection/traffic_light_status` | `autoware_msgs/TrafficLightResultArray` | The topic on which the node listens to for traffic light status messages. |
+| `/detection/traffic_light_status` | `autoware_msgs/TrafficLightResultArray` | The topic the node listens to for traffic light status messages. |
 
 
 #### Published Topics
