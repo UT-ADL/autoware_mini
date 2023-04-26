@@ -8,7 +8,7 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 
 def get_heading_from_pose_orientation(pose):
     """
-    Get heading from pose
+    Get heading angle from pose.orientation.
     :param pose: PoseStamped
     :return: heading in radians
     """
@@ -209,6 +209,14 @@ def interpolate_velocity_between_waypoints(point, backward_wp, forward_wp):
 
 
 def create_closest_point_on_path(waypoints, closest_idx, origin_point):
+    """
+    Project origin_point onto the path. First decide weather to use backward or forward waypointand then call
+    get_closest_point_on_line function to get the closest point on path.
+    :param waypoints: list of waypoints
+    :param closest_idx: index of the closest waypoint
+    :param origin_point: Point - origin point
+    :return: Point - closest point on path
+    """
 
     #initialize angles
     backward_angle = 0

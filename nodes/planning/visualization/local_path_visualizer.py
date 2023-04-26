@@ -76,7 +76,7 @@ class LocalPathVisualizer:
             # take orientation for stop point from close by waypoint
             stop_orientation = lane.waypoints[idx].pose.pose.orientation
 
-            if lane.is_blocked:
+            if lane.closest_object_velocity < 1.0:
                 color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
             else:
                 color = ColorRGBA(1.0, 1.0, 0.0, 0.5)
@@ -84,7 +84,7 @@ class LocalPathVisualizer:
             marker = Marker()
             marker.header.frame_id = lane.header.frame_id
             marker.header.stamp = rospy.Time.now()
-            marker.ns = "Stop line"
+            marker.ns = "Stopping point"
             marker.id = 0
             marker.type = marker.CUBE
             marker.action = marker.ADD
