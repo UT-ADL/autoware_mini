@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="detector"            default="cluster"   doc="cluster,vella,sfa,sim" />
-    <arg name="sfa_only_front"      default="False" />
+    <arg name="tfl_detector"        default="none"      doc="carla" />
+    <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
     <arg name="use_lidar_center"    default="False"      doc="whether to use center lidar for detection" />
 
     <group ns="detection">
@@ -12,8 +13,7 @@
             <include if="$(eval arg('detector')=='cluster')" file="$(find autoware_mini)/launch/detection/lidar_cluster.launch" />
 
             <node if="$(eval arg('detector')=='sfa')" pkg="autoware_mini" type="sfa_detector.py" name="sfa_detector" output="screen" required="true">
-                <param name="onnx_path"      value="$(find autoware_mini)/data/sfa/kilynuaron_model.onnx"/>
-                <param name="sfa_only_front" value="$(arg sfa_only_front)"/>
+                <param name="onnx_path"  value="$(find autoware_mini)/config/sfa/kilynuaron_model.onnx"/>
             </node>
         </group>
         
