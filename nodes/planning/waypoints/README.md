@@ -8,7 +8,7 @@ ROS node to load waypoints from a CSV file and publish them on a ROS topic. Wayp
 ```wp_id, x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag```
 
 
-##### Parameters
+#### Parameters
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -18,12 +18,12 @@ ROS node to load waypoints from a CSV file and publish them on a ROS topic. Wayp
 | `wp_right_width` | `float` | `1.4` | The right width of the waypoints. |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 None.
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ This node saves the current position and velocity of a vehicle as waypoints in a
 * Other fields are currently not used by `waypoint_saver`
 
 
-##### Parameters
+#### Parameters
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -51,7 +51,7 @@ This node saves the current position and velocity of a vehicle as waypoints in a
 | `waypoints_file` | `string` | `"/tmp/waypoints.csv"` | Name and path of the output file for the waypoints |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -59,7 +59,7 @@ This node saves the current position and velocity of a vehicle as waypoints in a
 | `/localization/current_velocity` | [`geometry_msgs/TwistStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html)  | Current velocity of the vehicle |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | --- | --- | --- |

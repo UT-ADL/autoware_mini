@@ -6,7 +6,7 @@
 ROS node that converts the Vella track messages to Autoware Detected Object messages by applying filtering, transforming and adding metadata to the messages.
 
 
-##### Parameters
+#### Parameters
 
 | Name | Type | Default value | Description |
 | --- | --- | --- | --- |
@@ -16,14 +16,14 @@ ROS node that converts the Vella track messages to Autoware Detected Object mess
 | `~output_frame` | string | 'map' | Frame ID for Autoware DetectedObjectArray. |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name         | Type                               | Description                                          |
 | ------------ | ---------------------------------- | ---------------------------------------------------- |
 | `/vdk/tracks` | `vella_msgs/Track3DArray`| Vella tracks to be converted to Autoware DetectedObject messages |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name         | Type                               | Description                                          |
 | ------------ | ---------------------------------- | ---------------------------------------------------- |

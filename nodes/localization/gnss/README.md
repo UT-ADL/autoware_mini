@@ -6,7 +6,7 @@
 This ROS node transforms GNSS coordinates provided by [NovAtel Oem7 ROS driver](http://wiki.ros.org/novatel_oem7_driver) and converts them to local map coordinates using either UTM or Lest97 transformations. The azimuth angle adjustment taking into consideration the meridian convergence is also added. Additionally this node publishes vehicle's current pose, velocity and odometry.
 
 
-##### Parameters
+#### Parameters
 
 | Name                    | Type    | Default Value | Description                                                  |
 | -----------------------| ------- | ------------- | ------------------------------------------------------------ |
@@ -25,7 +25,7 @@ This ROS node transforms GNSS coordinates provided by [NovAtel Oem7 ROS driver](
   * `lest97` - Estonian national coordinate system - [read more](https://epsg.io/3301), uses `WGS84ToLest97Transformer.py` from helpers/localization. Origin northing and easting are defined in the `localization.yaml` file
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name                 | Type                                         | Description                                                   |
 | --------------------| ---------------------------------------------| ------------------------------------------------------------- |
@@ -33,7 +33,7 @@ This ROS node transforms GNSS coordinates provided by [NovAtel Oem7 ROS driver](
 | `/novatel/oem7/inspva` | [`novatel_oem7_msgs/INSPVA`](https://docs.novatel.com/OEM7/Content/SPAN_Logs/INSPVA.htm)                  | The INS position, velocity, and attitude. Used fileds: header.stamp, latitude, longitude, height, roll, pitch, azimuth, east_velocity, north_velocity |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name                 | Type                                        | Description                                                   |
 | --------------------| --------------------------------------------| ------------------------------------------------------------- |

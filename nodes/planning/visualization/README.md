@@ -6,19 +6,19 @@
 This node visualizes the global path received on the 'global_path' topic.
 
 
-##### Parameters
+#### Parameters
 
 No parameters.
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | `/global_path` | `autoware_msgs/Lane` | The global path to be visualized. |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -31,7 +31,7 @@ No parameters.
 This node visualizes the Lanelet2 map. It loads the map using Lanelet2 and creates a `MarkerArray` message which contains markers for different parts of the map. The markers are published on the topic `lanelet2_map_markers`. Additionally, it listens to the topic `/detection/traffic_light_status` for traffic light status messages and publishes stop line markers with different colors based on the status of the traffic lights on the topic `stop_line_markers`.
 
 
-##### Parameters
+#### Parameters
 
 | Name | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
@@ -42,14 +42,14 @@ This node visualizes the Lanelet2 map. It loads the map using Lanelet2 and creat
 | `/localization/utm_origin_lon` | float | 0.0 | The longitude of the UTM origin |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | `/detection/traffic_light_status` | `autoware_msgs/TrafficLightResultArray` | The topic on which the node listens to for traffic light status messages. |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
@@ -63,7 +63,7 @@ This node visualizes the Lanelet2 map. It loads the map using Lanelet2 and creat
 A ROS node that visualizes the local path and other relevant information.
 
 
-##### Parameters
+#### Parameters
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -72,14 +72,14 @@ A ROS node that visualizes the local path and other relevant information.
 | `/planning/local_planner/braking_safety_distance` | `float` | `2.0` | Safety distance to use for braking visualization |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `/local_path` | `autoware_msgs/Lane` | The local path to visualize |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -92,12 +92,12 @@ A ROS node that visualizes the local path and other relevant information.
 This node subscribes to `/planning/local_path`, `/control/vehicle_cmd`, and `/localization/current_velocity` topics and publishes the current speed, target speed, closest object distance, and closest object speed. Published values are used in Rviz to display the data (dashboard).
 
 
-##### Parameters
+#### Parameters
 
 No parameters.
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -106,7 +106,7 @@ No parameters.
 | `/localization/current_velocity` | `geometry_msgs/TwistStamped` | Current velocity published by the localization module |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | --- | --- | --- |

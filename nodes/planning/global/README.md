@@ -6,7 +6,7 @@
 A ROS node that implements a global planner for autonomous vehicles based on Lanelet2 map. The node subscribes to the `move_base_simple/goal` topic and publishes the global path as a sequence of waypoints to the `global_path` topic. The node uses the current position of the vehicle from the `localization/current_pose` topic and generates the global path to the goal position by finding the shortest path in the Lanelet2 map. Multiple goal points can be added.
 
 
-##### Parameters
+#### Parameters
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
@@ -19,7 +19,7 @@ A ROS node that implements a global planner for autonomous vehicles based on Lan
 | `nearest_neighbor_search` | `string` | `"kd_tree"` | The type of the nearest neighbor search algorithm used by the planner |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 |------|------|-------------|
@@ -27,7 +27,7 @@ A ROS node that implements a global planner for autonomous vehicles based on Lan
 | `/localization/current_pose` | `geometry_msgs/PoseStamped` | The current position of the vehicle |
 | `/cancel_route` | `std_msgs/Bool` | A boolean flag to cancel the existing global path |
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 |------|------|-------------|
@@ -39,11 +39,9 @@ A ROS node that implements a global planner for autonomous vehicles based on Lan
 ## path_smoothing
 
 
-# Path Smoothing Node
-
 A ROS node for smoothing global path using interpolation and optional speed adjustments based on deceleration limit, path radius and lateral acceleration.
 
-## Parameters
+#### Parameters
 
 | Name | Type | Default Value | Description |
 | --- | --- | --- | --- |
@@ -58,14 +56,14 @@ A ROS node for smoothing global path using interpolation and optional speed adju
 | `~output_debug_info` | bool | `False` | Whether to output debug information. Debug information will draw graphs using function in helpers. |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `/global_path` | `autoware_msgs/Lane` | Subscribes to the global path to be smoothed. |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | --- | --- | --- |

@@ -6,7 +6,7 @@
 ROS node that clusters point cloud data and publishes detected objects.
 
 
-##### Parameters
+#### Parameters
 
 | Name | Type | Default Value | Description |
 | ----- | ----- | ------------- | ------------ |
@@ -18,14 +18,14 @@ ROS node that clusters point cloud data and publishes detected objects.
 | `transform_timeout` | float | `0.05` | Timeout in seconds for waiting for a transform to become available.
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 | ----- | ----- | ------------ |
 | `/points_clustered` | `sensor_msgs/PointCloud2` | Clustered point cloud data.
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | ----- | ----- | ------------ |
@@ -38,7 +38,7 @@ ROS node that clusters point cloud data and publishes detected objects.
 ROS node for filtering ground points from a 3D point cloud.
 
 
-##### Parameters
+#### Parameters
 
 | Name        | Type   | Default | Description                                               |
 | ----------- | ------ | ------- | --------------------------------------------------------- |
@@ -53,14 +53,14 @@ ROS node for filtering ground points from a 3D point cloud.
 | `~filter`   | string | 'none'  | Filtering method for smoothing ground levels              |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name         | Type                               | Description                                          |
 | ------------ | ---------------------------------- | ---------------------------------------------------- |
 | `/points_raw`| `sensor_msgs/PointCloud2`          | The raw point cloud to filter                        |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name                 | Type                               | Description                                                      |
 | -------------------- | ---------------------------------- | ---------------------------------------------------------------- |
@@ -74,7 +74,7 @@ ROS node for filtering ground points from a 3D point cloud.
 This node subscribes to a point cloud topic and clusters the points using DBSCAN algorithm. It downsamples the input data to a fixed size before clustering, to reduce processing time. It publishes the clustered point cloud data to a separate topic.
 
 
-##### Parameters
+#### Parameters
 
 | Name | Type | Default value | Description |
 | --- | --- | --- | --- |
@@ -83,14 +83,14 @@ This node subscribes to a point cloud topic and clusters the points using DBSCAN
 | `~cluster_min_size` | int | `7` | Minimum number of points required to form a cluster. |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `/points_no_ground` | `sensor_msgs/PointCloud2` | The input point cloud data. |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | --- | --- | --- |

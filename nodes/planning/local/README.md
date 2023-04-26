@@ -6,7 +6,7 @@
 The `LocalPlanner` node is responsible for generating a local path that can be followed by the vehicle, using the smoothed_path as a reference. The local path is generated based on the current position of the vehicle and the surrounding environment, such as detected objects, traffic lights, and stop lines. Local planner changes the velocities of the smoothed_path depending on the detected objects and traffic lights.
 
 
-##### Parameters
+#### Parameters
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
@@ -19,7 +19,7 @@ The `LocalPlanner` node is responsible for generating a local path that can be f
 |`~speed_deceleration_limit` | double | `1.0` | The maximum rate at which the vehicle can decelerate (m/s2) |
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 |------|------|-------------|
@@ -30,7 +30,7 @@ The `LocalPlanner` node is responsible for generating a local path that can be f
 |`/detection/traffic_light_status` | `autoware_msgs/TrafficLightResultArray` | Traffic light status |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 |------|------|-------------|

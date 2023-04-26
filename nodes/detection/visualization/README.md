@@ -6,19 +6,19 @@
 
 ROS node to visualize detected objects by publishing markers to RViz.
 
-##### Parameters
+#### Parameters
 
 No parameters.
 
 
-##### Subscribed Topics
+#### Subscribed Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `/detected_objects` | `autoware_msgs/DetectedObjectArray `| Detected objects to be visualized. |
 
 
-##### Published Topics
+#### Published Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
