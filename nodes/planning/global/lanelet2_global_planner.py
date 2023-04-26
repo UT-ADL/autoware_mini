@@ -165,10 +165,10 @@ class Lanelet2GlobalPlanner:
             self.publish_waypoints(self.waypoints)
             rospy.logwarn("lanelet2_global_planner - route cancelled!")
 
-    def create_waypoint_on_path(self, waypoints, closest_idx, start_point):
+    def create_waypoint_on_path(self, waypoints, closest_idx, origin_point):
         wp = copy.deepcopy(waypoints[closest_idx])
         # interpolate point on path
-        point = create_closest_point_on_path(waypoints, closest_idx, start_point)
+        point = create_closest_point_on_path(waypoints, closest_idx, origin_point)
         wp.pose.pose.position = point
         return wp
 
