@@ -13,8 +13,7 @@
             <include if="$(eval arg('detector')=='cluster')" file="$(find autoware_mini)/launch/detection/lidar_cluster.launch" />
 
             <node if="$(eval arg('detector')=='sfa')" pkg="autoware_mini" type="sfa_detector.py" name="sfa_detector" output="screen" required="true">
-                <param name="onnx_path"      value="$(find autoware_mini)/data/sfa/kilynuaron_model.onnx"/>
-                <param name="sfa_only_front" value="$(arg sfa_only_front)"/>
+                <param name="onnx_path"  value="$(find autoware_mini)/config/sfa/kilynuaron_model.onnx"/>
             </node>
         </group>
         

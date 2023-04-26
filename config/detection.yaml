@@ -23,21 +23,9 @@ lidar:
     transform_timeout: 0.05         # needed for Carla
 
   sfa_detector:
-    minFrontX: 0
-    maxFrontX: 50
-    minBackX: -50
-    maxBackX: 0
-    minY: -25
-    maxY: 25
-    minz: -2.73
-    max_z: 1.27
-    bev_height: 608
-    bev_width: 608
-    K: 50
-    down_ratio: 4
-    num_classes: 3
     peak_thresh: 0.2
     output_frame: "map"
+    sfa_only_front: False
 
 vella_detector:
   confidence_filter: 0.5
