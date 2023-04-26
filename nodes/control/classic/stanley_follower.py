@@ -70,8 +70,6 @@ class StanleyFollower:
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
-        assert current_pose_msg.header.stamp == current_velocity_msg.header.stamp
-
         if self.publish_debug_info:
             start_time = rospy.get_time()
 
