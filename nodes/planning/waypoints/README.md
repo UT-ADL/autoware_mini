@@ -1,33 +1,39 @@
-# Tools
+# Planning - waypoints
 
-## waypoint_saver
 
-Records waypoints, speed, yaw and blinker information and writes to csv file.
+## waypoint_loader
+
+
+ROS node to load waypoints from a CSV file and publish them on a ROS topic. Waypoint file should have the following strcture (header row):
+```wp_id, x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag```
+
 
 ##### Parameters
 
-* `interval` - distance between recorded waypoints in meters
-* `file_name` - output file name where to save waypoints (default: /tmp/waypoints.csv).
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `waypoints_file` | `string` | - | The path to the CSV file containing the waypoints. |
+| `output_frame` | `string` | `"map"` | The frame ID to use for the published waypoints. |
+| `wp_left_width` | `float` | `1.4` | The left width of the waypoints. |
+| `wp_right_width` | `float` | `1.4` | The right width of the waypoints. |
 
-##### Subscribes
 
-| Topic | Type | Comment |
+##### Subscribed Topics
+
+None.
+
+
+##### Published Topics
+
+| Name | Type | Description |
 | --- | --- | --- |
-| `current_pose` | [geometry_msgs/PoseStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html) | waypoint coordinates and yaw |
-| `current_velocity` | [geometry_msgs/TwistStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html) | velocity |
-| `/pacmod/parsed_tx/turn_rpt` | `pacmod_msgs.msg/SystemRptInt` | blinker information |
+| `/global_path` | `autoware_msgs/Lane` | The lane message containing the loaded waypoints. |
 
-##### Publishes
 
-| Topic | Type | Comment |
-| --- | --- | --- |
-| `path_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |
 
-##### Output
+## waypoint_saver
 
-Will record waypoint file with the following columns:
-
-```wp_id, x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag```
+This node saves the current position and velocity of a vehicle as waypoints in a csv file with the following format: wp_id x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag. It also publishes markers of the waypoints on the "path_markers" topic. More detailed explanation of saved fields:
 
 * `wp_id` - waypoint id automatically incremented
 * `x`, `y`, `z` - coordinates from `current_pose` message
@@ -36,39 +42,25 @@ Will record waypoint file with the following columns:
 * `steering_flag` - used for blinker information. Inside the code there is also a remapping.
 * Other fields are currently not used by `waypoint_saver`
 
-## waypoint_loader
-
-* Loads waypoints from the waypoint file (csv file with the following columns) and publishes waypoints to `path` topic.
-
-```wp_id, x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event_flag```
-
-* Has no subscribers
 
 ##### Parameters
-* `waypoints_file` - input waypoints file (full path)
-* `output_frame` - default: `map`
 
-##### Publishes
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `interval` | `float` | `1.0` | Minimum distance between consecutive waypoints in meters  (m)|
+| `waypoints_file` | `string` | `"/tmp/waypoints.csv"` | Name and path of the output file for the waypoints |
 
-| Topic | Type | Comment |
+
+##### Subscribed Topics
+
+| Name | Type | Description |
 | --- | --- | --- |
-| `global_path` | `autoware_msgs/Lane` | Lane contains an array of waypoints `autoware_msgs/Waypoint` |
+| `/localization/current_pose` | [`geometry_msgs/PoseStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html) | Current pose of the vehicle |
+| `/localization/current_velocity` | [`geometry_msgs/TwistStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TwistStamped.html)  | Current velocity of the vehicle |
 
-## waypoint_visualizer
 
-Visualizes `global_path` and `smoothed_path`. Visualizations for both path's are the same.
+##### Published Topics
 
-##### Subscribes
-
-| Topic | Type | Comment |
+| Name | Type | Description |
 | --- | --- | --- |
-| `global_path` | `autoware_msgs/Lane` | path from global planner or loaded waypoints |
-| `smoothed_path` | `autoware_msgs/Lane` | smoothed global path |
-
-
-##### Publishes
-
-| Topic | Type | Comment |
-| --- | --- | --- |
-| `global_path_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |
-| `smoothed_path_markers` | `visualization_msgs/MarkerArray` | includes markers for waypoint pose and velocity labels |
+| `/path_markers` | `MarkerArray` | Markers of the saved waypoints | 
