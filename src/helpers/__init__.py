@@ -253,14 +253,14 @@ def get_angle_three_points_2d(point1, point2, point3):
 
     return angle
 
-def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, distance):
+def get_point_and_orientation_on_path_within_distance(waypoints, front_wp_idx, start_point, distance):
     """
     Get point on path within distance from ego pose
     :param waypoints: waypoints
     :param front_wp_idx: wp index from where to start calculate the distance
     :param start_point: starting point for distance calculation
     :param distance: distance where to find the point on the path
-    :return: Point
+    :return: Point, Quaternion
     """
 
     point = Point()
@@ -281,7 +281,10 @@ def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, dist
     point.x = waypoints[i].pose.pose.position.x - dx
     point.y = waypoints[i].pose.pose.position.y - dy
     point.z = waypoints[i].pose.pose.position.z
-    return point
+
+    orientation = get_orientation_from_yaw(end_orientation)
+
+    return point, orientation
 
 
 def debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new):

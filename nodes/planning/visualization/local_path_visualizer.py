@@ -5,7 +5,7 @@ from autoware_msgs.msg import Lane
 from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
-from helpers import get_point_on_path_within_distance, get_distance_between_two_points
+from helpers import get_point_and_orientation_on_path_within_distance, get_distance_between_two_points
 
 class LocalPathVisualizer:
     def __init__(self):
@@ -63,18 +63,7 @@ class LocalPathVisualizer:
         # stop position visualization
         if len(lane.waypoints) > 1 and lane.closest_object_distance > 0:
 
-            stop_position = get_point_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance)
-
-            d = 0
-            for i, waypoint in enumerate(lane.waypoints):
-                if i == 0:
-                    continue
-                d += get_distance_between_two_points(lane.waypoints[i-1].pose.pose.position, lane.waypoints[i].pose.pose.position)
-                if d > lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance:
-                    idx = i
-                    break
-            # take orientation for stop point from close by waypoint
-            stop_orientation = lane.waypoints[idx].pose.pose.orientation
+            stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance)
 
             if lane.closest_object_velocity < 1.0:
                 color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
