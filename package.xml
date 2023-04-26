@@ -1,0 +1,40 @@
+<package format="2">
+  <name>autoware_mini</name>
+  <version>1.0.0</version>
+  <description>Minimalistic python based autonomy software</description>
+  <license>Closed-Source</license>
+  <author email="edgar.sepp@ut.ee">Edgar Sepp</author>
+  <maintainer email="adl@ut.ee">Autonomous Driving Lab</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>message_filters</exec_depend>
+  <exec_depend>ros_numpy</exec_depend>
+  <exec_depend>lanelet2</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>jsk_rviz_plugins</exec_depend>
+  <exec_depend>joy</exec_depend>
+
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-sklearn</exec_depend>
+  <exec_depend>python3-pyproj</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>python3-pygame</exec_depend>
+  <exec_depend>python3-simple-pid-pip</exec_depend>
+  <exec_depend>python3-catkin-tools</exec_depend>
+
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>autoware_msgs</exec_depend>
+  <exec_depend>automotive_platform_msgs</exec_depend>
+  <exec_depend>automotive_navigation_msgs</exec_depend>
+  <exec_depend>novatel_oem7_msgs</exec_depend>
+
+  <exec_depend>vehicle_platform</exec_depend>
+
+</package>

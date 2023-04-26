@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="interval"        default="1.0"                 doc="Distance between recorded waypoints" />
+    <arg name="waypoints_file"  default="waypoints_erm_utm_10cm.csv"  doc="full path with filename" />
+    <arg name="launch_rviz"     default="false"               doc="" />
+
+    <group ns="planning">
+
+        <node pkg="autoware_mini" type="waypoint_saver.py" name="waypoint_saver" output="screen" >
+            <param name="interval"          value="$(arg interval)" />
+            <param name="waypoints_file"    value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
+        </node> 
+
+        <node if="$(arg launch_rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
+    </group>
+
+</launch>

@@ -1,92 +1,124 @@
-# autoware_mini
+# Autoware Mini
 
+Autoware Mini is minimalistic Python-based autonomy software. It is built on Python and ROS 1 to make it easy to get started and tinkering. It uses Autoware messages to define the interfaces between the modules, aiming to be compatible with [Autoware](https://www.autoware.org/). Autoware Mini currently works on ROS Noetic (Ubuntu 20.04 and through [Conda RoboStack](https://robostack.github.io/) also on many other Linux versions). The software is open-source with friendly MIT license.
 
+## Goals
 
-## Getting started
+Our goals with the Autoware Mini were:
+* easy to get started with --> minimal amount of dependencies
+* simple and pedagogical --> simple Python nodes and ROS 1
+* easy to implement machine learning based approaches --> Python
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+It is not production-level software, but aimed for teaching and research. At the same time we have validated the software with a real car in a real traffic in the city center of Tartu, Estonia.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Architecture
 
-## Add your files
+![Autoware Mini diagram](images/diagram.png)
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.cs.ut.ee/autonomous-driving-lab/autoware_mini.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab.cs.ut.ee/autonomous-driving-lab/autoware_mini/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+The key modules of Autoware Mini are:
+* **Localization** - determines vehicle position and speed. Can be implemented using GNSS, lidar positioning, visual positioning, etc.
+* **Global planner** - given current position and destination determines the global path to the destination. Makes use of Lanelet2 map.
+* **Obstacle detection** - produces detected objects based on lidar, radar or camera readings. Includes tracking and prediction.
+* **Traffic light detection** - produces status for stoplines, if they are green or red. Red stopline is like an obstacle for local planner.
+* **Local planer** - given global path and obstacles plans local path that avoids obstacles and respects traffic lights.
+* **Follower** - follows the local path given by the local planner, matching target speeds at different points of trajectory.
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+1. Create workspace
+   ```
+   mkdir -p autoware_mini_ws/src
+   cd autoware_mini_ws/src
+   ```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+2. Clone the repos
+   ```
+   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware_mini.git
+   # not needed for planner simulation
+   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/vehicle_platform.git
+   # if using Carla simulation
+   git clone --recurse-submodules https://github.com/carla-simulator/ros-bridge.git carla_ros_bridge
+   ```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+3. Install system dependencies
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+   ```
+   rosdep update
+   rosdep install --from-paths . --ignore-src -r -y
+   ```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+4. Install Python dependencies
+   ```
+   pip install -r autoware_mini/requirements.txt
+   ```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+5. Build the workspace
+   ```
+   catkin build
+   ```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Launching planner simulation
 
-## License
-For open source projects, say how it is licensed.
+Planner simulation is very lightweight and has the least dependencies.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```
+roslaunch autoware_mini start_sim.launch
+```
+
+You should see Rviz window with a default map. To start driving you need to give the vehicle initial position with 2D Pose Estimate button and goal using 2D Nav Goal button. Obstacles can be placed or removed with Publish Point button.
+
+## Launching against recorded bag
+
+Running the autonomy stack against recorded bag file is a convenient way to test the perception modules.
+
+```
+roslaunch autoware_mini start_bag.launch bag_file:=<name of the bag file in data/bags directory>
+```
+
+The detection topics in bag are remapped to dummy topic names and new detections are generated by the autonomy stack.
+
+## Launching Carla simulation
+
+### Download Carla + Tartu map (Skip if already done)
+
+1. Download [Carla 0.9.13](https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz) and extract it. We will call this extracted folder `<CARLA ROOT>`.
+2. Download [Tartu.tar.gz](https://drive.google.com/file/d/10CHEOjHyiLJgD13g6WwDZ2_AWoLasG2F/view?usp=share_link).
+3. Copy `Tartu.tar.gz` inside the import folder under `<CARLA ROOT>` directory.
+4. Run `./ImportAssets.sh` from the `<CARLA ROOT>` directory. This will install the Tartu map. (You can now delete the `Tartu.tar.gz` file from the import folder.)
+5. Since we will be referring to `<CARLA ROOT>` a lot, let's export it as an environment variable. Make sure to replace the path where Carla is downloaded.
+
+   ```
+   export CARLA_ROOT=/path/to/your/carla/installation
+   ```
+
+6. Now, enter the following command. (**NOTE:** Here we assume that `CARLA_ROOT`  was set from the previous command.)
+   ```
+   export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla/dist/carla-0.9.13-py3.7-linux-x86_64.egg:${CARLA_ROOT}/PythonAPI/carla/agents:${CARLA_ROOT}/PythonAPI/carla
+   ```
+   **Note:** It will be convenient if the above variables are automatically exported whenever you open a terminal. Putting above exports in `~/.bashrc` will reduce the hassle of exporting everytime.
+
+### Launch instructions
+
+1. In a new terminal, (assuming enviornment variables are exported) run Carla simulator by entering the following command.
+
+   ```
+   $CARLA_ROOT/CarlaUE4.sh -prefernvidia -quality-level=Low
+   ```
+#### Launch using ground-truth detection:
+2. In a new terminal, (assuming enviornment variables are exported) run the following command. This runs Tartu environment of Carla with minimal sensors and our autonomy stack. The detected objects come from Carla directly.
+
+   ```
+   roslaunch autoware_mini start_carla.launch
+   ```
+#### OR
+#### Launch using lidar based detector:
+2. In a new terminal, (assuming enviornment variables are exported) run the following command. This runs Tartu environment of Carla with lidar sensors and our autonomy stack. The detection is performed using lidar-based cluster detector.
+
+   ```
+   roslaunch autoware_mini start_carla.launch detector:=cluster
+   ```
+## Launching in Lexus
+
+```
+roslaunch autoware_mini start_lexus.launch
+```

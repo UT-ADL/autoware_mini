@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="detector"            default="cluster"   doc="cluster,vella,carla,sim" />
+    <arg name="tfl_detector"        default="none"      doc="carla" />
+    <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
+    <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
+
+    <group ns="detection">
+        <group ns="lidar">
+            <remap if="$(arg use_lidar_center)" from="points_raw" to="/lidar_center/points_raw" />
+            <remap from="detected_objects" to="/detection/detected_objects" />
+            
+            <include if="$(eval arg('detector')=='cluster')" file="$(find autoware_mini)/launch/detection/lidar_cluster.launch" />
+        </group>
+        
+        <!-- Carla's ground truth objects -->
+        <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
+
+        <!-- Carla's ground truth traffic lights -->
+        <node if="$(eval arg('tfl_detector')=='carla')" pkg="autoware_mini" type="carla_traffic_light_detector.py" name="carla_traffic_light_detector" output="screen" required="true">
+            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+        </node>
+
+        <!-- Velodyne Vella detections -->
+        <group if="$(eval arg('detector')=='vella')">
+<!--        <node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args="2.11
+            $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen" required="true" /> -->
+            <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
+        </group>
+
+        <!-- Obstacle simulator -->
+        <node if="$(eval arg('detector')=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />
+
+        <!-- Detected objects visualizer -->
+        <node type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+
+        <rosparam command="load" file="$(find autoware_mini)/config/detection.yaml"/>
+    </group>
+
+</launch>

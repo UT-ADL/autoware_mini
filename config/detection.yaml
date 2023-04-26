@@ -1,0 +1,31 @@
+lidar:
+  ground_removal:
+    min_x: -60.0
+    max_x: 60.0
+    min_y: -60.0
+    max_y: 60.0
+    min_z: -3.0
+    max_z: 0.1
+    cell_size: 0.6
+    tolerance: 0.15
+    filter: none                    # none, median, average
+  points_clusterer:
+    sample_size: 10000
+    cluster_epsilon: 1.0
+    cluster_min_size: 5
+  cluster_detector:
+    min_cluster_size: 5
+    bounding_box_type: axis_aligned # axis_aligned, min_area
+    enable_pointcloud: False
+    enable_convex_hull: True
+    target_frame: map
+    transform_timeout: 0.05         # needed for Carla
+
+  vella_detector:
+    confidence_filter: 0.5
+    track_length_filter: 0
+    lidar_frame: lidar_center
+    output_frame: map
+
+obstacle_simulation:
+  publish_rate: 10
