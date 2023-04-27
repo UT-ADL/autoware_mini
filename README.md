@@ -20,7 +20,7 @@ The key modules of Autoware Mini are:
 * **Global planner** - given current position and destination determines the global path to the destination. Makes use of Lanelet2 map.
 * **Obstacle detection** - produces detected objects based on lidar, radar or camera readings. Includes tracking and prediction.
 * **Traffic light detection** - produces status for stoplines, if they are green or red. Red stopline is like an obstacle for the local planner.
-* **Local planer** - given the global path and obstacles, plans a local path that avoids obstacles and respects traffic lights.
+* **Local planner** - given the global path and obstacles, plans a local path that avoids obstacles and respects traffic lights.
 * **Follower** - follows the local path given by the local planner, matching target speeds at different points of trajectory.
 
 Here are couple of short videos introducing the Autoware Mini features.
