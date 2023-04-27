@@ -377,26 +377,26 @@ class SFADetector:
         :return: AutowareDetectedObject
         """
         detected_objects_list = []
-        for i, object in enumerate(detections):
+        for i, (cls_id, x, y, z, height, width, length, yaw) in enumerate(detections):
 
             detected_object = DetectedObject()
             detected_object.id = i + base
             detected_object.header.frame_id = self.output_frame
             detected_object.header.stamp = header.stamp
-            detected_object.label = self.class_names[object[0]]
+            detected_object.label = self.class_names[cls_id]
             detected_object.color = LIGHT_BLUE
             detected_object.valid = True
 
-            position_in_lidar = np.array([object[1], object[2], object[3], 1])
-            orientation_in_lidar = quaternion_from_euler(0, 0, object[7])
+            position_in_lidar = np.array([x, y, z, 1])
+            orientation_in_lidar = quaternion_from_euler(0, 0, yaw)
 
             detected_object.pose = self.transform_pose(position_in_lidar, orientation_in_lidar, tf_matrix, tf_rot)
             detected_object.pose_reliable = True
 
             # object dimensions
-            detected_object.dimensions.x = object[6]
-            detected_object.dimensions.y = object[5]
-            detected_object.dimensions.z = object[4]
+            detected_object.dimensions.x = length
+            detected_object.dimensions.y = width
+            detected_object.dimensions.z = height
             # Populate convex hull
             detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, header.stamp)
 
