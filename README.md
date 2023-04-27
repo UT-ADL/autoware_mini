@@ -56,7 +56,17 @@ You should have ROS Noetic installed, follow the official instructions for [Ubun
 
 5. Build the workspace
    ```
+   cd ..
    catkin build
+   ```
+
+6. Source the workspace environment
+   ```
+   source devel/setup.bash
+   ```
+   As this needs to be run every time before launching the software, you might want to add something similar to the following line to your `~/.bashrc`.
+   ```
+   source $HOME/autoware_mini_ws/devel/setup.bash
    ```
 
 ## Launching planner simulation
