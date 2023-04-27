@@ -1,6 +1,6 @@
 # Autoware Mini
 
-Autoware Mini is minimalistic Python-based autonomy software. It is built on Python and ROS 1 to make it easy to get started and tinkering. It uses Autoware messages to define the interfaces between the modules, aiming to be compatible with [Autoware](https://www.autoware.org/). Autoware Mini currently works on ROS Noetic (Ubuntu 20.04 and through [Conda RoboStack](https://robostack.github.io/) also on many other Linux versions). The software is open-source with friendly MIT license.
+Autoware Mini is a minimalistic Python-based autonomy software. It is built on Python and ROS 1 to make it easy to get started and tinkering. It uses Autoware messages to define the interfaces between the modules, aiming to be compatible with [Autoware](https://www.autoware.org/). Autoware Mini currently works on ROS Noetic (Ubuntu 20.04 and through [Conda RoboStack](https://robostack.github.io/) also on many other Linux versions). The software is open-source with a friendly MIT license.
 
 ## Goals
 
@@ -9,7 +9,7 @@ Our goals with the Autoware Mini were:
 * simple and pedagogical --> simple Python nodes and ROS 1
 * easy to implement machine learning based approaches --> Python
 
-It is not production-level software, but aimed for teaching and research. At the same time we have validated the software with a real car in a real traffic in the city center of Tartu, Estonia.
+It is not production-level software, but aimed for teaching and research. At the same time we have validated the software with a real car in real traffic in the city center of Tartu, Estonia.
 
 ## Architecture
 
@@ -19,8 +19,8 @@ The key modules of Autoware Mini are:
 * **Localization** - determines vehicle position and speed. Can be implemented using GNSS, lidar positioning, visual positioning, etc.
 * **Global planner** - given current position and destination determines the global path to the destination. Makes use of Lanelet2 map.
 * **Obstacle detection** - produces detected objects based on lidar, radar or camera readings. Includes tracking and prediction.
-* **Traffic light detection** - produces status for stoplines, if they are green or red. Red stopline is like an obstacle for local planner.
-* **Local planer** - given global path and obstacles plans local path that avoids obstacles and respects traffic lights.
+* **Traffic light detection** - produces status for stoplines, if they are green or red. Red stopline is like an obstacle for the local planner.
+* **Local planer** - given the global path and obstacles, plans a local path that avoids obstacles and respects traffic lights.
 * **Follower** - follows the local path given by the local planner, matching target speeds at different points of trajectory.
 
 ## Installation
