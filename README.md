@@ -81,7 +81,7 @@ You should see Rviz window with a default map. To start driving you need to give
 
 ## Launching against recorded bag
 
-Running the autonomy stack against recorded bag file is a convenient way to test the perception modules.
+Running the autonomy stack against recorded bag file is a convenient way to test the perception module. The example bag file can be downloaded from [here](https://owncloud.ut.ee/owncloud/s/fdyJa5789oJKAgE) and it shoud be saved to the `data/bags` directory.
 
 ```
 roslaunch autoware_mini start_bag.launch bag_file:=<name of the bag file in data/bags directory>
