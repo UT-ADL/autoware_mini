@@ -4,13 +4,12 @@ from __future__ import print_function
 from __future__ import division
 
 import rospy
-import ros_numpy
 import math
 import numpy as np
 import cv2
 import tf
 from tf.transformations import quaternion_multiply, quaternion_from_euler, euler_from_quaternion
-
+from ros_numpy import numpify
 from geometry_msgs.msg import Quaternion, Point, PolygonStamped, Pose
 from sensor_msgs.msg import PointCloud2
 from std_msgs.msg import ColorRGBA
@@ -39,7 +38,7 @@ DISCRETIZATION = (MAX_FRONT_X - MIN_FRONT_X)/BEV_HEIGHT  # 3D world discretizati
 BOUND_SIZE_X = MAX_FRONT_X - MIN_FRONT_X
 BOUND_SIZE_Y = MAX_Y - MIN_Y
 
-class SFAInference:
+class SFADetector:
     def __init__(self):
         rospy.loginfo(self.__class__.__name__ + " - Initializing")
 
@@ -83,7 +82,7 @@ class SFAInference:
         # convert the looked up transform to a 4x4 homogenous transformation matrix.
         tf_matrix = self.tf_listener.fromTranslationRotation(trans, tf_rot)
         # Unpack pointcloud2 msg ype to numpy array
-        pcd_array = ros_numpy.numpify(pointcloud)
+        pcd_array = numpify(pointcloud)
 
         # Reshape the array into shape -> (num_points, 4). 4 corresponds to the fields -> x,y,z,intensity
         points = np.zeros((pcd_array.shape[0], 4))
@@ -112,7 +111,6 @@ class SFAInference:
     def detect(self, points):
 
         if self.only_front:
-
             # process only detection from front FOV and return detections
             front_lidar = self.get_filtered_lidar(points)
             front_bev_map = self.make_bev_map(front_lidar)
@@ -120,12 +118,10 @@ class SFAInference:
             front_final_dets = self.convert_det_to_real_values(front_detections)
 
             return front_final_dets
-
         else:
             # process detections from bot front and back FOVs and return detections
-
             #front
-            front_lidar = self.get_filtered_lidar(points)
+            front_lidar = self.get_filtered_lidar(points, is_front=True)
             front_bev_map = self.make_bev_map(front_lidar)
             front_detections, front_bevmap = self.do_detection(front_bev_map, is_front=True)
             front_final_dets = self.convert_det_to_real_values(front_detections)
@@ -145,32 +141,32 @@ class SFAInference:
 
         if is_front:
             # Remove the point out of range x,y,z
-            mask = np.where((lidar[:, 0] >= MIN_FRONT_X) & (lidar[:, 0] <= MAX_FRONT_X) &
-                            (lidar[:, 1] >= MIN_Y) & (lidar[:, 1] <= MAX_Y) &
-                            (lidar[:, 2] >= MIN_Z) & (lidar[:, 2] <= MAX_Z))
+            mask = (lidar[:, 0] >= MIN_FRONT_X) & (lidar[:, 0] <= MAX_FRONT_X) & \
+                    (lidar[:, 1] >= MIN_Y) & (lidar[:, 1] <= MAX_Y) & \
+                    (lidar[:, 2] >= MIN_Z) & (lidar[:, 2] <= MAX_Z) \
 
         elif not is_front:
-            mask = np.where((lidar[:, 0] >= MIN_BACK_X) & (lidar[:, 0] <= MAX_BACK_X) &
-                            (lidar[:, 1] >= MIN_Y) & (lidar[:, 1] <= MAX_Y) &
-                            (lidar[:, 2] >= MIN_Z) & (lidar[:, 2] <= MAX_Z))
+            mask = (lidar[:, 0] >= MIN_BACK_X) & (lidar[:, 0] <= MAX_BACK_X) & \
+                            (lidar[:, 1] >= MIN_Y) & (lidar[:, 1] <= MAX_Y) & \
+                            (lidar[:, 2] >= MIN_Z) & (lidar[:, 2] <= MAX_Z) \
 
         lidar = lidar[mask]
-        lidar[:, 2] = lidar[:, 2] - MIN_Z
+        lidar[:, 2] -= MIN_Z
 
         return lidar
 
-    def make_bev_map(self, PointCloud_):
+    def make_bev_map(self, pointcloud):
         height = BEV_HEIGHT + 1
         width = BEV_WIDTH + 1
 
         # Discretize Feature Map
-        PointCloud = np.copy(PointCloud_)
-        PointCloud[:, 0] = np.int_(np.floor(PointCloud[:, 0] / DISCRETIZATION))
-        PointCloud[:, 1] = np.int_(np.floor(PointCloud[:, 1] / DISCRETIZATION) + width / 2)
+        pointcloud = np.copy(pointcloud)
+        pointcloud[:, 0] = np.int_(np.floor(pointcloud[:, 0] / DISCRETIZATION))
+        pointcloud[:, 1] = np.int_(np.floor(pointcloud[:, 1] / DISCRETIZATION) + width / 2)
 
         # sort-3times
-        sorted_indices = np.lexsort((-PointCloud[:, 2], PointCloud[:, 1], PointCloud[:, 0]))
-        PointCloud = PointCloud[sorted_indices]
+        sorted_indices = np.lexsort((-pointcloud[:, 2], pointcloud[:, 1], pointcloud[:, 0]))
+        PointCloud = pointcloud[sorted_indices]
         _, unique_indices, unique_counts = np.unique(PointCloud[:, 0:2], axis=0, return_index=True, return_counts=True)
         PointCloud_top = PointCloud[unique_indices]
 
@@ -252,13 +248,10 @@ class SFAInference:
 
     def _nms(self, heat, kernel=3):
         pad = (kernel - 1) // 2
-
         # Compute max pooling operation using SciPy
         hmax = maximum_filter(heat, size=kernel, mode='constant', cval=-np.inf)
-
         # Compute keep mask
         keep = (hmax == heat).astype(np.float32)
-
         # Apply keep mask to input tensor
         return heat * keep
 
@@ -285,7 +278,8 @@ class SFAInference:
         # Compute the number of dimensions in the input array
         ndim = scores.ndim
         # Convert the specified dimension to a positive index
-        dim = dim if dim >= 0 else ndim + dim
+        if dim < 0:
+            dim = ndim+dim
         # Compute the top K values and indices along the specified dimension
         topk_inds = np.argpartition(-scores, K, axis=dim)
         if ndim == 1:
@@ -353,7 +347,7 @@ class SFAInference:
         return np.arctan2(direction[:, 0:1], direction[:, 1:2])
 
     def convert_det_to_real_values(self, detections, add_score=False):
-        kitti_dets = []
+        final_detections = []
         for cls_id in range(NUM_CLASSES):
             if len(detections[cls_id]) > 0:
                 for det in detections[cls_id]:
@@ -365,12 +359,12 @@ class SFAInference:
                     z = _z + MIN_Z
                     w = _w / BEV_WIDTH * BOUND_SIZE_Y
                     l = _l / BEV_HEIGHT * BOUND_SIZE_X
-                    if not add_score:
-                        kitti_dets.append([cls_id, x, y, z, _h, w, l, _yaw])
+                    if add_score:
+                        final_detections.append([cls_id, x, y, z, _h, w, l, _yaw, _score])
                     else:
-                        kitti_dets.append([cls_id, x, y, z, _h, w, l, _yaw, _score])
+                        final_detections.append([cls_id, x, y, z, _h, w, l, _yaw])
 
-        return np.array(kitti_dets)
+        return np.array(final_detections)
 
     def generate_autoware_objects(self, detections, header, tf_matrix, tf_rot, base=0):
 
@@ -405,10 +399,6 @@ class SFAInference:
             detected_object.dimensions.z = object[4]
             # Populate convex hull
             detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, header.stamp)
-
-            detected_object.valid = True
-            detected_object.acceleration_reliable = False
-            detected_object.velocity_reliable = False
 
             detected_objects_list.append(detected_object)
 
@@ -454,8 +444,6 @@ class SFAInference:
             math.degrees(heading)
         ))
         convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
-        # Add the first polygon point to the list of points to make it 5 points in total and complete the loop
-        convex_hull.polygon.points.append(convex_hull.polygon.points[0])
 
         return convex_hull
 
@@ -464,5 +452,5 @@ class SFAInference:
 
 if __name__ == '__main__':
     rospy.init_node('sfa_detection', anonymous=True, log_level=rospy.INFO)
-    node = SFAInference()
+    node = SFADetector()
     node.run()
