@@ -23,6 +23,14 @@ The key modules of Autoware Mini are:
 * **Local planer** - given the global path and obstacles, plans a local path that avoids obstacles and respects traffic lights.
 * **Follower** - follows the local path given by the local planner, matching target speeds at different points of trajectory.
 
+Here are couple of short videos introducing the Autoware Mini features.
+
+[![Autoware Mini planning simulator](https://img.youtube.com/vi/k3dOySPAYaY/mqdefault.jpg)](https://www.youtube.com/watch?v=k3dOySPAYaY "Autoware Mini planning simulator")
+[![Autoware Mini perception testing with SFA detector](https://img.youtube.com/vi/bn3G2WqHEYA/mqdefault.jpg)](https://www.youtube.com/watch?v=bn3G2WqHEYA "Autoware Mini perception testing with SFA detector")
+[![Autoware Mini perception testing with cluster detector](https://img.youtube.com/vi/OqKMQ5hUgn0/mqdefault.jpg)](https://www.youtube.com/watch?v=OqKMQ5hUgn0 "Autoware Mini perception testing with cluster detector")
+[![Autoware Mini Carla testing with ground truth detector](https://img.youtube.com/vi/p8A05yQ1pfw/mqdefault.jpg)](https://www.youtube.com/watch?v=p8A05yQ1pfw "Autoware Mini Carla testing with ground truth detector")
+[![Autoware Mini Carla testing with cluster detector](https://img.youtube.com/vi/QEoPoBogIBc/mqdefault.jpg)](https://www.youtube.com/watch?v=QEoPoBogIBc "Autoware Mini Carla testing with cluster detector")
+
 ## Installation
 
 You should have ROS Noetic installed, follow the official instructions for [Ubuntu 20.03](http://wiki.ros.org/noetic/Installation/Ubuntu) or [RoboStack](https://robostack.github.io/GettingStarted.html).
