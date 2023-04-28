@@ -199,8 +199,13 @@ def interpolate_velocity_between_waypoints(point, backward_wp, forward_wp):
 
     # distance to backward waypoint
     distance_to_backward_wp = get_distance_between_two_points(point, backward_wp.pose.pose.position)
+    if distance_to_backward_wp < 0.01:
+        return backward_wp.twist.twist.linear.x
+
     # distance to forward waypoint
     distance_to_forward_wp = get_distance_between_two_points(point, forward_wp.pose.pose.position)
+    if distance_to_forward_wp < 0.01:
+        return forward_wp.twist.twist.linear.x
 
     backward_wp_vel = backward_wp.twist.twist.linear.x * distance_to_forward_wp / (distance_to_backward_wp + distance_to_forward_wp)
     forward_wp_vel = forward_wp.twist.twist.linear.x * distance_to_backward_wp / (distance_to_backward_wp + distance_to_forward_wp)
