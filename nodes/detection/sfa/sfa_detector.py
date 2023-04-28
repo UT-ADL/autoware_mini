@@ -21,40 +21,38 @@ from scipy.ndimage.filters import maximum_filter
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 
 ## Model params
-MIN_FRONT_X = 0  # minimum distance on lidar +ve x-axis to process points at (front_detections)
-MAX_FRONT_X = rospy.get_param("~maxFrontX",50)  # maximum distance on lidar +ve x-axis to process points at (back detections)
-MIN_BACK_X = rospy.get_param("~minBackX", -50)  # maxmimum distance on lidar -ve x-axis to process points at
-MAX_BACK_X = rospy.get_param("~maxBackX", 0)  # minimum distance on lidar -ve x-axis to process points at
-MIN_Y = rospy.get_param("~minY", -25)  # maxmimum distance on lidar -ve y-axis to process points at
-MAX_Y = rospy.get_param("~maxY", 25)  # maxmimum distance on lidar +ve y-axis to process points at
-MIN_Z = rospy.get_param("~minZ", -2.73)  # maxmimum distance on lidar -ve z-axis to process points at
-MAX_Z = rospy.get_param("~maxZ", 1.27)  # maxmimum distance on lidar +ve z-axis to process points at
-BEV_HEIGHT = rospy.get_param("~bev_height", 608)  # number of rows of the bev image
-BEV_WIDTH = rospy.get_param("~bev_height", 608)  # number of columns of the bev image
-K = rospy.get_param("~K", 50)  # number of top scoring detections to process
-DOWN_RATIO = rospy.get_param("~down_ratio", 4)
-NUM_CLASSES = rospy.get_param("~num_classes", 3)  # number of classes to detect
-DISCRETIZATION = (MAX_FRONT_X - MIN_FRONT_X)/BEV_HEIGHT  # 3D world discretization to 2D image: distance encoded by 1 pixel
-BOUND_SIZE_X = MAX_FRONT_X - MIN_FRONT_X
-BOUND_SIZE_Y = MAX_Y - MIN_Y
+BEV_HEIGHT = 608  # number of rows of the bev image
+BEV_WIDTH = 608  # number of columns of the bev image
+DOWN_RATIO = 4
+NUM_CLASSES = 3  # number of classes to detect
+CLASS_NAMES = {0: "pedestrian", 1: "car", 2: "cyclist"}
 
 class SFADetector:
     def __init__(self):
         rospy.loginfo(self.__class__.__name__ + " - Initializing")
-
         # Params
         self.onnx_path = rospy.get_param("~onnx_path", './kilynuaron_model.onnx')  # path of the trained model
-        self.only_front = rospy.get_param("~sfa_only_front", False)   # only front detections. If False, both front and back detections enabled
+
+        self.only_front = rospy.get_param("~only_front",False)  # only front detections. If False, both front and back detections enabled
+        self.MIN_FRONT_X = rospy.get_param("~maxFrontX", 0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
+        self.MAX_FRONT_X = rospy.get_param("~maxFrontX", 50)  # maximum distance on lidar +ve x-axis to process points at (back detections)
+        self.MIN_BACK_X = rospy.get_param("~minBackX", -50)  # maxmimum distance on lidar -ve x-axis to process points at
+        self.MAX_BACK_X = rospy.get_param("~maxBackX", 0)  # minimum distance on lidar -ve x-axis to process points at
+        self.MIN_Y = rospy.get_param("~minY", -25)  # maxmimum distance on lidar -ve y-axis to process points at
+        self.MAX_Y = rospy.get_param("~maxY", 25)  # maxmimum distance on lidar +ve y-axis to process points at
+        self.MIN_Z = rospy.get_param("~minZ", -2.73)  # maxmimum distance on lidar -ve z-axis to process points at
+        self.MAX_Z = rospy.get_param("~maxZ", 1.27)  # maxmimum distance on lidar +ve z-axis to process points at
+        self.DISCRETIZATION = (self.MAX_FRONT_X - self.MIN_FRONT_X) / BEV_HEIGHT  # 3D world self.DISCRETIZATION to 2D image: distance encoded by 1 pixel
+        self.BOUND_SIZE_X = self.MAX_FRONT_X - self.MIN_FRONT_X
+        self.BOUND_SIZE_Y = self.MAX_Y - self.MIN_Y
+
         self.peak_thresh = rospy.get_param("~peak_thresh", 0.2)  # score filter
+        self.K = rospy.get_param("~K", 50)  # number of top scoring detections to process
         self.output_frame = rospy.get_param("~output_frame", 'map')  # transform detected objects from lidar frame to this frame
+
         self.transform_timeout = rospy.get_param('~transform_timeout', 0.05)
 
         self.model = self.load_onnx(self.onnx_path) # get onnx model
-
-        # KITTI class names
-        self.class_names = {0: "pedestrian",
-                            1: "car",
-                            2: "cyclist"}
 
         # transform listener
         self.tf_listener = tf.TransformListener()
@@ -95,22 +93,13 @@ class SFADetector:
         detected_objects_array.header.stamp = pointcloud.header.stamp
         detected_objects_array.header.frame_id = self.output_frame
 
-        # check whether to run inference only on the front FOV of the lidar
-        if self.only_front:
-            front_dets = self.detect(points)
-            detected_objects_array.objects += self.generate_autoware_objects(front_dets, pointcloud.header, tf_matrix, tf_rot, len(detected_objects_array.objects))
-        else:
-            # run the detection pipline
-            front_dets, back_dets = self.detect(points)
-            detected_objects_array.objects += self.generate_autoware_objects(front_dets, pointcloud.header, tf_matrix,tf_rot,len(detected_objects_array.objects))
-            detected_objects_array.objects += self.generate_autoware_objects(back_dets, pointcloud.header, tf_matrix,tf_rot,len(detected_objects_array.objects))
-
-        # publish detected objects
+        final_detections = self.detect(points, only_front=self.only_front)
+        detected_objects_array.objects += self.generate_autoware_objects(final_detections, pointcloud.header, tf_matrix, tf_rot, len(detected_objects_array.objects))
         self.detected_object_array_pub.publish(detected_objects_array)
 
-    def detect(self, points):
+    def detect(self, points, only_front):
 
-        if self.only_front:
+        if only_front:
             # process only detection from front FOV and return detections
             front_lidar = self.get_filtered_lidar(points)
             front_bev_map = self.make_bev_map(front_lidar)
@@ -119,7 +108,7 @@ class SFADetector:
 
             return front_final_dets
         else:
-            # process detections from bot front and back FOVs and return detections
+            # process detections from both front and back FOVs and return detections
             #front
             front_lidar = self.get_filtered_lidar(points, is_front=True)
             front_bev_map = self.make_bev_map(front_lidar)
@@ -135,23 +124,24 @@ class SFADetector:
                 back_final_dets[:, 1] *= -1
                 back_final_dets[:, 2] *= -1
 
-            return front_final_dets, back_final_dets
+            # if both returning both front and back detections concatenate them along rows
+            return np.concatenate((front_final_dets, back_final_dets), axis=0)
 
     def get_filtered_lidar(self, lidar, is_front=True):
 
         if is_front:
             # Remove the point out of range x,y,z
-            mask = (lidar[:, 0] >= MIN_FRONT_X) & (lidar[:, 0] <= MAX_FRONT_X) & \
-                    (lidar[:, 1] >= MIN_Y) & (lidar[:, 1] <= MAX_Y) & \
-                    (lidar[:, 2] >= MIN_Z) & (lidar[:, 2] <= MAX_Z) \
+            mask = (lidar[:, 0] >= self.MIN_FRONT_X) & (lidar[:, 0] <= self.MAX_FRONT_X) & \
+                    (lidar[:, 1] >= self.MIN_Y) & (lidar[:, 1] <= self.MAX_Y) & \
+                    (lidar[:, 2] >= self.MIN_Z) & (lidar[:, 2] <= self.MAX_Z) \
 
-        elif not is_front:
-            mask = (lidar[:, 0] >= MIN_BACK_X) & (lidar[:, 0] <= MAX_BACK_X) & \
-                            (lidar[:, 1] >= MIN_Y) & (lidar[:, 1] <= MAX_Y) & \
-                            (lidar[:, 2] >= MIN_Z) & (lidar[:, 2] <= MAX_Z) \
+        else:
+            mask = (lidar[:, 0] >= self.MIN_BACK_X) & (lidar[:, 0] <= self.MAX_BACK_X) & \
+                    (lidar[:, 1] >= self.MIN_Y) & (lidar[:, 1] <= self.MAX_Y) & \
+                    (lidar[:, 2] >= self.MIN_Z) & (lidar[:, 2] <= self.MAX_Z) \
 
         lidar = lidar[mask]
-        lidar[:, 2] -= MIN_Z
+        lidar[:, 2] -= self.MIN_Z
 
         return lidar
 
@@ -161,34 +151,34 @@ class SFADetector:
 
         # Discretize Feature Map
         pointcloud = np.copy(pointcloud)
-        pointcloud[:, 0] = np.int_(np.floor(pointcloud[:, 0] / DISCRETIZATION))
-        pointcloud[:, 1] = np.int_(np.floor(pointcloud[:, 1] / DISCRETIZATION) + width / 2)
+        pointcloud[:, 0] = np.int_(np.floor(pointcloud[:, 0] / self.DISCRETIZATION))
+        pointcloud[:, 1] = np.int_(np.floor(pointcloud[:, 1] / self.DISCRETIZATION) + width / 2)
 
         # sort-3times
         sorted_indices = np.lexsort((-pointcloud[:, 2], pointcloud[:, 1], pointcloud[:, 0]))
-        PointCloud = pointcloud[sorted_indices]
-        _, unique_indices, unique_counts = np.unique(PointCloud[:, 0:2], axis=0, return_index=True, return_counts=True)
-        PointCloud_top = PointCloud[unique_indices]
+        pointcloud = pointcloud[sorted_indices]
+        _, unique_indices, unique_counts = np.unique(pointcloud[:, 0:2], axis=0, return_index=True, return_counts=True)
+        pointcloud_top = pointcloud[unique_indices]
 
         # Height Map, Intensity Map & Density Map
-        heightMap = np.zeros((height, width))
-        intensityMap = np.zeros((height, width))
-        densityMap = np.zeros((height, width))
+        height_map = np.zeros((height, width))
+        intensity_map = np.zeros((height, width))
+        density_map = np.zeros((height, width))
 
         # some important problem is image coordinate is (y,x), not (x,y)
-        max_height = float(np.abs(MAX_Z - MIN_Z))
-        heightMap[np.int_(PointCloud_top[:, 0]), np.int_(PointCloud_top[:, 1])] = PointCloud_top[:, 2] / max_height
+        max_height = float(np.abs(self.MAX_Z - self.MIN_Z))
+        height_map[np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = pointcloud_top[:, 2] / max_height
 
-        normalizedCounts = np.minimum(1.0, np.log(unique_counts + 1) / np.log(64))
-        intensityMap[np.int_(PointCloud_top[:, 0]), np.int_(PointCloud_top[:, 1])] = PointCloud_top[:, 3]
-        densityMap[np.int_(PointCloud_top[:, 0]), np.int_(PointCloud_top[:, 1])] = normalizedCounts
+        normalized_counts = np.minimum(1.0, np.log(unique_counts + 1) / np.log(64))
+        intensity_map[np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = pointcloud_top[:, 3]
+        density_map[np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = normalized_counts
 
-        RGB_Map = np.zeros((3, height - 1, width - 1))
-        RGB_Map[2, :, :] = densityMap[:BEV_HEIGHT, :BEV_WIDTH]  # r_map
-        RGB_Map[1, :, :] = heightMap[:BEV_HEIGHT, :BEV_WIDTH]  # g_map
-        RGB_Map[0, :, :] = intensityMap[:BEV_HEIGHT, :BEV_WIDTH]  # b_map
+        rgb_map = np.zeros((3, height - 1, width - 1))
+        rgb_map[2, :, :] = density_map[:BEV_HEIGHT, :BEV_WIDTH]  # r_map
+        rgb_map[1, :, :] = height_map[:BEV_HEIGHT, :BEV_WIDTH]  # g_map
+        rgb_map[0, :, :] = intensity_map[:BEV_HEIGHT, :BEV_WIDTH]  # b_map
 
-        return RGB_Map
+        return rgb_map
 
     def do_detection(self, bevmap, is_front):
         if not is_front:
@@ -205,7 +195,7 @@ class SFADetector:
         outputs['cen_offset'] = self._sigmoid(outputs['cen_offset'])
 
         # detections size (batch_size, K, 10)
-        detections = self.decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'], outputs['dim'], K)
+        detections = self.decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'], outputs['dim'], self.K)
         detections = self.post_processing(detections)
 
         return detections[0], bevmap
@@ -279,7 +269,7 @@ class SFADetector:
         ndim = scores.ndim
         # Convert the specified dimension to a positive index
         if dim < 0:
-            dim = ndim+dim
+            dim = ndim + dim
         # Compute the top K values and indices along the specified dimension
         topk_inds = np.argpartition(-scores, K, axis=dim)
         if ndim == 1:
@@ -332,8 +322,8 @@ class SFADetector:
                     detections[i, inds, 2:3] * DOWN_RATIO,
                     detections[i, inds, 3:4],
                     detections[i, inds, 4:5],
-                    detections[i, inds, 5:6] / BOUND_SIZE_Y * BEV_WIDTH,
-                    detections[i, inds, 6:7] / BOUND_SIZE_X * BEV_HEIGHT,
+                    detections[i, inds, 5:6] / self.BOUND_SIZE_Y * BEV_WIDTH,
+                    detections[i, inds, 6:7] / self.BOUND_SIZE_X * BEV_HEIGHT,
                     self.get_yaw(detections[i, inds, 7:9]).astype(np.float32)], axis=1)
                 # Filter by peak_thresh
                 if len(top_preds[j]) > 0:
@@ -354,11 +344,11 @@ class SFADetector:
                     # (scores-0:1, x-1:2, y-2:3, z-3:4, dim-4:7, yaw-7:8)
                     _score, _x, _y, _z, _h, _w, _l, _yaw = det
                     _yaw = -_yaw
-                    x = _y / BEV_HEIGHT * BOUND_SIZE_X + MIN_FRONT_X
-                    y = _x / BEV_WIDTH * BOUND_SIZE_Y + MIN_Y
-                    z = _z + MIN_Z
-                    w = _w / BEV_WIDTH * BOUND_SIZE_Y
-                    l = _l / BEV_HEIGHT * BOUND_SIZE_X
+                    x = _y / BEV_HEIGHT * self.BOUND_SIZE_X + self.MIN_FRONT_X
+                    y = _x / BEV_WIDTH * self.BOUND_SIZE_Y + self.MIN_Y
+                    z = _z + self.MIN_Z
+                    w = _w / BEV_WIDTH * self.BOUND_SIZE_Y
+                    l = _l / BEV_HEIGHT * self.BOUND_SIZE_X
                     if add_score:
                         final_detections.append([cls_id, x, y, z, _h, w, l, _yaw, _score])
                     else:
@@ -383,7 +373,7 @@ class SFADetector:
             detected_object.id = i + base
             detected_object.header.frame_id = self.output_frame
             detected_object.header.stamp = header.stamp
-            detected_object.label = self.class_names[cls_id]
+            detected_object.label = CLASS_NAMES[cls_id]
             detected_object.color = LIGHT_BLUE
             detected_object.valid = True
 
@@ -451,6 +441,6 @@ class SFADetector:
         rospy.spin()
 
 if __name__ == '__main__':
-    rospy.init_node('sfa_detection', anonymous=True, log_level=rospy.INFO)
+    rospy.init_node('SFADetector', log_level=rospy.INFO)
     node = SFADetector()
     node.run()
