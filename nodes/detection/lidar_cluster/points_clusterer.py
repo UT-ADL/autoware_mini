@@ -7,7 +7,7 @@ from ros_numpy import numpify, msgify
 try:
     from sklearnex.cluster import DBSCAN
     DBSCAN_ALGORITHM = 'auto'
-    rospy.logwarn("Intel® Extension for Scikit-learn found")
+    rospy.loginfo("Intel® Extension for Scikit-learn found")
 except ImportError:
     rospy.logwarn("Intel® Extension for Scikit-learn not found, reverting to original Scikit-learn. To speed up clustering install Intel® Extension for Scikit-learn, see https://intel.github.io/scikit-learn-intelex/.")
     from sklearn.cluster import DBSCAN
