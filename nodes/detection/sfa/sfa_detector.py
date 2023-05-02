@@ -101,7 +101,7 @@ class SFADetector:
             # process only detection from front FOV and return detections
             front_points = self.get_filtered_points(points)
             front_bev_map = self.make_bev_map(front_points)
-            front_detections = self.do_detection(front_bev_map, is_front=True)
+            front_detections = self.do_detection(front_bev_map)
             front_final_dets = self.convert_det_to_real_values(front_detections)
 
             return front_final_dets
@@ -110,14 +110,14 @@ class SFADetector:
             #front
             front_points = self.get_filtered_points(points, is_front=True)
             front_bev_map = self.make_bev_map(front_points)
-            front_detections = self.do_detection(front_bev_map, is_front=True)
+            front_detections = self.do_detection(front_bev_map)
             front_final_dets = self.convert_det_to_real_values(front_detections)
 
             # back
             back_points = self.get_filtered_points(points, is_front=False)
             back_bev_map = self.make_bev_map(back_points)
             back_bev_map = np.flip(back_bev_map, (1, 2))
-            back_detections = self.do_detection(back_bev_map, is_front=False)
+            back_detections = self.do_detection(back_bev_map)
             back_final_dets = self.convert_det_to_real_values(back_detections)
             if back_final_dets.shape[0] != 0:
                 back_final_dets[:, 1] *= -1
@@ -183,20 +183,20 @@ class SFADetector:
 
         return rgb_map
 
-    def do_detection(self, bevmap, is_front):
+    def do_detection(self, bevmap):
 
         input_bev_maps = np.expand_dims(bevmap, axis=0).astype(np.float32)
         onnx_outputs = self.model.run([], {"input":input_bev_maps})
-        dict_keys = ['hm_cen', 'cen_offset', 'direction', 'z_coor', 'dim']
-        outputs = {}
-        for onnx_output, dict_key in zip(onnx_outputs, dict_keys):
-            outputs[dict_key] = onnx_output
 
-        outputs['hm_cen'] = self._sigmoid(outputs['hm_cen'])
-        outputs['cen_offset'] = self._sigmoid(outputs['cen_offset'])
+        # unpacking onnx outputs
+        hm_cen = self._sigmoid(onnx_outputs[0])
+        cen_offset = self._sigmoid(onnx_outputs[1])
+        directions = onnx_outputs[2]
+        z_coors = onnx_outputs[3]
+        dimensions = onnx_outputs[4]
 
         # detections size (batch_size, K, 10)
-        detections = self.decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'], outputs['dim'], self.top_k)
+        detections = self.decode(hm_cen, cen_offset, directions, z_coors, dimensions, self.top_k)
         detections = self.post_processing(detections)
 
         return detections[0]
