@@ -189,8 +189,8 @@ class SFADetector:
         onnx_outputs = self.model.run([], {"input":input_bev_maps})
 
         # unpacking onnx outputs
-        hm_cen = self._sigmoid(onnx_outputs[0])
-        cen_offset = self._sigmoid(onnx_outputs[1])
+        hm_cen = self.sigmoid(onnx_outputs[0])
+        cen_offset = self.sigmoid(onnx_outputs[1])
         directions = onnx_outputs[2]
         z_coors = onnx_outputs[3]
         dimensions = onnx_outputs[4]
@@ -201,7 +201,7 @@ class SFADetector:
 
         return detections[0]
 
-    def _sigmoid(self, x):
+    def sigmoid(self, x):
         # Apply the sigmoid function element-wise to the input array
         sig_x = 1 / (1 + np.exp(-x))
         # Clamp the output values to be within the range [1e-4, 1 - 1e-4]
@@ -211,8 +211,8 @@ class SFADetector:
 
     def decode(self, hm_cen, cen_offset, direction, z_coor, dim, K=40):
         batch_size, num_classes, height, width = hm_cen.shape
-        hm_cen = self._nms(hm_cen)
-        scores, inds, clses, ys, xs = self._topk(hm_cen, K=K)
+        hm_cen = self.nms(hm_cen)
+        scores, inds, clses, ys, xs = self.topk(hm_cen, K=K)
         if cen_offset is not None:
             cen_offset = self.transpose_and_gather_feat(cen_offset, inds)
             cen_offset = cen_offset.reshape(batch_size, K, 2)
@@ -237,7 +237,7 @@ class SFADetector:
 
         return detections
 
-    def _nms(self, heat, kernel=3):
+    def nms(self, heat, kernel=3):
         # Compute max pooling operation using OpenCV
         kernel = np.ones((kernel, kernel))
         hmax = np.zeros(heat.shape)
@@ -251,17 +251,17 @@ class SFADetector:
         # Apply keep mask to input tensor
         return heat * keep
 
-    def _topk(self, scores, K=40):
+    def topk(self, scores, K=40):
         batch, cat, height, width = scores.shape
         scores_reshaped = scores.reshape(batch, cat, -1)
-        topk_scores, topk_inds = self.topk(scores_reshaped, K)
+        topk_scores, topk_inds = self.get_topk(scores_reshaped, K)
 
         topk_inds = topk_inds % (height * width)
         topk_ys = np.floor_divide(topk_inds, width).astype(np.float32)
         topk_xs = (topk_inds % width).astype(np.float32)
 
         topk_scores_reshaped = topk_scores.reshape(batch, -1)
-        topk_score, topk_ind = self.topk(topk_scores_reshaped, K)
+        topk_score, topk_ind = self.get_topk(topk_scores_reshaped, K)
         topk_clses = np.floor_divide(topk_ind, K).astype(np.int32)
 
         topk_inds = self.gather_feat(topk_inds.reshape(batch, -1, 1), topk_ind).reshape(batch, K)
@@ -270,7 +270,7 @@ class SFADetector:
 
         return topk_score, topk_inds, topk_clses, topk_ys, topk_xs
 
-    def topk(self,scores, K, dim=-1):
+    def get_topk(self,scores, K, dim=-1):
         # Compute the number of dimensions in the input array
         ndim = scores.ndim
         # Convert the specified dimension to a positive index
