@@ -15,7 +15,6 @@ from std_msgs.msg import ColorRGBA
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 
 import onnxruntime
-from scipy.ndimage.filters import maximum_filter
 
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 
@@ -240,9 +239,14 @@ class SFADetector:
         return detections
 
     def _nms(self, heat, kernel=3):
-        pad = (kernel - 1) // 2
-        # Compute max pooling operation using SciPy
-        hmax = maximum_filter(heat, size=kernel, mode='constant', cval=-np.inf)
+        # Compute max pooling operation using OpenCV
+        kernel = np.ones((kernel, kernel))
+        hmax = np.zeros(heat.shape)
+
+        # Apply cv2 dilate function on each channel individually
+        hmax[0, 0, :, :] = cv2.dilate(heat[0, 0, :, :], kernel, borderType=cv2.BORDER_CONSTANT, borderValue=-np.inf)
+        hmax[0, 1, :, :] = cv2.dilate(heat[0, 1, :, :], kernel, borderType=cv2.BORDER_CONSTANT, borderValue=-np.inf)
+        hmax[0, 2, :, :] = cv2.dilate(heat[0, 2, :, :], kernel, borderType=cv2.BORDER_CONSTANT, borderValue=-np.inf)
         # Compute keep mask
         keep = (hmax == heat).astype(np.float32)
         # Apply keep mask to input tensor
