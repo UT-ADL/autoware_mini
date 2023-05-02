@@ -116,13 +116,14 @@ class SFADetector:
             # back
             back_points = self.get_filtered_points(points, is_front=False)
             back_bev_map = self.make_bev_map(back_points)
+            back_bev_map = np.flip(back_bev_map, (1, 2))
             back_detections = self.do_detection(back_bev_map, is_front=False)
             back_final_dets = self.convert_det_to_real_values(back_detections)
             if back_final_dets.shape[0] != 0:
                 back_final_dets[:, 1] *= -1
                 back_final_dets[:, 2] *= -1
 
-            # if both returning both front and back detections concatenate them along rows
+            # if returning both front and back detections concatenate them along rows
             if len(front_final_dets) == 0:
                 return back_final_dets
             elif len(back_final_dets) == 0:
@@ -183,8 +184,6 @@ class SFADetector:
         return rgb_map
 
     def do_detection(self, bevmap, is_front):
-        if not is_front:
-            bevmap = np.flip(bevmap, (1, 2))
 
         input_bev_maps = np.expand_dims(bevmap, axis=0).astype(np.float32)
         onnx_outputs = self.model.run([], {"input":input_bev_maps})
