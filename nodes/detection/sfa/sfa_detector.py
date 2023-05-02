@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
-from __future__ import division
-
 import rospy
 import math
 import numpy as np
 import cv2
+
 import tf
 from tf.transformations import quaternion_multiply, quaternion_from_euler, euler_from_quaternion
 from ros_numpy import numpify
+
 from geometry_msgs.msg import Quaternion, Point, PolygonStamped, Pose
 from sensor_msgs.msg import PointCloud2
 from std_msgs.msg import ColorRGBA
@@ -29,9 +28,8 @@ CLASS_NAMES = {0: "pedestrian", 1: "car", 2: "cyclist"}
 
 class SFADetector:
     def __init__(self):
-        rospy.loginfo(self.__class__.__name__ + " - Initializing")
         # Params
-        self.onnx_path = rospy.get_param("~onnx_path", './kilynuaron_model.onnx')  # path of the trained model
+        self.onnx_path = rospy.get_param("~onnx_path", 'kilynuaron_model.onnx')  # path of the trained model
 
         self.only_front = rospy.get_param("~only_front",False)  # only front detections. If False, both front and back detections enabled
         self.MIN_FRONT_X = rospy.get_param("~maxFrontX", 0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
@@ -45,14 +43,17 @@ class SFADetector:
         self.DISCRETIZATION = (self.MAX_FRONT_X - self.MIN_FRONT_X) / BEV_HEIGHT  # 3D world self.DISCRETIZATION to 2D image: distance encoded by 1 pixel
         self.BOUND_SIZE_X = self.MAX_FRONT_X - self.MIN_FRONT_X
         self.BOUND_SIZE_Y = self.MAX_Y - self.MIN_Y
+        self.MAX_HEIGHT = np.abs(self.MAX_Z - self.MIN_Z)
 
         self.peak_thresh = rospy.get_param("~peak_thresh", 0.2)  # score filter
-        self.K = rospy.get_param("~K", 50)  # number of top scoring detections to process
+        self.top_k = rospy.get_param("~top_k", 50)  # number of top scoring detections to process
         self.output_frame = rospy.get_param("~output_frame", 'map')  # transform detected objects from lidar frame to this frame
 
         self.transform_timeout = rospy.get_param('~transform_timeout', 0.05)
 
         self.model = self.load_onnx(self.onnx_path) # get onnx model
+
+        rospy.loginfo("sfa_detector - loaded ONNX model file %s", self.onnx_path)
 
         # transform listener
         self.tf_listener = tf.TransformListener()
@@ -61,21 +62,19 @@ class SFADetector:
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1)
 
+        rospy.loginfo("sfa_detector - initialized")
+
     def load_onnx(self, onnx_path):
 
-        model = onnxruntime.InferenceSession(onnx_path, providers=['CUDAExecutionProvider'])
-        rospy.loginfo(self.__class__.__name__ + "- Loaded ONNX model file")
-
-        return model
+        return onnxruntime.InferenceSession(onnx_path, providers=['CUDAExecutionProvider'])
 
     def pointcloud_callback(self, pointcloud):
         """
-
         pointcloud: raw lidar data points
         return: None - publish autoware DetectedObjects
         """
         self.tf_listener.waitForTransform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp, rospy.Duration(self.transform_timeout))
-        # get the transform (translation and rotation) from lidar_frame to output frame at the time when the poinctloud msg was published
+        # get the transform (translation and rotation) from lidar frame to output frame at the time when the poinctloud msg was published
         trans, tf_rot = self.tf_listener.lookupTransform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp)
         # convert the looked up transform to a 4x4 homogenous transformation matrix.
         tf_matrix = self.tf_listener.fromTranslationRotation(trans, tf_rot)
@@ -94,56 +93,61 @@ class SFADetector:
         detected_objects_array.header.frame_id = self.output_frame
 
         final_detections = self.detect(points, only_front=self.only_front)
-        detected_objects_array.objects += self.generate_autoware_objects(final_detections, pointcloud.header, tf_matrix, tf_rot, len(detected_objects_array.objects))
+        detected_objects_array.objects = self.generate_autoware_objects(final_detections, pointcloud.header, tf_matrix, tf_rot)
         self.detected_object_array_pub.publish(detected_objects_array)
 
     def detect(self, points, only_front):
 
         if only_front:
             # process only detection from front FOV and return detections
-            front_lidar = self.get_filtered_lidar(points)
-            front_bev_map = self.make_bev_map(front_lidar)
-            front_detections, front_bevmap = self.do_detection(front_bev_map, is_front=True)
+            front_points = self.get_filtered_points(points)
+            front_bev_map = self.make_bev_map(front_points)
+            front_detections = self.do_detection(front_bev_map, is_front=True)
             front_final_dets = self.convert_det_to_real_values(front_detections)
 
             return front_final_dets
         else:
             # process detections from both front and back FOVs and return detections
             #front
-            front_lidar = self.get_filtered_lidar(points, is_front=True)
-            front_bev_map = self.make_bev_map(front_lidar)
-            front_detections, front_bevmap = self.do_detection(front_bev_map, is_front=True)
+            front_points = self.get_filtered_points(points, is_front=True)
+            front_bev_map = self.make_bev_map(front_points)
+            front_detections = self.do_detection(front_bev_map, is_front=True)
             front_final_dets = self.convert_det_to_real_values(front_detections)
 
             # back
-            back_lidar = self.get_filtered_lidar(points, is_front=False)
-            back_bev_map = self.make_bev_map(back_lidar)
-            back_detections, back_bevmap, = self.do_detection(back_bev_map, is_front=False)
+            back_points = self.get_filtered_points(points, is_front=False)
+            back_bev_map = self.make_bev_map(back_points)
+            back_detections = self.do_detection(back_bev_map, is_front=False)
             back_final_dets = self.convert_det_to_real_values(back_detections)
             if back_final_dets.shape[0] != 0:
                 back_final_dets[:, 1] *= -1
                 back_final_dets[:, 2] *= -1
 
             # if both returning both front and back detections concatenate them along rows
-            return np.concatenate((front_final_dets, back_final_dets), axis=0)
+            if len(front_final_dets) == 0:
+                return back_final_dets
+            elif len(back_final_dets) == 0:
+                return front_final_dets
+            else:
+                return np.concatenate((front_final_dets, back_final_dets), axis=0)
 
-    def get_filtered_lidar(self, lidar, is_front=True):
+    def get_filtered_points(self, points, is_front=True):
 
         if is_front:
             # Remove the point out of range x,y,z
-            mask = (lidar[:, 0] >= self.MIN_FRONT_X) & (lidar[:, 0] <= self.MAX_FRONT_X) & \
-                    (lidar[:, 1] >= self.MIN_Y) & (lidar[:, 1] <= self.MAX_Y) & \
-                    (lidar[:, 2] >= self.MIN_Z) & (lidar[:, 2] <= self.MAX_Z) \
+            mask = (points[:, 0] >= self.MIN_FRONT_X) & (points[:, 0] <= self.MAX_FRONT_X) & \
+                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] <= self.MAX_Y) & \
+                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] <= self.MAX_Z) \
 
         else:
-            mask = (lidar[:, 0] >= self.MIN_BACK_X) & (lidar[:, 0] <= self.MAX_BACK_X) & \
-                    (lidar[:, 1] >= self.MIN_Y) & (lidar[:, 1] <= self.MAX_Y) & \
-                    (lidar[:, 2] >= self.MIN_Z) & (lidar[:, 2] <= self.MAX_Z) \
+            mask = (points[:, 0] >= self.MIN_BACK_X) & (points[:, 0] <= self.MAX_BACK_X) & \
+                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] <= self.MAX_Y) & \
+                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] <= self.MAX_Z) \
 
-        lidar = lidar[mask]
-        lidar[:, 2] -= self.MIN_Z
+        points = points[mask]
+        points[:, 2] -= self.MIN_Z
 
-        return lidar
+        return points
 
     def make_bev_map(self, pointcloud):
         height = BEV_HEIGHT + 1
@@ -166,8 +170,7 @@ class SFADetector:
         density_map = np.zeros((height, width))
 
         # some important problem is image coordinate is (y,x), not (x,y)
-        max_height = float(np.abs(self.MAX_Z - self.MIN_Z))
-        height_map[np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = pointcloud_top[:, 2] / max_height
+        height_map[np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = pointcloud_top[:, 2] / self.MAX_HEIGHT
 
         normalized_counts = np.minimum(1.0, np.log(unique_counts + 1) / np.log(64))
         intensity_map[np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = pointcloud_top[:, 3]
@@ -195,10 +198,10 @@ class SFADetector:
         outputs['cen_offset'] = self._sigmoid(outputs['cen_offset'])
 
         # detections size (batch_size, K, 10)
-        detections = self.decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'], outputs['dim'], self.K)
+        detections = self.decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'], outputs['dim'], self.top_k)
         detections = self.post_processing(detections)
 
-        return detections[0], bevmap
+        return detections[0]
 
     def _sigmoid(self, x):
         # Apply the sigmoid function element-wise to the input array
@@ -302,7 +305,7 @@ class SFADetector:
         feat = self.gather_feat(feat, ind)
         return feat
 
-    def post_processing(self,detections):
+    def post_processing(self, detections):
         """
         :param detections: [batch_size, K, 10]
         # (scores x 1, xs x 1, ys x 1, z_coor x 1, dim x 3, direction x 2, clses x 1)
@@ -356,7 +359,7 @@ class SFADetector:
 
         return np.array(final_detections)
 
-    def generate_autoware_objects(self, detections, header, tf_matrix, tf_rot, base=0):
+    def generate_autoware_objects(self, detections, header, tf_matrix, tf_rot):
 
         """
         Generate Autoware DetectedObject from Detections
@@ -370,7 +373,7 @@ class SFADetector:
         for i, (cls_id, x, y, z, height, width, length, yaw) in enumerate(detections):
 
             detected_object = DetectedObject()
-            detected_object.id = i + base
+            detected_object.id = i
             detected_object.header.frame_id = self.output_frame
             detected_object.header.stamp = header.stamp
             detected_object.label = CLASS_NAMES[cls_id]
@@ -441,6 +444,6 @@ class SFADetector:
         rospy.spin()
 
 if __name__ == '__main__':
-    rospy.init_node('SFADetector', log_level=rospy.INFO)
+    rospy.init_node('sfa_detector', log_level=rospy.INFO)
     node = SFADetector()
     node.run()

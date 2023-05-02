@@ -32,14 +32,9 @@ lidar:
     min_z: -2.73
     max_z: 1.27
     peak_thresh: 0.2
-    K: 50
+    top_k: 50
     output_frame: "map"
 
-vella_detector:
-  confidence_filter: 0.5
-  track_length_filter: 0
-  lidar_frame: "lidar_center"
-  output_frame: "map"
   vella_detector:
     confidence_filter: 0.5
     track_length_filter: 0
