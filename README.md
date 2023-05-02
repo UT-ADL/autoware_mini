@@ -1,13 +1,15 @@
 # Autoware Mini
 
-Autoware Mini is minimalistic Python-based autonomy software. It is built on Python and ROS 1 to make it easy to get started and tinkering. It uses Autoware messages to define the interfaces between the modules, aiming to be compatible with [Autoware](https://www.autoware.org/). Autoware Mini currently works on ROS Noetic (Ubuntu 20.04 and through [Conda RoboStack](https://robostack.github.io/) also on many other Linux versions).
+Autoware Mini is a minimalistic Python-based autonomy software. It is built on Python and ROS 1 to make it easy to get started and tinkering. It uses Autoware messages to define the interfaces between the modules, aiming to be compatible with [Autoware](https://www.autoware.org/). Autoware Mini currently works on ROS Noetic (Ubuntu 20.04 and through [Conda RoboStack](https://robostack.github.io/) also on many other Linux versions). The software is open-source with a friendly MIT license.
+
+## Goals
 
 Our goals with the Autoware Mini were:
 * easy to get started with --> minimal amount of dependencies
 * simple and pedagogical --> simple Python nodes and ROS 1
 * easy to implement machine learning based approaches --> Python
 
-It is not production-level software, but aimed for teaching and research. At the same time we have validated the software with a real car in a real traffic in the city center of Tartu, Estonia.
+It is not production-level software, but aimed for teaching and research. At the same time we have validated the software with a real car in real traffic in the city center of Tartu, Estonia.
 
 ## Architecture
 
@@ -15,13 +17,23 @@ It is not production-level software, but aimed for teaching and research. At the
 
 The key modules of Autoware Mini are:
 * **Localization** - determines vehicle position and speed. Can be implemented using GNSS, lidar positioning, visual positioning, etc.
-* **Global planning** - given current position and destination determines the global path to the destination. Makes use of HD map.
-* **Obstacle detection** - produces detected objects based on lidar, radar or camera information. Includes tracking and prediction.
-* **Local planning** - given global path and obstacles plans local path that avoids obstacles and respects traffic lights.
-* **Traffic light detection** - produces status for stoplines, if they are green or red. Red stopline is like an obstacle for local planner.
-* **Controller** - follows the local path given by the local planner, including target speeds at different points of trajectory.
+* **Global planner** - given current position and destination determines the global path to the destination. Makes use of Lanelet2 map.
+* **Obstacle detection** - produces detected objects based on lidar, radar or camera readings. Includes tracking and prediction.
+* **Traffic light detection** - produces status for stoplines, if they are green or red. Red stopline is like an obstacle for the local planner.
+* **Local planner** - given the global path and obstacles, plans a local path that avoids obstacles and respects traffic lights.
+* **Follower** - follows the local path given by the local planner, matching target speeds at different points of trajectory.
+
+Here are couple of short videos introducing the Autoware Mini features.
+
+[![Autoware Mini planning simulator](https://img.youtube.com/vi/k3dOySPAYaY/mqdefault.jpg)](https://www.youtube.com/watch?v=k3dOySPAYaY "Autoware Mini planning simulator")
+[![Autoware Mini perception testing with SFA detector](https://img.youtube.com/vi/bn3G2WqHEYA/mqdefault.jpg)](https://www.youtube.com/watch?v=bn3G2WqHEYA "Autoware Mini perception testing with SFA detector")
+[![Autoware Mini perception testing with cluster detector](https://img.youtube.com/vi/OqKMQ5hUgn0/mqdefault.jpg)](https://www.youtube.com/watch?v=OqKMQ5hUgn0 "Autoware Mini perception testing with cluster detector")
+[![Autoware Mini Carla testing with ground truth detector](https://img.youtube.com/vi/p8A05yQ1pfw/mqdefault.jpg)](https://www.youtube.com/watch?v=p8A05yQ1pfw "Autoware Mini Carla testing with ground truth detector")
+[![Autoware Mini Carla testing with cluster detector](https://img.youtube.com/vi/QEoPoBogIBc/mqdefault.jpg)](https://www.youtube.com/watch?v=QEoPoBogIBc "Autoware Mini Carla testing with cluster detector")
 
 ## Installation
+
+You should have ROS Noetic installed, follow the official instructions for [Ubuntu 20.03](http://wiki.ros.org/noetic/Installation/Ubuntu) or [RoboStack](https://robostack.github.io/GettingStarted.html).
 
 1. Create workspace
    ```
@@ -32,8 +44,9 @@ The key modules of Autoware Mini are:
 2. Clone the repos
    ```
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware_mini.git
+   # not needed for planner simulation
    git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/vehicle_platform.git
-   # if using Carla
+   # if using Carla simulation
    git clone --recurse-submodules https://github.com/carla-simulator/ros-bridge.git carla_ros_bridge
    ```
 
@@ -51,7 +64,17 @@ The key modules of Autoware Mini are:
 
 5. Build the workspace
    ```
+   cd ..
    catkin build
+   ```
+
+6. Source the workspace environment
+   ```
+   source devel/setup.bash
+   ```
+   As this needs to be run every time before launching the software, you might want to add something similar to the following line to your `~/.bashrc`.
+   ```
+   source $HOME/autoware_mini_ws/devel/setup.bash
    ```
 
 ## Launching planner simulation
@@ -64,15 +87,25 @@ roslaunch autoware_mini start_sim.launch
 
 You should see Rviz window with a default map. To start driving you need to give the vehicle initial position with 2D Pose Estimate button and goal using 2D Nav Goal button. Obstacles can be placed or removed with Publish Point button.
 
-## Launching with Carla
+## Launching against recorded bag
+
+Running the autonomy stack against recorded bag file is a convenient way to test the perception module. The example bag file can be downloaded from [here](https://owncloud.ut.ee/owncloud/s/fdyJa5789oJKAgE) and it shoud be saved to the `data/bags` directory.
+
+```
+roslaunch autoware_mini start_bag.launch bag_file:=<name of the bag file in data/bags directory>
+```
+
+The detection topics in bag are remapped to dummy topic names and new detections are generated by the autonomy stack.
+
+## Launching Carla simulation
 
 ### Download Carla + Tartu map (Skip if already done)
 
 1. Download [Carla 0.9.13](https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz) and extract it. We will call this extracted folder `<CARLA ROOT>`.
-2. Download [Tartu.tar.gz](https://drive.google.com/file/d/10CHEOjHyiLJgD13g6WwDZ2_AWoLasG2F/view?usp=share_link)
-3. Copy Tartu.tar.gz inside the import folder under `<CARLA ROOT>` directory.
-4. Run ./ImportAssets.sh from the `<CARLA ROOT>` directory. This will install Tartu map. (You can now delete the Tartu.tar.gz file from import folder.)
-5. Since we will be refereing to `<CARLA ROOT>` alot, lets export it as environment variable. Make sure to replace the path where Carla is downloaded.
+2. Download [Tartu.tar.gz](https://drive.google.com/file/d/10CHEOjHyiLJgD13g6WwDZ2_AWoLasG2F/view?usp=share_link).
+3. Copy `Tartu.tar.gz` inside the import folder under `<CARLA ROOT>` directory.
+4. Run `./ImportAssets.sh` from the `<CARLA ROOT>` directory. This will install the Tartu map. (You can now delete the `Tartu.tar.gz` file from the import folder.)
+5. Since we will be referring to `<CARLA ROOT>` a lot, let's export it as an environment variable. Make sure to replace the path where Carla is downloaded.
 
    ```
    export CARLA_ROOT=/path/to/your/carla/installation
@@ -82,11 +115,11 @@ You should see Rviz window with a default map. To start driving you need to give
    ```
    export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla/dist/carla-0.9.13-py3.7-linux-x86_64.egg:${CARLA_ROOT}/PythonAPI/carla/agents:${CARLA_ROOT}/PythonAPI/carla
    ```
-   **Note:** It will be convenient if above variables are automatically exported whenever you open a terminal. Putting above exports in `~/.bashrc` will reduce hassle of exporting everytime.
+   **Note:** It will be convenient if the above variables are automatically exported whenever you open a terminal. Putting above exports in `~/.bashrc` will reduce the hassle of exporting everytime.
 
 ### Launch instructions
 
-1. In a new terminal, (assuming enviornment variables are exported) Run Carla simulator by entering followig command.
+1. In a new terminal, (assuming enviornment variables are exported) run Carla simulator by entering the following command.
 
    ```
    $CARLA_ROOT/CarlaUE4.sh -prefernvidia -quality-level=Low
@@ -99,7 +132,7 @@ You should see Rviz window with a default map. To start driving you need to give
    ```
 #### OR
 #### Launch using lidar based detector:
-2. In a new terminal, (assuming enviornment variables are exported) run the following command. This runs Tartu environment of Carla with lidar sensors and our autonomy stack. The detection is performed using Lidar based euclidean cluster detector.
+2. In a new terminal, (assuming enviornment variables are exported) run the following command. This runs Tartu environment of Carla with lidar sensors and our autonomy stack. The detection is performed using lidar-based cluster detector.
 
    ```
    roslaunch autoware_mini start_carla.launch detector:=cluster

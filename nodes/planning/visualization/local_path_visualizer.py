@@ -2,14 +2,18 @@
 
 import rospy
 from autoware_msgs.msg import Lane
+from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
+from helpers import get_point_and_orientation_on_path_within_distance, get_distance_between_two_points
 
 class LocalPathVisualizer:
     def __init__(self):
 
         # Parameters
         self.car_safety_radius = rospy.get_param("/planning/local_planner/car_safety_radius", 1.3)
+        self.current_pose_to_car_front = rospy.get_param("/planning/local_planner/current_pose_to_car_front", 4.0)
+        self.braking_safety_distance = rospy.get_param("/planning/local_planner/braking_safety_distance", 2.0)
 
         # Publishers
         self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, latch=True)
@@ -54,6 +58,33 @@ class LocalPathVisualizer:
             marker.scale.z = 0.5
             marker.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)
             marker.text = str(round(waypoint.twist.twist.linear.x * 3.6, 1))
+            marker_array.markers.append(marker)
+
+        # stop position visualization
+        if len(lane.waypoints) > 1 and lane.closest_object_distance > 0:
+
+            stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance)
+
+            if lane.closest_object_velocity < 1.0:
+                color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
+            else:
+                color = ColorRGBA(1.0, 1.0, 0.0, 0.5)
+
+            marker = Marker()
+            marker.header.frame_id = lane.header.frame_id
+            marker.header.stamp = rospy.Time.now()
+            marker.ns = "Stopping point"
+            marker.id = 0
+            marker.type = marker.CUBE
+            marker.action = marker.ADD
+            marker.pose.position.x = stop_position.x
+            marker.pose.position.y = stop_position.y
+            marker.pose.position.z = stop_position.z + 1.0
+            marker.pose.orientation = stop_orientation
+            marker.scale.x = 0.3
+            marker.scale.y = 5.0
+            marker.scale.z = 2.5
+            marker.color = color
             marker_array.markers.append(marker)
 
         self.local_path_markers_pub.publish(marker_array)

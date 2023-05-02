@@ -151,7 +151,7 @@ class LocalPlanner:
         end_index = wp_backward + self.local_path_length
         if end_index > len(global_path_array):
             end_index = len(global_path_array)
-        local_path_array = global_path_array[wp_backward : end_index,:].copy()
+        local_path_array = global_path_array[wp_backward : end_index,:]
 
         # project current_pose to the local path
         current_pose_on_path = get_closest_point_on_line(Point(x = current_pose.x, y = current_pose.y, z = current_pose.z),
@@ -234,7 +234,7 @@ class LocalPlanner:
                                             - self.braking_reaction_time * obstacles_ahead_speeds
 
                     # calculate target velocity based on stopping distance and deceleration limit
-                    target_velocities = (np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.speed_deceleration_limit * stopping_distances)))
+                    target_velocities = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.speed_deceleration_limit * stopping_distances))
                     lowest_target_velocity_idx = np.argmin(target_velocities)
                     target_vel = target_velocities[lowest_target_velocity_idx]
                     wp.twist.twist.linear.x = min(target_vel, wp.twist.twist.linear.x)

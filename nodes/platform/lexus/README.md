@@ -11,7 +11,7 @@ A Python ROS node for interfacing with Autoware's SSC.
 | --- | --- | --- | --- |
 | `use_adaptive_gear_ratio` | bool | `True` | Whether to use an adaptive gear ratio. |
 | `enable_reverse_motion` | bool | `False` | Whether to enable reverse motion. |
-| `command_timeout` | int | `200` | Timeout (in ms) to send dummy command message to keep SSC alive. |
+| `command_timeout` | int | `200` | Timeout (in ms) to send a dummy command message to keep SSC alive. |
 | `wheel_base` | float | `2.789` | Distance between front and rear axle (in meters). |
 | `ssc_gear_ratio` | float | `16.135` | Default gear ratio used in SSC. |
 | `acceleration_limit` | float | `3.0` | Maximum allowed acceleration (in m/s^2). |
@@ -49,22 +49,22 @@ A Python ROS node for interfacing with Autoware's SSC.
 Reacts to engage button in the car. Also logs marker button presses.
 
 
-## Parameters
+#### Parameters
 
 | Name              | Type  | Default | Description |
 |-------------------|-------|---------|-------------|
-| cooldown          | float |   `2.0` | Cooldown period (in seconds) after pressing the engage button. Prevents infinitely delaying the engage by pressing the button repeatedly. |
+| `cooldown`          | `float` |   `2.0` | Cooldown period (in seconds) after pressing the engage button. Prevents infinitely delaying the engagement by pressing the button repeatedly. |
 
 #### Subscribed Topics
 
 | Name           | Type                      | Description |
 |----------------|---------------------------|-------------|
-| current_pose   | geometry_msgs/PoseStamped | The current pose of the vehicle. Used to set the pose of markers. |
-| joy            | sensor_msgs/Joy            | The joystick input for button presses. |
+| `current_pose`   | `geometry_msgs/PoseStamped` | The current pose of the vehicle. Used to set the pose of markers. |
+| `joy`            | `sensor_msgs/Joy`            | The joystick input for button presses. |
 
 #### Published Topics
 
 | Name              | Type                | Description |
 |-------------------|---------------------|-------------|
-| engage            | std_msgs/Bool       | Sends a signal to engage the autonomy. |
-| log/markers       | visualization_msgs/Marker | Marker messages to log a button press. |
+| `engage`            | `std_msgs/Bool`       | Sends a signal to engage the autonomy. |
+| `log`/markers       | `visualization_msgs/Marker` | Marker messages to log a button press. |

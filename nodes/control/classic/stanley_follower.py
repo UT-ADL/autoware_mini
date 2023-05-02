@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 from helpers import get_heading_from_pose_orientation, get_blinker_state, get_heading_between_two_points, \
-    get_closest_point_on_line, get_point_on_path_within_distance, get_cross_track_error, \
+    get_closest_point_on_line, get_point_and_orientation_on_path_within_distance, get_cross_track_error, \
     get_pose_using_heading_and_distance, normalize_heading_error, interpolate_velocity_between_waypoints, \
     get_two_nearest_waypoint_idx
 from visualization_msgs.msg import MarkerArray, Marker
@@ -70,8 +70,6 @@ class StanleyFollower:
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
-        assert current_pose_msg.header.stamp == current_velocity_msg.header.stamp
-
         if self.publish_debug_info:
             start_time = rospy.get_time()
 
@@ -104,7 +102,7 @@ class StanleyFollower:
             return
     
         bl_nearest_point = get_closest_point_on_line(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
-        lookahead_point = get_point_on_path_within_distance(waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
+        lookahead_point, _ = get_point_and_orientation_on_path_within_distance(waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
 
         track_heading = get_heading_between_two_points(bl_nearest_point, lookahead_point)
         heading_error = normalize_heading_error(track_heading - current_heading)

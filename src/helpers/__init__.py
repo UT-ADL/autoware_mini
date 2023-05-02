@@ -8,7 +8,7 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 
 def get_heading_from_pose_orientation(pose):
     """
-    Get heading from pose
+    Get heading angle from pose.orientation.
     :param pose: PoseStamped
     :return: heading in radians
     """
@@ -199,8 +199,13 @@ def interpolate_velocity_between_waypoints(point, backward_wp, forward_wp):
 
     # distance to backward waypoint
     distance_to_backward_wp = get_distance_between_two_points(point, backward_wp.pose.pose.position)
+    if distance_to_backward_wp < 0.01:
+        return backward_wp.twist.twist.linear.x
+
     # distance to forward waypoint
     distance_to_forward_wp = get_distance_between_two_points(point, forward_wp.pose.pose.position)
+    if distance_to_forward_wp < 0.01:
+        return forward_wp.twist.twist.linear.x
 
     backward_wp_vel = backward_wp.twist.twist.linear.x * distance_to_forward_wp / (distance_to_backward_wp + distance_to_forward_wp)
     forward_wp_vel = forward_wp.twist.twist.linear.x * distance_to_backward_wp / (distance_to_backward_wp + distance_to_forward_wp)
@@ -208,86 +213,31 @@ def interpolate_velocity_between_waypoints(point, backward_wp, forward_wp):
     return backward_wp_vel + forward_wp_vel
 
 
-def create_closest_point_on_path(waypoints, closest_idx, start_point):
+def create_closest_point_on_path(waypoints, closest_idx, origin_point):
+    """
+    Project origin_point onto the path. First decide weather to use backward or forward waypointand then call
+    get_closest_point_on_line function to get the closest point on path.
+    :param waypoints: list of waypoints
+    :param closest_idx: index of the closest waypoint
+    :param origin_point: Point - origin point
+    :return: Point - closest point on path
+    """
 
     #initialize angles
     backward_angle = 0
     forward_angle = 0
 
     if closest_idx > 0:
-        backward_angle = abs(get_angle_three_points_2d(waypoints[closest_idx - 1].pose.pose.position, start_point, waypoints[closest_idx].pose.pose.position))
+        backward_angle = abs(get_angle_three_points_2d(waypoints[closest_idx - 1].pose.pose.position, origin_point, waypoints[closest_idx].pose.pose.position))
     if closest_idx < len(waypoints) - 1:
-        forward_angle = abs(get_angle_three_points_2d(waypoints[closest_idx].pose.pose.position, start_point, waypoints[closest_idx + 1].pose.pose.position))
+        forward_angle = abs(get_angle_three_points_2d(waypoints[closest_idx].pose.pose.position, origin_point, waypoints[closest_idx + 1].pose.pose.position))
 
     # if backward angle is bigger then project point to the backward section
     if backward_angle > forward_angle:
         closest_idx -= 1
 
-    start_position = Point(x=start_point.x, y=start_point.y, z=waypoints[closest_idx].pose.pose.position.z)
-    point = interpolate_point_to_path_point(start_position, waypoints[closest_idx].pose.pose.position, waypoints[closest_idx + 1].pose.pose.position)
-
-    return point
-
-
-def interpolate_point_to_path_point(point, point1, point2):
-
-    # convert points to arrays
-    point_array = np.array([point.x, point.y, point.z])
-    point1_array = np.array([point1.x, point1.y, point1.z])
-    point2_array = np.array([point2.x, point2.y, point2.z])
-
-    # interpolate point
-    point = interpolate_point_to_path_array(point_array, point1_array, point2_array)
-
-    return point
-
-
-def interpolate_point_to_path_array(point_array, point1_array, point2_array):
-    """
-    Interpolate point between two points (point1 and point2) on the path.
-    Original point is obs_point that is off the path. This function finds the angle between
-    path and obstacle direction and considers the distance as hypothenus of the triangle.
-    Then the angle is used to project the point to the path.
-    :param point_array: [x, y, z]
-    :param point1_array: [x, y, z]
-    :param point2_array: [x, y, z]
-    :return: Point
-    """
-
-    x = point_array[0]
-    y = point_array[1]
-    z = point_array[2]
-    x1 = point1_array[0]
-    y1 = point1_array[1]
-    z1 = point1_array[2]
-    x2 = point2_array[0]
-    y2 = point2_array[1]
-    z2 = point2_array[2]
-
-    # calculate distances
-    distance_to_obstacle = math.sqrt((x - x1) ** 2 + (y - y1) ** 2)
-    distance_to_forward_wp = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-    # find angle defined by 3 points: point1, point2 and obstacle point
-    angle = get_angle_three_points_2d(Point(x=x, y=y, z=z),
-                                      Point(x=x1, y=y1, z=z1),
-                                      Point(x=x2, y=y2, z=z2))
-
-    projected_distance = distance_to_obstacle * math.cos(angle)
-
-    # calculate ratio
-    ratio = projected_distance / distance_to_forward_wp
-
-    # calculate new point
-    x_new = x1 + ratio * (x2 - x1)
-    y_new = y1 + ratio * (y2 - y1)
-
-    # calculate z
-    z_new = (z2 + z1) /2
-
-    # create_point x, y, z
-    point = Point(x=x_new, y=y_new, z=z_new)
-
+    origin_position = Point(x = origin_point.x, y = origin_point.y, z = waypoints[closest_idx].pose.pose.position.z)
+    point = get_closest_point_on_line(origin_position, waypoints[closest_idx].pose.pose.position, waypoints[closest_idx + 1].pose.pose.position)
     return point
 
 
@@ -308,14 +258,14 @@ def get_angle_three_points_2d(point1, point2, point3):
 
     return angle
 
-def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, distance):
+def get_point_and_orientation_on_path_within_distance(waypoints, front_wp_idx, start_point, distance):
     """
     Get point on path within distance from ego pose
     :param waypoints: waypoints
     :param front_wp_idx: wp index from where to start calculate the distance
     :param start_point: starting point for distance calculation
     :param distance: distance where to find the point on the path
-    :return: Point
+    :return: Point, Quaternion
     """
 
     point = Point()
@@ -336,7 +286,10 @@ def get_point_on_path_within_distance(waypoints, front_wp_idx, start_point, dist
     point.x = waypoints[i].pose.pose.position.x - dx
     point.y = waypoints[i].pose.pose.position.y - dy
     point.z = waypoints[i].pose.pose.position.z
-    return point
+
+    orientation = get_orientation_from_yaw(end_orientation)
+
+    return point, orientation
 
 
 def debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new):
