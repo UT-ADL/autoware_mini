@@ -1,2 +1,6 @@
 pyproj >= 2.6.0
 scikit-learn-intelex
+onnxruntime_gpu
+simple-pid
+numpy >= 1.19, < 1.24
+scipy >= 1.7

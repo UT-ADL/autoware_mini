@@ -15,6 +15,14 @@
             <node if="$(eval arg('detector')=='sfa')" pkg="autoware_mini" type="sfa_detector.py" name="sfa_detector" output="screen" required="true">
                 <param name="onnx_path"  value="$(find autoware_mini)/config/sfa/kilynuaron_model.onnx"/>
             </node>
+
+            <!-- Velodyne Vella detections -->
+            <group if="$(eval arg('detector')=='vella')">
+                <!--node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args="2.11
+                $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen" required="true" /-->
+                <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
+            </group>
+
         </group>
         
         <!-- Carla's ground truth objects -->
@@ -29,13 +37,6 @@
         <node if="$(eval arg('tfl_detector')=='mqtt')" pkg="autoware_mini" type="mqtt_traffic_light_detector.py" name="mqtt_traffic_light_detector" output="screen" required="true">
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
         </node>
-
-        <!-- Velodyne Vella detections -->
-        <group if="$(eval arg('detector')=='vella')">
-<!--        <node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args="2.11
-            $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen" required="true" /> -->
-            <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
-        </group>
 
         <!-- Obstacle simulator -->
         <node if="$(eval arg('detector')=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />
