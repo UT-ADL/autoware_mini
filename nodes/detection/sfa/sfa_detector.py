@@ -186,14 +186,11 @@ class SFADetector:
     def do_detection(self, bevmap):
 
         input_bev_maps = np.expand_dims(bevmap, axis=0).astype(np.float32)
-        onnx_outputs = self.model.run([], {"input":input_bev_maps})
+        hm_cen, cen_offset, directions, z_coors, dimensions = self.model.run([], {"input":input_bev_maps})
 
         # unpacking onnx outputs
-        hm_cen = self.sigmoid(onnx_outputs[0])
-        cen_offset = self.sigmoid(onnx_outputs[1])
-        directions = onnx_outputs[2]
-        z_coors = onnx_outputs[3]
-        dimensions = onnx_outputs[4]
+        hm_cen = self.sigmoid(hm_cen)
+        cen_offset = self.sigmoid(cen_offset)
 
         # detections size (batch_size, K, 10)
         detections = self.decode(hm_cen, cen_offset, directions, z_coors, dimensions, self.top_k)
