@@ -3,44 +3,51 @@
 
     <arg name="global_planner"          default="lanelet2"  doc="waypoints, lanelet2, carla" />
     <arg name="local_planner"           default="speed"     doc="none, speed" />
+    <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
 
     <group ns="planning">
-
-        <!-- Waypoint loader -->
-        <node if="$(eval arg('global_planner')=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
-            <param name="waypoints_file" value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
-        </node>
 
         <!-- Lanelet2 map visualizer -->
         <node pkg="autoware_mini" type="lanelet2_map_visualizer.py" name="lanelet2_map_visualizer" output="screen" required="true">
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
         </node>
 
+        <!-- Waypoint loader -->
+        <node if="$(eval arg('global_planner')=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
+            <param name="waypoints_file" value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
+        </node>
+
         <!-- Lanelet2 global planner -->
         <node if="$(eval arg('global_planner')=='lanelet2')" pkg="autoware_mini" type="lanelet2_global_planner.py" name="lanelet2_global_planner" output="screen" required="true">
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
         </node>
-        <node pkg="autoware_mini" type="global_path_visualizer.py" name="global_path_visualizer" output="screen" required="true"/>
 
         <!-- Carla waypoints publisher -->
         <node if="$(eval arg('global_planner')=='carla')" pkg='autoware_mini' type='carla_waypoints_publisher.py' name='carla_waypoints_publisher' output='screen' required="true" />
 
-        <!-- Path smoothing and Local planner-->
-        <group if="$(eval arg('local_planner')=='speed')">
-            <node pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true" />
+        <!-- Global path visualizer -->
+        <node pkg="autoware_mini" type="global_path_visualizer.py" name="global_path_visualizer" output="screen" required="true"/>
 
+        <!-- Path smoothing -->
+        <group if="$(arg use_path_smoothing)">
+            <node pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true" />
             <node pkg="autoware_mini" type="global_path_visualizer.py" name="smoothed_path_visualizer" output="screen" required="true">
                 <remap from="global_path" to="smoothed_path"/>
                 <remap from="global_path_markers" to="smoothed_path_markers"/>
             </node>
+        </group>
+        <node unless="$(arg use_path_smoothing)" pkg="topic_tools" type="relay" args="/planning/global_path /planning/smoothed_path" name="smoothed_path_relay" output="screen" required="true" />
 
+        <!-- Local planner -->
+        <group if="$(eval arg('local_planner')=='speed')">
             <node pkg="autoware_mini" type="speed_local_planner.py" name="speed_local_planner" output="screen" required="true">
                 <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
             </node>
             <node pkg="autoware_mini" type="local_path_visualizer.py" name="local_path_visualizer" output="screen" required="true"/>
         </group>
+        <node if="$(eval arg('local_planner')=='none')" pkg="topic_tools" type="relay" args="/planning/smoothed_path /planning/local_path" name="local_path_relay" output="screen" required="true" />
 
         <!-- Visualization and Config -->
         <node pkg="autoware_mini" type="speed_obstacle_visualizer.py" name="speed_obstacle_visualizer" output="screen" required="true"/>

@@ -6,35 +6,35 @@
     <arg name="follower"                default="pure_pursuit"      doc="pure_pursuit, stanley" />
     <arg name="global_planner"          default="lanelet2"          doc="waypoints, lanelet2" />
     <arg name="local_planner"           default="speed"             doc="speed, none"/>
+    <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
     <arg name="tfl_detector"            default="mqtt"              doc="mqtt" />
-    <arg name="use_detection"           default="true"              doc="use object detection" />
     <arg name="max_speed"               default="30" />
     
-    <!-- Localizer -->
+    <!-- Localization -->
     <include file="$(find autoware_mini)/launch/localization.launch">
         <arg name="localizer"           value="$(arg localizer)" />
     </include>
 
-    <!-- Planner -->
-    <include file="$(find autoware_mini)/launch/planning.launch">
-        <arg name="global_planner"      value="$(arg global_planner)" />
-        <arg name="local_planner"       value="$(arg local_planner)" />
-        <arg name="waypoints_file"      value="$(arg waypoints_file)" />
-        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
-    </include>
-
     <!-- Detection -->
-    <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
+    <include file="$(find autoware_mini)/launch/detection.launch">
         <arg name="detector"            value="$(arg detector)" />
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>
 
-    <!-- Follower -->
+    <!-- Planning -->
+    <include file="$(find autoware_mini)/launch/planning.launch">
+        <arg name="global_planner"      value="$(arg global_planner)" />
+        <arg name="local_planner"       value="$(arg local_planner)" />
+        <arg name="use_path_smoothing"  value="$(arg use_path_smoothing)" />
+        <arg name="waypoints_file"      value="$(arg waypoints_file)" />
+        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+    </include>
+
+    <!-- Control -->
     <include file="$(find autoware_mini)/launch/control.launch">
-        <arg name="local_planner"   value="$(arg local_planner)" />
         <arg name="follower"        value="$(arg follower)" />
     </include>
 

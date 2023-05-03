@@ -1,14 +1,18 @@
 <?xml version="1.0"?>
 <launch>
     
-    <arg name="bag_file"            default="2023-03-14-20-34-16_vella_odom_compensation_ms.bag" doc="bag file to play" />
-    <arg name="localizer"           default="novatel"   doc="novatel, carla"/>
-    <arg name="detector"            default="cluster"   doc="cluster, sim, carla"/>
-    <arg name="global_planner"      default="none"      doc="waypoints, lanelet2"/>
-    <arg name="use_tf"              default="true"      doc="replaces tf-s in bag with the current ones"/>
-    <arg name="use_localization"    default="$(arg use_tf)" doc="replace localization topics"/>
-    <arg name="use_detection"       default="true"      doc="replace object detection topics"/>
-    <arg name="use_planning"        default="$(arg use_tf)" doc="replace planning topics"/>
+    <arg name="bag_file"                default="2023-03-14-20-34-16_vella_odom_compensation_ms.bag" doc="bag file to play" />
+    <arg name="localizer"               default="novatel"   doc="novatel, carla"/>
+    <arg name="detector"                default="cluster"   doc="cluster, sim, carla"/>
+    <arg name="tfl_detector"            default="none"      doc="mqtt" />
+    <arg name="global_planner"          default="none"      doc="waypoints, lanelet2"/>
+    <arg name="local_planner"           default="none"      doc="speed"/>
+    <arg name="use_path_smoothing"      default="true" />
+    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
+    <arg name="use_tf"                  default="true"      doc="replaces tf-s in bag with the current ones"/>
+    <arg name="use_localization"        default="$(arg use_tf)" doc="replace localization topics"/>
+    <arg name="use_detection"           default="true"      doc="replace object detection topics"/>
+    <arg name="use_planning"            default="true"      doc="replace planning topics"/>
 
     <!-- Use simulation time from bag -->
     <param name="/use_sim_time" value="true" />
@@ -39,25 +43,30 @@
         <remap from="/lidar_0/vlp32/pcl2" to="/lidar_center/points_raw"/>
     </node>
 
-    <!-- Vehicle platform -->
-    <include file="$(find vehicle_platform)/launch/platform.launch" >
-        <arg name="use_tf"          value="$(arg use_tf)" />
-        <arg name="use_lexus_model" value="true" />
-    </include>
-
     <!-- Localization -->
     <include if="$(arg use_tf)" file="$(find autoware_mini)/launch/localization.launch">
-        <arg name="localizer" value="$(arg localizer)" />
+        <arg name="localizer"       value="$(arg localizer)" />
     </include>
 
     <!-- Detection -->
     <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
-        <arg name="detector" value="$(arg detector)" />
+        <arg name="detector"            value="$(arg detector)" />
+        <arg name="tfl_detector"        value="$(arg tfl_detector)" />
+        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>
 
     <!-- Planning -->
     <include if="$(arg use_planning)" file="$(find autoware_mini)/launch/planning.launch">
-        <arg name="global_planner" value="$(arg global_planner)" />
+        <arg name="global_planner"      value="$(arg global_planner)" />
+        <arg name="local_planner"       value="$(arg local_planner)" />
+        <arg name="use_path_smoothing"  value="$(arg use_path_smoothing)" />
+        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+    </include>
+
+    <!-- Vehicle platform -->
+    <include file="$(find vehicle_platform)/launch/platform.launch" >
+        <arg name="use_tf"          value="$(arg use_tf)" />
+        <arg name="use_lexus_model" value="true" />
     </include>
 
     <!-- Rviz -->
