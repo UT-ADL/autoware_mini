@@ -31,7 +31,7 @@ class SFADetector:
         self.onnx_path = rospy.get_param("~onnx_path", 'kilynuaron_model.onnx')  # path of the trained model
 
         self.only_front = rospy.get_param("~only_front",False)  # only front detections. If False, both front and back detections enabled
-        self.MIN_FRONT_X = rospy.get_param("~maxFrontX", 0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
+        self.MIN_FRONT_X = rospy.get_param("~minFrontX", 0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
         self.MAX_FRONT_X = rospy.get_param("~maxFrontX", 50)  # maximum distance on lidar +ve x-axis to process points at (back detections)
         self.MIN_BACK_X = rospy.get_param("~minBackX", -50)  # maxmimum distance on lidar -ve x-axis to process points at
         self.MAX_BACK_X = rospy.get_param("~maxBackX", 0)  # minimum distance on lidar -ve x-axis to process points at
@@ -39,7 +39,7 @@ class SFADetector:
         self.MAX_Y = rospy.get_param("~maxY", 25)  # maxmimum distance on lidar +ve y-axis to process points at
         self.MIN_Z = rospy.get_param("~minZ", -2.73)  # maxmimum distance on lidar -ve z-axis to process points at
         self.MAX_Z = rospy.get_param("~maxZ", 1.27)  # maxmimum distance on lidar +ve z-axis to process points at
-        self.DISCRETIZATION = (self.MAX_FRONT_X - self.MIN_FRONT_X) / BEV_HEIGHT  # 3D world self.DISCRETIZATION to 2D image: distance encoded by 1 pixel
+        self.DISCRETIZATION = (self.MAX_FRONT_X - self.MIN_FRONT_X) / BEV_HEIGHT  # 3D world discretization to 2D image: distance encoded by 1 pixel
         self.BOUND_SIZE_X = self.MAX_FRONT_X - self.MIN_FRONT_X
         self.BOUND_SIZE_Y = self.MAX_Y - self.MIN_Y
         self.MAX_HEIGHT = np.abs(self.MAX_Z - self.MIN_Z)
@@ -150,13 +150,11 @@ class SFADetector:
         return points
 
     def make_bev_map(self, pointcloud):
-        height = BEV_HEIGHT + 1
-        width = BEV_WIDTH + 1
 
         # Discretize Feature Map
         pointcloud = np.copy(pointcloud)
         pointcloud[:, 0] = np.int_(np.floor(pointcloud[:, 0] / self.DISCRETIZATION))
-        pointcloud[:, 1] = np.int_(np.floor(pointcloud[:, 1] / self.DISCRETIZATION) + width / 2)
+        pointcloud[:, 1] = np.int_(np.floor(pointcloud[:, 1] / self.DISCRETIZATION) + BEV_WIDTH / 2)
 
         # sort-3times
         sorted_indices = np.lexsort((-pointcloud[:, 2], pointcloud[:, 1], pointcloud[:, 0]))
@@ -164,24 +162,14 @@ class SFADetector:
         _, unique_indices, unique_counts = np.unique(pointcloud[:, 0:2], axis=0, return_index=True, return_counts=True)
         pointcloud_top = pointcloud[unique_indices]
 
-        # Height Map, Intensity Map & Density Map
-        height_map = np.zeros((height, width))
-        intensity_map = np.zeros((height, width))
-        density_map = np.zeros((height, width))
-
-        # some important problem is image coordinate is (y,x), not (x,y)
-        height_map[np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = pointcloud_top[:, 2] / self.MAX_HEIGHT
-
         normalized_counts = np.minimum(1.0, np.log(unique_counts + 1) / np.log(64))
-        intensity_map[np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = pointcloud_top[:, 3]
-        density_map[np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = normalized_counts
 
-        rgb_map = np.zeros((3, height - 1, width - 1))
-        rgb_map[2, :, :] = density_map[:BEV_HEIGHT, :BEV_WIDTH]  # r_map
-        rgb_map[1, :, :] = height_map[:BEV_HEIGHT, :BEV_WIDTH]  # g_map
-        rgb_map[0, :, :] = intensity_map[:BEV_HEIGHT, :BEV_WIDTH]  # b_map
+        hid_map = np.zeros((3, BEV_HEIGHT , BEV_WIDTH))
+        hid_map[2, np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = normalized_counts # density map
+        hid_map[1, np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = pointcloud_top[:, 2] / self.MAX_HEIGHT  # height map
+        hid_map[0, np.int_(pointcloud_top[:, 0]), np.int_(pointcloud_top[:, 1])] = pointcloud_top[:, 3]  # intensity map
 
-        return rgb_map
+        return hid_map
 
     def do_detection(self, bevmap):
 
