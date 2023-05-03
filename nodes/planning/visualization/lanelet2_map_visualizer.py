@@ -24,7 +24,10 @@ CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.3)
 LANELET_COLOR_TO_MARKER_COLOR = {
     "red": RED,
     "yellow": YELLOW,
-    "green": GREEN
+    "green": GREEN,
+    "GREEN": GREEN,
+    "AMBER": YELLOW,
+    "RED": RED,
 }
 
 class Lanelet2MapVisualizer:

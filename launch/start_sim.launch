@@ -8,6 +8,7 @@
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
     <arg name="use_detection"           default="true"          doc="use object detection" />
     <arg name="detector"                default="sim"           doc="usually sim" />
+    <arg name="tfl_detector"            default="mqtt"          doc="mqtt" />
 
     <!-- Planner -->
     <include file="$(find autoware_mini)/launch/planning.launch">
@@ -19,7 +20,9 @@
 
     <!-- Detection -->
     <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
-        <arg name="detector" value="$(arg detector)" />
+        <arg name="detector"            value="$(arg detector)" />
+        <arg name="tfl_detector"        value="$(arg tfl_detector)" />
+        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>
 
     <!-- Follower -->
