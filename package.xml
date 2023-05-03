@@ -25,6 +25,7 @@
   <exec_depend>python3-pygame</exec_depend>
   <exec_depend>python3-simple-pid-pip</exec_depend>
   <exec_depend>python3-catkin-tools</exec_depend>
+  <exec_depend>python3-paho-mqtt</exec_depend>
 
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
