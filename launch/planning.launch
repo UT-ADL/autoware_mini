@@ -2,7 +2,7 @@
 <launch>
 
     <arg name="global_planner"          default="lanelet2"  doc="waypoints, lanelet2, carla" />
-    <arg name="local_planner"           default="speed"     doc="none, speed" />
+    <arg name="local_planner"           default="speed_only"     doc="none, speed_only" />
     <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
@@ -41,8 +41,8 @@
         <node unless="$(arg use_path_smoothing)" pkg="topic_tools" type="relay" args="/planning/global_path /planning/smoothed_path" name="smoothed_path_relay" output="screen" required="true" />
 
         <!-- Local planner -->
-        <group if="$(eval arg('local_planner')=='speed')">
-            <node pkg="autoware_mini" type="speed_local_planner.py" name="speed_local_planner" output="screen" required="true">
+        <group if="$(eval arg('local_planner')=='speed_only')">
+            <node pkg="autoware_mini" type="speed_only_planner.py" name="speed_only_planner" output="screen" required="true">
                 <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
             </node>
             <node pkg="autoware_mini" type="local_path_visualizer.py" name="local_path_visualizer" output="screen" required="true"/>

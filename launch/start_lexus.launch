@@ -5,7 +5,7 @@
     <arg name="detector"                default="cluster"           doc="cluster, sim, carla"/>
     <arg name="follower"                default="pure_pursuit"      doc="pure_pursuit, stanley" />
     <arg name="global_planner"          default="lanelet2"          doc="waypoints, lanelet2" />
-    <arg name="local_planner"           default="speed"             doc="speed, none"/>
+    <arg name="local_planner"           default="speed_only"        doc="speed_only, none"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />

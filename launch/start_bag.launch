@@ -6,7 +6,7 @@
     <arg name="detector"                default="cluster"   doc="cluster, sim, carla"/>
     <arg name="tfl_detector"            default="none"      doc="mqtt" />
     <arg name="global_planner"          default="none"      doc="waypoints, lanelet2"/>
-    <arg name="local_planner"           default="none"      doc="speed"/>
+    <arg name="local_planner"           default="none"      doc="speed_only"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
     <arg name="use_tf"                  default="true"      doc="replaces tf-s in bag with the current ones"/>
