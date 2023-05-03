@@ -21,8 +21,8 @@ MQTT_TO_AUTOWARE_TFL_MAP = {
     "AMBERRED" : 0,
     "YELLOW": 0,
     "AMBER": 0,
-    "AMB FLASH" : 0,
-    "AMBER FLASH" : 0,
+    "AMB FLASH" : 1,
+    "AMBER FLASH" : 1,
     "GREEN FLASH": 1,
     "GREEN": 1,
     "UNKNOWN": 2
@@ -61,6 +61,9 @@ class MqttTrafficLightDetector:
                     if "api_id" in line.attributes:
                         self.stop_line_ids[line.id] = line.attributes["api_id"]
 
+        # MQTT traffic light status
+        self.mqtt_status = {}
+
         # Publishers
         self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
 
@@ -73,27 +76,23 @@ class MqttTrafficLightDetector:
         client.connect(self.mqtt_host, self.mqtt_port, keepalive=10)
         client.loop_start()
 
-        self.mqtt_status = {}
 
+    def on_connect(self, client, userdata, flags, rc):
+        if rc != 0:
+            rospy.logerr('Failed to connect to MQTT server %s:%d, return code: %d', self.mqtt_host, self.mqtt_port, rc)
+            return
+
+        rospy.loginfo('Connected to MQTT server %s:%d', self.mqtt_host, self.mqtt_port)
+        client.subscribe(self.mqtt_topic)
+
+    def on_disconnect(self, client, userdata, rc):
+        rospy.logerr('Disconnected from MQTT server %s:%d, return code: %d', self.mqtt_host, self.mqtt_port, rc)
 
     def on_message(self, client, userdata, msg):
         rospy.logdebug('MQTT message recieved: %s, %s', msg.topic, str(msg.payload))
         # collect all messages
         api_id = msg.topic
         self.mqtt_status[api_id] = json.loads(msg.payload)
-
-    def on_disconnect(self, client, userdata, rc):
-        self.connection_up = False
-        rospy.logerr('Disconnected from MQTT server %s:%d, return code: %d', self.mqtt_host, self.mqtt_port, rc)
-
-    def on_connect(self, client, userdata, flags, rc):
-        if rc != 0:
-            rospy.logerr('Failed to connect to MQTT server %s:%d, return code: %d', self.mqtt_host, self.mqtt_port, rc)
-            return
-        self.connection_up = True
-        rospy.loginfo('Connected to MQTT server %s:%d', self.mqtt_host, self.mqtt_port)
-        client.subscribe(self.mqtt_topic)
-
 
     def combine_tfl_results_and_publish(self):
         """

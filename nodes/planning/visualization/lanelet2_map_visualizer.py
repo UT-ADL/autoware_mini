@@ -23,11 +23,16 @@ CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.3)
 
 LANELET_COLOR_TO_MARKER_COLOR = {
     "red": RED,
+    "red/amb": RED,
+    "amber-red": RED,
+    "amberred" : RED,
     "yellow": YELLOW,
+    "amber": YELLOW,
+    "amb flash": YELLOW,
+    "amber flash": YELLOW,
     "green": GREEN,
-    "GREEN": GREEN,
-    "AMBER": YELLOW,
-    "RED": RED,
+    "green flash": GREEN,
+    "unknown": WHITE,
 }
 
 class Lanelet2MapVisualizer:
@@ -79,14 +84,19 @@ class Lanelet2MapVisualizer:
             points = [Point(x=p.x, y=p.y, z=p.z + 0.01) for p in stop_line]
 
             # choose the color of stopline based on the traffic light state
-            if result.recognition_result_str in LANELET_COLOR_TO_MARKER_COLOR:
-                color = LANELET_COLOR_TO_MARKER_COLOR[result.recognition_result_str]
+            if result.recognition_result_str.lower() in LANELET_COLOR_TO_MARKER_COLOR:
+                color = LANELET_COLOR_TO_MARKER_COLOR[result.recognition_result_str.lower()]
             else:
+                rospy.logwarn("lanelet2_map_visualizer - unrecognized traffic light state: %s", result.recognition_result_str)
                 color = WHITE
 
             # create linestring marker
             stopline_marker = linestring_to_marker(points, "Stop line", stop_line.id, color, 0.5, rospy.Time.now())
             marker_array.markers.append(stopline_marker)
+
+            # create traffic light status marker
+            text_marker = text_to_marker(result.recognition_result_str, points, "Status text", stop_line.id, WHITE, 0.5, rospy.Time.now())
+            marker_array.markers.append(text_marker)
 
             # record the state of this stop line
             states[result.lane_id] = result.recognition_result_str
@@ -224,6 +234,34 @@ def linestring_to_marker(linestring, namespace, id, color, scale, stamp):
     # Add the points to the marker
     for point in linestring:
         marker.points.append(point)
+
+    return marker
+
+def text_to_marker(text, linestring, namespace, id, color, scale, stamp):
+    """
+    Creates a Marker from a text
+    :param text: text
+    :param namespace: Marker namespace
+    :param id: Marker id
+    :param color: Marker color
+    :param stamp: Marker timestamp
+    :return: Marker
+    """
+    # Create a Marker
+    marker = Marker()
+    marker.header.frame_id = "map"
+    marker.header.stamp = stamp
+    marker.ns = namespace
+    marker.id = id
+    marker.type = marker.TEXT_VIEW_FACING
+    marker.action = marker.ADD
+    marker.scale.z = scale
+    marker.color = color
+    marker.pose.position.x = (linestring[0].x + linestring[-1].x) / 2.0
+    marker.pose.position.y = (linestring[0].y + linestring[-1].y) / 2.0
+    marker.pose.position.z = (linestring[0].z + linestring[-1].z) / 2.0
+    marker.pose.orientation.w = 1.0
+    marker.text = text
 
     return marker
 
