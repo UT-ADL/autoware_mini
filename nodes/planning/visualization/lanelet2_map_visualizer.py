@@ -20,6 +20,7 @@ GREY = ColorRGBA(0.4, 0.4, 0.4, 0.6)
 ORANGE = ColorRGBA(1.0, 0.5, 0.0, 0.6)
 WHITE = ColorRGBA(1.0, 1.0, 1.0, 0.6)
 CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.3)
+WHITE100 = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
 LANELET_COLOR_TO_MARKER_COLOR = {
     "red": RED,
@@ -95,7 +96,7 @@ class Lanelet2MapVisualizer:
             marker_array.markers.append(stopline_marker)
 
             # create traffic light status marker
-            text_marker = text_to_marker(result.recognition_result_str, points, "Status text", stop_line.id, WHITE, 0.5, rospy.Time.now())
+            text_marker = text_to_marker(result.recognition_result_str, points, "Status text", stop_line.id, WHITE100, 0.5, rospy.Time.now())
             marker_array.markers.append(text_marker)
 
             # record the state of this stop line
