@@ -20,6 +20,7 @@ class GroundRemovalNode:
         self.cell_size = rospy.get_param('~cell_size', 1.0)
         self.tolerance = rospy.get_param('~tolerance', 0.1)
         self.filter = rospy.get_param('~filter', 'none')
+        self.filter_size = rospy.get_param('~filter_size', 3)
 
         self.width = int(math.ceil((self.max_x - self.min_x) / self.cell_size))
         self.height = int(math.ceil((self.max_y - self.min_y) / self.cell_size))
@@ -54,11 +55,14 @@ class GroundRemovalNode:
 
         # bring cell minimum lower, if all cells around it are lower
         if self.filter == 'median':
-            cols_blur = cv2.medianBlur(self.cols, 3)
-            self.cols = np.fmin(self.cols, cols_blur)
+            cols_blur = cv2.medianBlur(self.cols, self.filter_size)
+            np.fmin(self.cols, cols_blur, out=self.cols)
         elif self.filter == 'average':
-            cols_blur = cv2.blur(self.cols, (3, 3), cv2.BORDER_REPLICATE)
-            self.cols = np.fmin(self.cols, cols_blur)
+            cols_blur = cv2.blur(self.cols, (self.filter_size, self.filter_size), cv2.BORDER_REPLICATE)
+            np.fmin(self.cols, cols_blur, out=self.cols)
+        elif self.filter == 'minimum':
+            cols_blur = cv2.erode(self.cols, np.ones((self.filter_size, self.filter_size)), cv2.BORDER_REPLICATE)
+            np.fmin(self.cols, cols_blur, out=self.cols)
         elif self.filter != 'none':
             assert False, "Unknown filter value: " + self.filter
 
