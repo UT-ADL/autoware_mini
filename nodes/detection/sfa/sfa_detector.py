@@ -44,7 +44,7 @@ class SFADetector:
         self.BOUND_SIZE_Y = self.MAX_Y - self.MIN_Y
         self.MAX_HEIGHT = np.abs(self.MAX_Z - self.MIN_Z)
 
-        self.peak_thresh = rospy.get_param("~peak_thresh", 0.2)  # score filter
+        self.score_thresh = rospy.get_param("~score_thresh", 0.2)  # score filter
         self.top_k = rospy.get_param("~top_k", 50)  # number of top scoring detections to process
         self.output_frame = rospy.get_param("~output_frame", 'map')  # transform detected objects from lidar frame to this frame
 
@@ -101,24 +101,19 @@ class SFADetector:
             # process only detection from front FOV and return detections
             front_points = self.get_filtered_points(points)
             front_bev_map = self.make_bev_map(front_points)
-            front_detections = self.do_detection(front_bev_map)
-            front_final_dets = self.convert_det_to_real_values(front_detections)
-
+            front_final_dets= self.do_detection(front_bev_map)
             return front_final_dets
         else:
             # process detections from both front and back FOVs and return detections
             #front
             front_points = self.get_filtered_points(points, is_front=True)
             front_bev_map = self.make_bev_map(front_points)
-            front_detections = self.do_detection(front_bev_map)
-            front_final_dets = self.convert_det_to_real_values(front_detections)
-
+            front_final_dets = self.do_detection(front_bev_map)
             # back
             back_points = self.get_filtered_points(points, is_front=False)
             back_bev_map = self.make_bev_map(back_points)
             back_bev_map = np.flip(back_bev_map, (1, 2))
-            back_detections = self.do_detection(back_bev_map)
-            back_final_dets = self.convert_det_to_real_values(back_detections)
+            back_final_dets = self.do_detection(back_bev_map)
             if back_final_dets.shape[0] != 0:
                 back_final_dets[:, 1] *= -1
                 back_final_dets[:, 2] *= -1
@@ -182,9 +177,9 @@ class SFADetector:
 
         # detections size (batch_size, K, 10)
         detections = self.decode(hm_cen, cen_offset, directions, z_coors, dimensions, self.top_k)
-        detections = self.post_processing(detections)
+        detections = self.post_processing(detections, add_scores=False)
 
-        return detections[0]
+        return detections
 
     def sigmoid(self, x):
         # Apply the sigmoid function element-wise to the input array
@@ -293,59 +288,33 @@ class SFADetector:
         feat = self.gather_feat(feat, ind)
         return feat
 
-    def post_processing(self, detections):
+    def post_processing(self, detections, add_scores):
         """
         :param detections: [batch_size, K, 10]
         # (scores x 1, xs x 1, ys x 1, z_coor x 1, dim x 3, direction x 2, clses x 1)
         # (scores-0:1, xs-1:2, ys-2:3, z_coor-3:4, dim-4:7, direction-7:9, clses-9:10)
         :return:
         """
-        ret = []
-        for i in range(detections.shape[0]):
-            top_preds = {}
-            classes = detections[i, :, -1]
-            for j in range(NUM_CLASSES):
-                inds = (classes == j)
-                # x, y, z, h, w, l, yaw
-                top_preds[j] = np.concatenate([
-                    detections[i, inds, 0:1],
-                    detections[i, inds, 1:2] * DOWN_RATIO,
-                    detections[i, inds, 2:3] * DOWN_RATIO,
-                    detections[i, inds, 3:4],
-                    detections[i, inds, 4:5],
-                    detections[i, inds, 5:6] / self.BOUND_SIZE_Y * BEV_WIDTH,
-                    detections[i, inds, 6:7] / self.BOUND_SIZE_X * BEV_HEIGHT,
-                    self.get_yaw(detections[i, inds, 7:9]).astype(np.float32)], axis=1)
-                # Filter by peak_thresh
-                if len(top_preds[j]) > 0:
-                    keep_inds = (top_preds[j][:, 0] > self.peak_thresh)
-                    top_preds[j] = top_preds[j][keep_inds]
-            ret.append(top_preds)
-
-        return ret
+        # score based filtering
+        keep_inds = (detections[0][:, 0] > self.score_thresh)
+        filtered_detections = detections[0][keep_inds, :]
+        if filtered_detections.shape[0] > 0:
+            classes = filtered_detections[:, -1]
+            scores = filtered_detections[:, 0]
+            x = (filtered_detections[:, 2] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_X + self.MIN_FRONT_X
+            y = (filtered_detections[:, 1] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_Y + self.MIN_Y
+            z = filtered_detections[:, 3] + self.MIN_Z
+            heights = filtered_detections[:, 4]
+            widths = filtered_detections[:, 5]
+            lengths = filtered_detections[:, 6]
+            yaw = self.get_yaw(filtered_detections[:,7:9]).astype(np.float32)
+        if add_scores:
+            return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw, scores))
+        else:
+            return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw))
 
     def get_yaw(self, direction):
-        return np.arctan2(direction[:, 0:1], direction[:, 1:2])
-
-    def convert_det_to_real_values(self, detections, add_score=False):
-        final_detections = []
-        for cls_id in range(NUM_CLASSES):
-            if len(detections[cls_id]) > 0:
-                for det in detections[cls_id]:
-                    # (scores-0:1, x-1:2, y-2:3, z-3:4, dim-4:7, yaw-7:8)
-                    _score, _x, _y, _z, _h, _w, _l, _yaw = det
-                    _yaw = -_yaw
-                    x = _y / BEV_HEIGHT * self.BOUND_SIZE_X + self.MIN_FRONT_X
-                    y = _x / BEV_WIDTH * self.BOUND_SIZE_Y + self.MIN_Y
-                    z = _z + self.MIN_Z
-                    w = _w / BEV_WIDTH * self.BOUND_SIZE_Y
-                    l = _l / BEV_HEIGHT * self.BOUND_SIZE_X
-                    if add_score:
-                        final_detections.append([cls_id, x, y, z, _h, w, l, _yaw, _score])
-                    else:
-                        final_detections.append([cls_id, x, y, z, _h, w, l, _yaw])
-
-        return np.array(final_detections)
+        return -np.arctan2(direction[:, 0:1], direction[:, 1:2])
 
     def generate_autoware_objects(self, detections, header, tf_matrix, tf_rot):
 

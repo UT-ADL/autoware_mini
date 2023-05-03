@@ -31,7 +31,7 @@ lidar:
     max_y: 25
     min_z: -2.73
     max_z: 1.27
-    peak_thresh: 0.2
+    score_thresh: 0.2
     top_k: 50
     output_frame: "map"
 
