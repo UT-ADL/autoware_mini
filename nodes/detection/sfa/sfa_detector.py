@@ -59,7 +59,7 @@ class SFADetector:
 
         # Subscribers and Publishers
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
-        rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1)
+        rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1, buff_size=2*1024*1024)
 
         rospy.loginfo("sfa_detector - initialized")
 
@@ -308,10 +308,16 @@ class SFADetector:
             widths = filtered_detections[:, 5]
             lengths = filtered_detections[:, 6]
             yaw = self.get_yaw(filtered_detections[:,7:9]).astype(np.float32)
-        if add_scores:
-            return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw, scores))
+
+            if add_scores:
+                return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw, scores))
+            else:
+                return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw))
         else:
-            return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw))
+            if add_scores:
+                return np.empty((0, 9))
+            else:
+                return np.empty((0, 8))
 
     def get_yaw(self, direction):
         return -np.arctan2(direction[:, 0:1], direction[:, 1:2])
