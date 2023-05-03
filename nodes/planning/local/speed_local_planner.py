@@ -23,7 +23,7 @@ RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
 YELLOW = ColorRGBA(0.8, 0.8, 0.0, 0.4)
 
 
-class LocalPlanner:
+class SpeedLocalPlanner:
 
     def __init__(self):
 
@@ -271,6 +271,6 @@ class LocalPlanner:
 
 
 if __name__ == '__main__':
-    rospy.init_node('local_planner')
-    node = LocalPlanner()
+    rospy.init_node('speed_local_planner')
+    node = SpeedLocalPlanner()
     node.run()

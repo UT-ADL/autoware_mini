@@ -4,7 +4,8 @@
     <arg name="localizer"               default="novatel"           doc="novatel, carla"/>
     <arg name="detector"                default="cluster"           doc="cluster, sim, carla"/>
     <arg name="follower"                default="pure_pursuit"      doc="pure_pursuit, stanley" />
-    <arg name="planner"                 default="lanelet2"          doc="waypoints, lanelet2" />
+    <arg name="global_planner"          default="lanelet2"          doc="waypoints, lanelet2" />
+    <arg name="local_planner"           default="speed"             doc="speed, none"/>
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
     <arg name="use_detection"           default="false"             doc="use object detection" />    
@@ -17,7 +18,8 @@
 
     <!-- Planner -->
     <include file="$(find autoware_mini)/launch/planning.launch">
-        <arg name="planner"             value="$(arg planner)" />
+        <arg name="global_planner"      value="$(arg global_planner)" />
+        <arg name="local_planner"       value="$(arg local_planner)" />
         <arg name="waypoints_file"      value="$(arg waypoints_file)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>
@@ -29,7 +31,8 @@
 
     <!-- Follower -->
     <include file="$(find autoware_mini)/launch/control.launch">
-        <arg name="follower" value="$(arg follower)" />
+        <arg name="local_planner"   value="$(arg local_planner)" />
+        <arg name="follower"        value="$(arg follower)" />
     </include>
 
     <!-- Vehicle -->

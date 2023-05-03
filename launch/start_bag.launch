@@ -4,7 +4,7 @@
     <arg name="bag_file"            default="2023-03-14-20-34-16_vella_odom_compensation_ms.bag" doc="bag file to play" />
     <arg name="localizer"           default="novatel"   doc="novatel, carla"/>
     <arg name="detector"            default="cluster"   doc="cluster, sim, carla"/>
-    <arg name="planner"             default="none"      doc="waypoints, lanelet2"/>
+    <arg name="global_planner"      default="none"      doc="waypoints, lanelet2"/>
     <arg name="use_tf"              default="true"      doc="replaces tf-s in bag with the current ones"/>
     <arg name="use_localization"    default="$(arg use_tf)" doc="replace localization topics"/>
     <arg name="use_detection"       default="true"      doc="replace object detection topics"/>
@@ -57,7 +57,7 @@
 
     <!-- Planning -->
     <include if="$(arg use_planning)" file="$(find autoware_mini)/launch/planning.launch">
-        <arg name="planner" value="$(arg planner)" />
+        <arg name="global_planner" value="$(arg global_planner)" />
     </include>
 
     <!-- Rviz -->

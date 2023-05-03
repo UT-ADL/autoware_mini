@@ -2,19 +2,19 @@
 <launch>
 
     <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley" />
-    <arg name="planner"                 default="lanelet2"      doc="waypoints, lanelet2" />
+    <arg name="global_planner"          default="lanelet2"      doc="waypoints, lanelet2" />
+    <arg name="local_planner"           default="speed"         doc="none, speed" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
     <arg name="use_detection"           default="true"          doc="use object detection" />
-    <arg name="use_local_planner"       default="true" />
     <arg name="detector"                default="sim"           doc="usually sim" />
 
     <!-- Planner -->
     <include file="$(find autoware_mini)/launch/planning.launch">
-        <arg name="planner"             value="$(arg planner)" />
+        <arg name="global_planner"      value="$(arg global_planner)" />
+        <arg name="local_planner"       value="$(arg local_planner)" />
         <arg name="waypoints_file"      value="$(arg waypoints_file)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
-        <arg name="use_local_planner"   value="$(arg use_local_planner)" />
     </include>
 
     <!-- Detection -->
@@ -24,7 +24,8 @@
 
     <!-- Follower -->
     <include file="$(find autoware_mini)/launch/control.launch">
-        <arg name="follower" value="$(arg follower)" />
+        <arg name="local_planner"   value="$(arg local_planner)" />
+        <arg name="follower"        value="$(arg follower)" />
     </include>
 
     <!-- Bicycle_model simulator -->

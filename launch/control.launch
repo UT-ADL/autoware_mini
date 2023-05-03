@@ -1,11 +1,15 @@
 <?xml version="1.0"?>
 <launch>
 
+    <arg name="local_planner"       default="speed"     doc="none, speed" />
     <arg name="follower"            default="pure_pursuit"  doc="pure_pursuit, stanley" />
     
     <group ns="control">
 
         <!-- Follower -->
+
+        <remap if="$(eval arg('local_planner')=='none')" from="/planning/local_path" to="/planning/global_path"/>
+
         <node if="$(eval arg('follower')=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" required="true" />
 
         <node if="$(eval arg('follower')=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" required="true" />

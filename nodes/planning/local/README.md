@@ -1,9 +1,9 @@
 # Local plannning
 
 
-## local_planner
+## speed_local_planner
 
-The `LocalPlanner` node is responsible for generating a local path that can be followed by the vehicle, using the smoothed_path as a reference. The local path is generated based on the current position of the vehicle and the surrounding environment, such as detected objects, traffic lights, and stop lines. Local planner changes the velocities of the smoothed_path depending on the detected objects and traffic lights.
+The `speed_local_planner` node is responsible for generating a local path that can be followed by the vehicle, using the smoothed_path as a reference. The local path is generated based on the current position of the vehicle and the surrounding environment, such as detected objects, traffic lights, and stop lines. `speed_local_planner` changes only the speeds of the smoothed_path depending on the detected objects and traffic lights.
 
 
 #### Parameters
