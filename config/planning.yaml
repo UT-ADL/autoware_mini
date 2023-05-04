@@ -22,13 +22,13 @@ path_smoothing:
   adjust_endpoint_speed_to_zero: True
   speed_deceleration_limit: 1.0           # m/s2
   radius_calc_neighbour_index: 4          # int
-  lateral_acceleration_limit: 3.0         # m/s2
+  lateral_acceleration_limit: 2.0         # m/s2
   output_debug_info: False
 
-local_planner:
+speed_only_local_planner:
   local_path_length : 100
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
-  braking_safety_distance: 2.0
+  braking_safety_distance: 4.0
   braking_reaction_time: 1.6
   car_safety_radius: 1.2
   current_pose_to_car_front: 4.0  # m
