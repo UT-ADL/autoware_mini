@@ -16,7 +16,7 @@ from autoware_msgs.msg import Lane, DetectedObjectArray, TrafficLightResultArray
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped, Point
 from std_msgs.msg import ColorRGBA
 
-from helpers import get_two_nearest_waypoint_idx, get_closest_point_on_line
+from helpers import get_two_nearest_waypoint_idx, get_closest_point_on_line, get_distance_between_two_points
 
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.4)
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
@@ -147,27 +147,31 @@ class SpeedOnlyLocalPlanner:
             return
 
         # extract local path points from global path
-        wp_backward, _ = get_two_nearest_waypoint_idx(global_path_tree, current_pose.x, current_pose.y)
+        wp_backward, wp_forward = get_two_nearest_waypoint_idx(global_path_tree, current_pose.x, current_pose.y)
         end_index = wp_backward + self.local_path_length
         if end_index > len(global_path_array):
             end_index = len(global_path_array)
-        local_path_array = global_path_array[wp_backward : end_index,:]
 
-        # project current_pose to the local path
+        # project current_pose to path
         current_pose_on_path = get_closest_point_on_line(Point(x = current_pose.x, y = current_pose.y, z = current_pose.z),
-                                                         Point(x = local_path_array[0,0], y = local_path_array[0,1], z = local_path_array[0,2]),
-                                                         Point(x = local_path_array[1,0], y = local_path_array[1,1], z = local_path_array[1,2]))
+                                                         Point(x = global_path_array[wp_backward,0], y = global_path_array[wp_backward,1], z = global_path_array[wp_backward,2]),
+                                                         Point(x = global_path_array[wp_forward,0], y = global_path_array[wp_forward,1], z = global_path_array[wp_forward,2]))
+        
+        # create local_path_array and extract waypoints
+        local_path_array = global_path_array[wp_forward : end_index,:]
+        local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_forward:end_index])
 
-        # for all calculations consider the current pose as the first point of the local path
-        local_path_array[0] = [current_pose_on_path.x, current_pose_on_path.y, current_pose_on_path.z, current_velocity]
+        # current_pose_on_path is behind or on top of the wp_forward, add it if distance is greater than 1cm
+        if get_distance_between_two_points(current_pose_on_path, Point(x = local_path_array[0,0], y = local_path_array[0,1], z = local_path_array[0,2])) > 0.01:
+            # add to local_path_array
+            local_path_array = np.insert(local_path_array, 0, [current_pose_on_path.x, current_pose_on_path.y, current_pose_on_path.z, current_velocity], axis=0)
+            # add to local_path_waypoints
+            local_path_waypoints.insert(0, copy.deepcopy(local_path_waypoints[0]))
+            local_path_waypoints[0].pose.pose.position = current_pose_on_path
 
         # calculate distances up to each waypoint
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
         local_path_dists = np.insert(local_path_dists, 0, 0.0)
-
-        # slice waypoints from global path to local path and overwrite the first waypoint with the current_pose_on_path
-        local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_backward:end_index])
-        local_path_waypoints[0].pose.pose.position = current_pose_on_path
 
         # initialize closest object distance and velocity
         closest_object_distance = 0.0 
@@ -245,7 +249,6 @@ class SpeedOnlyLocalPlanner:
 
                     # record the closest object from the first waypoint
                     if i == 0:
-                        closest_object_idx = np.argmin(obstacles_ahead_dists)
                         # closest object distance is calculated from the front of the car
                         closest_object_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - self.current_pose_to_car_front
                         closest_object_velocity = obstacles_ahead_speeds[lowest_target_velocity_idx]
