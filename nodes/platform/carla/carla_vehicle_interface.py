@@ -26,7 +26,7 @@ class CarlaVehicleInterface:
     def __init__(self):
 
         # Node parameters
-        self.max_steer_angle = math.radians(rospy.get_param("~max_steer_angle", default=70))
+        self.max_steer_angle = math.radians(rospy.get_param("~max_steer_angle"))
 
         # Publishers
         self.ackerman_cmd_pub = rospy.Publisher(

@@ -12,7 +12,7 @@ from helpers import get_heading_from_pose_orientation
 class ObstacleSimulation:
     def __init__(self):
         # get parameters
-        self.publish_rate = rospy.get_param("~publish_rate", 10)
+        self.publish_rate = rospy.get_param("~publish_rate")
 
         # list of objects
         self.objects = []

@@ -17,10 +17,10 @@ class BicycleSimulation:
 
     def __init__(self):
         # get parameters
-        self.publish_rate = rospy.get_param("~publish_rate", 50)
-        self.wheel_base = rospy.get_param("wheel_base", 2.789)
-        self.acceleration_limit = rospy.get_param("~acceleration_limit", 3.0)
-        self.deceleration_limit = rospy.get_param("~deceleration_limit", 3.0)
+        self.publish_rate = rospy.get_param("~publish_rate")
+        self.wheel_base = rospy.get_param("wheel_base")
+        self.acceleration_limit = rospy.get_param("acceleration_limit")
+        self.deceleration_limit = rospy.get_param("deceleration_limit")
 
         # internal state of bicycle model
         self.x = 0

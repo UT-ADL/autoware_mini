@@ -17,14 +17,14 @@ class NovatelOem7Localizer:
     def __init__(self):
 
         # Parameters
-        self.coordinate_transformer = rospy.get_param("coordinate_transformer", "utm")
-        self.use_custom_origin = rospy.get_param("use_custom_origin", True)
+        self.coordinate_transformer = rospy.get_param("coordinate_transformer")
+        self.use_custom_origin = rospy.get_param("use_custom_origin")
         self.utm_origin_lat = rospy.get_param("utm_origin_lat")
         self.utm_origin_lon = rospy.get_param("utm_origin_lon")
         self.lest97_origin_northing = rospy.get_param("lest97_origin_northing")
         self.lest97_origin_easting = rospy.get_param("lest97_origin_easting")
-        self.use_msl_height = rospy.get_param("~use_msl_height", True)
-        self.child_frame = rospy.get_param("~child_frame", "base_link")
+        self.use_msl_height = rospy.get_param("~use_msl_height")
+        self.child_frame = rospy.get_param("~child_frame")
 
         # variable to store undulation value from bestpos message
         self.undulation = 0.0

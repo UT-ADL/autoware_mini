@@ -22,20 +22,20 @@ CARLA_TO_AUTOWARE_TFL_MAP = {
 }
 
 CARLA_TO_AUTOWARE_TFL_STR = {
-    CarlaTrafficLightStatus.RED: "red",
-    CarlaTrafficLightStatus.YELLOW: "yellow",
-    CarlaTrafficLightStatus.GREEN: "green",
-    CarlaTrafficLightStatus.OFF: "off",
-    CarlaTrafficLightStatus.UNKNOWN: "unknown"
+    CarlaTrafficLightStatus.RED: "RED",
+    CarlaTrafficLightStatus.YELLOW: "YELLOW",
+    CarlaTrafficLightStatus.GREEN: "GREEN",
+    CarlaTrafficLightStatus.OFF: "OFF",
+    CarlaTrafficLightStatus.UNKNOWN: "UNKNOWN"
 }
 
 class CarlaTrafficLightDetector:
     def __init__(self):
 
         # Node parameters
-        self.use_offset = rospy.get_param("~use_offset", default=True)
+        self.use_offset = rospy.get_param("/carla/use_offset")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")

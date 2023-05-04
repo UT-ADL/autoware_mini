@@ -22,8 +22,8 @@ class CarlaLocalizer:
     def __init__(self):
 
         # Node parameters
-        self.use_offset = rospy.get_param("~use_offset", default=True)
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
+        self.use_offset = rospy.get_param("/carla/use_offset")
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 

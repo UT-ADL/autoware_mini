@@ -11,16 +11,16 @@ from sensor_msgs.msg import PointCloud2
 
 class GroundRemovalNode:
     def __init__(self):
-        self.min_x = rospy.get_param('~min_x', -60.0)
-        self.max_x = rospy.get_param('~max_x', 60.0)
-        self.min_y = rospy.get_param('~min_y', -60.0)
-        self.max_y = rospy.get_param('~max_y', 60.0)
-        self.min_z = rospy.get_param('~min_z', -2.0)
-        self.max_z = rospy.get_param('~max_z', 1.0)
-        self.cell_size = rospy.get_param('~cell_size', 1.0)
-        self.tolerance = rospy.get_param('~tolerance', 0.1)
-        self.filter = rospy.get_param('~filter', 'none')
-        self.filter_size = rospy.get_param('~filter_size', 3)
+        self.min_x = rospy.get_param('~min_x')
+        self.max_x = rospy.get_param('~max_x')
+        self.min_y = rospy.get_param('~min_y')
+        self.max_y = rospy.get_param('~max_y')
+        self.min_z = rospy.get_param('~min_z')
+        self.max_z = rospy.get_param('~max_z')
+        self.cell_size = rospy.get_param('~cell_size')
+        self.tolerance = rospy.get_param('~tolerance')
+        self.filter = rospy.get_param('~filter')
+        self.filter_size = rospy.get_param('~filter_size')
 
         self.width = int(math.ceil((self.max_x - self.min_x) / self.cell_size))
         self.height = int(math.ceil((self.max_y - self.min_y) / self.cell_size))

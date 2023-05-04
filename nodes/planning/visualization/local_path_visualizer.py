@@ -11,9 +11,9 @@ class LocalPathVisualizer:
     def __init__(self):
 
         # Parameters
-        self.car_safety_radius = rospy.get_param("/planning/local_planner/car_safety_radius", 1.3)
-        self.current_pose_to_car_front = rospy.get_param("/planning/speed_only_local_planner/current_pose_to_car_front", 4.0)
-        self.braking_safety_distance = rospy.get_param("/planning/speed_only_local_planner/braking_safety_distance", 2.0)
+        self.car_safety_radius = rospy.get_param("car_safety_radius")
+        self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
+        self.braking_safety_distance = rospy.get_param("braking_safety_distance")
 
         # Publishers
         self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, latch=True)

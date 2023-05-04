@@ -12,7 +12,7 @@ class ButtonPanelNode:
         self.marker_id = 0
         self.time_engage = 0
 
-        self.cooldown = rospy.get_param("~cooldown", 2.0)
+        self.cooldown = rospy.get_param("~cooldown")
 
         self.engage_pub = rospy.Publisher("engage", Bool, queue_size=10)
         self.marker_pub = rospy.Publisher("/log/markers", Marker, queue_size=10)

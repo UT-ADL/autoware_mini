@@ -1,3 +1,9 @@
+carla:
+    use_offset: true
+
+carla_vehicle_interface:
+    max_steer_angle: 70.0
+
 carla_ackermann_control_ego_vehicle:
     # override the default values of the pid speed controller
     # (only relevant for ackermann control mode) 

@@ -32,15 +32,15 @@ class MqttTrafficLightDetector:
     def __init__(self):
 
         # Node parameters
-        self.mqtt_host = rospy.get_param('~mqtt_host', 'mqtt.cloud.ut.ee')
-        self.mqtt_port = rospy.get_param('~mqtt_port', 8883)
-        self.mqtt_topic = rospy.get_param('~mqtt_topic', "Tartu/#")
-        self.timeout = rospy.get_param('~timeout', 2.0) * 1000
+        self.mqtt_host = rospy.get_param('~mqtt_host')
+        self.mqtt_port = rospy.get_param('~mqtt_port')
+        self.mqtt_topic = rospy.get_param('~mqtt_topic')
+        self.timeout = rospy.get_param('~timeout')
         self.rate = rospy.Rate(10) # 10hz
 
         # self.use_offset = rospy.get_param("~use_offset", default=True)  # not necessary? will use lane_id
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
@@ -49,7 +49,7 @@ class MqttTrafficLightDetector:
         if coordinate_transformer == "utm":
                 projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            rospy.logfatal("mqtt_traffic_light_detector - only utm and custom origin currently supported for lanelet2 map loading")
             exit(1)
         lanelet2_map = load(lanelet2_map_name, projector)
 
@@ -112,9 +112,8 @@ class MqttTrafficLightDetector:
 
             # extract status from mqtt_status if key exits
             if api_id in self.mqtt_status:
-
-                if self.mqtt_status[api_id]["timestamp"] < (int(time.time()*1000) - self.timeout):
-                    rospy.logwarn('timeout of stopline: %s, by %f seconds', api_id, (self.mqtt_status[api_id]["timestamp"] - time.time()*1000)/1000)
+                if self.mqtt_status[api_id]["timestamp"] < int((time.time() - self.timeout) * 1000):
+                    rospy.logwarn('timeout of stopline: %s, by %f seconds', api_id, (self.mqtt_status[api_id]["timestamp"] - time.time() * 1000) / 1000)
                 else:
                     result_str = self.mqtt_status[api_id]["status"]
                     result = MQTT_TO_AUTOWARE_TFL_MAP[result_str]

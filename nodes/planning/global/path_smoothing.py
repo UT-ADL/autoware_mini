@@ -11,15 +11,15 @@ class PathSmoothing:
     def __init__(self):
 
         # Parameters
-        self.waypoint_interval = rospy.get_param("~waypoint_interval", 1.0)
-        self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves", True)
-        self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration", True)
-        self.adjust_endpoint_speed_to_zero = rospy.get_param("~adjust_endpoint_speed_to_zero", True)
-        self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_limit", 1.0)
-        self.speed_averaging_window = rospy.get_param("~speed_averaging_window", 21)
-        self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index", 4)
-        self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit", 3.0)
-        self.output_debug_info = rospy.get_param("~output_debug_info", False)
+        self.waypoint_interval = rospy.get_param("~waypoint_interval")
+        self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves")
+        self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration")
+        self.adjust_endpoint_speed_to_zero = rospy.get_param("~adjust_endpoint_speed_to_zero")
+        self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
+        self.speed_averaging_window = rospy.get_param("~speed_averaging_window")
+        self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index")
+        self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit")
+        self.output_debug_info = rospy.get_param("~output_debug_info")
 
         # Publishers
         self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1, latch=True)

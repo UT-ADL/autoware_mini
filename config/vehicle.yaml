@@ -1,12 +1,12 @@
 wheel_base: 2.789
+acceleration_limit: 1.0
+deceleration_limit: 5.0
 
 ssc_interface:
   use_adaptive_gear_ratio: True
   enable_reverse_motion: False
   command_timeout: 200
   ssc_gear_ratio: 16.135
-  acceleration_limit: 1.0
-  deceleration_limit: 1.0
   max_curvature_rate: 0.15
   agr_coef_a: 15.713
   agr_coef_b: 0.053
@@ -17,5 +17,3 @@ button_panel:
 
 bicycle_simulation:
   publish_rate: 50
-  acceleration_limit: 3.0
-  deceleration_limit: 3.0

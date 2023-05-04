@@ -35,6 +35,7 @@ lidar:
     score_thresh: 0.2
     top_k: 50
     output_frame: "map"
+    transform_timeout: 0.05
 
   vella_detector:
     confidence_filter: 0.5
@@ -44,3 +45,9 @@ lidar:
 
 obstacle_simulation:
   publish_rate: 10
+
+mqtt_traffic_light_detector:
+  mqtt_host: mqtt.cloud.ut.ee
+  mqtt_port: 8883
+  mqtt_topic: Tartu/#
+  timeout: 2.0

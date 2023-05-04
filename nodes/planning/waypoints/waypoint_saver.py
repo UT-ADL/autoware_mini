@@ -22,8 +22,8 @@ class WaypointSaver:
     def __init__(self):
 
         # Parameters
-        self.interval = rospy.get_param("~interval", 1.0)
-        self.waypoints_file = rospy.get_param("~waypoints_file", "/tmp/waypoints.csv")
+        self.interval = rospy.get_param("~interval")
+        self.waypoints_file = rospy.get_param("~waypoints_file")
 
         # Internal params
         self.written_x = 0  # last x coordinate written into text file, kept to calculate distance interval

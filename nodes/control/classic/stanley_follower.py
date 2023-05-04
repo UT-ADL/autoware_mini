@@ -21,12 +21,12 @@ class StanleyFollower:
     def __init__(self):
 
          # Parameters
-        self.cte_gain = rospy.get_param("~cte_gain", 0.3)       # gain for cross track error
-        self.wheel_base = rospy.get_param("/vehicle/wheel_base", 2.789)
-        self.heading_angle_limit = rospy.get_param("heading_angle_limit", 90.0)
-        self.lateral_error_limit = rospy.get_param("lateral_error_limit", 2.0)
-        self.publish_debug_info = rospy.get_param("~publish_debug_info", False)
-        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
+        self.cte_gain = rospy.get_param("~cte_gain")       # gain for cross track error
+        self.wheel_base = rospy.get_param("/vehicle/wheel_base")
+        self.heading_angle_limit = rospy.get_param("heading_angle_limit")
+        self.lateral_error_limit = rospy.get_param("lateral_error_limit")
+        self.publish_debug_info = rospy.get_param("~publish_debug_info")
+        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
 
         # Variables - init
         self.waypoint_tree = None

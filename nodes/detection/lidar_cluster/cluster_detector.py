@@ -18,12 +18,12 @@ BLUE80P = ColorRGBA(0.0, 0.0, 1.0, 0.8)
 
 class ClusterDetector:
     def __init__(self):
-        self.min_cluster_size = rospy.get_param('~min_cluster_size', 5)
-        self.bounding_box_type = rospy.get_param('~bounding_box_type', 'axis_aligned')
-        self.enable_pointcloud = rospy.get_param('~enable_pointcloud', False)
-        self.enable_convex_hull = rospy.get_param('~enable_convex_hull', True)
-        self.target_frame = rospy.get_param('~target_frame', 'map')
-        self.transform_timeout = rospy.get_param('~transform_timeout', 0.05)
+        self.min_cluster_size = rospy.get_param('~min_cluster_size')
+        self.bounding_box_type = rospy.get_param('~bounding_box_type')
+        self.enable_pointcloud = rospy.get_param('~enable_pointcloud')
+        self.enable_convex_hull = rospy.get_param('~enable_convex_hull')
+        self.target_frame = rospy.get_param('~target_frame')
+        self.transform_timeout = rospy.get_param('~transform_timeout')
 
         self.tf = tf.TransformListener()
 

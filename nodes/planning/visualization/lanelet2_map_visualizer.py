@@ -23,17 +23,18 @@ CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.3)
 WHITE100 = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
 LANELET_COLOR_TO_MARKER_COLOR = {
-    "red": RED,
-    "red/amb": RED,
-    "amber-red": RED,
-    "amberred" : RED,
-    "yellow": YELLOW,
-    "amber": YELLOW,
-    "amb flash": YELLOW,
-    "amber flash": YELLOW,
-    "green": GREEN,
-    "green flash": GREEN,
-    "unknown": WHITE,
+    "RED": RED,
+    "RED/AMB": RED,
+    "AMBER-RED": RED,
+    "AMBERRED" : RED,
+    "YELLOW": YELLOW,
+    "AMBER": YELLOW,
+    "AMB FLASH": YELLOW,
+    "AMBER FLASH": YELLOW,
+    "GREEN": GREEN,
+    "GREEN FLASH": GREEN,
+    "UNKNOWN": WHITE,
+    "OFF": WHITE,
 }
 
 class Lanelet2MapVisualizer:
@@ -85,8 +86,8 @@ class Lanelet2MapVisualizer:
             points = [Point(x=p.x, y=p.y, z=p.z + 0.01) for p in stop_line]
 
             # choose the color of stopline based on the traffic light state
-            if result.recognition_result_str.lower() in LANELET_COLOR_TO_MARKER_COLOR:
-                color = LANELET_COLOR_TO_MARKER_COLOR[result.recognition_result_str.lower()]
+            if result.recognition_result_str in LANELET_COLOR_TO_MARKER_COLOR:
+                color = LANELET_COLOR_TO_MARKER_COLOR[result.recognition_result_str]
             else:
                 rospy.logwarn("lanelet2_map_visualizer - unrecognized traffic light state: %s", result.recognition_result_str)
                 color = WHITE
@@ -181,7 +182,7 @@ def visualize_regulatoryElementLayer(map):
                     marker.scale.y = 0.2
                     marker.scale.z = 0.2
                     # marker.color = map.pointLayer.get(bulb.id).attributes["color"]
-                    marker.color = LANELET_COLOR_TO_MARKER_COLOR[map.pointLayer.get(bulb.id).attributes["color"]]
+                    marker.color = LANELET_COLOR_TO_MARKER_COLOR[map.pointLayer.get(bulb.id).attributes["color"].upper()]
                     marker.pose.position.x = bulb.x
                     marker.pose.position.y = bulb.y
                     marker.pose.position.z = bulb.z

@@ -32,13 +32,13 @@ class Lanelet2GlobalPlanner:
     def __init__(self):
 
         # Parameters
-        self.output_frame = rospy.get_param("~output_frame", "map")
-        self.distance_to_goal_limit = rospy.get_param("~distance_to_goal_limit", 2.0)
-        self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit", 5.0)
-        self.speed_limit = rospy.get_param("~speed_limit", 40.0)
-        self.wp_left_width = rospy.get_param("~wp_left_width", 1.4)
-        self.wp_right_width = rospy.get_param("~wp_right_width", 1.4)
-        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
+        self.output_frame = rospy.get_param("~output_frame")
+        self.distance_to_goal_limit = rospy.get_param("~distance_to_goal_limit")
+        self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit")
+        self.speed_limit = rospy.get_param("~speed_limit")
+        self.wp_left_width = rospy.get_param("~wp_left_width")
+        self.wp_right_width = rospy.get_param("~wp_right_width")
+        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
 
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")

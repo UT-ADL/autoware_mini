@@ -28,13 +28,13 @@ class SpeedOnlyLocalPlanner:
     def __init__(self):
 
         # Parameters
-        self.local_path_length = rospy.get_param("~local_path_length", 100)
-        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search", "kd_tree")
-        self.braking_safety_distance = rospy.get_param("~braking_safety_distance", 4.0)
-        self.braking_reaction_time = rospy.get_param("~braking_reaction_time", 1.6)
-        self.car_safety_radius = rospy.get_param("~car_safety_radius", 1.3)
-        self.current_pose_to_car_front = rospy.get_param("~current_pose_to_car_front", 4.0)
-        self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_limit", 1.0)
+        self.local_path_length = rospy.get_param("~local_path_length")
+        self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
+        self.braking_safety_distance = rospy.get_param("braking_safety_distance")
+        self.braking_reaction_time = rospy.get_param("braking_reaction_time")
+        self.car_safety_radius = rospy.get_param("car_safety_radius")
+        self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
+        self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
 
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
@@ -46,7 +46,7 @@ class SpeedOnlyLocalPlanner:
         if coordinate_transformer == "utm":
             projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            rospy.logfatal("speed_only_local_planner - only utm and custom origin currently supported for lanelet2 map loading")
             exit(1)
 
         self.lanelet2_map = load(lanelet2_map_name, projector)
@@ -123,7 +123,7 @@ class SpeedOnlyLocalPlanner:
             # add stop line points to the list if the traffic light is red or yellow
             if result.recognition_result == 0:
                 stop_line = self.lanelet2_map.lineStringLayer.get(result.lane_id)
-                stop_lines[result.lane_id] = [point for point in stop_line]
+                stop_lines[result.lane_id] = stop_line
 
         self.stop_lines = stop_lines
 
@@ -158,7 +158,7 @@ class SpeedOnlyLocalPlanner:
                                                          Point(x = global_path_array[wp_forward,0], y = global_path_array[wp_forward,1], z = global_path_array[wp_forward,2]))
         
         # create local_path_array and extract waypoints
-        local_path_array = global_path_array[wp_forward : end_index,:]
+        local_path_array = global_path_array[wp_forward:end_index, :]
         local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_forward:end_index])
 
         # current_pose_on_path is behind or on top of the wp_forward, add it if distance is greater than 1cm
@@ -178,10 +178,11 @@ class SpeedOnlyLocalPlanner:
         closest_object_velocity = 0.0
         blocked = False
 
-        # react to objects on the local path
+        # extract object points from detected objects
         points_list = []
         for obj in msg.objects:
             # project object velocity to base_link frame to get longitudinal speed
+            # TODO: project velocity to the path
             velocity = Vector3Stamped(header=msg.header, vector=obj.velocity.linear)
             try:
                 velocity = self.tf.transformVector3("base_link", velocity)
@@ -239,8 +240,12 @@ class SpeedOnlyLocalPlanner:
 
                     # calculate target velocity based on stopping distance and deceleration limit
                     target_velocities = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.speed_deceleration_limit * stopping_distances))
+
+                    # pick object that causes the lowest target velocity
                     lowest_target_velocity_idx = np.argmin(target_velocities)
                     target_vel = target_velocities[lowest_target_velocity_idx]
+
+                    # overwrite target velocity of the waypoint if lower than the current one
                     wp.twist.twist.linear.x = min(target_vel, wp.twist.twist.linear.x)
 
                     # from stop point onwards all speeds are zero

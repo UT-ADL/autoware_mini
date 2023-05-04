@@ -17,9 +17,9 @@ from sensor_msgs.msg import PointCloud2
 
 class PointsClusterer:
     def __init__(self):
-        self.sample_size = rospy.get_param('~sample_size', 10000)
-        self.cluster_epsilon = rospy.get_param('~cluster_epsilon', 1.0)
-        self.cluster_min_size = rospy.get_param('~cluster_min_size', 7)
+        self.sample_size = rospy.get_param('~sample_size')
+        self.cluster_epsilon = rospy.get_param('~cluster_epsilon')
+        self.cluster_min_size = rospy.get_param('~cluster_min_size')
 
         self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm=DBSCAN_ALGORITHM)
 

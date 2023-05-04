@@ -12,18 +12,18 @@ The `speed_only_planner` node is responsible for generating a local path that ca
 |------|------|---------|-------------|
 |`~local_path_length` | double | `100` | The maximum length of the local path in meters (m) |
 |`~nearest_neighbor_search` | string | `"kd_tree"` | The algorithm used for nearest neighbor search, alternative options: kd_tree, ball_tree, brute, auto|
-|`~braking_safety_distance` | double | `2.0` | The minimum distance from an object where the vehicle should stop (m) |
-|`~braking_reaction_time` | double | `1.6` | The time it takes the vehicle to react to an object in front of it  (s) |
-|`~car_safety_radius` | double | `1.3` | The safety radius of the vehicle - obstacles are detected within these circles around waypoints (m) |
-|`~current_pose_to_car_front` | double | `4.0` | The distance from the current pose of the vehicle to the front of the car (m) |
-|`~speed_deceleration_limit` | double | `1.0` | The maximum rate at which the vehicle can decelerate (m/s2) |
+|`braking_safety_distance` | double | `2.0` | The minimum distance from an object where the vehicle should stop (m) |
+|`braking_reaction_time` | double | `1.6` | The time it takes the vehicle to react to an object in front of it  (s) |
+|`car_safety_radius` | double | `1.3` | The safety radius of the vehicle - obstacles are detected within these circles around waypoints (m) |
+|`current_pose_to_car_front` | double | `4.0` | The distance from the current pose of the vehicle to the front of the car (m) |
+|`speed_deceleration_limit` | double | `1.0` | The maximum rate at which the vehicle can decelerate (m/s2) |
 
 
 #### Subscribed Topics
 
 | Name | Type | Description |
 |------|------|-------------|
-|`/smoothed_path` | `autoware_msgs/Lane` | The smoothed global path |
+|`smoothed_path` | `autoware_msgs/Lane` | The smoothed global path |
 |`/localization/current_pose` | `geometry_msgs/PoseStamped` | The current pose of the vehicle |
 |`/localization/current_velocity` | `geometry_msgs/TwistStamped` | The current velocity of the vehicle |
 |`/detection/detected_objects` | `autoware_msgs/DetectedObjectArray` | Detected objects |
