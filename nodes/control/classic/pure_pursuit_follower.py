@@ -28,10 +28,15 @@ class PurePursuitFollower:
         self.lateral_error_limit = rospy.get_param("lateral_error_limit")
         self.publish_debug_info = rospy.get_param("~publish_debug_info")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
+        self.default_acceleration = rospy.get_param("default_acceleration")
+        self.default_deceleration = rospy.get_param("default_deceleration")
+        self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
 
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
+        self.closest_object_distance = 0.0
+        self.closest_object_velocity = 0.0
         self.lock = threading.Lock()
 
         # Publishers
@@ -58,6 +63,8 @@ class PurePursuitFollower:
             with self.lock:
                 self.waypoint_tree = None
                 self.waypoints = None
+                self.closest_object_distance = 0.0
+                self.closest_object_velocity = 0.0
             return
 
         # prepare waypoints for nearest neighbor search
@@ -66,6 +73,8 @@ class PurePursuitFollower:
         with self.lock:
             self.waypoint_tree = waypoint_tree
             self.waypoints = path_msg.waypoints
+            self.closest_object_distance = path_msg.closest_object_distance
+            self.closest_object_velocity = path_msg.closest_object_velocity
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
@@ -75,6 +84,8 @@ class PurePursuitFollower:
         with self.lock:
             waypoints = self.waypoints
             waypoint_tree = self.waypoint_tree
+            closest_object_distance = self.closest_object_distance
+            closest_object_velocity = self.closest_object_velocity
 
         stamp = current_pose_msg.header.stamp
         current_pose = current_pose_msg.pose
@@ -82,7 +93,7 @@ class PurePursuitFollower:
 
         if waypoint_tree is None:
             # if no waypoints received yet or global_path cancelled, stop the vehicle
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
             return
 
         # Find 2 nearest waypoint idx's on path (from base_link)
@@ -90,7 +101,7 @@ class PurePursuitFollower:
 
         if front_wp_idx == len(waypoints)-1:
             # stop vehicle - last waypoint is reached
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(10, "pure_pursuit_follower - last waypoint reached")
             return
 
@@ -116,7 +127,7 @@ class PurePursuitFollower:
 
         if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_angle_difference)) > self.heading_angle_limit:
             # stop vehicle if cross track error or heading angle difference is over limit
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
             rospy.logerr_throttle(10, "pure_pursuit_follower - lateral error or heading angle difference over limit")
             return
     
@@ -127,17 +138,28 @@ class PurePursuitFollower:
         # target_velocity from map and based on closest object
         target_velocity = interpolate_velocity_between_waypoints(nearest_point, waypoints[back_wp_idx], waypoints[front_wp_idx])
 
+        if target_velocity < current_velocity:
+            # if decelerating because of obstacle then calculate necessary acceleration to stop at safety distance
+            if closest_object_distance - self.braking_safety_distance > 0:
+                acceleration = 0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance)
+            else:
+                acceleration = self.default_deceleration
+        elif target_velocity > current_velocity:
+            acceleration = self.default_acceleration
+        else:
+            acceleration = 0.0
+
         # blinkers
         left_blinker, right_blinker = get_blinker_state(waypoints[front_wp_idx].wpstate.steering_state)
 
         # Publish
-        self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
+        self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker)
         if self.publish_debug_info:
             self.publish_pure_pursuit_markers(stamp, current_pose, lookahead_point, heading_angle_difference)
             self.follower_debug_pub.publish(Float32MultiArray(data=[1.0 / (rospy.get_time() - start_time), current_heading, lookahead_heading, heading_error, cross_track_error, target_velocity]))
 
 
-    def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):
+    def publish_vehicle_command(self, stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker):
         vehicle_cmd = VehicleCmd()
         vehicle_cmd.header.stamp = stamp
         vehicle_cmd.header.frame_id =  "base_link"
@@ -146,7 +168,7 @@ class PurePursuitFollower:
         vehicle_cmd.lamp_cmd.r = right_blinker
         # velocity and steering
         vehicle_cmd.ctrl_cmd.linear_velocity = target_velocity
-        vehicle_cmd.ctrl_cmd.linear_acceleration = 0.0
+        vehicle_cmd.ctrl_cmd.linear_acceleration = acceleration
         vehicle_cmd.ctrl_cmd.steering_angle = steering_angle
         self.vehicle_command_pub.publish(vehicle_cmd)
 
