@@ -211,6 +211,9 @@ class SpeedOnlyLocalPlanner:
             # calculate obstacle distances from the start of the local path
             obstacle_dists = [local_path_dists[i] + d for i, d in enumerate(obstacle_dists)]
 
+            # If any calculated target_vel drops close to 0 then use this boolean to set all following wp speeds to 0
+            zero_speeds_onwards = False
+
             # calculate velocity based on distance to obstacle using deceleration limit
             for i, wp in enumerate(local_path_waypoints):
 
@@ -219,7 +222,7 @@ class SpeedOnlyLocalPlanner:
                     wp.cost = 1.0
 
                 # once we get zero speed, keep it that way
-                if blocked:
+                if zero_speeds_onwards:
                     wp.twist.twist.linear.x = 0.0
                     continue
 
@@ -246,18 +249,22 @@ class SpeedOnlyLocalPlanner:
                     lowest_target_velocity_idx = np.argmin(target_velocities)
                     target_vel = target_velocities[lowest_target_velocity_idx]
 
+                    # record the closest object from the first waypoint and decide if the lane is blocked
+                    if i == 0:
+                        # target_vel drops below the map velocity at current_pose (wp[0]) - object causing ego vehicle to slow down
+                        if target_vel < wp.twist.twist.linear.x:
+                            blocked = True
+
+                        # closest object distance is calculated from the front of the car
+                        closest_object_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - self.current_pose_to_car_front
+                        closest_object_velocity = obstacles_ahead_speeds[lowest_target_velocity_idx]
+
                     # overwrite target velocity of the waypoint if lower than the current one
                     wp.twist.twist.linear.x = min(target_vel, wp.twist.twist.linear.x)
 
                     # from stop point onwards all speeds are zero
                     if math.isclose(wp.twist.twist.linear.x, 0.0):
-                        blocked = True
-
-                    # record the closest object from the first waypoint
-                    if i == 0:
-                        # closest object distance is calculated from the front of the car
-                        closest_object_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - self.current_pose_to_car_front
-                        closest_object_velocity = obstacles_ahead_speeds[lowest_target_velocity_idx]
+                        zero_speeds_onwards = True
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked)
 

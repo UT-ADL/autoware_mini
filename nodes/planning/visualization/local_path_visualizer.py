@@ -65,10 +65,11 @@ class LocalPathVisualizer:
 
             stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance)
 
-            if lane.closest_object_velocity < 1.0:
-                color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
-            else:
+            color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
+            if lane.is_blocked:
                 color = ColorRGBA(1.0, 1.0, 0.0, 0.5)
+                if lane.closest_object_velocity < 1.0:
+                    color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
 
             marker = Marker()
             marker.header.frame_id = lane.header.frame_id
