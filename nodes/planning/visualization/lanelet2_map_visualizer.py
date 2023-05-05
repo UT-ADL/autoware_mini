@@ -93,12 +93,12 @@ class Lanelet2MapVisualizer:
                 rospy.logwarn("lanelet2_map_visualizer - unrecognized traffic light state: %s", result.recognition_result_str)
                 color = WHITE
 
-            # create linestring marker
-            stopline_marker = linestring_to_marker(points, "Stop line", stop_line.id, color, 0.5, rospy.Time.now())
-
             # check if string contains "FLASH" string in it
             if "FLASH" in result.recognition_result_str:
-                stopline_marker.color.a = 0.8 * get_multiplier()
+                color = ColorRGBA(color.r, color.g, color.b, color.a * get_multiplier())
+
+            # create linestring marker
+            stopline_marker = linestring_to_marker(points, "Stop line", stop_line.id, color, 0.5, rospy.Time.now())
 
             marker_array.markers.append(stopline_marker)
 
@@ -116,9 +116,7 @@ class Lanelet2MapVisualizer:
 
 
 def get_multiplier():
-    current_time = time.time()
-    seconds = current_time - int(current_time)
-    if seconds < 0.5:
+    if time.time() % 1 < 0.5:
         return 0.5
     else:
         return 1.0
