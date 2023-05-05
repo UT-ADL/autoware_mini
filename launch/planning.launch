@@ -52,6 +52,7 @@
         <!-- Visualization and Config -->
         <node pkg="topic_tools" type="transform" name="current_speed_transform" args="--wait-for-start /localization/current_velocity current_speed std_msgs/Float32 'm.twist.linear.x * 3.6'" output="screen" required="true"/>
         <node pkg="topic_tools" type="transform" name="target_speed_transform" args="--wait-for-start /control/vehicle_cmd target_speed std_msgs/Float32 'm.ctrl_cmd.linear_velocity * 3.6'" output="screen" required="true"/>
+        <node pkg="topic_tools" type="transform" name="acceleratio_transform" args="--wait-for-start /control/vehicle_cmd acceleration std_msgs/Float32 'm.ctrl_cmd.linear_acceleration'" output="screen" required="true"/>
         <node pkg="topic_tools" type="transform" name="closest_object_distance_transform" args="--wait-for-start /planning/local_path closest_object_distance std_msgs/Float32 'm.closest_object_distance'" output="screen" required="true"/>
         <node pkg="topic_tools" type="transform" name="closest_object_speed_transform" args="--wait-for-start /planning/local_path closest_object_speed std_msgs/Float32 'm.closest_object_velocity * 3.6'" output="screen" required="true"/>
         
