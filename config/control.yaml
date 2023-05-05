@@ -1,5 +1,7 @@
 heading_angle_limit: 90.0
 lateral_error_limit: 2.0
+default_acceleration: 1.0
+default_deceleration: -1.0
 
 pure_pursuit_follower:
   planning_time: 1.0

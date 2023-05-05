@@ -4,6 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Dashboard1
         - /Map1/Lanelet2 map1/Namespaces1
         - /Detection1
         - /Detection1/Lidar1
@@ -30,7 +31,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: Carla camera view
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -85,15 +86,6 @@ Visualization Manager:
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
-            base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            lexus_model:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
           Name: Lexus model
           Robot Description: robot_description
           TF Prefix: ""
@@ -157,6 +149,31 @@ Visualization Manager:
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
           Enabled: true
+          Name: Acceleration
+          Show Value: true
+          Topic: /planning/acceleration
+          Value: true
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 148
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 2
+          min value: -2
+          show caption: true
+          text size: 10
+          top: 10
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: true
           Name: Closest obj dist
           Show Value: true
           Topic: /dashboard/closest_object_distance
@@ -169,7 +186,7 @@ Visualization Manager:
           foreground alpha: 0.699999988079071
           foreground color: 25; 255; 240
           height: 128
-          left: 148
+          left: 286
           linewidth: 1
           max color: 255; 0; 0
           max value: 75
@@ -194,7 +211,7 @@ Visualization Manager:
           foreground alpha: 0.699999988079071
           foreground color: 25; 255; 240
           height: 128
-          left: 286
+          left: 424
           linewidth: 1
           max color: 255; 0; 0
           max value: 30
@@ -354,13 +371,20 @@ Visualization Manager:
               Value: true
             Dashboard:
               "": true
+              Acceleration: true
               Value: true
             Detection:
-              "": true
+              Detected objects: true
+              Lidar:
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
               Value: true
             Grid: true
             Map:
-              "": true
+              Lanelet2 map: true
+              Stop line status: true
               Value: true
             Planning:
               Global path: true
@@ -398,13 +422,20 @@ Visualization Manager:
               Value: true
             Dashboard:
               "": true
+              Acceleration: true
               Value: true
             Detection:
-              "": true
+              Detected objects: true
+              Lidar:
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
               Value: true
             Grid: true
             Map:
-              "": true
+              Lanelet2 map: true
+              Stop line status: true
               Value: true
             Planning:
               Global path: true
@@ -522,7 +553,7 @@ Visualization Manager:
           Marker Topic: /detection/detected_objects_markers
           Name: Detected objects
           Namespaces:
-            bounding_box: false
+            bounding_box: true
             centroid: true
             convex_hull: true
             text: true
@@ -613,7 +644,7 @@ Visualization Manager:
           Marker Topic: /vehicle/bicycle_markers
           Name: Bicycle markers
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/Camera

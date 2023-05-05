@@ -99,7 +99,7 @@ class PurePursuitFollower:
 
         if front_wp_idx == len(waypoints)-1:
             # stop vehicle - last waypoint is reached
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(10, "%s - last waypoint reached", rospy.get_name())
             return
 
@@ -125,7 +125,7 @@ class PurePursuitFollower:
 
         if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_angle_difference)) > self.heading_angle_limit:
             # stop vehicle if cross track error or heading angle difference is over limit
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
             rospy.logerr_throttle(10, "%s - lateral error or heading angle difference over limit", rospy.get_name())
             return
     
