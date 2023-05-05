@@ -293,7 +293,7 @@ class SFADetector:
             keep_inds = (detections[batch_num][:, 0] > self.score_thresh)
             filtered_detections = detections[batch_num][keep_inds, :]
             if filtered_detections.shape[0] > 0:
-                classes = filtered_detections[:, -1]
+                classes = filtered_detections[:, 9]
                 scores = filtered_detections[:, 0]
                 x = (filtered_detections[:, 2] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_X + self.MIN_FRONT_X
                 y = (filtered_detections[:, 1] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_Y + self.MIN_Y
