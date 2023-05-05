@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
+import time
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 
@@ -94,6 +95,11 @@ class Lanelet2MapVisualizer:
 
             # create linestring marker
             stopline_marker = linestring_to_marker(points, "Stop line", stop_line.id, color, 0.5, rospy.Time.now())
+
+            # check if string contains "FLASH" string in it
+            if "FLASH" in result.recognition_result_str:
+                stopline_marker.color.a = 0.8 * get_multiplier()
+
             marker_array.markers.append(stopline_marker)
 
             # create traffic light status marker
@@ -107,6 +113,15 @@ class Lanelet2MapVisualizer:
 
     def run(self):
         rospy.spin()
+
+
+def get_multiplier():
+    current_time = time.time()
+    seconds = current_time - int(current_time)
+    if seconds < 0.5:
+        return 0.5
+    else:
+        return 1.0
 
 
 def visualize_lanelet2_map(map):
