@@ -28,26 +28,25 @@ CLASS_NAMES = {0: "pedestrian", 1: "car", 2: "cyclist"}
 class SFADetector:
     def __init__(self):
         # Params
-        self.onnx_path = rospy.get_param("~onnx_path", './kilynuaron_model.onnx')  # path of the trained model
+        self.onnx_path = rospy.get_param("~onnx_path")  # path of the trained model
 
-        self.MIN_FRONT_X = rospy.get_param("~minFrontX", 0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
-        self.MAX_FRONT_X = rospy.get_param("~maxFrontX", 50)  # maximum distance on lidar +ve x-axis to process points at (back detections)
-        self.MIN_BACK_X = rospy.get_param("~minBackX", -50)  # maxmimum distance on lidar -ve x-axis to process points at
-        self.MAX_BACK_X = rospy.get_param("~maxBackX", 0)  # minimum distance on lidar -ve x-axis to process points at
-        self.MIN_Y = rospy.get_param("~minY", -25)  # maxmimum distance on lidar -ve y-axis to process points at
-        self.MAX_Y = rospy.get_param("~maxY", 25)  # maxmimum distance on lidar +ve y-axis to process points at
-        self.MIN_Z = rospy.get_param("~minZ", -2.73)  # maxmimum distance on lidar -ve z-axis to process points at
-        self.MAX_Z = rospy.get_param("~maxZ", 1.27)  # maxmimum distance on lidar +ve z-axis to process points at
+        self.MIN_FRONT_X = rospy.get_param("~min_front_x")  # minimum distance on lidar +ve x-axis to process points at (front_detections)
+        self.MAX_FRONT_X = rospy.get_param("~max_front_x")  # maximum distance on lidar +ve x-axis to process points at (back detections)
+        self.MIN_BACK_X = rospy.get_param("~min_back_x")  # maxmimum distance on lidar -ve x-axis to process points at
+        self.MAX_BACK_X = rospy.get_param("~max_back_x")  # minimum distance on lidar -ve x-axis to process points at
+        self.MIN_Y = rospy.get_param("~min_y")  # maxmimum distance on lidar -ve y-axis to process points at
+        self.MAX_Y = rospy.get_param("~max_y")  # maxmimum distance on lidar +ve y-axis to process points at
+        self.MIN_Z = rospy.get_param("~min_z")  # maxmimum distance on lidar -ve z-axis to process points at
+        self.MAX_Z = rospy.get_param("~max_z")  # maxmimum distance on lidar +ve z-axis to process points at
         self.DISCRETIZATION = (self.MAX_FRONT_X - self.MIN_FRONT_X) / BEV_HEIGHT  # 3D world discretization to 2D image: distance encoded by 1 pixel
         self.BOUND_SIZE_X = self.MAX_FRONT_X - self.MIN_FRONT_X
         self.BOUND_SIZE_Y = self.MAX_Y - self.MIN_Y
         self.MAX_HEIGHT = np.abs(self.MAX_Z - self.MIN_Z)
 
-        self.score_thresh = rospy.get_param("~score_thresh", 0.2)  # score filter
-        self.top_k = rospy.get_param("~top_k", 50)  # number of top scoring detections to process
-        self.output_frame = rospy.get_param("~output_frame", 'map')  # transform detected objects from lidar frame to this frame
-
-        self.transform_timeout = rospy.get_param('~transform_timeout', 0.05)
+        self.score_thresh = rospy.get_param("~score_thresh")  # score filter
+        self.top_k = rospy.get_param("~top_k")  # number of top scoring detections to process
+        self.output_frame = rospy.get_param("~output_frame")  # transform detected objects from lidar frame to this frame
+        self.transform_timeout = rospy.get_param('~transform_timeout') # transform timeout when waiting for transform to output frame
 
         self.model = self.load_onnx(self.onnx_path) # get onnx model
 
