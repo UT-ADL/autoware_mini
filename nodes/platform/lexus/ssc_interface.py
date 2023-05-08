@@ -130,11 +130,22 @@ class SSCInterface:
             rospy.logerr("%s - emergency stopping, speed overridden to 0", rospy.get_name())
             desired_speed = 0.0
 
+        # calculate acceleration and deceleration limits
+        if msg.ctrl_cmd.linear_acceleration == 0.0:
+            acceleration_limit = self.acceleration_limit
+            deceleration_limit = self.deceleration_limit
+        elif msg.ctrl_cmd.linear_acceleration > 0.0:
+            acceleration_limit = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
+            deceleration_limit = self.deceleration_limit
+        elif msg.ctrl_cmd.linear_acceleration < 0.0:
+            acceleration_limit = self.acceleration_limit
+            deceleration_limit = min(-msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
+
         # publish command messages
         header = Header()
         header.stamp = msg.header.stamp
         header.frame_id = 'base_link'
-        self.publish_speed_command(header, desired_mode, desired_speed)
+        self.publish_speed_command(header, desired_mode, desired_speed, acceleration_limit, deceleration_limit)
         self.publish_steer_command(header, desired_mode, desired_curvature)
         self.publish_turn_command(header, desired_mode, desired_turn_signal)
         self.publish_gear_command(header, desired_gear)
@@ -214,13 +225,13 @@ class SSCInterface:
     def turn_rpt_callback(self, turn_rpt_msg):
         self.turn_signals = turn_rpt_msg.output
 
-    def publish_speed_command(self, header, desired_mode, desired_speed):
+    def publish_speed_command(self, header, desired_mode, desired_speed, acceleration_limit, deceleration_limit):
         # publish speed command
         msg = SpeedMode(header = header)
         msg.mode = desired_mode
         msg.speed = desired_speed
-        msg.acceleration_limit = self.acceleration_limit
-        msg.deceleration_limit = self.deceleration_limit
+        msg.acceleration_limit = acceleration_limit
+        msg.deceleration_limit = deceleration_limit
         self.speed_mode_pub.publish(msg)
 
     def publish_steer_command(self, header, desired_mode, desired_curvature):
