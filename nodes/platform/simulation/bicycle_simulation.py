@@ -4,8 +4,8 @@ import threading
 import math
 
 import rospy
-import tf
-from tf2_ros import TransformBroadcaster
+from tf import TransformBroadcaster
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Quaternion, Point
 from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
@@ -56,7 +56,7 @@ class BicycleSimulation:
         # extract heading angle from orientation
         orientation = msg.pose.pose.orientation
         quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
-        _, _, self.heading_angle = tf.transformations.euler_from_quaternion(quaternion)
+        _, _, self.heading_angle = euler_from_quaternion(quaternion)
 
         rospy.loginfo("bicycle_simulation - initial position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame", 
                     msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z,
@@ -65,21 +65,16 @@ class BicycleSimulation:
 
     def vehicle_cmd_callback(self, msg):
         self.target_velocity = msg.ctrl_cmd.linear_velocity
-        # if target velocity is higher than current velocity
-        if self.target_velocity > self.velocity + 0.0001:
-            self.acceleration = abs(msg.ctrl_cmd.linear_acceleration)
-            # if acceleration is provided, use it, otherwise take from parameters
-            if self.acceleration == 0 or self.acceleration > self.acceleration_limit:
+        # calculate acceleration and deceleration limits
+        if msg.ctrl_cmd.linear_acceleration == 0.0:
+            if self.target_velocity > self.velocity:
                 self.acceleration = self.acceleration_limit
-        # if target velocity is lower than current velocity
-        elif self.target_velocity < self.velocity - 0.0001:
-            self.acceleration = -abs(msg.ctrl_cmd.linear_acceleration)
-            # if acceleration is provided, use it, otherwise take from parameters
-            if self.acceleration == 0 or self.acceleration < self.deceleration_limit:
-                self.acceleration = -abs(self.deceleration_limit)
-        # target velocity achieved, no need for acceleration
-        else:
-            self.acceleration = 0
+            else:
+                self.acceleration = self.deceleration_limit
+        elif msg.ctrl_cmd.linear_acceleration > 0.0:
+            self.acceleration = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
+        elif msg.ctrl_cmd.linear_acceleration < 0.0:
+            self.acceleration = max(msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
 
         rospy.logdebug("target velocity: %.3f, current velocity: %.3f, acceleration: %.3f", msg.ctrl_cmd.linear_velocity, self.velocity, self.acceleration)
 
@@ -114,7 +109,7 @@ class BicycleSimulation:
         self.heading_angle += heading_angle_dot * delta_t
 
         # create quaternion from heading angle to be used later in tf and pose and marker messages
-        x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, self.heading_angle)
+        x, y, z, w = quaternion_from_euler(0, 0, self.heading_angle)
         self.orientation = Quaternion(x, y, z, w)
 
     def run(self):
@@ -143,17 +138,13 @@ class BicycleSimulation:
 
     def publish_base_link_to_map_tf(self, stamp):
             
-        t = TransformStamped()
-
-        t.header.stamp = stamp
-        t.header.frame_id = "map"
-        t.child_frame_id = "base_link"
-
-        t.transform.translation.x = self.x
-        t.transform.translation.y = self.y
-        t.transform.rotation = self.orientation
-
-        self.br.sendTransform(t)
+        self.br.sendTransform(
+            (self.x, self.y, 0.0),
+            (self.orientation.x, self.orientation.y, self.orientation.z, self.orientation.w),
+            stamp,
+            "base_link",
+            "map"
+        )
 
     def publish_current_pose(self, stamp):
 

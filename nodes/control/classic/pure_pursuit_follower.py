@@ -28,8 +28,6 @@ class PurePursuitFollower:
         self.lateral_error_limit = rospy.get_param("lateral_error_limit")
         self.publish_debug_info = rospy.get_param("~publish_debug_info")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
-        self.default_acceleration = rospy.get_param("default_acceleration")
-        self.default_deceleration = rospy.get_param("default_deceleration")
         self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
 
         # Variables - init
@@ -138,14 +136,10 @@ class PurePursuitFollower:
         # target_velocity from map and based on closest object
         target_velocity = interpolate_velocity_between_waypoints(nearest_point, waypoints[back_wp_idx], waypoints[front_wp_idx])
 
-        if target_velocity < current_velocity:
-            # if decelerating because of obstacle then calculate necessary acceleration to stop at safety distance
-            if closest_object_distance - self.braking_safety_distance > 0:
-                acceleration = 0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance)
-            else:
-                acceleration = self.default_deceleration
-        elif target_velocity > current_velocity:
-            acceleration = self.default_acceleration
+        # if decelerating because of obstacle then calculate necessary acceleration to stop at safety distance
+        if target_velocity < current_velocity and closest_object_distance - self.braking_safety_distance > 0:
+            acceleration = 0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance)
+        # otherwise use vehicle default acceleration limits
         else:
             acceleration = 0.0
 

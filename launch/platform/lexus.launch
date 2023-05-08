@@ -20,6 +20,10 @@
             <param name="max_speed" value="$(arg max_speed)"/>
         </node>
 
+        <!-- Acceleration limits visualization -->
+        <node pkg="topic_tools" type="transform" name="acceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands acceleration_limit std_msgs/Float32 'm.acceleration_limit'" output="screen" required="true"/>
+        <node pkg="topic_tools" type="transform" name="deceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands deceleration_limit std_msgs/Float32 'm.deceleration_limit'" output="screen" required="true"/>
+
         <!-- Engage button panel -->
         <node pkg="autoware_mini" type="button_panel.py" name="button_panel" output="screen" required="true"/>
         <node pkg="joy" type="joy_node" name="joy" />
