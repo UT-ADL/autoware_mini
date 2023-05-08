@@ -141,17 +141,13 @@ class BicycleSimulation:
 
     def publish_base_link_to_map_tf(self, stamp):
             
-        t = TransformStamped()
-
-        t.header.stamp = stamp
-        t.header.frame_id = "map"
-        t.child_frame_id = "base_link"
-
-        t.transform.translation.x = self.x
-        t.transform.translation.y = self.y
-        t.transform.rotation = self.orientation
-
-        self.br.sendTransform(t)
+        self.br.sendTransform(
+            (self.x, self.y, 0.0),
+            (self.orientation.x, self.orientation.y, self.orientation.z, self.orientation.w),
+            stamp,
+            "base_link",
+            "map"
+        )
 
     def publish_current_pose(self, stamp):
 
