@@ -43,6 +43,10 @@ lidar:
     lidar_frame: lidar_center
     transform_timeout: 0.05
 
+radar:
+  radar_track:
+    max_detection_distance: 60
+
 obstacle_simulation:
   publish_rate: 10
 

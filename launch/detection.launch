@@ -4,11 +4,13 @@
     <arg name="tfl_detector"        default="none"      doc="carla, mqtt" />
     <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
     <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
+    <arg name="use_radar"           default="true"      doc="whether to use radar for detection" />
 
     <group ns="detection">
-        <group ns="lidar">
-            <remap if="$(arg use_lidar_center)" from="points_raw" to="/lidar_center/points_raw" />
-            <remap from="detected_objects" to="/detection/detected_objects" />
+        <group if="$(arg use_lidar_center)" ns="lidar">
+            <remap from="points_raw" to="/lidar_center/points_raw" />
+            <remap unless="$(arg use_radar)" from="detected_objects" to="/detection/detected_objects" />
+            <remap if="$(arg use_radar)" from="detected_objects" to="/detection/lidar/detected_objects" />
             
             <include if="$(eval arg('detector')=='cluster')" file="$(find autoware_mini)/launch/detection/lidar_cluster.launch" />
 
@@ -22,8 +24,13 @@
                 $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen" required="true" /-->
                 <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
             </group>
-
         </group>
+
+        <group if="$(arg use_radar)" ns="radar">
+            <remap unless="$(arg use_lidar_center)" from="detected_objects" to="/detection/detected_objects" />
+            <node pkg="autoware_mini" type="radar_track.py" name="radar_track" output="screen" required="true"/>
+        </group>
+
         
         <!-- Carla's ground truth objects -->
         <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
