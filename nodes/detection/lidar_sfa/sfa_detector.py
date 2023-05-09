@@ -129,14 +129,14 @@ class SFADetector:
 
         if is_front:
             # Remove the point out of range x,y,z
-            mask = (points[:, 0] >= self.MIN_FRONT_X) & (points[:, 0] <= self.MAX_FRONT_X) & \
-                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] <= self.MAX_Y) & \
-                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] <= self.MAX_Z) \
+            mask = (points[:, 0] >= self.MIN_FRONT_X) & (points[:, 0] < self.MAX_FRONT_X) & \
+                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] < self.MAX_Y) & \
+                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] < self.MAX_Z) \
 
         else:
-            mask = (points[:, 0] >= self.MIN_BACK_X) & (points[:, 0] <= self.MAX_BACK_X) & \
-                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] <= self.MAX_Y) & \
-                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] <= self.MAX_Z) \
+            mask = (points[:, 0] >= self.MIN_BACK_X) & (points[:, 0] < self.MAX_BACK_X) & \
+                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] < self.MAX_Y) & \
+                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] < self.MAX_Z) \
 
         points = points[mask]
         points[:, 2] -= self.MIN_Z
