@@ -153,7 +153,7 @@ class SpeedOnlyLocalPlanner:
             end_index = len(global_path_array)
 
         # create local_path_array and extract waypoints
-        local_path_array = global_path_array[wp_backward:end_index, :]
+        local_path_array = global_path_array[wp_backward:end_index, :].copy()
         local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_backward:end_index])
 
         # project current_pose to path
