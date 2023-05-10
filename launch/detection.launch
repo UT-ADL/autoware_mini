@@ -27,10 +27,11 @@
         </group>
 
         <group if="$(arg use_radar)" ns="radar">
-            <remap unless="$(arg use_lidar_center)" from="detected_objects" to="/detection/detected_objects" />
-            <node pkg="autoware_mini" type="radar_track.py" name="radar_track" output="screen" required="true"/>
+            <remap unless="$(arg use_lidar_center)" from="detected_objects" to="/detection/detected_objects"/>
+            <node pkg="autoware_mini" type="radar_relay.py" name="radar_track" output="screen" required="true"/>
         </group>
 
+<!--         <node if="$(eval use_radar and use_lidar_center)" pkg="autoware_mini" type="lidar_radar_fusion.py" name="lidar_radar_fusion" output="screen" required="true" /> -->
         
         <!-- Carla's ground truth objects -->
         <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
