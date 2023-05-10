@@ -258,6 +258,6 @@ class radar_track:
         rospy.spin()
 
 if __name__ == '__main__':
-    rospy.init_node('radar_track', anonymous=True, log_level=rospy.INFO)
+    rospy.init_node('radar_detection', anonymous=True, log_level=rospy.INFO)
     node = radar_track()
     node.run()
