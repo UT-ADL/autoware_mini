@@ -14,14 +14,13 @@ from std_msgs.msg import ColorRGBA
 from genpy import Duration
 import message_filters
 
-
 class radar_relay:
 
     def __init__(self):
 
         # Parameters
         self.output_frame = rospy.get_param("~target_frame", "map")
-        self.consistency_check = rospy.get_param("~consistency_check", 5) # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
+        self.consistency_check = rospy.get_param("~consistency_check") # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
         self.id_count = {} # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
 
         # Subscribers and tf listeners
@@ -38,7 +37,7 @@ class radar_relay:
         ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, ego_speed_sub], queue_size=5, slop=0.01)
         ts.registerCallback(self.syncronised_callback)
 
-        rospy.loginfo(self.__class__.__name__ + " - node started")
+        rospy.loginfo(self.__class__.__name__ + " - Initialized")
 
     def syncronised_callback(self, tracks, ego_speed):
         """

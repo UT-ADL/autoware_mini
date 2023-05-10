@@ -44,8 +44,8 @@ lidar:
     transform_timeout: 0.05
 
 radar:
-  radar_track:
-    max_detection_distance: 60
+  radar_relay:
+    consistency_check: 5 # Number of consecutive detections over which a radar object is dected before it is published/used further
 
 obstacle_simulation:
   publish_rate: 10
