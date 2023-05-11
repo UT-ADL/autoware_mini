@@ -136,9 +136,11 @@ class LidarRadarFusion:
             # been added to the merged_objects array
             del lidar_prepared[match['lidar_id']]
 
+        # commented out these lines fo now. Depends on our decision on what to do with unmatched lidar objects
+        # these objects have zero speeds
         # We add unmatched lidar objects as fallback
-        for unmatched_lidar_object in lidar_prepared.values():
-            merged_objects.objects.append(unmatched_lidar_object)
+        # for unmatched_lidar_object in lidar_prepared.values():
+        #     merged_objects.objects.append(unmatched_lidar_object)
 
         # We add all moving radar objects falling outside lidar hulls  to merged objects
         for id_radar, radar_object in radar_prepared.items():
