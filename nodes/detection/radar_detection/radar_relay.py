@@ -2,16 +2,12 @@
 
 import rospy
 import cv2
-import numpy as np
 import tf
-import copy
-from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point32, Quaternion, Point, PointStamped, PolygonStamped
+from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point32, Point, PointStamped, PolygonStamped
 from derived_object_msgs.msg import ObjectWithCovarianceArray
 from autoware_msgs.msg import DetectedObject, DetectedObjectArray
 from radar_msgs.msg import RadarTrack, RadarTracks
-from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import ColorRGBA
-from genpy import Duration
 import message_filters
 
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
@@ -32,7 +28,6 @@ class radar_relay:
 
         # Publishers
         self.detected_objs_pub = rospy.Publisher("detected_objects", DetectedObjectArray, queue_size=1)
-        self.markers_pub = rospy.Publisher("detected_objects_markers", MarkerArray, queue_size=1)
 
         # Strict Time Sync
         ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, ego_speed_sub], queue_size=5, slop=0.01)
@@ -45,10 +40,10 @@ class radar_relay:
         :type objects: ObjectWithCovarianceArray
         :type tracks: RadarTrackArray
         """
-        detected_objs, markers = self.generate_detected_objects_array_and_markers(tracks, ego_speed)
+        detected_objs = self.generate_detected_objects_array(tracks, ego_speed)
 
         # Checks is there is something to publish before publishing
-        if detected_objs is not None and markers is not None:
+        if detected_objs is not None:
             self.detected_objs_pub.publish(detected_objs)
             # self.markers_pub.publish(markers)
 
@@ -69,7 +64,7 @@ class radar_relay:
             if key in self.id_count:
                 del self.id_count[key]
 
-    def generate_detected_objects_array_and_markers(self, tracks, ego_speed):
+    def generate_detected_objects_array(self, tracks, ego_speed):
         """
         :param objects: Array of ObjectWithCovariance
         :param tracks: Array of RadarTrack
@@ -78,11 +73,10 @@ class radar_relay:
         :type objects: ObjectWithCovarianceArray
         :type tracks: RadarTrackArray
         :type source_frame: str
-        :returns: DetectedObjectArray and MarkerArray tfed to the output_frame class variable
+        :returns: DetectedObjectArray tfed to the output_frame class variable
         """
 
-        # palceholders for markers and detected objects
-        markers = MarkerArray()
+        # placeholders for detected objects
         detected_objects_array = DetectedObjectArray()
         detected_objects_array.header.frame_id = self.output_frame
         detected_objects_array.header.stamp = tracks.header.stamp
@@ -118,46 +112,9 @@ class radar_relay:
             detected_object.dimensions = track.size
             detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, tracks.header.stamp)
 
-            # Marker for rviz visualisation
-            markers.markers += self.generate_markers(detected_object)
             detected_objects_array.objects.append(detected_object)
 
-        return detected_objects_array, markers
-
-    def generate_markers(self, detected_object):
-
-        marker_list = []
-
-        centroid = Marker()
-        centroid.header.frame_id = self.output_frame
-        centroid.ns = "radar_centroid"
-        centroid.type = centroid.SPHERE
-        centroid.action = centroid.ADD
-        centroid.scale = Vector3(x=1., y=1., z=1.)
-        centroid.color = ColorRGBA(r=1., g=0.08, b=0.58, a=1.)
-        centroid.pose.position = detected_object.pose.position
-        centroid.pose.orientation = Quaternion(w=1., x=0., y=0., z=0.)
-        centroid.id = detected_object.id
-        centroid.lifetime = Duration(secs=0.1)
-
-        text = Marker()
-        text.header.frame_id = self.output_frame
-        text.ns = "radar_text"
-        text.type = text.TEXT_VIEW_FACING
-        text.action = text.ADD
-        text.scale = Vector3(x=0., y=0., z=1.)
-        text.color = ColorRGBA(r=1., g=1., b=1., a=1.)
-        text.pose.position = copy.copy(detected_object.pose.position)
-        text.pose.position.x += 2.5
-        text.pose.orientation = Quaternion(w=1., x=0., y=0., z=0.)
-        # printing the norm of a radar object's velocity in the label to ensure it matches with the values published by fusion node. Will come in handy when debugging
-        text.text = "#%02d_(%05.2f)" % (detected_object.id,
-                                        np.linalg.norm((detected_object.velocity.linear.x, detected_object.velocity.linear.y, detected_object.velocity.linear.z)))  # Id & speed
-        text.id = detected_object.id + 1000
-        text.lifetime = Duration(secs=0.1)
-
-        marker_list += [centroid, text]
-        return marker_list
+        return detected_objects_array
 
     def get_vel_vector_in_map(self, track, ego_speed, source_frame):
 
