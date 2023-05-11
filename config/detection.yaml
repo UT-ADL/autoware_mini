@@ -47,6 +47,11 @@ radar:
   radar_relay:
     consistency_check: 5 # Number of consecutive detections over which a radar object is dected before it is published/used further
 
+lidar_radar_fusion:
+  matching_distance: 1.6 # radius threshold value around lidar centroid for a radar object to be considered matched
+  radar_speed_threshold: 0.6 # Threshold for filtering out stationary objects based on speed
+  replace_speed_with_norm: True # Replace lidar and radar object speeds with norms in their respective x components
+
 obstacle_simulation:
   publish_rate: 10
 

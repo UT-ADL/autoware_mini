@@ -18,6 +18,9 @@
                 <param name="onnx_path"  value="$(find autoware_mini)/config/sfa/kilynuaron_model.onnx"/>
             </node>
 
+            <!--visualizer for lidar detections-->
+            <node type="detected_objects_visualizer.py" name="lidar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+
             <!-- Velodyne Vella detections -->
             <group if="$(eval arg('detector')=='vella')">
                 <!--node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args="2.11
@@ -28,10 +31,12 @@
 
         <group if="$(arg use_radar)" ns="radar">
             <remap unless="$(arg use_lidar_center)" from="detected_objects" to="/detection/detected_objects"/>
-            <node pkg="autoware_mini" type="radar_relay.py" name="radar_track" output="screen" required="true"/>
+            <node pkg="autoware_mini" type="radar_relay.py" name="radar_relay" output="screen" required="true"/>
+            <!-- visualizer for radar detections-->
+            <node type="detected_objects_visualizer.py" name="radar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
         </group>
 
-<!--         <node if="$(eval use_radar and use_lidar_center)" pkg="autoware_mini" type="lidar_radar_fusion.py" name="lidar_radar_fusion" output="screen" required="true" /> -->
+        <node if="$(eval use_radar and use_lidar_center)" pkg="autoware_mini" type="lidar_radar_fusion.py" name="lidar_radar_fusion" output="screen" required="true" />
         
         <!-- Carla's ground truth objects -->
         <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
@@ -49,7 +54,7 @@
         <!-- Obstacle simulator -->
         <node if="$(eval arg('detector')=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />
 
-        <!-- Detected objects visualizer -->
+        <!-- Detected objects visualizer for final objects-->
         <node type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/detection.yaml"/>

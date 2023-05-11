@@ -14,13 +14,14 @@ from std_msgs.msg import ColorRGBA
 from genpy import Duration
 import message_filters
 
+RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
 class radar_relay:
 
     def __init__(self):
 
         # Parameters
         self.output_frame = rospy.get_param("~target_frame", "map")
-        self.consistency_check = rospy.get_param("~consistency_check") # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
+        self.consistency_check = rospy.get_param("~consistency_check", 5) # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
         self.id_count = {} # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
 
         # Subscribers and tf listeners
@@ -49,7 +50,7 @@ class radar_relay:
         # Checks is there is something to publish before publishing
         if detected_objs is not None and markers is not None:
             self.detected_objs_pub.publish(detected_objs)
-            self.markers_pub.publish(markers)
+            # self.markers_pub.publish(markers)
 
     def is_consistent(self, track_id):
         if track_id not in self.id_count.keys():
@@ -106,6 +107,7 @@ class radar_relay:
             detected_object.header.stamp = tracks.header.stamp
             detected_object.id = int.from_bytes(track.uuid.uuid[:3], byteorder='big', signed=False)
             detected_object.label = 'unknown'
+            detected_object.color = RED
             detected_object.valid = True
             detected_object.pose_reliable = True
             detected_object.pose = self.get_tfed_pose(track.position, source_frame)
@@ -241,7 +243,7 @@ class radar_relay:
         # use cv2.boxPoints to get a rotated rectangle given the angle
         points = cv2.boxPoints((
             (obj_pose.position.x, obj_pose.position.y),
-            (obj_dims.x, obj_dims.y), 0)) # input angle as 0 because the rada driver outputs pose.orientation as (1,0,0,0)
+            (obj_dims.x, obj_dims.y), 0)) # input angle as 0 because the radar driver outputs pose.orientation as (1,0,0,0)
         convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
 
         return convex_hull
