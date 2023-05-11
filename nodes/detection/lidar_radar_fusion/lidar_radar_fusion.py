@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
 import rospy
-import copy
 import message_filters
 
-from visualization_msgs.msg import Marker, MarkerArray
+from visualization_msgs.msg import MarkerArray
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
-from geometry_msgs.msg import Vector3, Quaternion, Point
+from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
-from genpy import Duration
 from math import sqrt
 from shapely.geometry import Polygon, Point
 
