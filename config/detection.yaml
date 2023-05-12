@@ -51,3 +51,10 @@ mqtt_traffic_light_detector:
   mqtt_port: 8883
   mqtt_topic: Tartu/#
   timeout: 2.0
+
+camera_fl/traffic_light_position_extractor:
+  nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
+  traffic_light_bulb_radius: 0.1    # meters
+
+tfl_camera:
+  radius_to_roi_factor: 5.0  # multiplier for radius to get roi size
