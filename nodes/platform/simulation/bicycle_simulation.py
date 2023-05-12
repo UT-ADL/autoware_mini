@@ -19,8 +19,8 @@ class BicycleSimulation:
         # get parameters
         self.publish_rate = rospy.get_param("~publish_rate")
         self.wheel_base = rospy.get_param("wheel_base")
-        self.acceleration_limit = abs(rospy.get_param("acceleration_limit"))
-        self.deceleration_limit = -abs(rospy.get_param("deceleration_limit"))
+        self.acceleration_limit = rospy.get_param("acceleration_limit")
+        self.deceleration_limit = rospy.get_param("deceleration_limit")
 
         # internal state of bicycle model
         self.x = 0.0
@@ -65,16 +65,16 @@ class BicycleSimulation:
 
     def vehicle_cmd_callback(self, msg):
         self.target_velocity = msg.ctrl_cmd.linear_velocity
-        # calculate acceleration and deceleration limits
-        if msg.ctrl_cmd.linear_acceleration == 0.0:
-            if self.target_velocity > self.velocity:
-                self.acceleration = self.acceleration_limit
+        # calculate acceleration based on limits
+        if self.target_velocity > self.velocity:
+            self.acceleration = self.acceleration_limit
+        elif self.target_velocity < self.velocity:
+            if msg.ctrl_cmd.linear_acceleration == 0.0:
+                self.acceleration = -self.deceleration_limit
             else:
-                self.acceleration = self.deceleration_limit
-        elif msg.ctrl_cmd.linear_acceleration > 0.0:
-            self.acceleration = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
-        elif msg.ctrl_cmd.linear_acceleration < 0.0:
-            self.acceleration = max(msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
+                self.acceleration = -min(abs(msg.ctrl_cmd.linear_acceleration), self.deceleration_limit)
+        else:
+            self.acceleration = 0.0
 
         rospy.logdebug("%s - target velocity: %.3f, current velocity: %.3f, acceleration: %.3f", rospy.get_name(), msg.ctrl_cmd.linear_velocity, self.velocity, self.acceleration)
 

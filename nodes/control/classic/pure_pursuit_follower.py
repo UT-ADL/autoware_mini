@@ -135,10 +135,10 @@ class PurePursuitFollower:
         # target_velocity from map and based on closest object
         target_velocity = interpolate_velocity_between_waypoints(nearest_point, waypoints[back_wp_idx], waypoints[front_wp_idx])
 
-        # if decelerating because of obstacle then calculate necessary acceleration to stop at safety distance
-        if target_velocity < current_velocity and closest_object_distance - self.braking_safety_distance > 0:
-            acceleration = 0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance)
-        # otherwise use vehicle default acceleration limits
+        # if decelerating because of obstacle then calculate necessary deceleration to stop at safety distance
+        if closest_object_distance - self.braking_safety_distance > 0:
+            acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), 0.0)
+        # otherwise use vehicle default deceleration limit
         else:
             acceleration = 0.0
 
