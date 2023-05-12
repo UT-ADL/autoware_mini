@@ -6,7 +6,7 @@ import cv2
 
 from camera_tfl_helpers import convert_signals_to_rois
 
-from sensor_msgs.msg import CompressedImage, CameraInfo
+from sensor_msgs.msg import Image, CameraInfo
 from autoware_msgs.msg import Signals
 
 from cv_bridge import CvBridge, CvBridgeError
@@ -23,7 +23,7 @@ class TrafficLightClassifier:
 
         # Subscribers
         signals_sub = message_filters.Subscriber('signals', Signals)
-        camera_img_sub = message_filters.Subscriber('/camera_fl/image_raw/compressed', CompressedImage)
+        camera_img_sub = message_filters.Subscriber('/camera_fl/image_raw', Image)
         camera_info_sub = message_filters.Subscriber('/camera_fl/camera_info', CameraInfo)
 
         # Synchronizer
@@ -35,22 +35,19 @@ class TrafficLightClassifier:
         self.bridge = CvBridge()
 
     def data_callback(self, signals_msg, camera_img_msg, camera_info_msg):
-        print("traffic_light_classifier - data_callback")
-        rospy.loginfo("traffic_light_classifier - data_callback")
 
         if len(signals_msg.Signals) > 0:
 
             rois = convert_signals_to_rois(signals_msg.Signals, camera_info_msg.width, camera_info_msg.height, self.radius_to_roi_factor)
 
+            try:
+                image = self.bridge.imgmsg_to_cv2(camera_img_msg,  desired_encoding='rgb8')
+            except CvBridgeError as e:
+                rospy.logerr("traffic_light_position_visualizer - ", e)
+
             # Extract roi from image
             # Send to classifier
             # Publish result to TrafficLightResultArray
-
-
-            try:
-                image = self.bridge.compressed_imgmsg_to_cv2(camera_img_msg,  desired_encoding='rgb8')
-            except CvBridgeError as e:
-                rospy.logerr("traffic_light_position_visualizer - ", e)
 
             for roi in rois:
                 start_point = (int(roi[2]), int(roi[4]))
