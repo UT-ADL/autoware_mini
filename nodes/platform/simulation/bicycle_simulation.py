@@ -19,8 +19,8 @@ class BicycleSimulation:
         # get parameters
         self.publish_rate = rospy.get_param("~publish_rate")
         self.wheel_base = rospy.get_param("wheel_base")
-        self.acceleration_limit = abs(rospy.get_param("acceleration_limit"))
-        self.deceleration_limit = -abs(rospy.get_param("deceleration_limit"))
+        self.acceleration_limit = rospy.get_param("acceleration_limit")
+        self.deceleration_limit = rospy.get_param("deceleration_limit")
 
         # internal state of bicycle model
         self.x = 0.0

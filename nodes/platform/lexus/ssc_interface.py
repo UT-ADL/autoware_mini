@@ -131,15 +131,11 @@ class SSCInterface:
             desired_speed = 0.0
 
         # calculate acceleration and deceleration limits
+        acceleration_limit = self.acceleration_limit
         if msg.ctrl_cmd.linear_acceleration == 0.0:
-            acceleration_limit = self.acceleration_limit
             deceleration_limit = self.deceleration_limit
-        elif msg.ctrl_cmd.linear_acceleration > 0.0:
-            acceleration_limit = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
-            deceleration_limit = self.deceleration_limit
-        elif msg.ctrl_cmd.linear_acceleration < 0.0:
-            acceleration_limit = self.acceleration_limit
-            deceleration_limit = min(-msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
+        else:
+            deceleration_limit = min(abs(msg.ctrl_cmd.linear_acceleration), self.deceleration_limit)
 
         # publish command messages
         header = Header()
