@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
+from collections import defaultdict
 import cv2
 import tf
 from tf.transformations import euler_from_quaternion
@@ -19,7 +20,9 @@ class RadarDetector:
         # Parameters
         self.output_frame = rospy.get_param("~output_frame", "map")
         self.consistency_check = rospy.get_param("~consistency_check", 5) # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
-        self.id_count = {} # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
+        self.id_count = defaultdict(int) # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
+        self.id_counter = 0 # counter for generating id from uuids
+        self.uuid_map = {}
 
         # Publishers
         self.detected_objs_pub = rospy.Publisher("detected_objects", DetectedObjectArray, queue_size=1)
@@ -47,19 +50,12 @@ class RadarDetector:
             self.detected_objs_pub.publish(detected_objs)
 
     def is_consistent(self, track_id):
-        if track_id not in self.id_count.keys():
-            self.id_count[track_id] = 1
-            return False
-
         self.id_count[track_id] += 1
-        return self.id_count[track_id] > self.consistency_check
+        return self.id_count[track_id] >= self.consistency_check
 
     def remove_old_tracks(self, id_list):
         lost_tracks = self.id_count.keys() - id_list
-        self.remove_entries_from_dict(list(lost_tracks))
-
-    def remove_entries_from_dict(self, entries):
-        for key in entries:
+        for key in list(lost_tracks):
             if key in self.id_count:
                 del self.id_count[key]
 
@@ -78,22 +74,29 @@ class RadarDetector:
         # frame_id of recieved objects
         source_frame = tracks.header.frame_id
 
+         # converting uuids to integer values
+        id_list = []
+        for track in tracks.tracks:
+            uuid = track.uuid.uuid
+            if uuid not in self.uuid_map:
+                id = self.id_counter
+                self.uuid_map[uuid] = id
+                self.id_counter +=1
+            else:
+                id = self.uuid_map[uuid]
+            id_list.append(id)
         # removing tracks that have been lost (ids not detected anymore)
-        # not sure about byteorder
-        id_list = [int.from_bytes(track.uuid.uuid[:3], byteorder='big', signed=False) for track in tracks.tracks]
         self.remove_old_tracks(id_list)
 
-        for track in tracks.tracks:  # type: RadarTrack
-
-            ## Check if the radar id is consstent over a of frames. Dictated by the param named consistency_check
-            if not self.is_consistent(int.from_bytes(track.uuid.uuid[:3], byteorder='big', signed=False)):
+        for i, track in enumerate(tracks.tracks):  # type: RadarTrack
+            ## Check if the radar id is consistent over a few frames. Number of frames is dictated by the param named consistency_check
+            if not self.is_consistent(id_list[i]):
                 continue
-
             # Detected object
             detected_object = DetectedObject()
             detected_object.header.frame_id = self.output_frame
             detected_object.header.stamp = tracks.header.stamp
-            detected_object.id = int.from_bytes(track.uuid.uuid[:3], byteorder='big', signed=False)
+            detected_object.id = id_list[i]
             detected_object.label = 'unknown'
             detected_object.color = RED
             detected_object.valid = True
@@ -107,7 +110,6 @@ class RadarDetector:
             detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, tracks.header.stamp)
 
             detected_objects_array.objects.append(detected_object)
-
         return detected_objects_array
 
     def get_tfed_velocity(self, track, ego_speed, source_frame):
