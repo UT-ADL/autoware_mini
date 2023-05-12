@@ -2,8 +2,6 @@
 
 import rospy
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
 
 from autoware_msgs.msg import Signals
 from sensor_msgs.msg import Image
@@ -27,7 +25,7 @@ class TrafficLightPositionVisualizer:
         self.bridge = CvBridge()
 
         # Publishers
-        self.tfl_positions_pub = rospy.Publisher('tfl_positions', Image, queue_size=1)
+        self.tfl_positions_pub = rospy.Publisher('tfl_positions_visualization', Image, queue_size=1)
 
         # Subscribers
         # TODO create time synced subscriber? once the timestamps have been fixed downstream
