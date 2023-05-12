@@ -87,7 +87,7 @@ class RadarDetector:
             detected_object.velocity_reliable = True
             detected_object.velocity = self.get_tfed_velocity(track, ego_speed, source_frame)
             detected_object.acceleration_reliable = True
-            detected_object.acceleration = Twist(linear=self.get_tfed_vector3(track.acceleration, source_frame))
+            detected_object.acceleration = self.get_tfed_acceleration(track, source_frame)
             detected_object.dimensions = track.size
             detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, tracks.header.stamp)
 
@@ -110,7 +110,7 @@ class RadarDetector:
         """
         track: radar track (radar_msgs/RadarTrack)
         :param ego_speed: speed of our vehicle (geometry_msgs/TwistStamped)
-        :param source_header: frame in which to transform the velocity vector. Map in  most cases unless specifically required and changed
+        :param source_frame: frame in which to transform the velocity vector. Map in  most cases unless specifically required and changed
         :return: velocity vector transformed to map frame (geometry_msgs/Twist)
         """
         # compute ego_velocity in radar_fc frame
@@ -130,7 +130,7 @@ class RadarDetector:
     def get_tfed_pose(self, position, source_frame):
         """
         :type pose_with_cov: PoseWithCovariance
-        :type source_header: str
+        :type source_frame: str
         :returns: tfed Pose to the output_frame
         """
         # To apply a TF we need a pose stamped
@@ -139,11 +139,21 @@ class RadarDetector:
         source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, source_frame, rospy.Time(0))
         tfed_pose = tf2_geometry_msgs.do_transform_pose(pose_stamped, source_frame_to_output_tf).pose
         return tfed_pose
+    
+    def get_tfed_acceleration(self, track, source_frame):
+        """
+        track: radar track (radar_msgs/RadarTrack)
+        :param source_frame: frame in which to transform the velocity vector. Map in  most cases unless specifically required and changed
+        :return: acceleration transformed to map frame (geometry_msgs/Twist)
+        """
+        # compute acceleration in self.output frame in radar_fc frame
+        tfed_acceleration = self.get_tfed_vector3(track.acceleration, source_frame)
+        return Twist(linear=tfed_acceleration)
 
     def get_tfed_vector3(self, vector3, source_frame):
         """
         :type vector3: Vector3
-        :type source_header: str
+        :type source_frame: str
         :returns: tfed Vector3 to the output_frame class variable
         """
         # To apply a TF we need a Vector3 stamped
