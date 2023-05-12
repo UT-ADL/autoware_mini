@@ -14,6 +14,7 @@ from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 
 from cv_bridge import CvBridge, CvBridgeError
 
+# TODO - review the classifier class codes
 CLASSIFIER_RESULT_TO_STRING = {
     0: "red",
     3: "yellow",      # not sure ? - Almost never outputted?????
