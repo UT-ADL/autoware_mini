@@ -6,8 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from autoware_msgs.msg import Signals
-from sensor_msgs.msg import CompressedImage, Image
-from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
 
 SIGNAL_TYPE_TO_COLOR = {
     1: (255, 0, 0),   # Red
@@ -30,13 +30,16 @@ class TrafficLightPositionVisualizer:
         self.tfl_positions_pub = rospy.Publisher('tfl_positions', Image, queue_size=1)
 
         # Subscribers
-        # TODO create time synced subscriber once donstream the timestamps have been fixed
+        # TODO create time synced subscriber? once the timestamps have been fixed downstream
         rospy.Subscriber('signals', Signals, self.signals_callback, queue_size=1)
         rospy.Subscriber('/camera_fl/image_raw', Image, self.image_callback, queue_size=1)
 
     def image_callback(self, msg):
         # Convert the ROS message to OpenCV format using a CvBridge
-        image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
+        try:
+            image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
+        except CvBridgeError as e:
+            rospy.logerr("traffic_light_position_visualizer - ", e)
 
         if len(self.signals) > 0:
             for signal in self.signals:
@@ -47,8 +50,12 @@ class TrafficLightPositionVisualizer:
                                    radius = signal.radius, 
                                    color = SIGNAL_TYPE_TO_COLOR[signal.type], 
                                    thickness = 2)
-
-        self.tfl_positions_pub.publish(self.bridge.cv2_to_imgmsg(image, encoding='rgb8'))
+            
+            # publish only if there are signals
+            try:
+                self.tfl_positions_pub.publish(self.bridge.cv2_to_imgmsg(image, encoding='rgb8'))
+            except CvBridgeError as e:
+                rospy.logerr("traffic_light_position_visualizer - ", e)
 
     def signals_callback(self, msg):
         self.signals = msg.Signals
