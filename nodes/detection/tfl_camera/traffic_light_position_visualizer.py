@@ -48,12 +48,12 @@ class TrafficLightPositionVisualizer:
                                    radius = signal.radius, 
                                    color = SIGNAL_TYPE_TO_COLOR[signal.type], 
                                    thickness = 2)
-            
-            # publish only if there are signals
-            try:
-                self.tfl_positions_pub.publish(self.bridge.cv2_to_imgmsg(image, encoding='rgb8'))
-            except CvBridgeError as e:
-                rospy.logerr("traffic_light_position_visualizer - ", e)
+
+        try:
+            self.tfl_positions_pub.publish(self.bridge.cv2_to_imgmsg(image, encoding='rgb8'))
+        except CvBridgeError as e:
+            rospy.logerr("traffic_light_position_visualizer - ", e)
+
 
     def signals_callback(self, msg):
         self.signals = msg.Signals
