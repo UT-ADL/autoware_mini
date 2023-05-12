@@ -3,49 +3,48 @@
 import rospy
 import cv2
 import tf
-from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point32, Point, PointStamped, PolygonStamped
-from derived_object_msgs.msg import ObjectWithCovarianceArray
+from tf.transformations import euler_from_quaternion
+from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point,PolygonStamped
 from autoware_msgs.msg import DetectedObject, DetectedObjectArray
 from radar_msgs.msg import RadarTrack, RadarTracks
 from std_msgs.msg import ColorRGBA
 import message_filters
 
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
-class radar_relay:
 
+
+class RadarDetector:
     def __init__(self):
 
         # Parameters
-        self.output_frame = rospy.get_param("~target_frame", "map")
+        self.output_frame = rospy.get_param("~output_frame", "map")
         self.consistency_check = rospy.get_param("~consistency_check", 5) # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
         self.id_count = {} # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
-
-        # Subscribers and tf listeners
-        tracks_sub = message_filters.Subscriber('/radar_fc/radar_tracks', RadarTracks)
-        ego_speed_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped)
-
-        self.tf_listener = tf.TransformListener()
 
         # Publishers
         self.detected_objs_pub = rospy.Publisher("detected_objects", DetectedObjectArray, queue_size=1)
 
+        # Transform listener
+        self.tf_listener = tf.TransformListener()
+        # Subscribers
+        tracks_sub = message_filters.Subscriber('/radar_fc/radar_tracks', RadarTracks, queue_size=1)
+        ego_speed_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1)
         # Strict Time Sync
-        ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, ego_speed_sub], queue_size=5, slop=0.01)
+        ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, ego_speed_sub], queue_size=5, slop=0.02)
         ts.registerCallback(self.syncronised_callback)
 
         rospy.loginfo(self.__class__.__name__ + " - Initialized")
 
     def syncronised_callback(self, tracks, ego_speed):
         """
-        :type objects: ObjectWithCovarianceArray
-        :type tracks: RadarTrackArray
+        tracks: radar_msgs/RadarTracks
+        ego_speed: geometry_msgs/TwistStamped
         """
         detected_objs = self.generate_detected_objects_array(tracks, ego_speed)
 
         # Checks is there is something to publish before publishing
         if detected_objs is not None:
             self.detected_objs_pub.publish(detected_objs)
-            # self.markers_pub.publish(markers)
 
     def is_consistent(self, track_id):
         if track_id not in self.id_count.keys():
@@ -66,14 +65,9 @@ class radar_relay:
 
     def generate_detected_objects_array(self, tracks, ego_speed):
         """
-        :param objects: Array of ObjectWithCovariance
-        :param tracks: Array of RadarTrack
-        :param source_frame: Source frame of the messages, here it's the radar
-        :param ego_speed: speed of the ego vehicle
-        :type objects: ObjectWithCovarianceArray
-        :type tracks: RadarTrackArray
-        :type source_frame: str
-        :returns: DetectedObjectArray tfed to the output_frame class variable
+        tracks: radar_msgs/RadarTracks
+        ego_speed: speed of the ego vehicle (geometry_msgs/TwistStamped)
+        returns: array of autoware Detected Objects (DetectedObjectArray) tfed to the output_frame class variable
         """
 
         # placeholders for detected objects
@@ -106,7 +100,7 @@ class radar_relay:
             detected_object.pose_reliable = True
             detected_object.pose = self.get_tfed_pose(track.position, source_frame)
             detected_object.velocity_reliable = True
-            detected_object.velocity = self.get_vel_vector_in_map(track, ego_speed, source_frame)
+            detected_object.velocity = self.get_tfed_velocity(track, ego_speed, source_frame)
             detected_object.acceleration_reliable = True
             detected_object.acceleration = Twist(linear=self.get_tfed_vector3(track.acceleration, source_frame))
             detected_object.dimensions = track.size
@@ -116,7 +110,7 @@ class radar_relay:
 
         return detected_objects_array
 
-    def get_vel_vector_in_map(self, track, ego_speed, source_frame):
+    def get_tfed_velocity(self, track, ego_speed, source_frame):
 
         """
         :param track: radar track message
@@ -150,7 +144,7 @@ class radar_relay:
 
         # To apply a TF we need a pose stamped
         pose_stamped = PoseStamped()
-        pose_stamped.pose.position = Point(x=position.x, y=position.y, z=position.z )
+        pose_stamped.pose.position = position
         pose_stamped.header.frame_id = source_frame
         tfed_pose = self.tf_listener.transformPose(self.output_frame, pose_stamped).pose
         return tfed_pose
@@ -168,22 +162,6 @@ class radar_relay:
         tfed_vector3 = self.tf_listener.transformVector3(self.output_frame, vector3_stamped).vector
         return tfed_vector3
 
-    def get_tfed_point32(self, p32, source_frame):
-        """
-
-        :param p32: point to be transformed
-        :type p32:
-        :param source_frame: radar_frame
-        :type source_frame: string
-        :return: transformed Point32
-        :rtype: GeometryMsgs Point32
-        """
-        point_stamped = PointStamped()
-        point_stamped.header.frame_id = source_frame
-        point_stamped.point = Point(x=p32.x, y=p32.y, z=p32.z)
-        tfed_point = self.tf_listener.transformPoint(self.output_frame, point_stamped).point
-        return Point32(x=tfed_point.x, y=tfed_point.y, z=tfed_point.z)
-
     def produce_hull(self, obj_pose, obj_dims, stamp):
 
         """
@@ -198,18 +176,18 @@ class radar_relay:
         convex_hull.header.stamp = stamp
 
         # use cv2.boxPoints to get a rotated rectangle given the angle
+        _, _, heading = euler_from_quaternion(
+            (obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w))
         points = cv2.boxPoints((
             (obj_pose.position.x, obj_pose.position.y),
-            (obj_dims.x, obj_dims.y), 0)) # input angle as 0 because the radar driver outputs pose.orientation as (1,0,0,0)
+            (obj_dims.x, obj_dims.y), heading)) # input angle as 0 because the radar driver outputs pose.orientation as (1,0,0,0)
         convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
 
         return convex_hull
-
     def run(self):
         rospy.spin()
 
-
 if __name__ == '__main__':
-    rospy.init_node('radar_relay', anonymous=True, log_level=rospy.INFO)
-    node = radar_relay()
+    rospy.init_node('radar_detector', anonymous=True, log_level=rospy.INFO)
+    node = RadarDetector()
     node.run()
