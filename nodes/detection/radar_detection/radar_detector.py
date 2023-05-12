@@ -3,7 +3,8 @@
 import rospy
 from collections import defaultdict
 import cv2
-import tf
+import tf2_ros
+import tf2_geometry_msgs
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point,PolygonStamped
 from autoware_msgs.msg import DetectedObject, DetectedObjectArray
@@ -27,8 +28,13 @@ class RadarDetector:
         # Publishers
         self.detected_objs_pub = rospy.Publisher("detected_objects", DetectedObjectArray, queue_size=1)
 
-        # Transform listener
-        self.tf_listener = tf.TransformListener()
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+        # Allowing to buffer to fill up
+        rospy.sleep(0.5)
+
+        # static transform. Fetch once
+        self.base_link_to_radar_tf = self.tf_buffer.lookup_transform('radar_fc', 'base_link', rospy.Time(0))
         # Subscribers
         tracks_sub = message_filters.Subscriber('/radar_fc/radar_tracks', RadarTracks, queue_size=1)
         ego_speed_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1)
@@ -44,7 +50,6 @@ class RadarDetector:
         ego_speed: geometry_msgs/TwistStamped
         """
         detected_objs = self.generate_detected_objects_array(tracks, ego_speed)
-
         # Checks is there is something to publish before publishing
         if detected_objs is not None:
             self.detected_objs_pub.publish(detected_objs)
@@ -65,7 +70,6 @@ class RadarDetector:
         ego_speed: speed of the ego vehicle (geometry_msgs/TwistStamped)
         returns: array of autoware Detected Objects (DetectedObjectArray) tfed to the output_frame class variable
         """
-
         # placeholders for detected objects
         detected_objects_array = DetectedObjectArray()
         detected_objects_array.header.frame_id = self.output_frame
@@ -73,8 +77,7 @@ class RadarDetector:
 
         # frame_id of recieved objects
         source_frame = tracks.header.frame_id
-
-         # converting uuids to integer values
+        # converting uuids to integer values
         id_list = []
         for track in tracks.tracks:
             uuid = track.uuid.uuid
@@ -115,53 +118,49 @@ class RadarDetector:
     def get_tfed_velocity(self, track, ego_speed, source_frame):
 
         """
-        :param track: radar track message
-        :type track: RadarTrack
-        :param ego_speed: speed of our vehicle
-        :type ego_speed: std_msgs/TwistStamped
-        :param source_frame: frame in which to transform the velocity vector. Map in  this case
-        :type source_frame: string
-        :return: velocity vector transformed to map frame
-        :rtype: std_msgs/Twist
+        track: radar track (radar_msgs/RadarTrack)
+        :param ego_speed: speed of our vehicle (geometry_msgs/TwistStamped)
+        :param source_header: frame in which to transform the velocity vector. Map in  most cases unless specifically required and changed
+        :return: velocity vector transformed to map frame (geometry_msgs/Twist)
         """
 
+        # compute ego_velocity in radar_fc frame
+        ego_speed_in_base = Vector3Stamped(vector=ego_speed.twist.linear)
+        ego_speed_in_radar_fc = tf2_geometry_msgs.do_transform_vector3(ego_speed_in_base, self.base_link_to_radar_tf)
         # Computing speed relative to map.
-        velocity_x = ego_speed.twist.linear.x + track.velocity.x
-        velocity_y = ego_speed.twist.linear.y + track.velocity.y # this value is zero for both ego and track velocity
-        velocity_z = ego_speed.twist.linear.z + track.velocity.z # this value is zero for both ego and track velocity
-
+        velocity_x = ego_speed_in_radar_fc.vector.x + track.velocity.x
+        velocity_y = ego_speed_in_radar_fc.vector.y + track.velocity.y # this value is zero for both ego and track velocity
+        velocity_z = ego_speed_in_radar_fc.vector.z + track.velocity.z # this value is zero for both ego and track velocity
         velocity_vector = Vector3(velocity_x, velocity_y, velocity_z)
 
         # transforming the velocity vector to map frame
-        velocity_in_map = Twist(linear = self.get_tfed_vector3(velocity_vector, source_frame))
+        velocity_in_map = Twist(linear=self.get_tfed_vector3(velocity_vector, source_frame))
 
         return velocity_in_map
 
     def get_tfed_pose(self, position, source_frame):
         """
         :type pose_with_cov: PoseWithCovariance
-        :type source_frame: str
+        :type source_header: str
         :returns: tfed Pose to the output_frame
         """
-
         # To apply a TF we need a pose stamped
         pose_stamped = PoseStamped()
         pose_stamped.pose.position = position
-        pose_stamped.header.frame_id = source_frame
-        tfed_pose = self.tf_listener.transformPose(self.output_frame, pose_stamped).pose
+        source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, source_frame, rospy.Time(0))
+        tfed_pose = tf2_geometry_msgs.do_transform_pose(pose_stamped, source_frame_to_output_tf).pose
         return tfed_pose
 
     def get_tfed_vector3(self, vector3, source_frame):
         """
         :type vector3: Vector3
-        :type source_frame: str
+        :type source_header: str
         :returns: tfed Vector3 to the output_frame class variable
         """
-
         # To apply a TF we need a Vector3 stamped
         vector3_stamped = Vector3Stamped(vector=vector3)
-        vector3_stamped.header.frame_id = source_frame
-        tfed_vector3 = self.tf_listener.transformVector3(self.output_frame, vector3_stamped).vector
+        source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, source_frame, rospy.Time(0))
+        tfed_vector3 = tf2_geometry_msgs.do_transform_vector3(vector3_stamped, source_frame_to_output_tf).vector
         return tfed_vector3
 
     def produce_hull(self, obj_pose, obj_dims, stamp):
