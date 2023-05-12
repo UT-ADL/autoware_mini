@@ -6,16 +6,13 @@ import numpy as np
 import math
 
 from sklearn.neighbors import NearestNeighbors
-from helpers.timer import Timer
+from helpers import get_distance_between_two_points
+from image_geometry import PinholeCameraModel
 
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 
-from helpers import get_distance_between_two_points
-
-from image_geometry import PinholeCameraModel
-
-from geometry_msgs.msg import PoseStamped, PointStamped, Point
+from geometry_msgs.msg import PointStamped, Point
 from sensor_msgs.msg import CameraInfo
 from autoware_msgs.msg import Lane, Signals, ExtractedPosition
 
@@ -96,11 +93,9 @@ class TrafficLightPositionExtractor:
 
     def local_path_callback(self, msg):
         
-        t2 = Timer()
-        
         signals_on_image = []
 
-        if len(msg.waypoints) > 0:
+        if len(msg.waypoints) > 0 and self.image_time is not None:
 
             # Extract waypoints and create array - xy coordinates only
             waypoints_xy = np.array([(wp.pose.pose.position.x, wp.pose.pose.position.y) for wp in msg.waypoints])
@@ -109,7 +104,6 @@ class TrafficLightPositionExtractor:
             stopline_idx = np.unique(np.hstack(stopline_idx))
             stoplines_on_path = [int(self.stopline_array[idx][0]) for idx in stopline_idx]
             signals_on_path = list(filter(lambda signal: int(signal[0]) in stoplines_on_path, self.signal_array))
-            t2("signals_on_path")
 
             # TODO - currently approximation - 2m behind the cameras
             current_position = Point(x = waypoints_xy[0][0], y = waypoints_xy[0][1], z = 0.0)
@@ -144,7 +138,6 @@ class TrafficLightPositionExtractor:
                 extracted_position.signalId = int(signal[2])
                 extracted_position.u = int(round(point_image[0]))
                 extracted_position.v = int(round(point_image[1]))
-                # TODO - radius
                 extracted_position.radius = math.ceil(radius)
                 extracted_position.x = float(signal[4])
                 extracted_position.y = float(signal[5])
@@ -159,14 +152,10 @@ class TrafficLightPositionExtractor:
         # publish signals
         signals = Signals()
         # TODO: write image timestamp?
-        #signals.header.stamp = rospy.Time.now()
+        signals.header.stamp = self.image_time if self.image_time is not None else rospy.Time.now()
         signals.header.frame_id = "camera_fl"
         signals.Signals = signals_on_image
         self.signals_pub.publish(signals)
-
-
-        t2("local_path_callback - end")
-        print(t2)
 
 
     def camera_info_callback(self, msg):
