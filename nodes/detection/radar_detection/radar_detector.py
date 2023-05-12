@@ -23,7 +23,7 @@ class RadarDetector:
         self.consistency_check = rospy.get_param("~consistency_check", 5) # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
         self.id_count = defaultdict(int) # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
         self.id_counter = 0 # counter for generating id from uuids
-        self.uuid_map = {}
+        self.uuid_map = {} # dictionary containing uuid-integer id pairs
 
         # Publishers
         self.detected_objs_pub = rospy.Publisher("detected_objects", DetectedObjectArray, queue_size=1)
@@ -48,34 +48,13 @@ class RadarDetector:
         """
         tracks: radar_msgs/RadarTracks
         ego_speed: geometry_msgs/TwistStamped
+        publish: DetectedObjectArray
         """
-        detected_objs = self.generate_detected_objects_array(tracks, ego_speed)
-        # Checks is there is something to publish before publishing
-        if detected_objs is not None:
-            self.detected_objs_pub.publish(detected_objs)
-
-    def is_consistent(self, track_id):
-        self.id_count[track_id] += 1
-        return self.id_count[track_id] >= self.consistency_check
-
-    def remove_old_tracks(self, id_list):
-        lost_tracks = self.id_count.keys() - id_list
-        for key in list(lost_tracks):
-            if key in self.id_count:
-                del self.id_count[key]
-
-    def generate_detected_objects_array(self, tracks, ego_speed):
-        """
-        tracks: radar_msgs/RadarTracks
-        ego_speed: speed of the ego vehicle (geometry_msgs/TwistStamped)
-        returns: array of autoware Detected Objects (DetectedObjectArray) tfed to the output_frame class variable
-        """
-        # placeholders for detected objects
         detected_objects_array = DetectedObjectArray()
         detected_objects_array.header.frame_id = self.output_frame
         detected_objects_array.header.stamp = tracks.header.stamp
 
-        # frame_id of recieved objects
+        # frame_id of recieved tracks
         source_frame = tracks.header.frame_id
         # converting uuids to integer values
         id_list = []
@@ -91,7 +70,7 @@ class RadarDetector:
         # removing tracks that have been lost (ids not detected anymore)
         self.remove_old_tracks(id_list)
 
-        for i, track in enumerate(tracks.tracks):  # type: RadarTrack
+        for i, track in enumerate(tracks.tracks):  # type: radar_msgs/RadarTrack
             ## Check if the radar id is consistent over a few frames. Number of frames is dictated by the param named consistency_check
             if not self.is_consistent(id_list[i]):
                 continue
@@ -113,7 +92,18 @@ class RadarDetector:
             detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, tracks.header.stamp)
 
             detected_objects_array.objects.append(detected_object)
-        return detected_objects_array
+
+        self.detected_objs_pub.publish(detected_objects_array)
+
+    def is_consistent(self, track_id):
+        self.id_count[track_id] += 1
+        return self.id_count[track_id] >= self.consistency_check
+
+    def remove_old_tracks(self, id_list):
+        lost_tracks = self.id_count.keys() - id_list
+        for key in list(lost_tracks):
+            if key in self.id_count:
+                del self.id_count[key]
 
     def get_tfed_velocity(self, track, ego_speed, source_frame):
 
@@ -123,7 +113,6 @@ class RadarDetector:
         :param source_header: frame in which to transform the velocity vector. Map in  most cases unless specifically required and changed
         :return: velocity vector transformed to map frame (geometry_msgs/Twist)
         """
-
         # compute ego_velocity in radar_fc frame
         ego_speed_in_base = Vector3Stamped(vector=ego_speed.twist.linear)
         ego_speed_in_radar_fc = tf2_geometry_msgs.do_transform_vector3(ego_speed_in_base, self.base_link_to_radar_tf)
