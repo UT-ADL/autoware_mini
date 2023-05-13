@@ -110,6 +110,6 @@ class LidarRadarFusion:
 
 
 if __name__ == '__main__':
-    rospy.init_node('radar_lidar_fusion', anonymous=True, log_level=rospy.INFO)
+    rospy.init_node('lidar_radar_fusion', log_level=rospy.INFO)
     node = LidarRadarFusion()
     node.run()
