@@ -2,8 +2,6 @@
 
 import rospy
 import message_filters
-
-from visualization_msgs.msg import MarkerArray
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
@@ -11,33 +9,27 @@ from math import sqrt
 from shapely.geometry import Polygon, Point
 
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.8)
+
 class LidarRadarFusion:
     def __init__(self):
 
         # Parameters
-        radar_detections_topic = rospy.get_param("~in_radar_detections_topic", 'radar/detected_objects')
-        lidar_detections_topic = rospy.get_param("~in_lidar_detections_topic", 'lidar/detected_objects')
-        marker_array_topic = rospy.get_param("~out_marker_array_topic", 'detected_objects_markers')
-        detected_object_array_topic = rospy.get_param("~out_tracked_objects", 'detected_objects')
-
         self.matching_distance = rospy.get_param("~matching_distance") # radius threshold value around lidar centroid for a radar object to be considered matched
         self.radar_speed_threshold = rospy.get_param("~radar_speed_threshold")  # Threshold for filtering out stationary objects based on speed
         self.replace_speed_with_norm = rospy.get_param("~replace_speed_with_norm")  # Replace lidar and radar object speeds with norms in their respective x components
 
-        # Publishers
-        self.marker_array_pub = rospy.Publisher(marker_array_topic, MarkerArray, queue_size=1)
-        self.detected_object_array_pub = rospy.Publisher(detected_object_array_topic, DetectedObjectArray, queue_size=1)
-
         # Subscribers and tf listeners
-        radar_detections_sub = message_filters.Subscriber(radar_detections_topic, DetectedObjectArray)
-        lidar_detections_sub = message_filters.Subscriber(lidar_detections_topic, DetectedObjectArray)
+        radar_detections_sub = message_filters.Subscriber('radar/detected_objects', DetectedObjectArray, queue_size=1)
+        lidar_detections_sub = message_filters.Subscriber('lidar/detected_objects', DetectedObjectArray, queue_size=1)
 
         # Sync
-        ts = message_filters.ApproximateTimeSynchronizer([radar_detections_sub, lidar_detections_sub],
-                                                         queue_size=15, slop=0.05)
+        ts = message_filters.ApproximateTimeSynchronizer([radar_detections_sub, lidar_detections_sub], queue_size=15, slop=0.05)
         ts.registerCallback(self.radar_lidar_data_callback)
+        # Publishers
+        self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
 
-        rospy.loginfo(self.__class__.__name__ + " - Initialized")
+        rospy.loginfo(rospy.get_name().split('/')[-1] + " - Initialized")
+
     def radar_lidar_data_callback(self, radar_detections, lidar_detections):
         """
         :type radar_detections: DetectedObjectArray
@@ -47,7 +39,7 @@ class LidarRadarFusion:
 
         matches, within_hull_radar_ids = self.match_objects(radar_prepared, lidar_prepared)
 
-        merged_objects, viz_messages = self.process_matches(matches, radar_prepared, lidar_prepared, within_hull_radar_ids)
+        merged_objects = self.process_matches(matches, radar_prepared, lidar_prepared, within_hull_radar_ids)
         merged_objects.header = lidar_detections.header
         self.detected_object_array_pub.publish(merged_objects)
 
@@ -124,7 +116,6 @@ class LidarRadarFusion:
         :type lidar_prepared: Dict of DetectedObject
         """
         merged_objects = DetectedObjectArray()
-        viz_messages = MarkerArray()
         for match in matches:
 
             # merge all matched objects
@@ -147,8 +138,7 @@ class LidarRadarFusion:
             if id_radar not in within_hull_radar_ids and radar_speed >= self.radar_speed_threshold:
                 merged_objects.objects.append(radar_object)
 
-        return merged_objects, viz_messages
-
+        return merged_objects
     def merge_object(self, radar_object, lidar_object):
         """
         :type radar_object: DetectedObject
