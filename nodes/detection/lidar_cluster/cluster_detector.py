@@ -22,7 +22,7 @@ class ClusterDetector:
         self.bounding_box_type = rospy.get_param('~bounding_box_type')
         self.enable_pointcloud = rospy.get_param('~enable_pointcloud')
         self.enable_convex_hull = rospy.get_param('~enable_convex_hull')
-        self.target_frame = rospy.get_param('~target_frame')
+        self.output_frame = rospy.get_param('output_frame')
         self.transform_timeout = rospy.get_param('~transform_timeout')
 
         self.tf_listener = tf.TransformListener()
@@ -41,12 +41,12 @@ class ClusterDetector:
         points = data.view((np.float32, 4))
 
         # if target frame does not match the header frame
-        if msg.header.frame_id != self.target_frame:
+        if msg.header.frame_id != self.output_frame:
             # wait for target frame transform to be available
             if self.transform_timeout > 0:
-                self.tf_listener.waitForTransform(self.target_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
+                self.tf_listener.waitForTransform(self.output_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
             # fetch transform for target frame
-            tf_matrix = self.tf_listener.asMatrix(self.target_frame, msg.header).astype(np.float32).T
+            tf_matrix = self.tf_listener.asMatrix(self.output_frame, msg.header).astype(np.float32).T
             # make copy of points
             points = points.copy()
             # turn into homogeneous coordinates
@@ -55,7 +55,7 @@ class ClusterDetector:
             points = points.dot(tf_matrix)
 
         # prepare header for all objects
-        header = Header(stamp=msg.header.stamp, frame_id=self.target_frame)
+        header = Header(stamp=msg.header.stamp, frame_id=self.output_frame)
 
         # create detected objects
         objects = DetectedObjectArray(header=header)
@@ -103,7 +103,7 @@ class ClusterDetector:
             object.label = "unknown"
             object.color = BLUE80P
             object.valid = True
-            object.space_frame = self.target_frame
+            object.space_frame = self.output_frame
             object.pose.position.x = center_x
             object.pose.position.y = center_y
             object.pose.position.z = center_z

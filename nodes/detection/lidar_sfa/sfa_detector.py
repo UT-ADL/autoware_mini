@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import rospy
-import math
 import numpy as np
 import cv2
 
@@ -16,6 +15,8 @@ from std_msgs.msg import ColorRGBA
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 
 import onnxruntime
+
+from helpers.detection import create_hull
 
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 
@@ -47,7 +48,7 @@ class SFADetector:
 
         self.score_thresh = rospy.get_param("~score_thresh")  # score filter
         self.top_k = rospy.get_param("~top_k")  # number of top scoring detections to process
-        self.output_frame = rospy.get_param("~output_frame")  # transform detected objects from lidar frame to this frame
+        self.output_frame = rospy.get_param("output_frame")  # transform detected objects from lidar frame to this frame
         self.transform_timeout = rospy.get_param('~transform_timeout') # transform timeout when waiting for transform to output frame
 
         self.model = self.load_onnx(self.onnx_path) # get onnx model
@@ -353,38 +354,11 @@ class SFADetector:
             detected_object.dimensions.y = width
             detected_object.dimensions.z = height
             # Populate convex hull
-            detected_object.convex_hull = self.create_hull(detected_object.pose, detected_object.dimensions, header.stamp)
+            detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, header.stamp)
 
             detected_objects_list.append(detected_object)
 
         return detected_objects_list
-
-    def create_hull(self, obj_pose, obj_dims, stamp):
-
-        """
-        Produce convex hull for an object given its pose and dimensions
-        :param obj_pose: geometry_msgs/Pose. Position and orientation of object
-        :param obj_dims: Vector3 - length, width and height of object
-        :param vella_stamp: Time stamp at which the lidar pointcloud was created
-        :return: geometry_msgs/PolygonStamped
-        """
-        convex_hull = PolygonStamped()
-        convex_hull.header.frame_id = self.output_frame
-        convex_hull.header.stamp = stamp
-
-        # compute heading angle from object's orientation
-        _, _, heading = euler_from_quaternion(
-            (obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w))
-
-        # use cv2.boxPoints to get a rotated rectangle given the angle
-        points = cv2.boxPoints((
-            (obj_pose.position.x, obj_pose.position.y),
-            (obj_dims.x, obj_dims.y),
-            math.degrees(heading)
-        ))
-        convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
-
-        return convex_hull
 
     def run(self):
         rospy.spin()

@@ -3,9 +3,7 @@
 from __future__ import print_function
 from __future__ import division
 
-import math
 import numpy as np
-import cv2
 
 import rospy
 from tf2_ros import Buffer, TransformListener
@@ -17,6 +15,8 @@ from vella_msgs.msg import Track3DArray
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from geometry_msgs.msg import PolygonStamped, Point, PoseStamped
 
+from helpers.detection import create_hull
+
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 MPH_TO_MS_MULTIPLIER = 0.447 # if we find out that vella speeds are indeed given in mph then multiply our speed with this constant  to get speeds in m/s
 
@@ -26,7 +26,7 @@ class VellaDetector:
         self.confidence_filter = rospy.get_param("~confidence_filter") # filter out objects with score less than this threshold
         self.track_length_filter = rospy.get_param("~track_length_filter") # filter out objects with track length less than this threshold
         self.lidar_frame = rospy.get_param("~lidar_frame") # frame_id for tracks published by vella - vella does not populate frame_id of vdk/tracks messages
-        self.output_frame = rospy.get_param("~output_frame")  # transform vella tracks from lidar frame to this frame
+        self.output_frame = rospy.get_param("output_frame")  # transform vella tracks from lidar frame to this frame
         self.transform_timeout = rospy.get_param("~transform_timeout")  # transform timeout when transforming poses
 
         # transform listener
@@ -107,38 +107,9 @@ class VellaDetector:
         detected_object.dimensions.z = vella_track.height
 
         # produce convex hull
-        detected_object.convex_hull = self.create_hull(detected_object.pose, detected_object.dimensions, vella_stamp)
+        detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, vella_stamp)
 
         return detected_object
-
-    def create_hull(self, obj_pose, obj_dims, vella_stamp):
-
-        """
-        Produce convex hull for an object given its pose and dimensions
-        :param obj_pose: geometry_msgs/Pose. Position and orientation of object
-        :param obj_dims: Vector3 - length, width and height of object
-        :param vella_stamp: Time stamp at which vella track was creatd
-        :return: geometry_msgs/PolygonStamped
-        """
-        convex_hull = PolygonStamped()
-        convex_hull.header.frame_id = self.output_frame
-        convex_hull.header.stamp = vella_stamp
-
-        # Taken from Autoware mini
-        # compute heading angle from object's orientation
-        _, _, heading  = euler_from_quaternion((obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w))
-
-        # use cv2.boxPoints to get a rotated rectangle given the angle
-        points = cv2.boxPoints((
-                                (obj_pose.position.x, obj_pose.position.y),
-                                (obj_dims.x, obj_dims.y),
-                                math.degrees(heading)
-                                ))
-        convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
-        # Add the first polygon point to the list of points to make it 5 points in total and complete the loop
-        convex_hull.polygon.points.append(convex_hull.polygon.points[0])
-
-        return convex_hull
 
     def run(self):
         rospy.spin()
