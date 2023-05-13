@@ -42,15 +42,11 @@ class ClusterDetector:
 
         # if target frame does not match the header frame
         if msg.header.frame_id != self.target_frame:
-            try:
-                # wait for target frame transform to be available
-                if self.transform_timeout > 0:
-                    self.tf.waitForTransform(self.target_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
-                # fetch transform for target frame
-                tf_matrix = self.tf.asMatrix(self.target_frame, msg.header).astype(np.float32).T
-            except Exception as e:
-                rospy.logerr(str(e))
-                return
+            # wait for target frame transform to be available
+            if self.transform_timeout > 0:
+                self.tf.waitForTransform(self.target_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
+            # fetch transform for target frame
+            tf_matrix = self.tf.asMatrix(self.target_frame, msg.header).astype(np.float32).T
             # make copy of points
             points = points.copy()
             # turn into homogeneous coordinates
