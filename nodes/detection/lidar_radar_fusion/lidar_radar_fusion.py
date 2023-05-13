@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-
+import numpy as np
 import rospy
+import cv2
 import message_filters
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
-from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
 from math import sqrt
-from shapely.geometry import Polygon, Point
 
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.8)
 
@@ -76,22 +75,18 @@ class LidarRadarFusion:
         for id_lidar, lidar_object in lidar_prepared.items():
 
             # Extracting lidar hull points
-            lidar_hull = [(hull_point.x, hull_point.y) for hull_point in lidar_object.convex_hull.polygon.points] #unpacking geometry_msg/Point32 to float values
-
-            # converting the convex hull to shapely Polygon for further processing
-            shapely_lidar_hull = Polygon(lidar_hull)
+            lidar_hull = np.array([[hull_point.x, hull_point.y] for hull_point in lidar_object.convex_hull.polygon.points], dtype=np.float32) #unpacking geometry_msg/Point32 to float values
 
             min_radar_speed = 9999
             match_radar_id = None
             # For each radar object check if its centroid lies within the convex hull of the lidar object
             # or if the distance between the two centroids is smaller than the matching distance
             for id_radar, radar_object in radar_prepared.items():
-
-                radar_object_centroid = Point(radar_object.pose.position.x, radar_object.pose.position.y)
+                radar_object_centroid = (radar_object.pose.position.x, radar_object.pose.position.y)
                 distance = self.compute_distance(radar_prepared[id_radar], lidar_prepared[id_lidar])
 
-                # check if the radar object falls within the lidar hull
-                is_within_hull = shapely_lidar_hull.contains(radar_object_centroid)
+                # check if the radar object falls within(+1) or one the edge(0) of the lidar hull
+                is_within_hull = cv2.pointPolygonTest(lidar_hull, radar_object_centroid, measureDist=False) >= 0
                 if is_within_hull:
                     within_hull_radar_ids.append(id_radar)
 
