@@ -25,7 +25,7 @@ class ClusterDetector:
         self.target_frame = rospy.get_param('~target_frame')
         self.transform_timeout = rospy.get_param('~transform_timeout')
 
-        self.tf = tf.TransformListener()
+        self.tf_listener = tf.TransformListener()
 
         self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         rospy.Subscriber('points_clustered', PointCloud2, self.cluster_callback, queue_size=1, buff_size=1024*1024)
@@ -44,9 +44,9 @@ class ClusterDetector:
         if msg.header.frame_id != self.target_frame:
             # wait for target frame transform to be available
             if self.transform_timeout > 0:
-                self.tf.waitForTransform(self.target_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
+                self.tf_listener.waitForTransform(self.target_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
             # fetch transform for target frame
-            tf_matrix = self.tf.asMatrix(self.target_frame, msg.header).astype(np.float32).T
+            tf_matrix = self.tf_listener.asMatrix(self.target_frame, msg.header).astype(np.float32).T
             # make copy of points
             points = points.copy()
             # turn into homogeneous coordinates

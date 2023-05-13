@@ -42,6 +42,7 @@ lidar:
     track_length_filter: 0
     lidar_frame: lidar_center
     output_frame: map
+    transform_timeout: 0.05
 
 obstacle_simulation:
   publish_rate: 10

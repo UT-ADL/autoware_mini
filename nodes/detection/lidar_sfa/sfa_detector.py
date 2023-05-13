@@ -5,11 +5,12 @@ import math
 import numpy as np
 import cv2
 
-import tf
-from tf.transformations import quaternion_multiply, quaternion_from_euler, euler_from_quaternion
+from tf2_ros import TransformListener, Buffer
+from tf2_geometry_msgs import do_transform_pose
+from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from ros_numpy import numpify
 
-from geometry_msgs.msg import Quaternion, Point, PolygonStamped, Pose
+from geometry_msgs.msg import Quaternion, Point, PolygonStamped, PoseStamped
 from sensor_msgs.msg import PointCloud2
 from std_msgs.msg import ColorRGBA
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
@@ -54,7 +55,8 @@ class SFADetector:
         rospy.loginfo("sfa_detector - loaded ONNX model file %s", self.onnx_path)
 
         # transform listener
-        self.tf_listener = tf.TransformListener()
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer)
 
         # Subscribers and Publishers
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
@@ -71,11 +73,9 @@ class SFADetector:
         pointcloud: raw lidar data points
         return: None - publish autoware DetectedObjects
         """
-        self.tf_listener.waitForTransform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp, rospy.Duration(self.transform_timeout))
-        # get the transform (translation and rotation) from lidar frame to output frame at the time when the poinctloud msg was published
-        trans, tf_rot = self.tf_listener.lookupTransform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp)
-        # convert the looked up transform to a 4x4 homogenous transformation matrix.
-        tf_matrix = self.tf_listener.fromTranslationRotation(trans, tf_rot)
+        # get the transform from lidar frame to output frame at the time when the poinctloud msg was published
+        transform = self.tf_buffer.lookup_transform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp, rospy.Duration(self.transform_timeout))
+
         # Unpack pointcloud2 msg ype to numpy array
         pcd_array = numpify(pointcloud)
 
@@ -91,7 +91,7 @@ class SFADetector:
         detected_objects_array.header.frame_id = self.output_frame
 
         final_detections = self.detect(points, only_front=self.only_front)
-        detected_objects_array.objects = self.generate_autoware_objects(final_detections, pointcloud.header, tf_matrix, tf_rot)
+        detected_objects_array.objects = self.generate_autoware_objects(final_detections, pointcloud.header, transform)
         self.detected_object_array_pub.publish(detected_objects_array)
 
     def detect(self, points, only_front):
@@ -321,7 +321,7 @@ class SFADetector:
     def get_yaw(self, direction):
         return -np.arctan2(direction[:, 0:1], direction[:, 1:2])
 
-    def generate_autoware_objects(self, detections, header, tf_matrix, tf_rot):
+    def generate_autoware_objects(self, detections, header, transform):
 
         """
         Generate Autoware DetectedObject from Detections
@@ -341,11 +341,11 @@ class SFADetector:
             detected_object.label = CLASS_NAMES[cls_id]
             detected_object.color = LIGHT_BLUE
             detected_object.valid = True
-
-            position_in_lidar = np.array([x, y, z, 1])
-            orientation_in_lidar = quaternion_from_euler(0, 0, yaw)
-
-            detected_object.pose = self.transform_pose(position_in_lidar, orientation_in_lidar, tf_matrix, tf_rot)
+            pose_stamped = PoseStamped()
+            pose_stamped.pose.position = Point(x, y, z)
+            x, y, z, w = quaternion_from_euler(0, 0, yaw)
+            pose_stamped.pose.orientation = Quaternion(x, y, z, w) 
+            detected_object.pose = do_transform_pose(pose_stamped, transform).pose
             detected_object.pose_reliable = True
 
             # object dimensions
@@ -353,28 +353,13 @@ class SFADetector:
             detected_object.dimensions.y = width
             detected_object.dimensions.z = height
             # Populate convex hull
-            detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, header.stamp)
+            detected_object.convex_hull = self.create_hull(detected_object.pose, detected_object.dimensions, header.stamp)
 
             detected_objects_list.append(detected_object)
 
         return detected_objects_list
 
-    def transform_pose(self, position, orientation, tf_matrix, tf_rot):
-
-        # create Pose object.
-        transformed_pose = Pose()
-        # transform input pose's position using the transformation matrix
-        transformed_x, transformed_y, transformed_z, _ = np.dot(tf_matrix, position)
-        transformed_pose.position = Point(transformed_x, transformed_y, transformed_z)
-
-        # transform the objects' orientation quaternion to output frame by multiplying it with the transform quaternion.
-        # Note: it's not an ordinary element-wise multiplication
-        x, y, z, w = quaternion_multiply(tf_rot, orientation)
-        transformed_pose.orientation = Quaternion(x, y, z, w)
-
-        return transformed_pose
-
-    def produce_hull(self, obj_pose, obj_dims, stamp):
+    def create_hull(self, obj_pose, obj_dims, stamp):
 
         """
         Produce convex hull for an object given its pose and dimensions
@@ -387,7 +372,6 @@ class SFADetector:
         convex_hull.header.frame_id = self.output_frame
         convex_hull.header.stamp = stamp
 
-        # Taken from Autoware mini
         # compute heading angle from object's orientation
         _, _, heading = euler_from_quaternion(
             (obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w))
