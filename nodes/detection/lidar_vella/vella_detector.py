@@ -26,7 +26,7 @@ class VellaDetector:
         self.confidence_filter = rospy.get_param("~confidence_filter") # filter out objects with score less than this threshold
         self.track_length_filter = rospy.get_param("~track_length_filter") # filter out objects with track length less than this threshold
         self.lidar_frame = rospy.get_param("~lidar_frame") # frame_id for tracks published by vella - vella does not populate frame_id of vdk/tracks messages
-        self.output_frame = rospy.get_param("output_frame")  # transform vella tracks from lidar frame to this frame
+        self.output_frame = rospy.get_param("/detection/output_frame")  # transform vella tracks from lidar frame to this frame
         self.transform_timeout = rospy.get_param("~transform_timeout")  # transform timeout when transforming poses
 
         # transform listener

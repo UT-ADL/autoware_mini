@@ -48,7 +48,7 @@ class SFADetector:
 
         self.score_thresh = rospy.get_param("~score_thresh")  # score filter
         self.top_k = rospy.get_param("~top_k")  # number of top scoring detections to process
-        self.output_frame = rospy.get_param("output_frame")  # transform detected objects from lidar frame to this frame
+        self.output_frame = rospy.get_param("/detection/output_frame")  # transform detected objects from lidar frame to this frame
         self.transform_timeout = rospy.get_param('~transform_timeout') # transform timeout when waiting for transform to output frame
 
         self.model = self.load_onnx(self.onnx_path) # get onnx model

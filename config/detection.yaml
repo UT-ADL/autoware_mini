@@ -1,6 +1,6 @@
-lidar:
-  output_frame: map
+output_frame: map
 
+lidar:
   ground_removal:
     min_x: -60.0
     max_x: 60.0

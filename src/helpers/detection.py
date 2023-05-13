@@ -9,7 +9,8 @@ def create_hull(obj_pose, obj_dims, output_frame, stamp):
     Produce convex hull for an object given its pose and dimensions
     :param obj_pose: geometry_msgs/Pose. Position and orientation of object
     :param obj_dims: Vector3 - length, width and height of object
-    :param vella_stamp: Time stamp at which the lidar pointcloud was created
+    :param output_frame: string frame_id for the convex hull
+    :param stamp: Time stamp at which the lidar pointcloud was created
     :return: geometry_msgs/PolygonStamped
     """
     convex_hull = PolygonStamped()

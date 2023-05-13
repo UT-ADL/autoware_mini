@@ -44,6 +44,7 @@ class CarlaDetector:
         use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
+        self.output_frame = rospy.get_param("/detection/output_frame")
 
         # Internal parameters
         self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
@@ -75,7 +76,7 @@ class CarlaDetector:
             object_msg.color = YELLOW80P
             object_msg.score = 1
             object_msg.valid = True
-            object_msg.space_frame = 'map'
+            object_msg.space_frame = self.output_frame
             object_msg.pose = obj.pose
 
             if self.use_offset:
@@ -86,7 +87,7 @@ class CarlaDetector:
             object_msg.dimensions.z = obj.shape.dimensions[2]
             object_msg.velocity = obj.twist
             object_msg.acceleration = obj.accel
-            object_msg.convex_hull = create_hull(object_msg.pose, object_msg.dimensions, object_msg.space_frame, object_msg.header.stamp)
+            object_msg.convex_hull = create_hull(object_msg.pose, object_msg.dimensions, self.output_frame, object_msg.header.stamp)
             object_msg.pose_reliable = True
             object_msg.velocity_reliable = True
             object_msg.acceleration_reliable = True

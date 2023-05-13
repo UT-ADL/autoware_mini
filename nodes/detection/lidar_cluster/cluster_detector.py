@@ -22,7 +22,7 @@ class ClusterDetector:
         self.bounding_box_type = rospy.get_param('~bounding_box_type')
         self.enable_pointcloud = rospy.get_param('~enable_pointcloud')
         self.enable_convex_hull = rospy.get_param('~enable_convex_hull')
-        self.output_frame = rospy.get_param('output_frame')
+        self.output_frame = rospy.get_param('/detection/output_frame')
         self.transform_timeout = rospy.get_param('~transform_timeout')
 
         self.tf_listener = tf.TransformListener()
