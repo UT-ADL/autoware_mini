@@ -4,7 +4,7 @@ import threading
 import math
 
 import rospy
-from tf import TransformBroadcaster
+from tf2_ros import TransformBroadcaster
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Quaternion, Point
@@ -141,13 +141,17 @@ class BicycleSimulation:
 
     def publish_base_link_to_map_tf(self, stamp):
             
-        self.br.sendTransform(
-            (self.x, self.y, 0.0),
-            (self.orientation.x, self.orientation.y, self.orientation.z, self.orientation.w),
-            stamp,
-            "base_link",
-            "map"
-        )
+        t = TransformStamped()
+
+        t.header.stamp = stamp
+        t.header.frame_id = "map"
+        t.child_frame_id = "base_link"
+
+        t.transform.translation.x = self.x
+        t.transform.translation.y = self.y
+        t.transform.rotation = self.orientation
+
+        self.br.sendTransform(t)
 
     def publish_current_pose(self, stamp):
 
