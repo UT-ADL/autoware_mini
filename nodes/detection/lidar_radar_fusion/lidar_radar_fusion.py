@@ -23,13 +23,13 @@ class LidarRadarFusion:
 
         # Sync
         ts = message_filters.ApproximateTimeSynchronizer([radar_detections_sub, lidar_detections_sub], queue_size=15, slop=0.05)
-        ts.registerCallback(self.radar_lidar_data_callback)
+        ts.registerCallback(self.lidar_radar_callback)
         # Publishers
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
 
         rospy.loginfo(rospy.get_name().split('/')[-1] + " - Initialized")
 
-    def radar_lidar_data_callback(self, radar_detections, lidar_detections):
+    def lidar_radar_callback(self, radar_detections, lidar_detections):
         """
         radar_detections: DetectedObjectArray
         lidar_detections: DetectedObjectArray
