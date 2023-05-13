@@ -17,14 +17,15 @@ class LidarRadarFusion:
         self.matching_distance = rospy.get_param("~matching_distance") # radius threshold value around lidar centroid for a radar object to be considered matched
         self.radar_speed_threshold = rospy.get_param("~radar_speed_threshold")  # Threshold for filtering out stationary objects based on speed
 
-        # Subscribers and tf listeners
+        # Subscribers
         radar_detections_sub = message_filters.Subscriber('radar/detected_objects', DetectedObjectArray, queue_size=1)
         lidar_detections_sub = message_filters.Subscriber('lidar/detected_objects', DetectedObjectArray, queue_size=1)
 
         # Sync
         ts = message_filters.ApproximateTimeSynchronizer([radar_detections_sub, lidar_detections_sub], queue_size=15, slop=0.05)
         ts.registerCallback(self.lidar_radar_callback)
-        # Publishers
+
+        # Publisher
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
 
         rospy.loginfo(rospy.get_name().split('/')[-1] + " - Initialized")
@@ -77,8 +78,10 @@ class LidarRadarFusion:
                         matched_radar_detection = radar_detection
 
             if matched_radar_detection is None:
+                # if unmatched, publish unfused lidar detection
                 final_detections.objects.append(lidar_detection)
             else:
+                # if a match found, fuse detections and publish the fused one
                 fused_detection = self.fuse_detections(lidar_detection, matched_radar_detection)
                 final_detections.objects.append(fused_detection)
 
