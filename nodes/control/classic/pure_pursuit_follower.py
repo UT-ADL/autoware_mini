@@ -28,6 +28,7 @@ class PurePursuitFollower:
         self.publish_debug_info = rospy.get_param("~publish_debug_info")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
+        self.speed_deceleration_limit = rospy.get_param("/planning/speed_deceleration_limit")
 
         # Variables - init
         self.waypoint_tree = None
@@ -137,9 +138,14 @@ class PurePursuitFollower:
 
         # if decelerating because of obstacle then calculate necessary deceleration to stop at safety distance
         if closest_object_distance - self.braking_safety_distance > 0:
-            acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), 0.0)
+            # always allow minimum deceleration, to be able to adapt to map speeds
+            acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), -self.speed_deceleration_limit)
         # otherwise use vehicle default deceleration limit
         else:
+            acceleration = 0.0
+
+        # fix for Carla - acceleration cannot be negative if target velocity is higher than current velocity
+        if acceleration < 0.0 and target_velocity > current_velocity:
             acceleration = 0.0
 
         # blinkers
