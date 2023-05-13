@@ -67,12 +67,15 @@ class BicycleSimulation:
         self.target_velocity = msg.ctrl_cmd.linear_velocity
         # calculate acceleration based on limits
         if self.target_velocity > self.velocity:
-            self.acceleration = self.acceleration_limit
-        elif self.target_velocity < self.velocity:
-            if msg.ctrl_cmd.linear_acceleration == 0.0:
-                self.acceleration = -self.deceleration_limit
+            if msg.ctrl_cmd.linear_acceleration > 0.0:
+                self.acceleration = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
             else:
-                self.acceleration = -min(abs(msg.ctrl_cmd.linear_acceleration), self.deceleration_limit)
+                self.acceleration = self.acceleration_limit
+        elif self.target_velocity < self.velocity:
+            if msg.ctrl_cmd.linear_acceleration < 0.0:
+                self.acceleration = -min(-msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
+            else:
+                self.acceleration = -self.deceleration_limit
         else:
             self.acceleration = 0.0
 
