@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 
-import rospy
-from collections import defaultdict
 import cv2
+from collections import defaultdict
+
+import rospy
 import tf2_ros
 import tf2_geometry_msgs
 from tf.transformations import euler_from_quaternion
-from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point,PolygonStamped
+import message_filters
+from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point, PolygonStamped
 from autoware_msgs.msg import DetectedObject, DetectedObjectArray
 from radar_msgs.msg import RadarTrack, RadarTracks
 from std_msgs.msg import ColorRGBA
-import message_filters
 
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
 RADAR_CLASSIFICATION = {0: 'unknown', 1:'static', 2:'dynamic'}
