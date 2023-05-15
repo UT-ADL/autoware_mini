@@ -67,28 +67,19 @@ class LidarRadarFusion:
                         min_radar_speed = radar_speed
                         matched_radar_detection = radar_detection
 
-            if matched_radar_detection is None:
-                # if unmatched, publish unfused lidar detection
+            if matched_radar_detection is not None:
+                # if a match found, fuse detections and publish the fused one
+                lidar_detection.velocity = matched_radar_detection.velocity
+                lidar_detection.velocity_reliable = True
+                lidar_detection.acceleration = matched_radar_detection.acceleration
+                lidar_detection.acceleration_reliable = True
+                lidar_detection.color = GREEN
                 final_detections.objects.append(lidar_detection)
             else:
-                # if a match found, fuse detections and publish the fused one
-                fused_detection = self.fuse_detections(lidar_detection, matched_radar_detection)
-                final_detections.objects.append(fused_detection)
+                # if unmatched, publish unfused lidar detection
+                final_detections.objects.append(lidar_detection)
 
         self.detected_object_array_pub.publish(final_detections)
-
-    def fuse_detections(self, lidar_detection, radar_detection):
-        """
-        lidar_detection: DetectedObject
-        radar_detection: DetectedObject
-        return: lidar_detection - fused detection of type DetectedObject
-        """
-        lidar_detection.velocity = radar_detection.velocity
-        lidar_detection.velocity_reliable = True
-        lidar_detection.acceleration = radar_detection.acceleration
-        lidar_detection.acceleration_reliable = True
-        lidar_detection.color = GREEN
-        return lidar_detection
 
     @staticmethod
     def compute_distance(obj1, obj2):
