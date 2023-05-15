@@ -24,7 +24,7 @@ class RadarDetector:
         # Parameters
         self.output_frame = rospy.get_param("/detection/output_frame")
         self.consistency_check = rospy.get_param("~consistency_check") # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
-        self.id_count = defaultdict(int) # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
+        self.uuid_count = defaultdict(int) # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
         self.id_counter = 0 # counter for generating id from uuids
         self.uuid_map = {} # dictionary containing uuid-integer id pairs
 
@@ -59,29 +59,32 @@ class RadarDetector:
 
         # frame_id of recieved tracks
         source_frame = tracks.header.frame_id
-        # converting uuids to integer values
-        id_list = []
-        for track in tracks.tracks:
-            uuid = track.uuid.uuid
-            if uuid not in self.uuid_map:
-                id = self.id_counter
-                self.uuid_map[uuid] = id
-                self.id_counter +=1
-            else:
-                id = self.uuid_map[uuid]
-            id_list.append(id)
-        # removing tracks that have been lost (ids not detected anymore)
-        self.remove_old_tracks(id_list)
 
         for i, track in enumerate(tracks.tracks):  # type: radar_msgs/RadarTrack
+            # generate integer id from uuid
+            uuid = track.uuid.uuid
+            if uuid not in self.uuid_map:
+                integer_id = self.id_counter
+                self.uuid_map[uuid] = integer_id
+                self.id_counter +=1
+            else:
+                integer_id = self.uuid_map[uuid]
+
+            ## how to remove a lost track here?
+            ## how do we check if a track which was previously there isn't there anymore until we've seen all the new tracks?
+            # removing tracks that have been lost (ids not detected anymore)
+            # self.remove_old_tracks(id_list)
+
             ## Check if the radar id is consistent over a few frames. Number of frames is dictated by the param named consistency_check
-            if not self.is_consistent(id_list[i]):
+            self.uuid_count[uuid] += 1
+            if not self.uuid_count[uuid] >= self.consistency_check:
                 continue
+
             # Detected object
             detected_object = DetectedObject()
             detected_object.header.frame_id = self.output_frame
             detected_object.header.stamp = tracks.header.stamp
-            detected_object.id = id_list[i]
+            detected_object.id = integer_id
             detected_object.label = RADAR_CLASSIFICATION[track.classification]
             detected_object.color = RED
             detected_object.valid = True
@@ -97,10 +100,6 @@ class RadarDetector:
             detected_objects_array.objects.append(detected_object)
 
         self.detected_objs_pub.publish(detected_objects_array)
-
-    def is_consistent(self, track_id):
-        self.id_count[track_id] += 1
-        return self.id_count[track_id] >= self.consistency_check
 
     def remove_old_tracks(self, id_list):
         lost_tracks = self.id_count.keys() - id_list
