@@ -60,6 +60,9 @@ class RadarDetector:
         # frame_id of recieved tracks
         source_frame = tracks.header.frame_id
 
+        # read source frame to output frame transform
+        source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, source_frame, tracks.header.stamp)
+
         for i, track in enumerate(tracks.tracks):  # type: radar_msgs/RadarTrack
             # generate integer id from uuid
             uuid = track.uuid.uuid
@@ -89,11 +92,11 @@ class RadarDetector:
             detected_object.color = RED
             detected_object.valid = True
             detected_object.pose_reliable = True
-            detected_object.pose = self.get_tfed_pose(track.position, source_frame)
+            detected_object.pose = self.get_tfed_pose(track.position, source_frame_to_output_tf)
             detected_object.velocity_reliable = True
-            detected_object.velocity.linear = self.get_tfed_velocity(track.velocity, ego_speed.twist.linear, source_frame)
+            detected_object.velocity.linear = self.get_tfed_velocity(track.velocity, ego_speed.twist.linear, source_frame_to_output_tf)
             detected_object.acceleration_reliable = True
-            detected_object.acceleration.linear = self.get_tfed_vector3(track.acceleration, source_frame)
+            detected_object.acceleration.linear = self.get_tfed_vector3(track.acceleration, source_frame_to_output_tf)
             detected_object.dimensions = track.size
             detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, tracks.header.stamp)
 
@@ -101,7 +104,7 @@ class RadarDetector:
 
         self.detected_objs_pub.publish(detected_objects_array)
 
-    def get_tfed_velocity(self, track_velocity, ego_speed, source_frame):
+    def get_tfed_velocity(self, track_velocity, ego_speed, source_frame_to_output_tf):
 
         """
         track: radar track (radar_msgs/RadarTrack)
@@ -119,9 +122,9 @@ class RadarDetector:
         velocity_vector = Vector3(velocity_x, velocity_y, velocity_z)
 
         # transforming the velocity vector to the output frame
-        return self.get_tfed_vector3(velocity_vector, source_frame)
+        return self.get_tfed_vector3(velocity_vector, source_frame_to_output_tf)
 
-    def get_tfed_pose(self, position, source_frame):
+    def get_tfed_pose(self, position, source_frame_to_output_tf):
         """
         :type pose_with_cov: PoseWithCovariance
         :type source_frame: str
@@ -130,11 +133,10 @@ class RadarDetector:
         # To apply a TF we need a pose stamped
         pose_stamped = PoseStamped()
         pose_stamped.pose.position = position
-        source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, source_frame, rospy.Time(0))
         tfed_pose = tf2_geometry_msgs.do_transform_pose(pose_stamped, source_frame_to_output_tf).pose
         return tfed_pose
 
-    def get_tfed_vector3(self, vector3, source_frame):
+    def get_tfed_vector3(self, vector3, source_frame_to_output_tf):
         """
         :type vector3: Vector3
         :type source_frame: str
@@ -142,7 +144,6 @@ class RadarDetector:
         """
         # To apply a TF we need a Vector3 stamped
         vector3_stamped = Vector3Stamped(vector=vector3)
-        source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, source_frame, rospy.Time(0))
         tfed_vector3 = tf2_geometry_msgs.do_transform_vector3(vector3_stamped, source_frame_to_output_tf).vector
         return tfed_vector3
 
