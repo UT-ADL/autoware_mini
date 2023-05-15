@@ -189,6 +189,6 @@ class RadarDetector:
         rospy.spin()
 
 if __name__ == '__main__':
-    rospy.init_node('radar_detector', anonymous=True, log_level=rospy.INFO)
+    rospy.init_node('radar_detector', log_level=rospy.INFO)
     node = RadarDetector()
     node.run()
