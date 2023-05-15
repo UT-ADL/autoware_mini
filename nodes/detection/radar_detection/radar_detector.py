@@ -43,7 +43,7 @@ class RadarDetector:
         ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, ego_speed_sub], queue_size=5, slop=0.02)
         ts.registerCallback(self.syncronised_callback)
 
-        rospy.loginfo(self.__class__.__name__ + " - Initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def syncronised_callback(self, tracks, ego_speed):
         """
