@@ -11,8 +11,6 @@
 
         <node if="$(eval arg('follower')=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" required="true" />
 
-        <node pkg="topic_tools" type="transform" name="acceleration_transform" args="--wait-for-start /control/vehicle_cmd acceleration std_msgs/Float32 'm.ctrl_cmd.linear_acceleration'" output="screen" required="true"/>
-
         <rosparam command="load" file="$(find autoware_mini)/config/control.yaml"/>
 
     </group>
