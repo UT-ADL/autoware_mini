@@ -26,10 +26,14 @@ class StanleyFollower:
         self.lateral_error_limit = rospy.get_param("lateral_error_limit")
         self.publish_debug_info = rospy.get_param("~publish_debug_info")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
+        self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
+        self.speed_deceleration_limit = rospy.get_param("/planning/speed_deceleration_limit")
 
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
+        self.closest_object_distance = 0.0
+        self.closest_object_velocity = 0.0
         self.lock = threading.Lock()
 
         # Publishers
@@ -57,6 +61,8 @@ class StanleyFollower:
             with self.lock:
                 self.waypoint_tree = None
                 self.waypoints = None
+                self.closest_object_distance = 0.0
+                self.closest_object_velocity = 0.0
             return
 
         # prepare waypoints for nearest neighbor search
@@ -65,6 +71,8 @@ class StanleyFollower:
         with self.lock:
             self.waypoint_tree = waypoint_tree
             self.waypoints = path_msg.waypoints
+            self.closest_object_distance = path_msg.closest_object_distance
+            self.closest_object_velocity = path_msg.closest_object_velocity
 
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
@@ -75,6 +83,8 @@ class StanleyFollower:
         with self.lock:
             waypoints = self.waypoints
             waypoint_tree = self.waypoint_tree
+            closest_object_distance = self.closest_object_distance
+            closest_object_velocity = self.closest_object_velocity
     
         stamp = current_pose_msg.header.stamp
         current_pose = current_pose_msg.pose
@@ -83,7 +93,7 @@ class StanleyFollower:
 
         if waypoint_tree is None:
             # if no waypoints received yet or global_path cancelled, stop the vehicle
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
             return
 
         # Find pose for the front wheel and 2 closest waypoint idx (fw_)
@@ -96,7 +106,7 @@ class StanleyFollower:
 
         if bl_front_wp_idx == len(waypoints)-1:
             # stop vehicle if last waypoint is reached
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
             rospy.logwarn_throttle(10, "%s - last waypoint reached", rospy.get_name())
             return
     
@@ -108,7 +118,7 @@ class StanleyFollower:
 
         if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_error)) > self.heading_angle_limit:
             # stop vehicle if cross track error or heading angle difference is over limit
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
+            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
             rospy.logerr_throttle(10, "%s - lateral error or heading angle difference over limit", rospy.get_name())
             return
 
@@ -119,17 +129,29 @@ class StanleyFollower:
         # target_velocity from map and based on closest object
         target_velocity = interpolate_velocity_between_waypoints(bl_nearest_point, waypoints[bl_back_wp_idx], waypoints[bl_front_wp_idx])
 
+        # if decelerating because of obstacle then calculate necessary deceleration to stop at safety distance
+        if closest_object_distance - self.braking_safety_distance > 0:
+            # always allow minimum deceleration, to be able to adapt to map speeds
+            acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), -self.speed_deceleration_limit)
+        # otherwise use vehicle default deceleration limit
+        else:
+            acceleration = 0.0
+
+        # fix for Carla - acceleration cannot be negative if target velocity is higher than current velocity
+        if acceleration < 0.0 and target_velocity > current_velocity:
+            acceleration = 0.0
+
         # blinkers
         left_blinker, right_blinker  = get_blinker_state(waypoints[bl_front_wp_idx].wpstate.steering_state)
 
         # Publish
-        self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
+        self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker)
         if self.publish_debug_info:
             self.publish_stanley_markers(stamp, bl_nearest_point, lookahead_point, front_wheel_position, heading_error)
             self.follower_debug_pub.publish(Float32MultiArray(data=[(rospy.get_time() - start_time), current_heading, track_heading, heading_error, cross_track_error, target_velocity]))
 
 
-    def publish_vehicle_command(self, stamp, steering_angle, target_velocity, left_blinker, right_blinker):
+    def publish_vehicle_command(self, stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker):
         vehicle_cmd = VehicleCmd()
         vehicle_cmd.header.stamp = stamp
         vehicle_cmd.header.frame_id = "base_link"
@@ -138,7 +160,7 @@ class StanleyFollower:
         vehicle_cmd.lamp_cmd.r = right_blinker 
         # velocity and steering
         vehicle_cmd.ctrl_cmd.linear_velocity = target_velocity
-        vehicle_cmd.ctrl_cmd.linear_acceleration = 0.0
+        vehicle_cmd.ctrl_cmd.linear_acceleration = acceleration
         vehicle_cmd.ctrl_cmd.steering_angle = steering_angle
         self.vehicle_command_pub.publish(vehicle_cmd)
 
