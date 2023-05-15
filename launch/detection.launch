@@ -3,22 +3,17 @@
     <arg name="detector"            default="cluster"   doc="cluster,sfa,vella,carla,sim" />
     <arg name="tfl_detector"        default="none"      doc="carla, mqtt" />
     <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
-    <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
-    <arg name="use_radar"           default="true"      doc="whether to use radar for detection" />
 
     <group ns="detection">
-        <group if="$(arg use_lidar_center)" ns="lidar">
+        <group if="$(eval arg('detector')=='cluster' or arg('detector')=='sfa' or arg('detector')=='vella' or arg('detector')=='fusion')" ns="lidar">
             <remap from="points_raw" to="/lidar_center/points_raw" />
-            <remap unless="$(arg use_radar)" from="detected_objects" to="/detection/detected_objects" />
+            <remap unless="$(eval arg('detector')=='fusion')" from="detected_objects" to="/detection/detected_objects" />
 
-            <include if="$(eval arg('detector')=='cluster')" file="$(find autoware_mini)/launch/detection/lidar_cluster.launch" />
+            <include if="$(eval arg('detector')=='cluster' or arg('detector')=='fusion')" file="$(find autoware_mini)/launch/detection/lidar_cluster.launch" />
 
             <node if="$(eval arg('detector')=='sfa')" pkg="autoware_mini" type="sfa_detector.py" name="sfa_detector" output="screen" required="true">
                 <param name="onnx_path"  value="$(find autoware_mini)/config/sfa/kilynuaron_model.onnx"/>
             </node>
-
-            <!--visualizer for lidar detections-->
-            <node type="detected_objects_visualizer.py" name="lidar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
 
             <!-- Velodyne Vella detections -->
             <group if="$(eval arg('detector')=='vella')">
@@ -26,16 +21,19 @@
                 $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen" required="true" /-->
                 <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
             </group>
+
+            <!--visualizer for lidar detections-->
+            <node if="$(eval arg('detector')=='fusion')" type="detected_objects_visualizer.py" name="lidar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
         </group>
 
-        <group if="$(arg use_radar)" ns="radar">
-            <remap unless="$(arg use_lidar_center)" from="detected_objects" to="/detection/detected_objects"/>
+        <group if="$(eval arg('detector')=='radar' or arg('detector')=='fusion')" ns="radar">
+            <remap unless="$(eval arg('detector')=='fusion')" from="detected_objects" to="/detection/detected_objects" />
             <node pkg="autoware_mini" type="radar_detector.py" name="radar_detector" output="screen" required="true"/>
             <!-- visualizer for radar detections-->
-            <node type="detected_objects_visualizer.py" name="radar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+            <node if="$(eval arg('detector')=='fusion')" type="detected_objects_visualizer.py" name="radar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
         </group>
 
-        <node if="$(eval use_radar and use_lidar_center)" pkg="autoware_mini" type="lidar_radar_fusion.py" name="lidar_radar_fusion" output="screen" required="true" />
+        <node if="$(eval arg('detector')=='fusion')" pkg="autoware_mini" type="lidar_radar_fusion.py" name="lidar_radar_fusion" output="screen" required="true" />
         
         <!-- Carla's ground truth objects -->
         <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
@@ -53,7 +51,7 @@
         <!-- Obstacle simulator -->
         <node if="$(eval arg('detector')=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />
 
-        <!-- Detected objects visualizer for final objects-->
+        <!-- Detected objects visualizer for final objects -->
         <node type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/detection.yaml"/>

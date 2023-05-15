@@ -15,7 +15,7 @@ from std_msgs.msg import ColorRGBA
 from helpers.detection import create_hull
 
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
-RADAR_CLASSIFICATION = {0: 'unknown', 1:'static', 2:'dynamic'}
+RADAR_CLASSIFICATION = {0:'unknown', 1:'static', 2:'dynamic'}
 
 
 class RadarDetector:
@@ -24,6 +24,8 @@ class RadarDetector:
         # Parameters
         self.output_frame = rospy.get_param("/detection/output_frame")
         self.consistency_check = rospy.get_param("~consistency_check") # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
+
+        # Internal variables
         self.uuid_count = defaultdict(int) # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
         self.id_counter = 0 # counter for generating id from uuids
         self.uuid_map = {} # dictionary containing uuid-integer id pairs
@@ -31,16 +33,19 @@ class RadarDetector:
         # Publishers
         self.detected_objs_pub = rospy.Publisher("detected_objects", DetectedObjectArray, queue_size=1)
 
+        # Dynamic transform listener
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
-        # Allowing to buffer to fill up
+        # allow time for tf buffer to fill
         rospy.sleep(0.5)
 
-        # static transform. Fetch once
+        # Static transform, fetch once
         self.base_link_to_radar_tf = self.tf_buffer.lookup_transform('radar_fc', 'base_link', rospy.Time(0))
+
         # Subscribers
         tracks_sub = message_filters.Subscriber('/radar_fc/radar_tracks', RadarTracks, queue_size=1)
         ego_speed_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1)
+
         # Strict Time Sync
         ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, ego_speed_sub], queue_size=5, slop=0.02)
         ts.registerCallback(self.syncronised_callback)
@@ -57,11 +62,8 @@ class RadarDetector:
         detected_objects_array.header.frame_id = self.output_frame
         detected_objects_array.header.stamp = tracks.header.stamp
 
-        # frame_id of recieved tracks
-        source_frame = tracks.header.frame_id
-
         # read source frame to output frame transform
-        source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, source_frame, tracks.header.stamp)
+        source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, tracks.header.frame_id, tracks.header.stamp)
 
         for i, track in enumerate(tracks.tracks):  # type: radar_msgs/RadarTrack
             # generate integer id from uuid
@@ -73,14 +75,9 @@ class RadarDetector:
             else:
                 integer_id = self.uuid_map[uuid]
 
-            ## how to remove a lost track here?
-            ## how do we check if a track which was previously there isn't there anymore until we've seen all the new tracks?
-            # removing tracks that have been lost (ids not detected anymore)
-            # self.remove_old_tracks(id_list)
-
-            ## Check if the radar id is consistent over a few frames. Number of frames is dictated by the param named consistency_check
+            # Check if the radar id is consistent over a few frames. Number of frames is dictated by the param named consistency_check
             self.uuid_count[uuid] += 1
-            if not self.uuid_count[uuid] >= self.consistency_check:
+            if self.uuid_count[uuid] < self.consistency_check:
                 continue
 
             # Detected object
@@ -113,12 +110,11 @@ class RadarDetector:
         :return: velocity vector transformed to map frame (geometry_msgs/Twist)
         """
         # compute ego_velocity in radar_fc frame
-        ego_speed_in_base = Vector3Stamped(vector=ego_speed)
-        ego_speed_in_radar = tf2_geometry_msgs.do_transform_vector3(ego_speed_in_base, self.base_link_to_radar_tf)
+        ego_speed_in_radar = self.get_tfed_vector3(ego_speed, self.base_link_to_radar_tf)
         # Computing speed relative to map.
-        velocity_x = ego_speed_in_radar.vector.x + track_velocity.x
-        velocity_y = ego_speed_in_radar.vector.y + track_velocity.y # this value is zero for both ego and track velocity
-        velocity_z = ego_speed_in_radar.vector.z + track_velocity.z # this value is zero for both ego and track velocity
+        velocity_x = ego_speed_in_radar.x + track_velocity.x
+        velocity_y = ego_speed_in_radar.y + track_velocity.y # this value is zero for track velocity
+        velocity_z = ego_speed_in_radar.z + track_velocity.z # this value is zero for track velocity
         velocity_vector = Vector3(velocity_x, velocity_y, velocity_z)
 
         # transforming the velocity vector to the output frame

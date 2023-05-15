@@ -41,24 +41,20 @@ class LidarRadarFusion:
 
         for lidar_detection in lidar_detections.objects:
             # Extracting lidar hull points
-            lidar_hull = np.array([(hull_point.x, hull_point.y) for hull_point in lidar_detection.convex_hull.polygon.points], dtype=np.float32) #unpacking geometry_msg/Point32 to float values
+            hull_points = [(hull_point.x, hull_point.y) for hull_point in lidar_detection.convex_hull.polygon.points]
+            lidar_hull = np.array(hull_points, dtype=np.float32)
 
             min_radar_speed = np.inf
             matched_radar_detection = None
             # For each radar object check if its centroid lies within the convex hull of the lidar object
             # or if the distance between the two centroids is smaller than the self.maching_distance param
             for radar_detection in radar_detections.objects:
-                radar_object_centroid = (radar_detection.pose.position.x, radar_detection.pose.position.y)
-                distance = self.compute_distance(lidar_detection, radar_detection)
-
-                # calculate norm of radar detection's speed
-                radar_speed = self.compute_norm(radar_detection.velocity.linear)
                 # check if the radar object falls within(+1) or one the edge(0) of the lidar hull. Side note: outside of hull = -1
+                radar_object_centroid = (radar_detection.pose.position.x, radar_detection.pose.position.y)
                 is_within_hull = cv2.pointPolygonTest(lidar_hull, radar_object_centroid, measureDist=False) >= 0
 
-                # Add all moving radar objects falling outside lidar hulls  to final objects
-                if not is_within_hull and radar_speed >= self.radar_speed_threshold:
-                    final_detections.objects.append(radar_detection)
+                # calculate distance between lidar and radar objects
+                distance = self.compute_distance(lidar_detection, radar_detection)
 
                 # check if matched
                 if is_within_hull or distance < self.matching_distance:
@@ -74,10 +70,20 @@ class LidarRadarFusion:
                 lidar_detection.acceleration = matched_radar_detection.acceleration
                 lidar_detection.acceleration_reliable = True
                 lidar_detection.color = GREEN
-                final_detections.objects.append(lidar_detection)
-            else:
-                # if unmatched, publish unfused lidar detection
-                final_detections.objects.append(lidar_detection)
+                # remove matched radar detection from the potential list of radar detections
+                radar_detections.objects.remove(matched_radar_detection)
+
+            # lidar detections are always published
+            final_detections.objects.append(lidar_detection)
+
+        # add radar detections that are not matched to final detections
+        for radar_detection in radar_detections.objects:
+            # calculate norm of radar detection's speed
+            radar_speed = self.compute_norm(radar_detection.velocity.linear)
+
+            # add only moving radar objects
+            if radar_speed >= self.radar_speed_threshold:
+                final_detections.objects.append(radar_detection)
 
         self.detected_object_array_pub.publish(final_detections)
 
@@ -86,8 +92,8 @@ class LidarRadarFusion:
         return sqrt((obj1.pose.position.x - obj2.pose.position.x)**2 + (obj1.pose.position.y - obj2.pose.position.y)**2)
 
     @staticmethod
-    def compute_norm(obj_velocity):
-        return sqrt(obj_velocity.x**2 + obj_velocity.y**2 + obj_velocity.z**2)
+    def compute_norm(vec):
+        return sqrt(vec.x**2 + vec.y**2 + vec.z**2)
 
     def run(self):
         rospy.spin()
