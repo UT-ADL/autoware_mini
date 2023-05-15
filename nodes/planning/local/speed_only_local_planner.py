@@ -48,7 +48,7 @@ class SpeedOnlyLocalPlanner:
         if coordinate_transformer == "utm":
             projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("speed_only_local_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
             exit(1)
 
         self.lanelet2_map = load(lanelet2_map_name, projector)
@@ -187,7 +187,7 @@ class SpeedOnlyLocalPlanner:
         try:
             transform = self.tf_buffer.lookup_transform("base_link", msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
         except TransformException as e:
-            rospy.logerr(str(e))
+            rospy.logerr("%s - unable to transform object speed to base frame, using speed 0: %s", rospy.get_name(), str(e))
             transform = None
 
         # extract object points from detected objects

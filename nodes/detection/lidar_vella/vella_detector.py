@@ -39,7 +39,7 @@ class VellaDetector:
         # vella tracks subscriber
         rospy.Subscriber('/vdk/tracks', Track3DArray, self.vella_tracks_callback, queue_size=1)
 
-        rospy.loginfo("vella_detector - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def vella_tracks_callback(self, vella_tracks):
 

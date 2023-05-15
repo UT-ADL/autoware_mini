@@ -53,7 +53,7 @@ class SFADetector:
 
         self.model = self.load_onnx(self.onnx_path) # get onnx model
 
-        rospy.loginfo("sfa_detector - loaded ONNX model file %s", self.onnx_path)
+        rospy.loginfo("%s - loaded ONNX model file %s", rospy.get_name(), self.onnx_path)
 
         # transform listener
         self.tf_buffer = Buffer()
@@ -63,7 +63,7 @@ class SFADetector:
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1, buff_size=2*1024*1024)
 
-        rospy.loginfo("sfa_detector - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def load_onnx(self, onnx_path):
 

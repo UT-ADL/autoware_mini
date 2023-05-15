@@ -54,7 +54,7 @@ class Lanelet2MapVisualizer:
         if coordinate_transformer == "utm":
             projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
             exit(1)
 
         self.lanelet2_map = load(lanelet2_map_name, projector)
@@ -70,7 +70,7 @@ class Lanelet2MapVisualizer:
         self.stop_line_markers_pub = rospy.Publisher('stop_line_markers', MarkerArray, queue_size=1, latch=True)
         rospy.Subscriber("/detection/traffic_light_status", TrafficLightResultArray, self.traffic_light_status_callback)
 
-        rospy.loginfo("lanelet2_map_visualizer - map loaded with %i lanelets and %i regulatory elements from file: %s",
+        rospy.loginfo("%s - map loaded with %i lanelets and %i regulatory elements from file: %s", rospy.get_name(),
                       len(self.lanelet2_map.laneletLayer), len(self.lanelet2_map.regulatoryElementLayer), lanelet2_map_name)
 
     def traffic_light_status_callback(self, msg):
@@ -90,7 +90,7 @@ class Lanelet2MapVisualizer:
             if result.recognition_result_str in LANELET_COLOR_TO_MARKER_COLOR:
                 color = LANELET_COLOR_TO_MARKER_COLOR[result.recognition_result_str]
             else:
-                rospy.logwarn("lanelet2_map_visualizer - unrecognized traffic light state: %s", result.recognition_result_str)
+                rospy.logwarn("%s - unrecognized traffic light state: %s", rospy.get_name(), result.recognition_result_str)
                 color = WHITE
 
             # check if string contains "FLASH" string in it

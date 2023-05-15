@@ -49,7 +49,7 @@ class MqttTrafficLightDetector:
         if coordinate_transformer == "utm":
                 projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("mqtt_traffic_light_detector - only utm and custom origin currently supported for lanelet2 map loading")
+            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
             exit(1)
         lanelet2_map = load(lanelet2_map_name, projector)
 
@@ -79,17 +79,17 @@ class MqttTrafficLightDetector:
 
     def on_connect(self, client, userdata, flags, rc):
         if rc != 0:
-            rospy.logerr('Failed to connect to MQTT server %s:%d, return code: %d', self.mqtt_host, self.mqtt_port, rc)
+            rospy.logerr('%s - failed to connect to MQTT server %s:%d, return code: %d', rospy.get_name(), self.mqtt_host, self.mqtt_port, rc)
             return
 
-        rospy.loginfo('Connected to MQTT server %s:%d', self.mqtt_host, self.mqtt_port)
+        rospy.loginfo('%s - connected to MQTT server %s:%d', rospy.get_name(), self.mqtt_host, self.mqtt_port)
         client.subscribe(self.mqtt_topic)
 
     def on_disconnect(self, client, userdata, rc):
-        rospy.logerr('Disconnected from MQTT server %s:%d, return code: %d', self.mqtt_host, self.mqtt_port, rc)
+        rospy.logerr('%s - disconnected from MQTT server %s:%d, return code: %d', rospy.get_name(), self.mqtt_host, self.mqtt_port, rc)
 
     def on_message(self, client, userdata, msg):
-        rospy.logdebug('MQTT message recieved: %s, %s', msg.topic, str(msg.payload))
+        rospy.logdebug('%s - MQTT message recieved: %s, %s', rospy.get_name(), msg.topic, str(msg.payload))
         # collect all messages
         api_id = msg.topic
         self.mqtt_status[api_id] = json.loads(msg.payload)
@@ -113,7 +113,7 @@ class MqttTrafficLightDetector:
             # extract status from mqtt_status if key exits
             if api_id in self.mqtt_status:
                 if self.mqtt_status[api_id]["timestamp"] < int((time.time() - self.timeout) * 1000):
-                    rospy.logwarn('timeout of stopline: %s, by %f seconds', api_id, (self.mqtt_status[api_id]["timestamp"] - time.time() * 1000) / 1000)
+                    rospy.logwarn('%s - timeout of stopline: %s, by %f seconds', rospy.get_name(), api_id, (self.mqtt_status[api_id]["timestamp"] - time.time() * 1000) / 1000)
                 else:
                     result_str = self.mqtt_status[api_id]["status"]
                     result = MQTT_TO_AUTOWARE_TFL_MAP[result_str]

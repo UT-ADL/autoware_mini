@@ -23,9 +23,9 @@ class WaypointLoader:
         self.publish_waypoints()  
 
         if len(self.waypoints) == 0:
-            rospy.logerr("waypoint_loader - no waypoints found in file: %s ", self.waypoints_file)
+            rospy.logerr("%s - no waypoints found in file: %s ", rospy.get_name(), self.waypoints_file)
         else:
-            rospy.loginfo("waypoint_loader - %i waypoints published from file: %s" % (len(self.waypoints), self.waypoints_file))
+            rospy.loginfo("%s - %i waypoints published from file: %s", rospy.get_name(), len(self.waypoints), self.waypoints_file)
         
     def load_waypoints(self, waypoints_file):
         

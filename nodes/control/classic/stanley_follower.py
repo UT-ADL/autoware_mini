@@ -47,14 +47,14 @@ class StanleyFollower:
         ts.registerCallback(self.current_status_callback)
 
         # output information to console
-        rospy.loginfo("stanley_follower - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
 
     def path_callback(self, path_msg):
 
         if len(path_msg.waypoints) < 2:
             # if path is cancelled and empty waypoints received
-            rospy.logwarn_throttle(30, "stanley_follower - no waypoints, stopping!")
+            rospy.logwarn_throttle(30, "%s - no waypoints, stopping!", rospy.get_name())
             with self.lock:
                 self.waypoint_tree = None
                 self.waypoints = None
@@ -98,7 +98,7 @@ class StanleyFollower:
         if bl_front_wp_idx == len(waypoints)-1:
             # stop vehicle if last waypoint is reached
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
-            rospy.logwarn_throttle(10, "stanley_follower - last waypoint reached")
+            rospy.logwarn_throttle(10, "%s - last waypoint reached", rospy.get_name())
             return
     
         bl_nearest_point = get_closest_point_on_line(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
@@ -110,7 +110,7 @@ class StanleyFollower:
         if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_error)) > self.heading_angle_limit:
             # stop vehicle if cross track error or heading angle difference is over limit
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
-            rospy.logerr_throttle(10, "stanley_follower - lateral error or heading angle difference over limit")
+            rospy.logerr_throttle(10, "%s - lateral error or heading angle difference over limit", rospy.get_name())
             return
 
         # calculate steering angle

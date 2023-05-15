@@ -26,7 +26,7 @@ class PointsClusterer:
         self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=1)
         rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=1024*1024)
 
-        rospy.loginfo("points_clusterer - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def points_callback(self, msg):
         data = numpify(msg)
@@ -65,7 +65,7 @@ class PointsClusterer:
         cluster_msg.header.frame_id = msg.header.frame_id
         self.cluster_pub.publish(cluster_msg)
 
-        rospy.logdebug("%d points, %d clusters", len(points), np.max(labels) + 1)
+        rospy.logdebug("%s - %d points, %d clusters", rospy.get_name(), len(points), np.max(labels) + 1)
 
     def run(self):
         rospy.spin()

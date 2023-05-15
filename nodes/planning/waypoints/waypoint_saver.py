@@ -50,8 +50,8 @@ class WaypointSaver:
         ts.registerCallback(self.data_callback)
 
         # loginfo
-        rospy.loginfo("waypoint_saver - interval: %i m", self.interval)
-        rospy.loginfo("waypoint_saver - save to %s ", self.waypoints_file)
+        rospy.loginfo("%s - interval: %i m", rospy.get_name(), self.interval)
+        rospy.loginfo("%s - save to %s ", rospy.get_name(), self.waypoints_file)
 
 
     def vehicle_status_callback(self, vehicle_status_msg):

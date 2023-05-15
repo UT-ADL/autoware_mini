@@ -55,7 +55,7 @@ class Lanelet2GlobalPlanner:
         if coordinate_transformer == "utm":
                 projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
             exit(1)
 
         self.lanelet2_map = load(lanelet2_map_name, projector)
@@ -77,18 +77,18 @@ class Lanelet2GlobalPlanner:
         rospy.Subscriber('cancel_route', Bool, self.cancel_route_callback, queue_size=1)
 
     def goal_callback(self, msg):
-        rospy.loginfo("lanelet2_global_planner - goal position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame",
+        rospy.loginfo("%s - goal position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame", rospy.get_name(),
                     msg.pose.position.x, msg.pose.position.y, msg.pose.position.z,
                     msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z,
                     msg.pose.orientation.w, msg.header.frame_id)
 
         if self.current_location == None:
             # TODO handle if current_pose gets lost at later stage - see current_pose_callback
-            rospy.logwarn("lanelet2_global_planner - current_pose not available")
+            rospy.logwarn("%s - current_pose not available", rospy.get_name())
             return
 
         if self.lanelet2_map == None:
-            rospy.logwarn("lanelet2_global_planner - lanelet2 map not available")
+            rospy.logwarn("%s - lanelet2 map not available", rospy.get_name())
             return
 
         # if there is already a goal, use it as start point
@@ -102,7 +102,7 @@ class Lanelet2GlobalPlanner:
 
         route = self.graph.getRoute(start_lanelet, goal_lanelet, 0, True)        # lanelet2.routing.Route
         if route == None:
-            rospy.logwarn("lanelet2_global_planner - no route found, try new goal!")
+            rospy.logwarn("%s - no route found, try new goal!", rospy.get_name())
             return
 
         path = route.shortestPath()
@@ -110,7 +110,7 @@ class Lanelet2GlobalPlanner:
 
         # check if goal is in path
         if path_no_lane_change[len(path_no_lane_change)-1].id != goal_lanelet.id:
-            rospy.logwarn("lanelet2_global_planner - last lanelet in path (%d) is not goal lanelet (%d)", path_no_lane_change[len(path_no_lane_change)-1].id, goal_lanelet.id)
+            rospy.logwarn("%s - last lanelet in path (%d) is not goal lanelet (%d)", rospy.get_name(), path_no_lane_change[len(path_no_lane_change)-1].id, goal_lanelet.id)
             return
 
         waypoints = self.convert_to_waypoints(path_no_lane_change)
@@ -124,18 +124,18 @@ class Lanelet2GlobalPlanner:
         start_wp = self.create_waypoint_on_path(waypoints, start_idx[0][0], start_point)
         d = get_distance_between_two_points(start_wp.pose.pose.position, start_point)
         if d > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - start point too far (%f) from centerline", d)
+            rospy.logwarn("%s - start point too far (%f) from centerline", rospy.get_name(), d)
             return
 
         goal_idx = waypoint_tree.kneighbors([(new_goal.x, new_goal.y)], 1, return_distance=False)
         goal_wp = self.create_waypoint_on_path(waypoints, goal_idx[0][0], new_goal)
         d = get_distance_between_two_points(goal_wp.pose.pose.position, new_goal)
         if d > self.distance_to_centerline_limit:
-            rospy.logwarn("lanelet2_global_planner - goal point too far (%f) from centerline", d)
+            rospy.logwarn("%s - goal point too far (%f) from centerline", rospy.get_name(), d)
             return
 
         if start_lanelet.id == goal_lanelet.id and start_idx[0][0] > goal_idx[0][0]:
-            rospy.logwarn("lanelet2_global_planner - goal point can't be before the start point on the same lanelet")
+            rospy.logwarn("%s - goal point can't be before the start point on the same lanelet", rospy.get_name())
             return
 
         # update goal point and add new waypoints to the existing ones
@@ -144,7 +144,7 @@ class Lanelet2GlobalPlanner:
         self.waypoints += [start_wp] + waypoints[start_idx[0][0] + 1 : goal_idx[0][0]] + [goal_wp]
 
         self.publish_waypoints(self.waypoints)
-        rospy.loginfo("lanelet2_global_planner - path published")
+        rospy.loginfo("%s - path published", rospy.get_name())
 
 
     def current_pose_callback(self, msg):
@@ -156,14 +156,14 @@ class Lanelet2GlobalPlanner:
                 self.waypoints = []
                 self.goal_point = None
                 self.publish_waypoints(self.waypoints)
-                rospy.logwarn("lanelet2_global_planner - goal reached, clearing path!")
+                rospy.logwarn("%s - goal reached, clearing path!", rospy.get_name())
 
     def cancel_route_callback(self, msg):
         if msg.data:
             self.waypoints = []
             self.goal_point = None
             self.publish_waypoints(self.waypoints)
-            rospy.logwarn("lanelet2_global_planner - route cancelled!")
+            rospy.logwarn("%s - route cancelled!", rospy.get_name())
 
     def create_waypoint_on_path(self, waypoints, closest_idx, origin_point):
         wp = copy.deepcopy(waypoints[closest_idx])

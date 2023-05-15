@@ -35,7 +35,7 @@ class NovatelOem7Localizer:
         elif self.coordinate_transformer == "lest97":
             self.transformer = WGS84ToLest97Transformer(self.use_custom_origin, self.lest97_origin_northing, self.lest97_origin_easting)
         else:
-            rospy.logfatal("novatel_localizer - coordinate_transformer not supported: %s ", str(self.coordinate_transformer))
+            rospy.logfatal("%s - coordinate_transformer not supported: %s ", rospy.get_name(), str(self.coordinate_transformer))
             exit(1)
 
         # Publishers
@@ -49,7 +49,7 @@ class NovatelOem7Localizer:
         self.inspva_sub = rospy.Subscriber('/novatel/oem7/inspva', INSPVA, self.inspva_callback)
 
         # output information to console
-        rospy.loginfo("novatel_localizer - localizer initialized using %s coordinates", str(self.coordinate_transformer))
+        rospy.loginfo("%s - localizer initialized using %s coordinates", rospy.get_name(), str(self.coordinate_transformer))
 
 
     def inspva_callback(self, inspva_msg):

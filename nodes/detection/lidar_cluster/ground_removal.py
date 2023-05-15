@@ -30,7 +30,7 @@ class GroundRemovalNode:
         self.no_ground_pub = rospy.Publisher('points_no_ground', PointCloud2, queue_size=1)
         rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1, buff_size=2*1024*1024)
 
-        rospy.loginfo("ground_removal - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def pointcloud_callback(self, msg):
         data = numpify(msg)
