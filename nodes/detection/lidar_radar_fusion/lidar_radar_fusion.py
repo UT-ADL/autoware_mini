@@ -36,16 +36,6 @@ class LidarRadarFusion:
         lidar_detections: DetectedObjectArray
         publish: DetectedObjectArray
         """
-        final_objects = self.match_and_fuse_detections(lidar_detections, radar_detections)
-        self.detected_object_array_pub.publish(final_objects)
-
-    def match_and_fuse_detections(self, lidar_detections, radar_detections):
-
-        """
-        radar_prepared: radar object dictionary containing DetectedObjects and their ids
-        lidar_prepared: lidar object dictionary containing DetectedObjects and their ids
-        return: matches and within_hull_radar_ids
-        """
         final_detections = DetectedObjectArray()
         final_detections.header = lidar_detections.header
 
@@ -85,7 +75,7 @@ class LidarRadarFusion:
                 fused_detection = self.fuse_detections(lidar_detection, matched_radar_detection)
                 final_detections.objects.append(fused_detection)
 
-        return final_detections
+        self.detected_object_array_pub.publish(final_detections)
 
     def fuse_detections(self, lidar_detection, radar_detection):
         """
