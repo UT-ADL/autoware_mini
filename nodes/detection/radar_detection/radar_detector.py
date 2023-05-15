@@ -101,12 +101,6 @@ class RadarDetector:
 
         self.detected_objs_pub.publish(detected_objects_array)
 
-    def remove_old_tracks(self, id_list):
-        lost_tracks = self.id_count.keys() - id_list
-        for key in list(lost_tracks):
-            if key in self.id_count:
-                del self.id_count[key]
-
     def get_tfed_velocity(self, track, ego_speed, source_frame):
 
         """
