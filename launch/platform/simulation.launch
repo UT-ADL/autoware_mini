@@ -7,14 +7,10 @@
         <!-- Bicycle_model simulator -->
         <node pkg="autoware_mini" type="bicycle_simulation.py" name="bicycle_simulation" output="screen" required="true" />
 
-        <!-- SSC interface -->
+        <!-- SSC interface for the sake of visualization of acceleration limits -->
         <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true" >
             <param name="max_speed" value="$(arg max_speed)"/>
         </node>
-
-        <!-- Acceleration limits visualization -->
-        <node pkg="topic_tools" type="transform" name="acceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands acceleration_limit std_msgs/Float32 'm.acceleration_limit'" output="screen" required="true"/>
-        <node pkg="topic_tools" type="transform" name="deceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands deceleration_limit std_msgs/Float32 'm.deceleration_limit'" output="screen" required="true"/>
 
         <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />
     </group>

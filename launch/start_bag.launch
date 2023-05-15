@@ -64,12 +64,13 @@
     </include>
 
     <!-- Vehicle platform -->
-    <include file="$(find vehicle_platform)/launch/platform.launch" >
+    <include file="$(find vehicle_platform)/launch/platform.launch">
         <arg name="use_tf"          value="$(arg use_tf)" />
         <arg name="use_lexus_model" value="true" />
     </include>
 
     <!-- Rviz -->
+    <include file="$(find autoware_mini)/launch/dashboard.launch" />
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
 
 </launch>
