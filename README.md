@@ -33,7 +33,7 @@ Here are couple of short videos introducing the Autoware Mini features.
 
 ## Installation
 
-You should have ROS Noetic installed, follow the official instructions for [Ubuntu 20.03](http://wiki.ros.org/noetic/Installation/Ubuntu) or [RoboStack](https://robostack.github.io/GettingStarted.html).
+You should have ROS Noetic installed, follow the official instructions for [Ubuntu 20.04](http://wiki.ros.org/noetic/Installation/Ubuntu) or [RoboStack](https://robostack.github.io/GettingStarted.html).
 
 1. Create workspace
    ```
