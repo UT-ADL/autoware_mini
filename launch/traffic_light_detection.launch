@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="tfl_detector"        default="none"      doc="carla, mqtt, camera, fused" />
+    <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
+
+
+    <!-- Carla's ground truth traffic lights -->
+    <node if="$(eval arg('tfl_detector')=='carla')" pkg="autoware_mini" type="carla_traffic_light_detector.py" name="carla_traffic_light_detector" output="screen" required="true">
+        <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+    </node>
+
+
+    <!-- MQTT traffic light detector -->
+    <node if="$(eval arg('tfl_detector')=='mqtt' or arg('tfl_detector')=='fused')" pkg="autoware_mini" type="mqtt_traffic_light_detector.py" name="mqtt_traffic_light_detector" output="screen" required="true">
+        <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+    </node>
+
+    <!-- Camera based traffic light detection -->
+    <group if="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fused')">
+        
+        <!-- Camera FL -->
+        <node pkg="autoware_mini" type="camera_traffic_light_detector.py" name="camera_traffic_light_detector_left" output="screen" required="true" >
+            <param name="camera_info_topic" value="/camera_fl/camera_info" />
+            <param name="camera_image_topic" value="/camera_fl/image_raw" />
+            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+        </node>
+
+        <!-- Camera FR -->
+        <!-- <node pkg="autoware_mini" type="camera_traffic_light_detector.py" name="camera_traffic_light_detector_right" output="screen" required="true" >
+            <param name="camera_info_topic" value="/camera_fr/camera_info" />
+            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+        </node> -->
+
+    </group>
+
+</launch>
