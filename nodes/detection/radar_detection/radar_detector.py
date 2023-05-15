@@ -8,9 +8,10 @@ import tf2_ros
 import tf2_geometry_msgs
 from tf.transformations import euler_from_quaternion
 import message_filters
-from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point, PolygonStamped
+
+from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseStamped, Point, PolygonStamped
 from autoware_msgs.msg import DetectedObject, DetectedObjectArray
-from radar_msgs.msg import RadarTrack, RadarTracks
+from radar_msgs.msg import RadarTracks
 from std_msgs.msg import ColorRGBA
 
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
