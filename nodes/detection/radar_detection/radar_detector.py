@@ -111,11 +111,11 @@ class RadarDetector:
         """
         # compute ego_velocity in radar_fc frame
         ego_speed_in_base = Vector3Stamped(vector=ego_speed)
-        ego_speed_in_radar_fc = tf2_geometry_msgs.do_transform_vector3(ego_speed_in_base, self.base_link_to_radar_tf)
+        ego_speed_in_radar = tf2_geometry_msgs.do_transform_vector3(ego_speed_in_base, self.base_link_to_radar_tf)
         # Computing speed relative to map.
-        velocity_x = ego_speed_in_radar_fc.vector.x + track_velocity.x
-        velocity_y = ego_speed_in_radar_fc.vector.y + track_velocity.y # this value is zero for both ego and track velocity
-        velocity_z = ego_speed_in_radar_fc.vector.z + track_velocity.z # this value is zero for both ego and track velocity
+        velocity_x = ego_speed_in_radar.vector.x + track_velocity.x
+        velocity_y = ego_speed_in_radar.vector.y + track_velocity.y # this value is zero for both ego and track velocity
+        velocity_z = ego_speed_in_radar.vector.z + track_velocity.z # this value is zero for both ego and track velocity
         velocity_vector = Vector3(velocity_x, velocity_y, velocity_z)
 
         # transforming the velocity vector to the output frame
