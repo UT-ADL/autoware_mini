@@ -91,7 +91,7 @@ class RadarDetector:
             detected_object.pose_reliable = True
             detected_object.pose = self.get_tfed_pose(track.position, source_frame)
             detected_object.velocity_reliable = True
-            detected_object.velocity = self.get_tfed_velocity(track, ego_speed, source_frame)
+            detected_object.velocity.linear = self.get_tfed_velocity(track.velocity, ego_speed.twist.linear, source_frame)
             detected_object.acceleration_reliable = True
             detected_object.acceleration = self.get_tfed_acceleration(track, source_frame)
             detected_object.dimensions = track.size
@@ -101,7 +101,7 @@ class RadarDetector:
 
         self.detected_objs_pub.publish(detected_objects_array)
 
-    def get_tfed_velocity(self, track, ego_speed, source_frame):
+    def get_tfed_velocity(self, track_velocity, ego_speed, source_frame):
 
         """
         track: radar track (radar_msgs/RadarTrack)
@@ -110,18 +110,16 @@ class RadarDetector:
         :return: velocity vector transformed to map frame (geometry_msgs/Twist)
         """
         # compute ego_velocity in radar_fc frame
-        ego_speed_in_base = Vector3Stamped(vector=ego_speed.twist.linear)
+        ego_speed_in_base = Vector3Stamped(vector=ego_speed)
         ego_speed_in_radar_fc = tf2_geometry_msgs.do_transform_vector3(ego_speed_in_base, self.base_link_to_radar_tf)
         # Computing speed relative to map.
-        velocity_x = ego_speed_in_radar_fc.vector.x + track.velocity.x
-        velocity_y = ego_speed_in_radar_fc.vector.y + track.velocity.y # this value is zero for both ego and track velocity
-        velocity_z = ego_speed_in_radar_fc.vector.z + track.velocity.z # this value is zero for both ego and track velocity
+        velocity_x = ego_speed_in_radar_fc.vector.x + track_velocity.x
+        velocity_y = ego_speed_in_radar_fc.vector.y + track_velocity.y # this value is zero for both ego and track velocity
+        velocity_z = ego_speed_in_radar_fc.vector.z + track_velocity.z # this value is zero for both ego and track velocity
         velocity_vector = Vector3(velocity_x, velocity_y, velocity_z)
 
-        # transforming the velocity vector to map frame
-        velocity_in_map = Twist(linear=self.get_tfed_vector3(velocity_vector, source_frame))
-
-        return velocity_in_map
+        # transforming the velocity vector to the output frame
+        return self.get_tfed_vector3(velocity_vector, source_frame)
 
     def get_tfed_pose(self, position, source_frame):
         """
