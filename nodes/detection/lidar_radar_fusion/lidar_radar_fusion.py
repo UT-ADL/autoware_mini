@@ -41,7 +41,7 @@ class LidarRadarFusion:
 
         for lidar_detection in lidar_detections.objects:
             # Extracting lidar hull points
-            lidar_hull = np.array([[hull_point.x, hull_point.y] for hull_point in lidar_detection.convex_hull.polygon.points], dtype=np.float32) #unpacking geometry_msg/Point32 to float values
+            lidar_hull = np.array([(hull_point.x, hull_point.y) for hull_point in lidar_detection.convex_hull.polygon.points], dtype=np.float32) #unpacking geometry_msg/Point32 to float values
 
             min_radar_speed = np.inf
             matched_radar_detection = None
