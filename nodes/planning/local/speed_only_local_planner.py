@@ -4,7 +4,8 @@ import rospy
 import copy
 import math
 import threading
-import tf
+from tf2_ros import Buffer, TransformListener, TransformException
+from tf2_geometry_msgs import do_transform_vector3
 
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
@@ -30,6 +31,7 @@ class SpeedOnlyLocalPlanner:
         # Parameters
         self.local_path_length = rospy.get_param("~local_path_length")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
+        self.transform_timeout = rospy.get_param("~transform_timeout")
         self.braking_safety_distance = rospy.get_param("braking_safety_distance")
         self.braking_reaction_time = rospy.get_param("braking_reaction_time")
         self.car_safety_radius = rospy.get_param("car_safety_radius")
@@ -60,7 +62,8 @@ class SpeedOnlyLocalPlanner:
         self.current_pose = None
         self.current_velocity = 0.0
         self.stop_lines = {}
-        self.tf = tf.TransformListener()
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer)
 
         # Publishers
         self.local_path_pub = rospy.Publisher('local_path', Lane, queue_size=1)
@@ -179,17 +182,23 @@ class SpeedOnlyLocalPlanner:
         closest_object_velocity = 0.0
         blocked = False
 
-        # extract object points from detected objects
         points_list = []
+        # fetch the transform from the object frame to the base_link frame to align the speed with ego vehicle
+        try:
+            transform = self.tf_buffer.lookup_transform("base_link", msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
+        except TransformException as e:
+            rospy.logerr(str(e))
+            transform = None
+
+        # extract object points from detected objects
         for obj in msg.objects:
             # project object velocity to base_link frame to get longitudinal speed
             # TODO: project velocity to the path
             velocity = Vector3Stamped(header=msg.header, vector=obj.velocity.linear)
-            try:
-                velocity = self.tf.transformVector3("base_link", velocity)
-            except Exception as e:
-                rospy.logerr(str(e))
-                # safe option - assume the object is not moving
+            # in case there is no transform assume the object is not moving
+            if transform is not None:
+                velocity = do_transform_vector3(velocity, transform)
+            else:
                 velocity.vector.x = 0.0
             # add object center point and convex hull points to the points list
             points_list.append([obj.pose.position.x, obj.pose.position.y, obj.pose.position.z, velocity.vector.x])

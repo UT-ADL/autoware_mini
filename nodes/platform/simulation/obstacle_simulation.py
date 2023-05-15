@@ -87,15 +87,13 @@ class ObstacleSimulation:
         # create message
         msg = DetectedObjectArray()
         msg.header.stamp = stamp
+        msg.header.frame_id = 'map'
         msg.objects = self.objects
-
-        # take message frame from the first object
-        if len(msg.objects) > 0:
-            msg.header.frame_id = msg.objects[0].header.frame_id
 
         # overwrite object timestamp
         for o in msg.objects:
             o.header.stamp = stamp
+            assert o.header.frame_id == msg.header.frame_id, "object frame_id does not match message frame_id"
 
         self.objects_pub.publish(msg)
 

@@ -1,26 +1,28 @@
 #!/usr/bin/env python3
 
-import rospy
-from collections import defaultdict
 import cv2
+from collections import defaultdict
+
+import rospy
 import tf2_ros
 import tf2_geometry_msgs
 from tf.transformations import euler_from_quaternion
-from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point,PolygonStamped
+import message_filters
+from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseWithCovariance, PoseStamped, Point, PolygonStamped
 from autoware_msgs.msg import DetectedObject, DetectedObjectArray
 from radar_msgs.msg import RadarTrack, RadarTracks
 from std_msgs.msg import ColorRGBA
-import message_filters
 
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
+RADAR_CLASSIFICATION = {0: 'unknown', 1:'static', 2:'dynamic'}
 
 
 class RadarDetector:
     def __init__(self):
 
         # Parameters
-        self.output_frame = rospy.get_param("~output_frame", "map")
-        self.consistency_check = rospy.get_param("~consistency_check", 5) # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
+        self.output_frame = rospy.get_param("/detection/output_frame")
+        self.consistency_check = rospy.get_param("~consistency_check") # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
         self.id_count = defaultdict(int) # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
         self.id_counter = 0 # counter for generating id from uuids
         self.uuid_map = {} # dictionary containing uuid-integer id pairs
@@ -42,7 +44,7 @@ class RadarDetector:
         ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, ego_speed_sub], queue_size=5, slop=0.02)
         ts.registerCallback(self.syncronised_callback)
 
-        rospy.loginfo(self.__class__.__name__ + " - Initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def syncronised_callback(self, tracks, ego_speed):
         """
@@ -79,7 +81,7 @@ class RadarDetector:
             detected_object.header.frame_id = self.output_frame
             detected_object.header.stamp = tracks.header.stamp
             detected_object.id = id_list[i]
-            detected_object.label = 'unknown'
+            detected_object.label = RADAR_CLASSIFICATION[track.classification]
             detected_object.color = RED
             detected_object.valid = True
             detected_object.pose_reliable = True
@@ -188,6 +190,6 @@ class RadarDetector:
         rospy.spin()
 
 if __name__ == '__main__':
-    rospy.init_node('radar_detector', anonymous=True, log_level=rospy.INFO)
+    rospy.init_node('radar_detector', log_level=rospy.INFO)
     node = RadarDetector()
     node.run()

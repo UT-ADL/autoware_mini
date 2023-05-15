@@ -1,3 +1,5 @@
+output_frame: map
+
 lidar:
   ground_removal:
     min_x: -60.0
@@ -19,7 +21,6 @@ lidar:
     bounding_box_type: axis_aligned # axis_aligned, min_area
     enable_pointcloud: False
     enable_convex_hull: True
-    target_frame: map
     transform_timeout: 0.05         # needed for Carla
 
   sfa_detector:
@@ -34,14 +35,21 @@ lidar:
     max_z: 1.27
     score_thresh: 0.2
     top_k: 50
-    output_frame: "map"
     transform_timeout: 0.05
 
   vella_detector:
     confidence_filter: 0.5
     track_length_filter: 0
     lidar_frame: lidar_center
-    output_frame: map
+    transform_timeout: 0.05
+
+radar:
+  radar_detector:
+    consistency_check: 5 # Number of consecutive detections over which a radar object is dected before it is published/used further
+
+lidar_radar_fusion:
+  matching_distance: 1.6 # radius threshold value around lidar centroid for a radar object to be considered matched
+  radar_speed_threshold: 0.6 # Threshold for filtering out stationary objects based on speed
 
 radar:
   radar_detector:
