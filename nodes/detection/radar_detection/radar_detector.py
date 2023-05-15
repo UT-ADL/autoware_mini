@@ -13,6 +13,7 @@ from std_msgs.msg import ColorRGBA
 import message_filters
 
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
+RADAR_CLASSIFICATION = {0: 'unknown', 1:'static', 2:'dynamic'}
 
 
 class RadarDetector:
@@ -79,7 +80,7 @@ class RadarDetector:
             detected_object.header.frame_id = self.output_frame
             detected_object.header.stamp = tracks.header.stamp
             detected_object.id = id_list[i]
-            detected_object.label = 'unknown'
+            detected_object.label = RADAR_CLASSIFICATION[track.classification]
             detected_object.color = RED
             detected_object.valid = True
             detected_object.pose_reliable = True
