@@ -21,8 +21,8 @@ class RadarDetector:
     def __init__(self):
 
         # Parameters
-        self.output_frame = rospy.get_param("~output_frame", "map")
-        self.consistency_check = rospy.get_param("~consistency_check", 5) # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
+        self.output_frame = rospy.get_param("/detection/output_frame")
+        self.consistency_check = rospy.get_param("~consistency_check") # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
         self.id_count = defaultdict(int) # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
         self.id_counter = 0 # counter for generating id from uuids
         self.uuid_map = {} # dictionary containing uuid-integer id pairs

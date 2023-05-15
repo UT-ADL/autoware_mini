@@ -45,7 +45,6 @@ lidar:
 
 radar:
   radar_detector:
-    output_frame: "map"
     consistency_check: 5 # Number of consecutive detections over which a radar object is dected before it is published/used further
 
 lidar_radar_fusion:
