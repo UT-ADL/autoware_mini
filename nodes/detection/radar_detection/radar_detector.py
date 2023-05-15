@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
-import cv2
 from collections import defaultdict
 
 import rospy
 import tf2_ros
 import tf2_geometry_msgs
-from tf.transformations import euler_from_quaternion
 import message_filters
 
-from geometry_msgs.msg import Vector3, Vector3Stamped, Twist, TwistStamped, PoseStamped, Point, PolygonStamped
+from geometry_msgs.msg import Vector3, Vector3Stamped, TwistStamped, PoseStamped
 from autoware_msgs.msg import DetectedObject, DetectedObjectArray
 from radar_msgs.msg import RadarTracks
 from std_msgs.msg import ColorRGBA
+
+from helpers.detection import create_hull
 
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
 RADAR_CLASSIFICATION = {0: 'unknown', 1:'static', 2:'dynamic'}
@@ -98,7 +98,7 @@ class RadarDetector:
             detected_object.acceleration_reliable = True
             detected_object.acceleration.linear = self.get_tfed_vector3(track.acceleration, source_frame_to_output_tf)
             detected_object.dimensions = track.size
-            detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, tracks.header.stamp)
+            detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, tracks.header.stamp)
 
             detected_objects_array.objects.append(detected_object)
 
@@ -147,28 +147,6 @@ class RadarDetector:
         tfed_vector3 = tf2_geometry_msgs.do_transform_vector3(vector3_stamped, source_frame_to_output_tf).vector
         return tfed_vector3
 
-    def produce_hull(self, obj_pose, obj_dims, stamp):
-
-        """
-        Produce convex hull for an object given its pose and dimensions
-        :param obj_pose: geometry_msgs/Pose. Position and orientation of object
-        :param obj_dims: Vector3 - length, width and height of object
-        :param vella_stamp: Time stamp at which the lidar pointcloud was created
-        :return: geometry_msgs/PolygonStamped
-        """
-        convex_hull = PolygonStamped()
-        convex_hull.header.frame_id = self.output_frame
-        convex_hull.header.stamp = stamp
-
-        # use cv2.boxPoints to get a rotated rectangle given the angle
-        _, _, heading = euler_from_quaternion(
-            (obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w))
-        points = cv2.boxPoints((
-            (obj_pose.position.x, obj_pose.position.y),
-            (obj_dims.x, obj_dims.y), heading)) # input angle as 0 because the radar driver outputs pose.orientation as (1,0,0,0)
-        convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
-
-        return convex_hull
     def run(self):
         rospy.spin()
 
