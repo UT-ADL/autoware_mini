@@ -52,7 +52,7 @@ class LidarRadarFusion:
                 distance = self.compute_distance(lidar_detection, radar_detection)
 
                 # calculate norm of radar detection's speed
-                radar_speed = self.compute_norm(radar_detection)
+                radar_speed = self.compute_norm(radar_detection.velocity.linear)
                 # check if the radar object falls within(+1) or one the edge(0) of the lidar hull. Side note: outside of hull = -1
                 is_within_hull = cv2.pointPolygonTest(lidar_hull, radar_object_centroid, measureDist=False) >= 0
 
@@ -95,8 +95,8 @@ class LidarRadarFusion:
         return sqrt((obj1.pose.position.x - obj2.pose.position.x)**2 + (obj1.pose.position.y - obj2.pose.position.y)**2)
 
     @staticmethod
-    def compute_norm(obj):
-        return sqrt(obj.velocity.linear.x**2 + obj.velocity.linear.y**2 + obj.velocity.linear.z**2)
+    def compute_norm(obj_velocity):
+        return sqrt(obj_velocity.x**2 + obj_velocity.y**2 + obj_velocity.z**2)
 
     def run(self):
         rospy.spin()
