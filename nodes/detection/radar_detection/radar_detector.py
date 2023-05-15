@@ -93,7 +93,7 @@ class RadarDetector:
             detected_object.velocity_reliable = True
             detected_object.velocity.linear = self.get_tfed_velocity(track.velocity, ego_speed.twist.linear, source_frame)
             detected_object.acceleration_reliable = True
-            detected_object.acceleration = self.get_tfed_acceleration(track, source_frame)
+            detected_object.acceleration.linear = self.get_tfed_vector3(track.acceleration, source_frame)
             detected_object.dimensions = track.size
             detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, tracks.header.stamp)
 
@@ -133,16 +133,6 @@ class RadarDetector:
         source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, source_frame, rospy.Time(0))
         tfed_pose = tf2_geometry_msgs.do_transform_pose(pose_stamped, source_frame_to_output_tf).pose
         return tfed_pose
-    
-    def get_tfed_acceleration(self, track, source_frame):
-        """
-        track: radar track (radar_msgs/RadarTrack)
-        :param source_frame: frame in which to transform the velocity vector. Map in  most cases unless specifically required and changed
-        :return: acceleration transformed to map frame (geometry_msgs/Twist)
-        """
-        # compute acceleration in self.output frame in radar_fc frame
-        tfed_acceleration = self.get_tfed_vector3(track.acceleration, source_frame)
-        return Twist(linear=tfed_acceleration)
 
     def get_tfed_vector3(self, vector3, source_frame):
         """
