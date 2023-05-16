@@ -37,6 +37,7 @@
         <remap from="/planning/smoothed_path_markers" to="/bag/planning/smoothed_path_markers" if="$(arg use_planning)"/>
         <remap from="/planning/local_path" to="/bag/planning/local_path" if="$(arg use_planning)"/>
         <remap from="/planning/local_path_markers" to="/bag/planning/local_path_markers" if="$(arg use_planning)"/>
+        <remap from="/planning/stop_line_markers" to="/bag/planning/stop_line_markers" if="$(arg use_planning)"/>
         <remap from="/detection/traffic_light_status" to="/bag/detection/traffic_light_status" if="$(arg use_detection)"/>
         <!-- For compatibility with older bags and Vella bags -->
         <remap from="/points_raw_center" to="/lidar_center/points_raw"/>
