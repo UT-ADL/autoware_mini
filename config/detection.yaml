@@ -56,16 +56,16 @@ camera_traffic_light_detector_left:
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   traffic_light_bulb_radius: 0.1    # meters
   radius_to_roi_multiplier: 5.0  # multiplier for radius to get roi size
-  rectify_image: True
   transform_from_frame: map
   transform_to_frame: camera_fl
+  rectify_image: True
   output_roi_image: True
 
 camera_traffic_light_detector_right:
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   traffic_light_bulb_radius: 0.1    # meters
   radius_to_roi_multiplier: 5.0  # multiplier for radius to get roi size
-  rectify_image: True
   transform_from_frame: map
   transform_to_frame: camera_fr
+  rectify_image: True
   output_roi_image: True
