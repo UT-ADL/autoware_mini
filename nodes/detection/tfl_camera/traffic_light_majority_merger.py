@@ -6,9 +6,9 @@ import message_filters
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 
 TRAFFIC_LIGHT_RESULT_TO_STRING = {
-    0: "red",    # and yellow
-    1: "green",
-    2: "unknown"
+    0: "RED",    # and yellow
+    1: "GREEN",
+    2: "UNKNOWN"
 }
 
 class TrafficLightMajorityMerger:
