@@ -50,13 +50,10 @@ class CameraTrafficLightDetector:
     def __init__(self):
 
         # Node parameters
-        output_roi_topic = rospy.get_param('~output_roi_topic')
         onnx_path = rospy.get_param("~onnx_path")
 
         self.output_roi_image = rospy.get_param("~output_roi_image")
         self.rectify_image = rospy.get_param('~rectify_image')
-        self.transform_from_frame = rospy.get_param('~transform_from_frame')
-        self.transform_to_frame = rospy.get_param('~transform_to_frame')
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.traffic_light_bulb_radius = rospy.get_param("~traffic_light_bulb_radius")
         self.radius_to_roi_multiplier = rospy.get_param("~radius_to_roi_multiplier")
@@ -71,10 +68,11 @@ class CameraTrafficLightDetector:
         # internal variables
         self.lock = threading.Lock()
         self.current_pose = None
+        self.transform_from_frame = None
 
         # Load the map using Lanelet2
         if coordinate_transformer == "utm":
-                projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
+            projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
             rospy.logfatal("traffic_light_position_extractor - only utm currently supported for lanelet2 map loading")
             exit(1)
@@ -113,12 +111,12 @@ class CameraTrafficLightDetector:
         self.model = onnxruntime.InferenceSession(onnx_path)
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher('/traffic_light_status', TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
         if self.output_roi_image:
-            self.tfl_roi_pub = rospy.Publisher(output_roi_topic, Image, queue_size=1)
+            self.tfl_roi_pub = rospy.Publisher('traffic_light_roi', Image, queue_size=1)
 
         # Camera model
-        camera_info = rospy.wait_for_message('/camera_info', CameraInfo, timeout=4)
+        camera_info = rospy.wait_for_message('camera_info', CameraInfo, timeout=4)
         self.camera_model = PinholeCameraModel()
         self.camera_model.fromCameraInfo(camera_info)
 
@@ -127,13 +125,15 @@ class CameraTrafficLightDetector:
 
         # Subscribers
         rospy.Subscriber('/planning/local_path', Lane, self.local_path_callback, queue_size=1)
-        rospy.Subscriber('/image_raw', Image, self.camera_image_callback, queue_size=1)
+        rospy.Subscriber('image_raw', Image, self.camera_image_callback, queue_size=1)
 
 
     def local_path_callback(self, msg):
 
         signals_on_path = []
         current_pose = None
+
+        self.transform_from_frame = msg.header.frame_id
 
         if len(msg.waypoints) > 0:
 
@@ -148,7 +148,7 @@ class CameraTrafficLightDetector:
             current_pose = msg.waypoints[0].pose.pose.position
 
         with self.lock:
-            self.signals_on_path = signals_on_path.copy()
+            self.signals_on_path = signals_on_path
             self.current_pose = current_pose
 
 
@@ -159,6 +159,7 @@ class CameraTrafficLightDetector:
             current_pose = self.current_pose
 
         image_time_stamp = msg.header.stamp
+        transform_to_frame = msg.header.frame_id
 
         tfl_status = TrafficLightResultArray()
         tfl_status.header.stamp = image_time_stamp
@@ -170,17 +171,18 @@ class CameraTrafficLightDetector:
             rospy.logerr("camera_traffic_light_detector - CvBridgeError: %s", e)
             return
 
-        # extract transform
-        try:
-            t = self.tf_buffer.lookup_transform(self.transform_to_frame, self.transform_from_frame, image_time_stamp)
-        except tf2_ros.TransformException as ex:
-            rospy.logerr("camera_traffic_light_detector - Could not load transform from %s to %s: %s" % (self.transform_from_frame, self.transform_to_frame, ex))
-            return
         
         if self.rectify_image:
             self.camera_model.rectifyImage(image, image)
 
         if len(signals_on_path) > 0 and current_pose is not None:
+
+            # extract transform
+            try:
+                t = self.tf_buffer.lookup_transform(transform_to_frame, self.transform_from_frame, image_time_stamp)
+            except tf2_ros.TransformException as ex:
+                rospy.logerr("camera_traffic_light_detector - Could not load transform from %s to %s: %s" % (self.transform_from_frame, transform_to_frame, ex))
+                return
             
             # reorg signals (individual bulbs) into traffic lights
             traffic_lights = {}
@@ -197,7 +199,6 @@ class CameraTrafficLightDetector:
             for plId, signals in traffic_lights.items():
                 u = []
                 v = []
-                print("signals" ,signals)
                 for linkId, _, _, _, x, y, z in signals:
                     point_map = PointStamped()
                     point_map.header.frame_id = "map"
@@ -228,7 +229,6 @@ class CameraTrafficLightDetector:
                 # round and clip against image limits
                 u = np.clip(np.round(np.array(u)), 0, self.camera_model.width)
                 v = np.clip(np.round(np.array(v)), 0, self.camera_model.height)
-                print(int(linkId))
                 # extract one roi per traffic light
                 rois.append([int(linkId), plId, int(np.min(u)), int(np.max(u)), int(np.min(v)), int(np.max(v))])
 

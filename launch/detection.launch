@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="detector"            default="cluster"   doc="cluster,sfa,vella,carla,sim" />
-    <arg name="tfl_detector"        default="none"      doc="carla, mqtt, camera, fused" />
+    <arg name="tfl_detector"        default="none"      doc="carla, mqtt, camera, fusion" />
     <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
     <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
 

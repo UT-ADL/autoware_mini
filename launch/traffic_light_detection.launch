@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="tfl_detector"        default="none"      doc="carla, mqtt, camera, fused" />
+    <arg name="tfl_detector"        default="none"      doc="carla, mqtt, camera, fusion" />
     <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
     <arg name="onnx_path"           default="$(find autoware_mini)/config/traffic_lights/tlr_model.onnx" doc="onnx model path" />
 
@@ -12,40 +12,36 @@
 
 
     <!-- MQTT traffic light detector -->
-    <node if="$(eval arg('tfl_detector')=='mqtt' or arg('tfl_detector')=='fused')" pkg="autoware_mini" type="mqtt_traffic_light_detector.py" name="mqtt_traffic_light_detector" output="screen" required="true">
+    <node if="$(eval arg('tfl_detector')=='mqtt' or arg('tfl_detector')=='fusion')" pkg="autoware_mini" type="mqtt_traffic_light_detector.py" name="mqtt_traffic_light_detector" output="screen" required="true">
         <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
-        <remap if="$(eval arg('tfl_detector')=='fused')" from="/detection/traffic_light_status" to="/detection/mqtt_traffic_light_status"/>
+        <remap if="$(eval arg('tfl_detector')=='fusion')" from="/detection/traffic_light_status" to="/detection/mqtt_traffic_light_status"/>
     </node>
 
     <!-- Camera based traffic light detection -->
-    <group if="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fused')">
+    <group if="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')">
         
         <!-- Camera FL -->
-        <node pkg="autoware_mini" type="camera_traffic_light_detector.py" name="camera_traffic_light_detector_left" output="screen" required="true" >
-            <remap from="/camera_info" to="/camera_fl/camera_info"/>
-            <remap from="/image_raw" to="/camera_fl/image_raw"/>
-            <remap from="/traffic_light_status" to="/detection/camera_fl_traffic_light_status"/>
-            <param name="output_roi_topic" value="camera_fl_traffic_light_roi_visualization" />
+        <node pkg="autoware_mini" type="camera_traffic_light_detector.py" name="camera_traffic_light_detector_left" output="screen" required="true" ns="camera_fl">
+            <remap from="camera_info" to="/camera_fl/camera_info"/>
+            <remap from="image_raw" to="/camera_fl/image_raw"/>
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
             <param name="onnx_path" value="$(arg onnx_path)" />
         </node>
 
         <!-- Camera FR -->
-        <node pkg="autoware_mini" type="camera_traffic_light_detector.py" name="camera_traffic_light_detector_right" output="screen" required="true" >
-            <remap from="/camera_info" to="/camera_fr/camera_info"/>
-            <remap from="/image_raw" to="/camera_fr/image_raw"/>
-            <remap from="/traffic_light_status" to="/detection/camera_fr_traffic_light_status"/>
-            <param name="output_roi_topic" value="camera_fr_traffic_light_roi_visualization" />
+        <node pkg="autoware_mini" type="camera_traffic_light_detector.py" name="camera_traffic_light_detector_right" output="screen" required="true" ns="camera_fr">
+            <remap from="camera_info" to="/camera_fr/camera_info"/>
+            <remap from="image_raw" to="/camera_fr/image_raw"/>
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
             <param name="onnx_path" value="$(arg onnx_path)" />
         </node>
 
         <node pkg="autoware_mini" type="traffic_light_majority_merger.py" name="traffic_light_majority_merger" output="screen" required="true" >
-            <remap if="$(eval arg('tfl_detector')=='fused')" from="/traffic_light_status" to="/detection/camera_traffic_light_status"/>
+            <remap if="$(eval arg('tfl_detector')=='fusion')" from="/traffic_light_status" to="/detection/camera_traffic_light_status"/>
             <remap if="$(eval arg('tfl_detector')=='camera')" from="/traffic_light_status" to="/detection/traffic_light_status"/>
         </node>
 
-        <node if="$(eval arg('tfl_detector')=='fused')" pkg="autoware_mini" type="traffic_light_priority_merger.py" name="traffic_light_priority_merger" output="screen" required="true" >
+        <node if="$(eval arg('tfl_detector')=='fusion')" pkg="autoware_mini" type="traffic_light_priority_merger.py" name="traffic_light_priority_merger" output="screen" required="true" >
             <remap from="/tfl_status_topic_1" to="/detection/mqtt_traffic_light_status"/>
             <remap from="/tfl_status_topic_2" to="/detection/camera_traffic_light_status"/>
             <remap from="/traffic_light_status" to="/detection/traffic_light_status"/>
