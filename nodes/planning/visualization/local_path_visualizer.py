@@ -2,10 +2,9 @@
 
 import rospy
 from autoware_msgs.msg import Lane
-from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
-from helpers import get_point_and_orientation_on_path_within_distance, get_distance_between_two_points
+from helpers.waypoints import get_point_and_orientation_on_path_within_distance
 
 class LocalPathVisualizer:
     def __init__(self):

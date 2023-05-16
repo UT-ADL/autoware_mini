@@ -16,7 +16,8 @@ from autoware_msgs.msg import Lane, Waypoint, WaypointState
 from std_msgs.msg import Bool, ColorRGBA
 from visualization_msgs.msg import MarkerArray, Marker
 from tf.transformations import quaternion_from_euler
-from helpers import get_heading_between_two_points, create_closest_point_on_path, get_distance_between_two_points
+from helpers.geometry import get_heading_between_two_points, get_distance_between_two_points_2d
+from helpers.waypoints import get_closest_point_on_path
 
 LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
     "straight": WaypointState.STR_STRAIGHT,
@@ -122,14 +123,14 @@ class Lanelet2GlobalPlanner:
         # create new start and goal waypoints
         start_idx = waypoint_tree.kneighbors([(start_point.x, start_point.y)], 1, return_distance=False)
         start_wp = self.create_waypoint_on_path(waypoints, start_idx[0][0], start_point)
-        d = get_distance_between_two_points(start_wp.pose.pose.position, start_point)
+        d = get_distance_between_two_points_2d(start_wp.pose.pose.position, start_point)
         if d > self.distance_to_centerline_limit:
             rospy.logwarn("%s - start point too far (%f) from centerline", rospy.get_name(), d)
             return
 
         goal_idx = waypoint_tree.kneighbors([(new_goal.x, new_goal.y)], 1, return_distance=False)
         goal_wp = self.create_waypoint_on_path(waypoints, goal_idx[0][0], new_goal)
-        d = get_distance_between_two_points(goal_wp.pose.pose.position, new_goal)
+        d = get_distance_between_two_points_2d(goal_wp.pose.pose.position, new_goal)
         if d > self.distance_to_centerline_limit:
             rospy.logwarn("%s - goal point too far (%f) from centerline", rospy.get_name(), d)
             return
@@ -151,7 +152,7 @@ class Lanelet2GlobalPlanner:
         self.current_location = BasicPoint2d(msg.pose.position.x, msg.pose.position.y)
 
         if self.goal_point != None:
-            d = get_distance_between_two_points(self.current_location, self.goal_point)
+            d = get_distance_between_two_points_2d(self.current_location, self.goal_point)
             if d < self.distance_to_goal_limit:
                 self.waypoints = []
                 self.goal_point = None
@@ -168,7 +169,7 @@ class Lanelet2GlobalPlanner:
     def create_waypoint_on_path(self, waypoints, closest_idx, origin_point):
         wp = copy.deepcopy(waypoints[closest_idx])
         # interpolate point on path
-        point = create_closest_point_on_path(waypoints, closest_idx, origin_point)
+        point = get_closest_point_on_path(waypoints, closest_idx, origin_point)
         wp.pose.pose.position = point
         return wp
 

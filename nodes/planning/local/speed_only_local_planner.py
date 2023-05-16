@@ -17,7 +17,8 @@ from autoware_msgs.msg import Lane, DetectedObjectArray, TrafficLightResultArray
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped, Point
 from std_msgs.msg import ColorRGBA
 
-from helpers import get_two_nearest_waypoint_idx, get_closest_point_on_line, get_distance_between_two_points
+from helpers.geometry import get_closest_point_on_line, get_distance_between_two_points_2d
+from helpers.waypoints import get_two_nearest_waypoint_idx
 
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.4)
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
@@ -169,7 +170,7 @@ class SpeedOnlyLocalPlanner:
         local_path_waypoints[0].pose.pose.position = current_pose_on_path
 
         # if current position overlaps with the first waypoint, remove it
-        if math.isclose(get_distance_between_two_points(local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position), 0):
+        if math.isclose(get_distance_between_two_points_2d(local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position), 0):
             local_path_array = local_path_array[1:]
             local_path_waypoints = local_path_waypoints[1:]
 
