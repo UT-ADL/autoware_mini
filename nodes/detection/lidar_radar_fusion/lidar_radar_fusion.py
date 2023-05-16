@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+from math import sqrt
 import numpy as np
-import rospy
 import cv2
+
+import rospy
 import message_filters
+
 from autoware_msgs.msg import DetectedObjectArray
 from std_msgs.msg import ColorRGBA
-from math import sqrt
 
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.8)
 
@@ -38,6 +40,8 @@ class LidarRadarFusion:
         """
         final_detections = DetectedObjectArray()
         final_detections.header = lidar_detections.header
+        used_radar_detections = {}
+        max_id = 0
 
         for lidar_detection in lidar_detections.objects:
             # Extracting lidar hull points
@@ -70,20 +74,28 @@ class LidarRadarFusion:
                 lidar_detection.acceleration = matched_radar_detection.acceleration
                 lidar_detection.acceleration_reliable = True
                 lidar_detection.color = GREEN
-                # remove matched radar detection from the potential list of radar detections
-                radar_detections.objects.remove(matched_radar_detection)
+                # record matched radar detections
+                used_radar_detections[matched_radar_detection.id] = True
+
+            # keep track of the largest id
+            if lidar_detection.id > max_id:
+                max_id = lidar_detection.id
 
             # lidar detections are always published
             final_detections.objects.append(lidar_detection)
 
         # add radar detections that are not matched to final detections
         for radar_detection in radar_detections.objects:
-            # calculate norm of radar detection's speed
-            radar_speed = self.compute_norm(radar_detection.velocity.linear)
+            if radar_detection.id not in used_radar_detections:
+                # calculate norm of radar detection's speed
+                radar_speed = self.compute_norm(radar_detection.velocity.linear)
 
-            # add only moving radar objects
-            if radar_speed >= self.radar_speed_threshold:
-                final_detections.objects.append(radar_detection)
+                # add only moving radar objects
+                if radar_speed >= self.radar_speed_threshold:
+                    # generate new id for the radar object
+                    max_id += 1
+                    radar_detection.id = max_id
+                    final_detections.objects.append(radar_detection)
 
         self.detected_object_array_pub.publish(final_detections)
 

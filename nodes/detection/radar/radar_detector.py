@@ -71,7 +71,8 @@ class RadarDetector:
             if uuid not in self.uuid_map:
                 integer_id = self.id_counter
                 self.uuid_map[uuid] = integer_id
-                self.id_counter +=1
+                # wrap around ids at 1 million
+                self.id_counter = (self.id_counter + 1) % 1000000
             else:
                 integer_id = self.uuid_map[uuid]
 

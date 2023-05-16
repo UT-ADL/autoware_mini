@@ -45,7 +45,7 @@ lidar:
 
 radar:
   radar_detector:
-    consistency_check: 5 # Number of consecutive detections over which a radar object is dected before it is published/used further
+    consistency_check: 0 # Number of consecutive detections over which a radar object is detected before it is published/used further
 
 lidar_radar_fusion:
   matching_distance: 1.6 # radius threshold value around lidar centroid for a radar object to be considered matched
