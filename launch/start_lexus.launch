@@ -9,7 +9,7 @@
     <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
-    <arg name="tfl_detector"            default="mqtt"              doc="mqtt" />
+    <arg name="tfl_detector"            default="mqtt"              doc="mqtt, camera, fusion" />
     <arg name="max_speed"               default="30" />
     
     <!-- Localization -->
