@@ -57,6 +57,8 @@ class LidarRadarFusion:
                 radar_object_centroid = (radar_detection.pose.position.x, radar_detection.pose.position.y)
                 is_within_hull = cv2.pointPolygonTest(lidar_hull, radar_object_centroid, measureDist=False) >= 0
 
+                # calculate norm of radar detection's speed
+                radar_speed = self.compute_norm(radar_detection.velocity.linear)
                 # calculate distance between lidar and radar objects
                 distance = self.compute_distance(lidar_detection, radar_detection)
 
