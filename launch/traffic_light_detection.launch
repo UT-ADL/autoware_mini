@@ -22,9 +22,9 @@
         
         <!-- Camera FL -->
         <node pkg="autoware_mini" type="camera_traffic_light_detector.py" name="camera_traffic_light_detector_left" output="screen" required="true" >
-            <param name="camera_info_topic" value="/camera_fl/camera_info" />
-            <param name="camera_image_topic" value="/camera_fl/image_raw" />
-            <param name="output_status_topic" value="camera_fl_traffic_light_status" />
+            <remap from="/camera_info" to="/camera_fl/camera_info"/>
+            <remap from="/image_raw" to="/camera_fl/image_raw"/>
+            <remap from="/traffic_light_status" to="/detection/camera_fl_traffic_light_status"/>
             <param name="output_roi_topic" value="camera_fl_traffic_light_roi_visualization" />
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
             <param name="onnx_path" value="$(arg onnx_path)" />
@@ -32,12 +32,17 @@
 
         <!-- Camera FR -->
         <node pkg="autoware_mini" type="camera_traffic_light_detector.py" name="camera_traffic_light_detector_right" output="screen" required="true" >
-            <param name="camera_info_topic" value="/camera_fr/camera_info" />
-            <param name="camera_image_topic" value="/camera_fr/image_raw" />
-            <param name="output_status_topic" value="camera_fr_traffic_light_status" />
+            <remap from="/camera_info" to="/camera_fr/camera_info"/>
+            <remap from="/image_raw" to="/camera_fr/image_raw"/>
+            <remap from="/traffic_light_status" to="/detection/camera_fr_traffic_light_status"/>
             <param name="output_roi_topic" value="camera_fr_traffic_light_roi_visualization" />
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
             <param name="onnx_path" value="$(arg onnx_path)" />
+        </node>
+
+        <node pkg="autoware_mini" type="traffic_light_majority_merger.py" name="traffic_light_majority_merger" output="screen" required="true" >
+            <remap if="$(eval arg('tfl_detector')=='fused')" from="/traffic_light_status" to="/detection/camera_traffic_light_status"/>
+            <remap if="$(eval arg('tfl_detector')=='camera')" from="/traffic_light_status" to="/detection/traffic_light_status"/>
         </node>
 
     </group>

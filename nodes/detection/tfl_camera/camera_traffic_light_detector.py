@@ -15,11 +15,11 @@ from image_geometry import PinholeCameraModel
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 
-from geometry_msgs.msg import PointStamped, Point
+from geometry_msgs.msg import PointStamped
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CameraInfo
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
-from autoware_msgs.msg import Lane, Signals, ExtractedPosition
+from autoware_msgs.msg import Lane
 
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -39,14 +39,17 @@ CLASSIFIER_RESULT_TO_COLOR = {
     2: (0,0,0)
 }
 
+CLASSIFIER_RESULT_TO_TLRESULT = {
+    0: 0,   # 0 RED
+    3: 0,   # 0 YELLOW
+    1: 1,   # 1 GREEN
+    2: 2    # 2 UNKNOWN
+}
 
 class CameraTrafficLightDetector:
     def __init__(self):
 
         # Node parameters
-        camera_info_topic = rospy.get_param('~camera_info_topic')
-        camera_image_topic = rospy.get_param('~camera_image_topic')
-        output_status_topic = rospy.get_param('~output_status_topic')
         output_roi_topic = rospy.get_param('~output_roi_topic')
         onnx_path = rospy.get_param("~onnx_path")
 
@@ -111,12 +114,12 @@ class CameraTrafficLightDetector:
         self.model = onnxruntime.InferenceSession(onnx_path)
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher(output_status_topic, TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('/traffic_light_status', TrafficLightResultArray, queue_size=1)
         if self.output_roi_image:
             self.tfl_roi_pub = rospy.Publisher(output_roi_topic, Image, queue_size=1)
 
         # Camera model
-        camera_info = rospy.wait_for_message(camera_info_topic, CameraInfo, timeout=4)
+        camera_info = rospy.wait_for_message('/camera_info', CameraInfo, timeout=4)
         self.camera_model = PinholeCameraModel()
         self.camera_model.fromCameraInfo(camera_info)
 
@@ -125,7 +128,7 @@ class CameraTrafficLightDetector:
 
         # Subscribers
         rospy.Subscriber('/planning/local_path', Lane, self.local_path_callback, queue_size=1)
-        rospy.Subscriber(camera_image_topic, Image, self.camera_image_callback, queue_size=1)
+        rospy.Subscriber('/image_raw', Image, self.camera_image_callback, queue_size=1)
 
 
     def local_path_callback(self, msg):
@@ -138,7 +141,7 @@ class CameraTrafficLightDetector:
             # Extract waypoints and create array - xy coordinates only
             waypoints_xy = np.array([(wp.pose.pose.position.x, wp.pose.pose.position.y) for wp in msg.waypoints])
             _, stopline_idx = self.stopline_tree.radius_neighbors(waypoints_xy, self.waypoint_interval / 2, return_distance=True)
-            # flatten the stopline_idx and remove duplicates                    print("out of image")
+            # flatten the stopline_idx and remove duplicates
             stopline_idx = np.unique(np.hstack(stopline_idx))
             stoplines_on_path = [int(self.stopline_array[idx][0]) for idx in stopline_idx]
             signals_on_path = list(filter(lambda signal: int(signal[0]) in stoplines_on_path, self.signal_array))
@@ -228,8 +231,7 @@ class CameraTrafficLightDetector:
                 # extract one roi per traffic light
                 rois.append([int(signal[0]), plId, int(np.min(u)), int(np.max(u)), int(np.min(v)), int(np.max(v))])
 
-
-            # create roi images, stack them and do prediction 
+            # create roi images, stack them
             roi_images = []
             for roi in rois:
 
@@ -239,32 +241,32 @@ class CameraTrafficLightDetector:
                 roi_images.append(roi_image)
                 input = np.stack(roi_images, axis=0)
 
-                # run model and do prediction
-                prediction = self.model.run(None, {'conv2d_1_input': input})
+            # run model and do prediction
+            prediction = self.model.run(None, {'conv2d_1_input': input})
 
-                for i, pred in enumerate(prediction[0]):
-                    result = np.argmax(pred)
+            for i, pred in enumerate(prediction[0]):
+                result = np.argmax(pred)
 
-                    tfl_result = TrafficLightResult()
-                    tfl_result.light_id = int(rois[i][1])
-                    tfl_result.lane_id = int(rois[i][0])
-                    tfl_result.recognition_result = result
-                    tfl_result.recognition_result_str = CLASSIFIER_RESULT_TO_STRING[result]
+                tfl_result = TrafficLightResult()
+                tfl_result.light_id = int(rois[i][1])
+                tfl_result.lane_id = int(rois[i][0])
+                tfl_result.recognition_result = CLASSIFIER_RESULT_TO_TLRESULT[result]
+                tfl_result.recognition_result_str = CLASSIFIER_RESULT_TO_STRING[result]
 
-                    tfl_status.results.append(tfl_result)
+                tfl_status.results.append(tfl_result)
 
-                    if self.output_roi_image:
-                        start_point = (int(rois[i][2]), int(rois[i][4]))
-                        end_point = (int(rois[i][3]), int(rois[i][5]))
-                        cv2.rectangle(image, start_point, end_point, CLASSIFIER_RESULT_TO_COLOR[result] , thickness = 3)
-                        cv2.putText(image,
-                            CLASSIFIER_RESULT_TO_STRING[result],
-                            org = (int(roi[2]) + 5, int(roi[5]) - 5),
-                            fontFace = cv2.FONT_HERSHEY_SIMPLEX,
-                            fontScale = 1,
-                            color = CLASSIFIER_RESULT_TO_COLOR[result], 
-                            thickness = 2)
-        print(tfl_status)
+                if self.output_roi_image:
+                    start_point = (int(rois[i][2]), int(rois[i][4]))
+                    end_point = (int(rois[i][3]), int(rois[i][5]))
+                    cv2.rectangle(image, start_point, end_point, CLASSIFIER_RESULT_TO_COLOR[result] , thickness = 3)
+                    cv2.putText(image,
+                        CLASSIFIER_RESULT_TO_STRING[result],
+                        org = (int(roi[2]) + 5, int(roi[5]) - 5),
+                        fontFace = cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale = 1,
+                        color = CLASSIFIER_RESULT_TO_COLOR[result], 
+                        thickness = 2)
+
         self.tfl_status_pub.publish(tfl_status)
 
         if self.output_roi_image:
