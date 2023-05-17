@@ -7,9 +7,8 @@ import threading
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from helpers import get_heading_from_pose_orientation, get_heading_between_two_points, get_blinker_state, \
-    normalize_heading_error, get_point_and_orientation_on_path_within_distance, get_closest_point_on_line, \
-    get_cross_track_error, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
+from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error
+from helpers.waypoints import get_blinker_state, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
@@ -48,13 +47,13 @@ class PurePursuitFollower:
         ts.registerCallback(self.current_status_callback)
 
         # output information to console
-        rospy.loginfo("pure_pursuit_follower - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def path_callback(self, path_msg):
         
         if len(path_msg.waypoints) < 2:
             # if path is cancelled and empty waypoints received
-            rospy.logwarn_throttle(30, "pure_pursuit_follower - no waypoints, stopping!")
+            rospy.logwarn_throttle(30, "%s - no waypoints, stopping!", rospy.get_name())
             with self.lock:
                 self.waypoint_tree = None
                 self.waypoints = None
@@ -91,7 +90,7 @@ class PurePursuitFollower:
         if front_wp_idx == len(waypoints)-1:
             # stop vehicle - last waypoint is reached
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
-            rospy.logwarn_throttle(10, "pure_pursuit_follower - last waypoint reached")
+            rospy.logwarn_throttle(10, "%s - last waypoint reached", rospy.get_name())
             return
 
         # get nearest point on path from base_link
@@ -102,13 +101,13 @@ class PurePursuitFollower:
         if lookahead_distance < self.min_lookahead_distance:
             lookahead_distance = self.min_lookahead_distance
 
-        cross_track_error = get_cross_track_error(current_pose, waypoints[back_wp_idx].pose.pose, waypoints[front_wp_idx].pose.pose)
+        cross_track_error = get_cross_track_error(current_pose.position, waypoints[back_wp_idx].pose.pose.position, waypoints[front_wp_idx].pose.pose.position)
 
         # lookahead_point - point on the path within given lookahead distance
         lookahead_point, _ = get_point_and_orientation_on_path_within_distance(waypoints, front_wp_idx, nearest_point, lookahead_distance)
 
         # find current_heading, lookahead_heading, heading error and cross_track_error
-        current_heading = get_heading_from_pose_orientation(current_pose)
+        current_heading = get_heading_from_orientation(current_pose.orientation)
         lookahead_heading = get_heading_between_two_points(current_pose.position, lookahead_point)
         heading_error = lookahead_heading - current_heading
 
@@ -117,7 +116,7 @@ class PurePursuitFollower:
         if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_angle_difference)) > self.heading_angle_limit:
             # stop vehicle if cross track error or heading angle difference is over limit
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
-            rospy.logerr_throttle(10, "pure_pursuit_follower - lateral error or heading angle difference over limit")
+            rospy.logerr_throttle(10, "%s - lateral error or heading angle difference over limit", rospy.get_name())
             return
     
         # calculate steering angle

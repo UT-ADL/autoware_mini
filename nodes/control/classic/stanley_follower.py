@@ -7,10 +7,9 @@ import threading
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from helpers import get_heading_from_pose_orientation, get_blinker_state, get_heading_between_two_points, \
-    get_closest_point_on_line, get_point_and_orientation_on_path_within_distance, get_cross_track_error, \
-    get_pose_using_heading_and_distance, normalize_heading_error, interpolate_velocity_between_waypoints, \
-    get_two_nearest_waypoint_idx
+from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error, get_point_using_heading_and_distance
+from helpers.waypoints import get_blinker_state, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
+
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
 from std_msgs.msg import ColorRGBA, Float32MultiArray
@@ -47,14 +46,14 @@ class StanleyFollower:
         ts.registerCallback(self.current_status_callback)
 
         # output information to console
-        rospy.loginfo("stanley_follower - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
 
     def path_callback(self, path_msg):
 
         if len(path_msg.waypoints) < 2:
             # if path is cancelled and empty waypoints received
-            rospy.logwarn_throttle(30, "stanley_follower - no waypoints, stopping!")
+            rospy.logwarn_throttle(30, "%s - no waypoints, stopping!", rospy.get_name())
             with self.lock:
                 self.waypoint_tree = None
                 self.waypoints = None
@@ -80,7 +79,7 @@ class StanleyFollower:
         stamp = current_pose_msg.header.stamp
         current_pose = current_pose_msg.pose
         current_velocity = current_velocity_msg.twist.linear.x
-        current_heading = get_heading_from_pose_orientation(current_pose)
+        current_heading = get_heading_from_orientation(current_pose.orientation)
 
         if waypoint_tree is None:
             # if no waypoints received yet or global_path cancelled, stop the vehicle
@@ -88,9 +87,9 @@ class StanleyFollower:
             return
 
         # Find pose for the front wheel and 2 closest waypoint idx (fw_)
-        front_wheel_pose = get_pose_using_heading_and_distance(current_pose, current_heading, self.wheel_base)
-        fw_back_wp_idx, fw_front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, front_wheel_pose.position.x, front_wheel_pose.position.y)
-        cross_track_error = get_cross_track_error(front_wheel_pose, waypoints[fw_back_wp_idx].pose.pose, waypoints[fw_front_wp_idx].pose.pose)
+        front_wheel_position = get_point_using_heading_and_distance(current_pose.position, current_heading, self.wheel_base)
+        fw_back_wp_idx, fw_front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, front_wheel_position.x, front_wheel_position.y)
+        cross_track_error = get_cross_track_error(front_wheel_position, waypoints[fw_back_wp_idx].pose.pose.position, waypoints[fw_front_wp_idx].pose.pose.position)
 
         # get closest point to base_link on path (line defined by 2 closest waypoints) - (bl_)
         bl_back_wp_idx, bl_front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
@@ -98,7 +97,7 @@ class StanleyFollower:
         if bl_front_wp_idx == len(waypoints)-1:
             # stop vehicle if last waypoint is reached
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
-            rospy.logwarn_throttle(10, "stanley_follower - last waypoint reached")
+            rospy.logwarn_throttle(10, "%s - last waypoint reached", rospy.get_name())
             return
     
         bl_nearest_point = get_closest_point_on_line(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
@@ -110,7 +109,7 @@ class StanleyFollower:
         if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_error)) > self.heading_angle_limit:
             # stop vehicle if cross track error or heading angle difference is over limit
             self.publish_vehicle_command(stamp, 0.0, 0.0, 0, 0)
-            rospy.logerr_throttle(10, "stanley_follower - lateral error or heading angle difference over limit")
+            rospy.logerr_throttle(10, "%s - lateral error or heading angle difference over limit", rospy.get_name())
             return
 
         # calculate steering angle
@@ -126,7 +125,7 @@ class StanleyFollower:
         # Publish
         self.publish_vehicle_command(stamp, steering_angle, target_velocity, left_blinker, right_blinker)
         if self.publish_debug_info:
-            self.publish_stanley_markers(stamp, bl_nearest_point, lookahead_point, front_wheel_pose, heading_error)
+            self.publish_stanley_markers(stamp, bl_nearest_point, lookahead_point, front_wheel_position, heading_error)
             self.follower_debug_pub.publish(Float32MultiArray(data=[(rospy.get_time() - start_time), current_heading, track_heading, heading_error, cross_track_error, target_velocity]))
 
 
@@ -144,7 +143,7 @@ class StanleyFollower:
         self.vehicle_command_pub.publish(vehicle_cmd)
 
 
-    def publish_stanley_markers(self, stamp, nearest_point, lookahead_point, front_pose, heading_error):
+    def publish_stanley_markers(self, stamp, nearest_point, lookahead_point, front_position, heading_error):
 
         marker_array = MarkerArray()
 
@@ -158,14 +157,14 @@ class StanleyFollower:
         marker.action = Marker.ADD
         marker.scale.x = 0.1
         marker.color = ColorRGBA(1.0, 0.0, 1.0, 1.0)
-        marker.points = ([nearest_point, lookahead_point, front_pose.position])
+        marker.points = ([nearest_point, lookahead_point, front_position])
         marker_array.markers.append(marker)
 
         # label of angle alpha
         average_pose = Pose()
-        average_pose.position.x = (front_pose.position.x + nearest_point.x) / 2
-        average_pose.position.y = (front_pose.position.y + nearest_point.y) / 2
-        average_pose.position.z = (front_pose.position.z + nearest_point.z) / 2
+        average_pose.position.x = (front_position.x + nearest_point.x) / 2
+        average_pose.position.y = (front_position.y + nearest_point.y) / 2
+        average_pose.position.z = (front_position.z + nearest_point.z) / 2
 
         marker_text = Marker()
         marker_text.header.frame_id = "map"

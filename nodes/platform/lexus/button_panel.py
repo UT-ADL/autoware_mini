@@ -20,21 +20,21 @@ class ButtonPanelNode:
         rospy.Subscriber("/localization/current_pose", PoseStamped, self.pose_callback)
         rospy.Subscriber("joy", Joy, self.joy_callback)
 
-        rospy.loginfo("button_panel - node started")
+        rospy.loginfo("%s - node started", rospy.get_name())
 
     def pose_callback(self, msg):
-        rospy.logdebug("button_panel - got pose (%d, %d)", msg.pose.position.x, msg.pose.position.y)
+        rospy.logdebug("%s - got pose (%d, %d)", rospy.get_name(), msg.pose.position.x, msg.pose.position.y)
         self.pose_msg = msg
 
     def joy_callback(self, msg):
-        rospy.logdebug("button_panel - got joy (%d, %d, %d, %d, %d, %d)", msg.buttons[0], msg.buttons[1], msg.buttons[2], msg.buttons[3], msg.buttons[4], msg.buttons[5])
+        rospy.logdebug("%s - got joy (%d, %d, %d, %d, %d, %d)", rospy.get_name(), msg.buttons[0], msg.buttons[1], msg.buttons[2], msg.buttons[3], msg.buttons[4], msg.buttons[5])
         if msg.buttons[0] == 1:
             if rospy.get_time() - self.time_engage > self.cooldown:
                 self.engage_pub.publish(Bool(data=True))
                 self.time_engage = rospy.get_time()
-                rospy.logdebug("button_panel - published engage")
+                rospy.logdebug("%s - published engage", rospy.get_name())
             else:
-                rospy.logwarn("button_panel - did not publish engage, in cooldown")
+                rospy.logwarn("%s - did not publish engage, in cooldown", rospy.get_name())
         if msg.buttons[1] == 1 or msg.buttons[2] == 0 or msg.buttons[3] == 1 or msg.buttons[4] == 1 or msg.buttons[5] == 1:
             if self.pose_msg is not None:
                 marker = Marker()
@@ -69,9 +69,9 @@ class ButtonPanelNode:
                 marker.color.a = 1
                 self.marker_id += 1
                 self.marker_pub.publish(marker)
-                rospy.logdebug("button_panel - published marker (%d, %d)", marker.pose.position.x, marker.pose.position.y)
+                rospy.logdebug("%s - published marker (%d, %d)", rospy.get_name(), marker.pose.position.x, marker.pose.position.y)
             else:
-                rospy.logwarn("button_panel - did not publish marker, no current pose yet")
+                rospy.logwarn("%s - did not publish marker, no current pose yet", rospy.get_name())
 
     def run(self):
         rospy.spin()

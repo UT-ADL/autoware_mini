@@ -89,8 +89,8 @@ class SSCInterface:
             desired_mode = int(self.engage)
             desired_speed = min(self.max_speed / 3.6, abs(msg.ctrl_cmd.linear_velocity))
         else:
-            rospy.logwarn("Invalid vehicle command: gear = %d, velocity = %lf", msg.gear_cmd.gear, msg.ctrl_cmd.linear_velocity)
-            rospy.logwarn("Disengaging autonomy")
+            rospy.logwarn("%s - invalid vehicle command: gear = %d, velocity = %lf", rospy.get_name(), msg.gear_cmd.gear, msg.ctrl_cmd.linear_velocity)
+            rospy.logwarn("%s - disengaging autonomy", rospy.get_name())
             # if not valid command then disengage
             desired_mode = 0
             desired_speed = 0.0
@@ -110,7 +110,7 @@ class SSCInterface:
             desired_gear = msg.gear_cmd.gear
             # refuse REVERSE gear when not enabled
             if desired_gear == Gear.REVERSE and not self.enable_reverse_motion:
-                rospy.logerr("Reverse gear ignored, reverse motion not enabled")
+                rospy.logerr("%s - reverse gear ignored, reverse motion not enabled", rospy.get_name())
                 desired_gear = Gear.NONE
 
         # calculate desired turn signal for SSC
@@ -127,7 +127,7 @@ class SSCInterface:
 
         # emergency mode stops the car
         if msg.emergency == 1:
-            rospy.logerr("Emergency stopping, speed overridden to 0")
+            rospy.logerr("%s - emergency stopping, speed overridden to 0", rospy.get_name())
             desired_speed = 0.0
 
         # publish command messages
@@ -144,8 +144,8 @@ class SSCInterface:
 
     def timeout_callback(self, event=None):
         if not self.alive and self.engage:
-            rospy.logerr("Did not receive any commands for at least %d ms", self.command_timeout)
-            rospy.logerr("Disengaging autonomy until re-enabled")
+            rospy.logerr("%s - did not receive any commands for at least %d ms", rospy.get_name(), self.command_timeout)
+            rospy.logerr("%s - disengaging autonomy until re-enabled", rospy.get_name())
             self.engage = False
 
             # send dummy commands to keep SSC alive

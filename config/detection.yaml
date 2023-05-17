@@ -1,3 +1,5 @@
+output_frame: map
+
 lidar:
   ground_removal:
     min_x: -60.0
@@ -19,7 +21,6 @@ lidar:
     bounding_box_type: axis_aligned # axis_aligned, min_area
     enable_pointcloud: False
     enable_convex_hull: True
-    target_frame: map
     transform_timeout: 0.05         # needed for Carla
 
   sfa_detector:
@@ -34,14 +35,13 @@ lidar:
     max_z: 1.27
     score_thresh: 0.2
     top_k: 50
-    output_frame: "map"
     transform_timeout: 0.05
 
   vella_detector:
     confidence_filter: 0.5
     track_length_filter: 0
     lidar_frame: lidar_center
-    output_frame: map
+    transform_timeout: 0.05
 
 obstacle_simulation:
   publish_rate: 10

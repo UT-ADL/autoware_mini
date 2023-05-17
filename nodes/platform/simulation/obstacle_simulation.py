@@ -7,8 +7,6 @@ from geometry_msgs.msg import PointStamped, Point32
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from std_msgs.msg import ColorRGBA
 
-from helpers import get_heading_from_pose_orientation
-
 class ObstacleSimulation:
     def __init__(self):
         # get parameters
@@ -24,7 +22,7 @@ class ObstacleSimulation:
         # initial position and vehicle command from outside
         rospy.Subscriber('/clicked_point', PointStamped, self.point_callback)
 
-        rospy.loginfo("obstacle_simulation - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def point_callback(self, msg):
         # check if clicked on an existing object
@@ -32,7 +30,7 @@ class ObstacleSimulation:
             if o.pose.position.x - o.dimensions.x / 2.0 <= msg.point.x <= o.pose.position.x + o.dimensions.x / 2.0 and \
                     o.pose.position.y - o.dimensions.y / 2.0 <= msg.point.y <= o.pose.position.y + o.dimensions.y / 2.0:
                 self.objects.remove(o)
-                rospy.loginfo("obstacle_simulation - removed obstacle %d", o.id)
+                rospy.loginfo("%s - removed obstacle %d", rospy.get_name(), o.id)
                 return
 
         # if not, create a new 
@@ -65,7 +63,7 @@ class ObstacleSimulation:
         ]
 
         self.objects.append(obj)
-        rospy.loginfo("obstacle_simulation - added obstacle %d at (%f, %f, %f) in %s frame", self.id, msg.point.x, msg.point.y, msg.point.z, msg.header.frame_id)
+        rospy.loginfo("%s - added obstacle %d at (%f, %f, %f) in %s frame", rospy.get_name(), self.id, msg.point.x, msg.point.y, msg.point.z, msg.header.frame_id)
         self.id += 1
 
     def run(self):
@@ -87,15 +85,13 @@ class ObstacleSimulation:
         # create message
         msg = DetectedObjectArray()
         msg.header.stamp = stamp
+        msg.header.frame_id = 'map'
         msg.objects = self.objects
-
-        # take message frame from the first object
-        if len(msg.objects) > 0:
-            msg.header.frame_id = msg.objects[0].header.frame_id
 
         # overwrite object timestamp
         for o in msg.objects:
             o.header.stamp = stamp
+            assert o.header.frame_id == msg.header.frame_id, "object frame_id does not match message frame_id"
 
         self.objects_pub.publish(msg)
 

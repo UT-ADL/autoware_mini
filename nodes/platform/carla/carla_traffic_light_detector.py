@@ -44,7 +44,7 @@ class CarlaTrafficLightDetector:
         if coordinate_transformer == "utm":
                 projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
             exit(1)
         lanelet2_map = load(lanelet2_map_name, projector)
 
@@ -99,14 +99,14 @@ class CarlaTrafficLightDetector:
         tfl_status.header.stamp = rospy.Time.now()
         for light in msg.traffic_lights:
             if light.id not in self.tlf_id_to_coords_map:
-                rospy.logwarn("Traffic light %d not found in info", light.id)
+                rospy.logwarn("%s - traffic light %d not found in info", rospy.get_name(), light.id)
                 continue
             tfl_coords = self.tlf_id_to_coords_map[light.id]
 
             try:
                 light_id, lane_id = self.classifier.predict([tfl_coords])[0]
             except ValueError:
-                rospy.logdebug("Traffic light %d at coordinates (%f, %f) not found in map", light.id, tfl_coords[0], tfl_coords[1])
+                rospy.logdebug("%s - traffic light %d at coordinates (%f, %f) not found in map", rospy.get_name(), light.id, tfl_coords[0], tfl_coords[1])
                 continue
 
             tfl_result = TrafficLightResult()
