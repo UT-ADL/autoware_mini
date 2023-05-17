@@ -8,6 +8,7 @@ Panels:
         - /Detection1
         - /Detection1/Lidar1
         - /Planning1
+        - /Planning1/Global path1/Namespaces1
         - /Planning1/Smoothed path1/Namespaces1
         - /Planning1/Local path1/Namespaces1
         - /Simulation1
@@ -206,11 +207,11 @@ Visualization Manager:
           width: 128
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
-          Enabled: true
+          Enabled: false
           Name: Acceleration
           Show Value: true
           Topic: /dashboard/acceleration
-          Value: true
+          Value: false
           auto color change: false
           auto scale: false
           background color: 0; 0; 0
@@ -231,11 +232,11 @@ Visualization Manager:
           width: 128
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
-          Enabled: true
+          Enabled: false
           Name: Accel limit
           Show Value: true
           Topic: /dashboard/acceleration_limit
-          Value: true
+          Value: false
           auto color change: false
           auto scale: false
           background color: 0; 0; 0
@@ -256,11 +257,11 @@ Visualization Manager:
           width: 128
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
-          Enabled: true
+          Enabled: false
           Name: Decel limit
           Show Value: true
           Topic: /dashboard/deceleration_limit
-          Value: true
+          Value: false
           auto color change: false
           auto scale: false
           background color: 0; 0; 0
@@ -349,14 +350,18 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               "": true
               Value: true
             Detection:
-              "": true
+              Detected objects: true
+              Lidar:
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
               Value: true
             Grid: true
             Map:
@@ -393,14 +398,18 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               "": true
               Value: true
             Detection:
-              "": true
+              Detected objects: true
+              Lidar:
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
               Value: true
             Grid: true
             Map:
