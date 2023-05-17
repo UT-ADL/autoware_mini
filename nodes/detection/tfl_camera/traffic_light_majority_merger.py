@@ -7,9 +7,9 @@ import numpy as np
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 
 TRAFFIC_LIGHT_RESULT_TO_STRING = {
-    0: "RED",    # and yellow
-    1: "GREEN",
-    2: "UNKNOWN"
+    0: "RED cam",    # and yellow
+    1: "GREEN cam",
+    2: "UNKNOWN cam"
 }
 
 class TrafficLightMajorityMerger:
