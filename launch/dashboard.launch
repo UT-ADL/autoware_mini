@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+    <group ns="dashboard">
+        <!-- Current and target speed -->
+        <node pkg="topic_tools" type="transform" name="current_speed_transform" args="--wait-for-start /localization/current_velocity current_speed std_msgs/Float32 'm.twist.linear.x * 3.6'" output="screen" required="true"/>
+        <node pkg="topic_tools" type="transform" name="target_speed_transform" args="--wait-for-start /control/vehicle_cmd target_speed std_msgs/Float32 'm.ctrl_cmd.linear_velocity * 3.6'" output="screen" required="true"/>
+        <!-- Closest object distance and speed -->
+        <node pkg="topic_tools" type="transform" name="closest_object_distance_transform" args="--wait-for-start /planning/local_path closest_object_distance std_msgs/Float32 'm.closest_object_distance'" output="screen" required="true"/>
+        <node pkg="topic_tools" type="transform" name="closest_object_speed_transform" args="--wait-for-start /planning/local_path closest_object_speed std_msgs/Float32 'm.closest_object_velocity * 3.6'" output="screen" required="true"/>        
+        <!-- Acceleration and limits -->
+        <node pkg="topic_tools" type="transform" name="acceleration_transform" args="--wait-for-start /control/vehicle_cmd acceleration std_msgs/Float32 'm.ctrl_cmd.linear_acceleration'" output="screen" required="true"/>
+        <node pkg="topic_tools" type="transform" name="acceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands acceleration_limit std_msgs/Float32 'm.acceleration_limit'" output="screen" required="true"/>
+        <node pkg="topic_tools" type="transform" name="deceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands deceleration_limit std_msgs/Float32 'm.deceleration_limit'" output="screen" required="true"/>
+    </group>
+</launch>

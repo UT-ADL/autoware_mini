@@ -4,8 +4,8 @@ import threading
 import math
 
 import rospy
-import tf
 from tf2_ros import TransformBroadcaster
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Quaternion, Point
 from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
@@ -23,12 +23,13 @@ class BicycleSimulation:
         self.deceleration_limit = rospy.get_param("deceleration_limit")
 
         # internal state of bicycle model
-        self.x = 0
-        self.y = 0
-        self.acceleration = 0
-        self.velocity = 0
-        self.heading_angle = 0
-        self.steering_angle = 0
+        self.x = 0.0
+        self.y = 0.0
+        self.acceleration = 0.0
+        self.velocity = 0.0
+        self.heading_angle = 0.0
+        self.target_velocity = 0.0
+        self.steering_angle = 0.0
         self.orientation = Quaternion(0, 0, 0, 1)
         self.blinkers = 0
 
@@ -55,7 +56,7 @@ class BicycleSimulation:
         # extract heading angle from orientation
         orientation = msg.pose.pose.orientation
         quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
-        _, _, self.heading_angle = tf.transformations.euler_from_quaternion(quaternion)
+        _, _, self.heading_angle = euler_from_quaternion(quaternion)
 
         rospy.loginfo("%s - initial position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame", rospy.get_name(), 
                     msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z,
@@ -63,23 +64,20 @@ class BicycleSimulation:
                     msg.pose.pose.orientation.w, msg.header.frame_id)
 
     def vehicle_cmd_callback(self, msg):
-        # if target velocity is higher than current velocity
-        if msg.ctrl_cmd.linear_velocity > self.velocity + 0.0001:
-            # if acceleration is provided, use it, otherwise take from parameters
-            if msg.ctrl_cmd.linear_acceleration != 0:
-                self.acceleration = abs(msg.ctrl_cmd.linear_acceleration)
+        self.target_velocity = msg.ctrl_cmd.linear_velocity
+        # calculate acceleration based on limits
+        if self.target_velocity > self.velocity:
+            if msg.ctrl_cmd.linear_acceleration > 0.0:
+                self.acceleration = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
             else:
-                self.acceleration = abs(self.acceleration_limit)
-        # if target velocity is lower than current velocity
-        elif msg.ctrl_cmd.linear_velocity < self.velocity - 0.0001:
-            # if acceleration is provided, use it, otherwise take from parameters
-            if msg.ctrl_cmd.linear_acceleration != 0:
-                self.acceleration = -abs(msg.ctrl_cmd.linear_acceleration)
+                self.acceleration = self.acceleration_limit
+        elif self.target_velocity < self.velocity:
+            if msg.ctrl_cmd.linear_acceleration < 0.0:
+                self.acceleration = -min(-msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
             else:
-                self.acceleration = -abs(self.deceleration_limit)
-        # target velocity achieved, no need for acceleration
+                self.acceleration = -self.deceleration_limit
         else:
-            self.acceleration = 0
+            self.acceleration = 0.0
 
         rospy.logdebug("%s - target velocity: %.3f, current velocity: %.3f, acceleration: %.3f", rospy.get_name(), msg.ctrl_cmd.linear_velocity, self.velocity, self.acceleration)
 
@@ -100,6 +98,9 @@ class BicycleSimulation:
         # change velocity by acceleration
         self.velocity += self.acceleration * delta_t
 
+        # clip velocity at 0
+        self.velocity = max(self.velocity, 0)
+
         # compute change according to bicycle model equations
         x_dot = self.velocity * math.cos(self.heading_angle)
         y_dot = self.velocity * math.sin(self.heading_angle)
@@ -111,7 +112,7 @@ class BicycleSimulation:
         self.heading_angle += heading_angle_dot * delta_t
 
         # create quaternion from heading angle to be used later in tf and pose and marker messages
-        x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, self.heading_angle)
+        x, y, z, w = quaternion_from_euler(0, 0, self.heading_angle)
         self.orientation = Quaternion(x, y, z, w)
 
     def run(self):

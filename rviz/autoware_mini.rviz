@@ -8,7 +8,6 @@ Panels:
         - /Detection1
         - /Detection1/Lidar1
         - /Planning1
-        - /Planning1/Global path1/Namespaces1
         - /Planning1/Smoothed path1/Namespaces1
         - /Planning1/Local path1/Namespaces1
         - /Simulation1
@@ -61,6 +60,8 @@ Visualization Manager:
       Displays:
         - Class: rviz/TF
           Enabled: false
+          Filter (blacklist): ""
+          Filter (whitelist): ""
           Frame Timeout: 15
           Frames:
             All Enabled: false
@@ -108,7 +109,7 @@ Visualization Manager:
           Enabled: true
           Name: Target speed
           Show Value: false
-          Topic: /planning/target_speed
+          Topic: /dashboard/target_speed
           Value: true
           auto color change: false
           auto scale: false
@@ -133,7 +134,7 @@ Visualization Manager:
           Enabled: true
           Name: Current speed
           Show Value: true
-          Topic: /planning/current_speed
+          Topic: /dashboard/current_speed
           Value: true
           auto color change: false
           auto scale: false
@@ -158,7 +159,7 @@ Visualization Manager:
           Enabled: true
           Name: Closest obj dist
           Show Value: true
-          Topic: /planning/closest_object_distance
+          Topic: /dashboard/closest_object_distance
           Value: true
           auto color change: false
           auto scale: false
@@ -183,7 +184,7 @@ Visualization Manager:
           Enabled: true
           Name: Closest obj spd
           Show Value: true
-          Topic: /planning/closest_object_speed
+          Topic: /dashboard/closest_object_speed
           Value: true
           auto color change: false
           auto scale: false
@@ -201,6 +202,81 @@ Visualization Manager:
           show caption: true
           text size: 10
           top: 10
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: true
+          Name: Acceleration
+          Show Value: true
+          Topic: /dashboard/acceleration
+          Value: true
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 10
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 2
+          min value: -2
+          show caption: true
+          text size: 10
+          top: 168
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: true
+          Name: Accel limit
+          Show Value: true
+          Topic: /dashboard/acceleration_limit
+          Value: true
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 148
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 2
+          min value: -2
+          show caption: true
+          text size: 10
+          top: 168
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: true
+          Name: Decel limit
+          Show Value: true
+          Topic: /dashboard/deceleration_limit
+          Value: true
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 286
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 2
+          min value: -2
+          show caption: true
+          text size: 10
+          top: 168
           update interval: 0.03999999910593033
           width: 128
       Enabled: true
@@ -225,6 +301,7 @@ Visualization Manager:
           Marker Topic: /planning/stop_line_markers
           Name: Stop line status
           Namespaces:
+            Status text: true
             Stop line: true
           Queue Size: 100
           Value: true
@@ -272,13 +349,11 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              "": true
+              Current pose: true
+              Follower markers: true
               Value: true
             Dashboard:
-              Closest obj dist: true
-              Closest obj spd: true
-              Current speed: true
-              Target speed: true
+              "": true
               Value: true
             Detection:
               "": true
@@ -288,7 +363,11 @@ Visualization Manager:
               "": true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Right: true
@@ -298,8 +377,7 @@ Visualization Manager:
               "": true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -315,13 +393,11 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              "": true
+              Current pose: true
+              Follower markers: true
               Value: true
             Dashboard:
-              Closest obj dist: true
-              Closest obj spd: true
-              Current speed: true
-              Target speed: true
+              "": true
               Value: true
             Detection:
               "": true
@@ -331,7 +407,11 @@ Visualization Manager:
               "": true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Left: true
@@ -341,8 +421,7 @@ Visualization Manager:
               "": true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -476,6 +555,7 @@ Visualization Manager:
           Marker Topic: /planning/local_path_markers
           Name: Local path
           Namespaces:
+            Stopping point: true
             Velocity label: true
             Waypoints: true
           Queue Size: 100
@@ -552,9 +632,12 @@ Visualization Manager:
               Follower markers: true
               Value: true
             Dashboard:
+              Accel limit: true
+              Acceleration: true
               Closest obj dist: true
               Closest obj spd: true
               Current speed: true
+              Decel limit: true
               Target speed: true
               Value: true
             Detection:
@@ -588,7 +671,7 @@ Visualization Manager:
               Value: true
             System:
               Lexus model: true
-              TF: false
+              TF: true
               Value: true
             Value: true
           Zoom Factor: 1
