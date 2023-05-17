@@ -40,14 +40,14 @@ class TrafficLightPriorityMerger:
         # iterate over priority topic (MQTT)
         for result in topic_1_msg.results:
             # priority topic result is not unkown -> add to merged result
-            if result.recognition_result_str != "UNKNOWN":
+            if result.recognition_result != 2:
                 merged_tfl_status_msg.results.append(result)
 
                 # delete result from topic 2 if it exists there
                 if result.lane_id in topic_2_tfl_results.keys():
                     del topic_2_tfl_results[result.lane_id]
             
-            if result.recognition_result_str == "UNKNOWN" and result.lane_id in topic_2_tfl_results.keys():
+            if result.recognition_result == 2 and result.lane_id in topic_2_tfl_results.keys():
                 # if result is unknown and there is a result in topic 2, use topic 2 result
                 merged_tfl_status_msg.results.append(topic_2_tfl_results[result.lane_id])
                 del topic_2_tfl_results[result.lane_id]
