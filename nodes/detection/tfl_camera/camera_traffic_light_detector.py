@@ -67,14 +67,14 @@ class CameraTrafficLightDetector:
 
         # internal variables
         self.lock = threading.Lock()
-        self.current_pose = None
         self.transform_from_frame = None
+        self.traffic_lights = {}
 
         # Load the map using Lanelet2
         if coordinate_transformer == "utm":
             projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("traffic_light_position_extractor - only utm currently supported for lanelet2 map loading")
+            rospy.logfatal("%s - only utm currently supported for lanelet2 map loading", rospy.get_name())
             exit(1)
         self.lanelet2_map = load(lanelet2_map_name, projector)
 
@@ -130,8 +130,7 @@ class CameraTrafficLightDetector:
 
     def local_path_callback(self, msg):
 
-        signals_on_path = []
-        current_pose = None
+        traffic_lights = {}
 
         self.transform_from_frame = msg.header.frame_id
 
@@ -145,18 +144,22 @@ class CameraTrafficLightDetector:
             stoplines_on_path = [int(self.stopline_array[idx][0]) for idx in stopline_idx]
             signals_on_path = list(filter(lambda signal: int(signal[0]) in stoplines_on_path, self.signal_array))
 
-            current_pose = msg.waypoints[0].pose.pose.position
+            # reorg signals (individual bulbs) into traffic lights dict
+            for signal in signals_on_path:
+                plId = int(signal[1])
+                if plId in traffic_lights:
+                    traffic_lights[plId].append(signal)
+                else:
+                    traffic_lights[plId] = [signal]
 
         with self.lock:
-            self.signals_on_path = signals_on_path
-            self.current_pose = current_pose
+            self.traffic_lights = traffic_lights
 
 
     def camera_image_callback(self, msg):
 
         with self.lock:
-            signals_on_path = self.signals_on_path.copy()
-            current_pose = self.current_pose
+            traffic_lights = self.traffic_lights
 
         image_time_stamp = msg.header.stamp
         transform_to_frame = msg.header.frame_id
@@ -168,31 +171,20 @@ class CameraTrafficLightDetector:
         try:
             image = self.bridge.imgmsg_to_cv2(msg,  desired_encoding='rgb8')
         except CvBridgeError as e:
-            rospy.logerr("camera_traffic_light_detector - CvBridgeError: %s", e)
+            rospy.logerr("%s - CvBridgeError: %s", rospy.get_name(), str(e))
             return
 
-        
         if self.rectify_image:
             self.camera_model.rectifyImage(image, image)
 
-        if len(signals_on_path) > 0 and current_pose is not None:
+        if len(traffic_lights) > 0:
 
             # extract transform
             try:
                 t = self.tf_buffer.lookup_transform(transform_to_frame, self.transform_from_frame, image_time_stamp)
             except tf2_ros.TransformException as ex:
-                rospy.logerr("camera_traffic_light_detector - Could not load transform from %s to %s: %s" % (self.transform_from_frame, transform_to_frame, ex))
+                rospy.logerr("%s - Could not load transform from %s to %s: %s", rospy.get_name(), self.transform_from_frame, transform_to_frame, str(ex))
                 return
-            
-            # reorg signals (individual bulbs) into traffic lights
-            traffic_lights = {}
-
-            for signal in signals_on_path:
-                plId = int(signal[1])
-                if plId in traffic_lights:
-                    traffic_lights[plId].append(signal)
-                else:
-                    traffic_lights[plId] = [signal]
 
             # calc roi coordinates
             rois = []
@@ -201,8 +193,6 @@ class CameraTrafficLightDetector:
                 v = []
                 for linkId, _, _, _, x, y, z in signals:
                     point_map = PointStamped()
-                    point_map.header.frame_id = "map"
-                    point_map.header.stamp = image_time_stamp
                     point_map.point.x = float(x)
                     point_map.point.y = float(y)
                     point_map.point.z = float(z)
@@ -216,7 +206,7 @@ class CameraTrafficLightDetector:
                         break
 
                     # calculate radius of the bulb in pixels
-                    d = get_distance_between_two_points(current_pose, point_map.point)
+                    d = np.linalg.norm([point_camera.x, point_camera.y, point_camera.z])
                     radius = self.camera_model.fx() * self.traffic_light_bulb_radius / d
 
                     # calc extent for every signal then generate roi using min/max and rounding
@@ -274,7 +264,7 @@ class CameraTrafficLightDetector:
             try:
                 img_msg = self.bridge.cv2_to_imgmsg(image, encoding='rgb8')
             except CvBridgeError as e:
-                rospy.logerr("camera_traffic_light_detector - ", e)
+                rospy.logerr("%s - CVBridge cant't convert image to message: %s", rospy.get_name(), str(e))
             
             img_msg.header.stamp = image_time_stamp
             self.tfl_roi_pub.publish(img_msg)
