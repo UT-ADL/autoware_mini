@@ -22,27 +22,26 @@ from autoware_msgs.msg import Lane
 
 from cv_bridge import CvBridge, CvBridgeError
 
-
-# TODO - review the classifier class codes
+# Classifier outputs 4 classes (LightState)
 CLASSIFIER_RESULT_TO_STRING = {
-    0: "red",
-    3: "yellow",      # not sure ? - Almost never outputted?????
-    1: "green",
-    2: "unkown"
+    0: "green",
+    1: "yellow",
+    2: "red",
+    3: "unknown"
 }
 
 CLASSIFIER_RESULT_TO_COLOR = {
-    0: (255,0,0),
-    3: (255,255,0),      # not sure ? - Almost never outputted?????
-    1: (0,255,0),
-    2: (0,0,0)
+    0: (0,255,0),
+    1: (255,255,0),
+    2: (255,0,0),
+    3: (0,0,0)
 }
 
 CLASSIFIER_RESULT_TO_TLRESULT = {
-    0: 0,   # 0 RED
-    3: 0,   # 0 YELLOW
-    1: 1,   # 1 GREEN
-    2: 2    # 2 UNKNOWN
+    0: 1,   # GREEN
+    1: 0,   # YELLOW
+    2: 0,   # RED
+    3: 2    # UNKNOWN
 }
 
 class CameraTrafficLightDetector:
@@ -134,7 +133,7 @@ class CameraTrafficLightDetector:
 
         traffic_lights = {}
         rois = []
-        prediction = []
+        predictions = []
 
         if len(local_path_msg.waypoints) > 0:
             traffic_lights = self.get_traffic_lights_on_path(local_path_msg.waypoints)
@@ -159,31 +158,31 @@ class CameraTrafficLightDetector:
                 return
 
             rois = self.calculate_roi_coordinates(traffic_lights, transform)
-            roi_images = self.create_roi_images(image, rois)
 
-            # run model and do prediction
-            prediction = self.model.run(None, {'conv2d_1_input': roi_images})[0]
+            if len(rois) > 0:
+                roi_images = self.create_roi_images(image, rois)
 
-            if len(prediction) != len(rois):
-                rospy.logerr("%s - Number of predictions (%d) does not match number of rois (%d)", rospy.get_name(), len(prediction[0]), len(rois))
-                return
+                # run model and do prediction
+                predictions = self.model.run(None, {'conv2d_1_input': roi_images})[0]
 
-            # extract results in sync with rois
-            for pred, (linkId, plId, _, _, _, _) in zip(prediction, rois):
-                result = np.argmax(pred)
+                assert len(predictions) == len(rois), "Number of predictions (%d) does not match number of rois (%d)" % (len(predictions), len(rois))
 
-                tfl_result = TrafficLightResult()
-                tfl_result.light_id = plId
-                tfl_result.lane_id = linkId
-                tfl_result.recognition_result = CLASSIFIER_RESULT_TO_TLRESULT[result]
-                tfl_result.recognition_result_str = CLASSIFIER_RESULT_TO_STRING[result]
+                # extract results in sync with rois
+                for pred, (linkId, plId, _, _, _, _) in zip(predictions, rois):
+                    result = np.argmax(pred)
 
-                tfl_status.results.append(tfl_result)
+                    tfl_result = TrafficLightResult()
+                    tfl_result.light_id = plId
+                    tfl_result.lane_id = linkId
+                    tfl_result.recognition_result = CLASSIFIER_RESULT_TO_TLRESULT[result]
+                    tfl_result.recognition_result_str = CLASSIFIER_RESULT_TO_STRING[result]
+
+                    tfl_status.results.append(tfl_result)
 
         self.tfl_status_pub.publish(tfl_status)
 
         if self.output_roi_image:
-            self.publish_roi_images(image, rois, prediction, image_time_stamp)
+            self.publish_roi_images(image, rois, predictions, image_time_stamp)
 
 
     def get_traffic_lights_on_path(self, waypoints):
@@ -267,11 +266,11 @@ class CameraTrafficLightDetector:
 
         return image
 
-    def publish_roi_images(self, image, rois, prediction, image_time_stamp):
+    def publish_roi_images(self, image, rois, predictions, image_time_stamp):
         
         # add rois to image
         if len(rois) > 0:
-            for pred, (_, _, min_u, max_u, min_v, max_v) in zip(prediction, rois):
+            for pred, (_, _, min_u, max_u, min_v, max_v) in zip(predictions, rois):
                 result = np.argmax(pred)
                 
                 start_point = (min_u, min_v)
@@ -279,7 +278,7 @@ class CameraTrafficLightDetector:
                 cv2.rectangle(image, start_point, end_point, CLASSIFIER_RESULT_TO_COLOR[result] , thickness = 3)
                 cv2.putText(image,
                     CLASSIFIER_RESULT_TO_STRING[result] + " " + str(pred[result])[:4],
-                    org = (min_u + 5, max_v - 5),
+                    org = (min_u, max_v + 22),
                     fontFace = cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale = 1,
                     color = CLASSIFIER_RESULT_TO_COLOR[result], 
