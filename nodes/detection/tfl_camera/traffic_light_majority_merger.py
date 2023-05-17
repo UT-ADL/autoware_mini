@@ -2,6 +2,7 @@
 
 import rospy
 import message_filters
+import numpy as np
 
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 
@@ -15,7 +16,7 @@ class TrafficLightMajorityMerger:
     def __init__(self):
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher('/traffic_light_status', TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
 
         # Subscribers
         camera_fl_tfl_status = message_filters.Subscriber('camera_fl/traffic_light_status', TrafficLightResultArray)
@@ -35,18 +36,12 @@ class TrafficLightMajorityMerger:
                 if result.lane_id not in tfl_status_counts:
                     # create list with 3 zeros (3 possible states in TrafficLightResult)
                     tfl_status_counts[result.lane_id] = [0] * 3
-                    tfl_status_counts[result.lane_id][result.recognition_result] += 1
-                else:
-                    tfl_status_counts[result.lane_id][result.recognition_result] += 1
-
+                tfl_status_counts[result.lane_id][result.recognition_result] += 1
 
         # find max_count and decide for result
         for lane_id, status_list in tfl_status_counts.items():
-            max_status_count = max(status_list)
-            max_status_values = [i for i, j in enumerate(status_list) if j == max_status_count]
-
             # always prefer min value of the results: 0 - red / yellow < 1 - green < 2 - unknown
-            merged_result = min(max_status_values)
+            merged_result = np.argmax(status_list)
 
             new_msg = TrafficLightResult()
             new_msg.lane_id = lane_id
