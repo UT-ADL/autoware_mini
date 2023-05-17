@@ -65,7 +65,7 @@ class LidarRadarFusion:
                 # check if matched
                 if is_within_hull or distance < self.matching_distance:
                     # match the radar object with the lowest speed
-                    if radar_speed < min_radar_speed:
+                    if radar_speed < min_radar_speed and radar_speed >= self.radar_speed_threshold:
                         min_radar_speed = radar_speed
                         matched_radar_detection = radar_detection
 
