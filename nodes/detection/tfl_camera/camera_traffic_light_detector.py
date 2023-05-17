@@ -2,11 +2,11 @@
 
 import rospy
 import numpy as np
-import threading
 import cv2
 import tf2_ros
 import tf2_geometry_msgs
 import onnxruntime
+import message_filters
 
 from sklearn.neighbors import NearestNeighbors
 from image_geometry import PinholeCameraModel
@@ -64,10 +64,6 @@ class CameraTrafficLightDetector:
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
 
-        # internal variables
-        self.lock = threading.Lock()
-        self.transform_from_frame = None
-        self.traffic_lights = {}
 
         # Load the map using Lanelet2
         if coordinate_transformer == "utm":
@@ -103,7 +99,6 @@ class CameraTrafficLightDetector:
         self.signal_array = np.array(signal)
 
         # Spatial index for nearest neighbor search - xy coordinates only
-        # TODO replace with classifier
         self.stopline_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(self.stopline_array[:,1:3])
 
         self.bridge = CvBridge()
@@ -123,53 +118,30 @@ class CameraTrafficLightDetector:
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
         # Subscribers
-        rospy.Subscriber('/planning/local_path', Lane, self.local_path_callback, queue_size=1)
-        rospy.Subscriber('image_raw', Image, self.camera_image_callback, queue_size=1)
+        local_paths_sub = message_filters.Subscriber('/planning/local_path', Lane)
+        camera_image_sub = message_filters.Subscriber('image_raw', Image)
+        self.ts = message_filters.ApproximateTimeSynchronizer([local_paths_sub, camera_image_sub], 5, 0.07)
+        self.ts.registerCallback(self.local_path_camera_image_callback)
 
+    def local_path_camera_image_callback(self, local_path_msg, camera_image_msg):
 
-    def local_path_callback(self, msg):
-
-        traffic_lights = {}
-        self.transform_from_frame = msg.header.frame_id
-
-        if len(msg.waypoints) > 0:
-            # Extract waypoints and create array - xy coordinates only
-            waypoints_xy = np.array([(wp.pose.pose.position.x, wp.pose.pose.position.y) for wp in msg.waypoints])
-            _, stopline_idx = self.stopline_tree.radius_neighbors(waypoints_xy, self.waypoint_interval / 2, return_distance=True)
-            # flatten the stopline_idx and remove duplicates
-            stopline_idx = np.unique(np.hstack(stopline_idx))
-            stoplines_on_path = [int(self.stopline_array[idx][0]) for idx in stopline_idx]
-            signals_on_path = list(filter(lambda signal: int(signal[0]) in stoplines_on_path, self.signal_array))
-
-            # reorg signals (individual bulbs) into traffic lights dict
-            for signal in signals_on_path:
-                plId = int(signal[1])
-                if plId in traffic_lights:
-                    traffic_lights[plId].append(signal)
-                else:
-                    traffic_lights[plId] = [signal]
-
-        with self.lock:
-            self.traffic_lights = traffic_lights
-
-
-    def camera_image_callback(self, msg):
-
-        with self.lock:
-            traffic_lights = self.traffic_lights
-
-        image_time_stamp = msg.header.stamp
-        transform_to_frame = msg.header.frame_id
+        image_time_stamp = camera_image_msg.header.stamp
+        transform_to_frame = camera_image_msg.header.frame_id
+        transform_from_frame = local_path_msg.header.frame_id
 
         tfl_status = TrafficLightResultArray()
         tfl_status.header.stamp = image_time_stamp
 
+        traffic_lights = {}
         rois = []
         prediction = []
 
+        if len(local_path_msg.waypoints) > 0:
+            traffic_lights = self.get_traffic_lights_on_path(local_path_msg.waypoints)
+
         # extract image
         try:
-            image = self.bridge.imgmsg_to_cv2(msg,  desired_encoding='rgb8')
+            image = self.bridge.imgmsg_to_cv2(camera_image_msg,  desired_encoding='rgb8')
         except CvBridgeError as e:
             rospy.logerr("%s - CvBridgeError: %s", rospy.get_name(), str(e))
             return
@@ -181,9 +153,9 @@ class CameraTrafficLightDetector:
 
             # extract transform
             try:
-                transform = self.tf_buffer.lookup_transform(transform_to_frame, self.transform_from_frame, image_time_stamp)
+                transform = self.tf_buffer.lookup_transform(transform_to_frame, transform_from_frame, image_time_stamp)
             except tf2_ros.TransformException as ex:
-                rospy.logerr("%s - Could not load transform from %s to %s: %s", rospy.get_name(), self.transform_from_frame, transform_to_frame, str(ex))
+                rospy.logerr("%s - Could not load transform from %s to %s: %s", rospy.get_name(), transform_from_frame, transform_to_frame, str(ex))
                 return
 
             rois = self.calculate_roi_coordinates(traffic_lights, transform)
@@ -196,7 +168,7 @@ class CameraTrafficLightDetector:
                 rospy.logerr("%s - Number of predictions (%d) does not match number of rois (%d)", rospy.get_name(), len(prediction[0]), len(rois))
                 return
 
-            # extract results
+            # extract results in sync with rois
             for pred, (linkId, plId, _, _, _, _) in zip(prediction, rois):
                 result = np.argmax(pred)
 
@@ -213,6 +185,28 @@ class CameraTrafficLightDetector:
         if self.output_roi_image:
             self.publish_roi_images(image, rois, prediction, image_time_stamp)
 
+
+    def get_traffic_lights_on_path(self, waypoints):
+        
+        traffic_lights = {}
+        
+        # Extract waypoints and create array - xy coordinates only
+        waypoints_xy = np.array([(wp.pose.pose.position.x, wp.pose.pose.position.y) for wp in waypoints])
+        _, stopline_idx = self.stopline_tree.radius_neighbors(waypoints_xy, self.waypoint_interval / 2, return_distance=True)
+        # flatten the stopline_idx and remove duplicates
+        stopline_idx = np.unique(np.hstack(stopline_idx))
+        stoplines_on_path = [int(self.stopline_array[idx][0]) for idx in stopline_idx]
+        signals_on_path = list(filter(lambda signal: int(signal[0]) in stoplines_on_path, self.signal_array))
+
+        # reorg signals (individual bulbs) into traffic lights dict
+        for signal in signals_on_path:
+            plId = int(signal[1])
+            if plId in traffic_lights:
+                traffic_lights[plId].append(signal)
+            else:
+                traffic_lights[plId] = [signal]
+
+        return traffic_lights
 
     def calculate_roi_coordinates(self, traffic_lights, transform):
 
@@ -253,7 +247,6 @@ class CameraTrafficLightDetector:
             rois.append([int(linkId), plId, int(np.min(u)), int(np.max(u)), int(np.min(v)), int(np.max(v))])
         
         return rois
-
 
     def create_roi_images(self, image, rois):
 
