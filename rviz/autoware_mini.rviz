@@ -184,7 +184,7 @@ Visualization Manager:
           Enabled: true
           Name: Closest obj spd
           Show Value: true
-          Topic: /dashboard/closest_object_distance
+          Topic: /dashboard/closest_object_speed
           Value: true
           auto color change: false
           auto scale: false
@@ -202,81 +202,6 @@ Visualization Manager:
           show caption: true
           text size: 10
           top: 10
-          update interval: 0.03999999910593033
-          width: 128
-        - Buffer length: 100
-          Class: jsk_rviz_plugin/Plotter2D
-          Enabled: true
-          Name: Acceleration
-          Show Value: true
-          Topic: /dashboard/closest_object_speed
-          Value: true
-          auto color change: false
-          auto scale: false
-          background color: 0; 0; 0
-          backround alpha: 0
-          border: true
-          foreground alpha: 0.699999988079071
-          foreground color: 25; 255; 240
-          height: 128
-          left: 10
-          linewidth: 1
-          max color: 255; 0; 0
-          max value: 2
-          min value: -2
-          show caption: true
-          text size: 10
-          top: 168
-          update interval: 0.03999999910593033
-          width: 128
-        - Buffer length: 100
-          Class: jsk_rviz_plugin/Plotter2D
-          Enabled: true
-          Name: Accel limit
-          Show Value: true
-          Topic: /dashboard/acceleration_limit
-          Value: true
-          auto color change: false
-          auto scale: false
-          background color: 0; 0; 0
-          backround alpha: 0
-          border: true
-          foreground alpha: 0.699999988079071
-          foreground color: 25; 255; 240
-          height: 128
-          left: 148
-          linewidth: 1
-          max color: 255; 0; 0
-          max value: 2
-          min value: -2
-          show caption: true
-          text size: 10
-          top: 168
-          update interval: 0.03999999910593033
-          width: 128
-        - Buffer length: 100
-          Class: jsk_rviz_plugin/Plotter2D
-          Enabled: true
-          Name: Decel limit
-          Show Value: true
-          Topic: /dashboard/deceleration_limit
-          Value: true
-          auto color change: false
-          auto scale: false
-          background color: 0; 0; 0
-          backround alpha: 0
-          border: true
-          foreground alpha: 0.699999988079071
-          foreground color: 25; 255; 240
-          height: 128
-          left: 286
-          linewidth: 1
-          max color: 255; 0; 0
-          max value: 2
-          min value: -2
-          show caption: true
-          text size: 10
-          top: 168
           update interval: 0.03999999910593033
           width: 128
         - Buffer length: 100
