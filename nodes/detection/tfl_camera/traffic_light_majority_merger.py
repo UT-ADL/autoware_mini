@@ -7,13 +7,16 @@ import numpy as np
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 
 TRAFFIC_LIGHT_RESULT_TO_STRING = {
-    0: "RED cam",    # and yellow
-    1: "GREEN cam",
-    2: "UNKNOWN cam"
+    0: "RED",    # and yellow
+    1: "GREEN",
+    2: "UNKNOWN"
 }
 
 class TrafficLightMajorityMerger:
     def __init__(self):
+
+        # Node parameters
+        self.id_string = rospy.get_param('~id_string')
 
         # Publishers
         self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
@@ -47,7 +50,7 @@ class TrafficLightMajorityMerger:
             new_msg.lane_id = lane_id
             new_msg.recognition_result = merged_result
             # TODO QUESTION yellow string and other status string get lost here - should retain?
-            new_msg.recognition_result_str = TRAFFIC_LIGHT_RESULT_TO_STRING[merged_result]
+            new_msg.recognition_result_str = TRAFFIC_LIGHT_RESULT_TO_STRING[merged_result] + " " + self.id_string
             merged_tfl_status_msg.results.append(new_msg)
 
         self.tfl_status_pub.publish(merged_tfl_status_msg)
