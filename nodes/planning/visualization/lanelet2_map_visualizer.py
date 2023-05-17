@@ -25,6 +25,7 @@ WHITE100 = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
 LANELET_COLOR_TO_MARKER_COLOR = {
     "RED": RED,
+    "RED cam": RED,
     "RED/AMB": RED,
     "AMBER-RED": RED,
     "AMBERRED" : RED,
@@ -33,8 +34,10 @@ LANELET_COLOR_TO_MARKER_COLOR = {
     "AMB FLASH": YELLOW,
     "AMBER FLASH": YELLOW,
     "GREEN": GREEN,
+    "GREEN cam": GREEN,
     "GREEN FLASH": GREEN,
     "UNKNOWN": WHITE,
+    "UNKNOWN cam": WHITE,
     "OFF": WHITE,
 }
 
