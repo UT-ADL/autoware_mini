@@ -2,6 +2,7 @@
 
 import rospy
 import threading
+import message_filters
 
 from autoware_msgs.msg import TrafficLightResultArray
 
@@ -14,22 +15,30 @@ class TrafficLightPriorityMerger:
         self.topic_2_tfl_results = {}
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher('/traffic_light_status', TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('/tfl_status_topic_1', TrafficLightResultArray, self.tfl_status_topic_1_callback, queue_size=1)
-        rospy.Subscriber('/tfl_status_topic_2', TrafficLightResultArray, self.tfl_status_topic_2_callback, queue_size=1)
+        topic_1_tfl_status = message_filters.Subscriber('tfl_status_topic_1', TrafficLightResultArray)
+        topic_2_tfl_status = message_filters.Subscriber('tfl_status_topic_2', TrafficLightResultArray)
+        ts = message_filters.ApproximateTimeSynchronizer([topic_1_tfl_status, topic_2_tfl_status], queue_size=2, slop=0.1)
+        ts.registerCallback(self.tfl_status_callback)
 
-
-    def tfl_status_topic_1_callback(self, msg):
-
-        with self.lock:
-            topic_2_tfl_results = self.topic_2_tfl_results
+    def tfl_status_callback(self, topic_1_msg, topic_2_msg):
 
         merged_tfl_status_msg = TrafficLightResultArray()
-        merged_tfl_status_msg.header.stamp = msg.header.stamp
+        merged_tfl_status_msg.header.stamp = topic_1_msg.header.stamp
 
-        for result in msg.results:
+        # iterate over msg and add results to dictionary
+        topic_2_tfl_results = {}
+
+        for result in topic_2_msg.results:
+            if result.lane_id not in topic_2_tfl_results:
+                topic_2_tfl_results[result.lane_id] = result
+            else:
+                rospy.logwarn("%s - Duplicate lane_id (%s) in tfl_status_topic_2, keeping first", rospy.get_name(), result.lane_id)
+
+        # iterate over priority topic (MQTT)
+        for result in topic_1_msg.results:
             # priority topic result is not unkown -> add to merged result
             if result.recognition_result_str != "UNKNOWN":
                 merged_tfl_status_msg.results.append(result)
@@ -51,27 +60,6 @@ class TrafficLightPriorityMerger:
             merged_tfl_status_msg.results.append(result)
 
         self.tfl_status_pub.publish(merged_tfl_status_msg)
-
-
-    def tfl_status_topic_2_callback(self, msg):
-
-        # iterate over msg and add results to dictionary
-        topic_2_tfl_results = {}
-
-        for result in msg.results:
-            if result.lane_id not in topic_2_tfl_results:
-                topic_2_tfl_results[result.lane_id] = result
-            else:
-                rospy.logwarn("%s - Duplicate lane_id (%s) in tfl_status_topic_2, keeping first", rospy.get_name(), result.lane_id)
-
-        with self.lock:
-            self.topic_2_tfl_results = topic_2_tfl_results
-
-
-    def tfl_status_callback(self, mqtt_tfl_status_msg, camera_tfl_status_msg):
-
-        merged_tfl_status_msg = TrafficLightResultArray()
-        merged_tfl_status_msg.header.stamp = mqtt_tfl_status_msg.header.stamp
 
 
     def run(self):
