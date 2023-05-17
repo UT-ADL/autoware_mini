@@ -62,7 +62,7 @@ class TrafficLightPriorityMerger:
             if result.lane_id not in topic_2_tfl_results:
                 topic_2_tfl_results[result.lane_id] = result
             else:
-                rospy.logwarn("traffic_light_priority_merger - Duplicate lane_id (%s) in tfl_status_topic_2, keeping first", result.lane_id)
+                rospy.logwarn("%s - Duplicate lane_id (%s) in tfl_status_topic_2, keeping first", rospy.get_name(), result.lane_id)
 
         with self.lock:
             self.topic_2_tfl_results = topic_2_tfl_results
