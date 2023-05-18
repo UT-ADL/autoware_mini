@@ -43,9 +43,9 @@ You should have ROS Noetic installed, follow the official instructions for [Ubun
 
 2. Clone the repos
    ```
-   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware_mini.git
+   git clone https://github.com/UT-ADL/autoware_mini.git
    # not needed for planner simulation
-   git clone git@gitlab.cs.ut.ee:autonomous-driving-lab/autoware.ai/local/vehicle_platform.git
+   git clone https://github.com/UT-ADL/vehicle_platform.git
    # if using Carla simulation
    git clone --recurse-submodules https://github.com/carla-simulator/ros-bridge.git carla_ros_bridge
    ```
