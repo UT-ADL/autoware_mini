@@ -1,6 +1,5 @@
-pyproj >= 2.6.0
+pyproj >= 2.6
 numpy >= 1.19, < 1.24
 scikit-learn-intelex
 onnxruntime_gpu
-simple-pid
-numpy >= 1.19, < 1.24
+simple-pid < 2.0
