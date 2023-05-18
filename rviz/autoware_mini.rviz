@@ -34,7 +34,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: Carla camera view
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -89,15 +89,6 @@ Visualization Manager:
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
-            base_link:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-            lexus_model:
-              Alpha: 1
-              Show Axes: false
-              Show Trail: false
-              Value: true
           Name: Lexus model
           Robot Description: robot_description
           TF Prefix: ""
@@ -366,7 +357,7 @@ Visualization Manager:
           Unreliable: false
           Value: false
         - Class: rviz/Camera
-          Enabled: false
+          Enabled: true
           Image Rendering: background and overlay
           Image Topic: /camera_fl/image_raw
           Name: Camera View Left
@@ -374,7 +365,7 @@ Visualization Manager:
           Queue Size: 2
           Transport Hint: raw
           Unreliable: false
-          Value: false
+          Value: true
           Visibility:
             Control:
               Current pose: true
@@ -399,6 +390,9 @@ Visualization Manager:
               Traffic lights:
                 Left ROI image: true
                 Right ROI image: true
+              Radar:
+                Radar detections: true
+                Raw radar: true
                 Value: true
               Value: true
             Grid: true
@@ -425,13 +419,12 @@ Visualization Manager:
               Carla image view: true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
         - Class: rviz/Camera
-          Enabled: false
+          Enabled: true
           Image Rendering: background and overlay
           Image Topic: /camera_fr/image_raw
           Name: Camera View Right
@@ -439,7 +432,7 @@ Visualization Manager:
           Queue Size: 2
           Transport Hint: raw
           Unreliable: false
-          Value: false
+          Value: true
           Visibility:
             Control:
               Current pose: true
@@ -460,10 +453,15 @@ Visualization Manager:
                 Points clustered: true
                 Points ground: true
                 Points no ground: true
+                Lidar detections: true
                 Value: true
               Traffic lights:
                 Left ROI image: true
                 Right ROI image: true
+              Detected objects: true
+              Radar:
+                Radar detections: true
+                Raw radar: true
                 Value: true
               Value: true
             Grid: true
@@ -490,8 +488,7 @@ Visualization Manager:
               Carla image view: true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -585,17 +582,42 @@ Visualization Manager:
               Use Fixed Frame: true
               Use rainbow: true
               Value: false
-          Enabled: true
+            - Class: rviz/MarkerArray
+              Enabled: false
+              Marker Topic: /detection/lidar/detected_objects_markers
+              Name: Lidar detections
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: false
+          Enabled: false
           Name: Lidar
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: false
+              Marker Topic: /radar_fc/can_viz_markers
+              Name: Raw radar
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: false
+            - Class: rviz/MarkerArray
+              Enabled: false
+              Marker Topic: /detection/radar/detected_objects_markers
+              Name: Radar detections
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: false
+          Enabled: false
+          Name: Radar
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /detection/detected_objects_markers
           Name: Detected objects
           Namespaces:
-            bounding_box: false
-            centroid: true
-            convex_hull: true
-            text: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Group
@@ -635,9 +657,7 @@ Visualization Manager:
           Marker Topic: /planning/global_path_markers
           Name: Global path
           Namespaces:
-            Path: true
-            Velocity label: false
-            Waypoint pose: false
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -653,8 +673,7 @@ Visualization Manager:
           Marker Topic: /planning/local_path_markers
           Name: Local path
           Namespaces:
-            Velocity label: true
-            Waypoints: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -740,6 +759,7 @@ Visualization Manager:
             Detection:
               Detected objects: true
               Lidar:
+                Lidar detections: true
                 Points clustered: true
                 Points ground: true
                 Points no ground: true
@@ -747,6 +767,9 @@ Visualization Manager:
               Traffic lights:
                 Left ROI image: true
                 Right ROI image: true
+              Radar:
+                Radar detections: true
+                Raw radar: true
                 Value: true
               Value: true
             Grid: true
@@ -819,7 +842,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: 0.25499987602233887
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -829,10 +852,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.0010000000474974513
-      Scale: 20
+      Scale: 10.554637908935547
       Target Frame: base_link
-      X: 0
-      Y: 0
+      X: -2.443471908569336
+      Y: 21.3930721282959
     Saved:
       - Angle: 0
         Class: rviz/TopDownOrtho
@@ -911,7 +934,7 @@ Window Geometry:
     collapsed: false
   Displays:
     collapsed: false
-  Height: 1369
+  Height: 1043
   Hide Left Dock: false
   Hide Right Dock: false
   Left ROI image:
@@ -927,6 +950,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 2488
-  X: 72
-  Y: 34
+  Width: 1920
+  X: 3840
+  Y: 0

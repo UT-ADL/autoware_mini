@@ -43,6 +43,14 @@ lidar:
     lidar_frame: lidar_center
     transform_timeout: 0.05
 
+radar:
+  radar_detector:
+    consistency_check: 0 # Number of consecutive detections over which a radar object is detected before it is published/used further
+
+lidar_radar_fusion:
+  matching_distance: 1.6 # radius threshold value around lidar centroid for a radar object to be considered matched
+  radar_speed_threshold: 0.6 # Threshold for filtering out stationary objects based on speed
+
 obstacle_simulation:
   publish_rate: 10
 
