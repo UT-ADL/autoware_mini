@@ -17,6 +17,8 @@ from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 MQTT_TO_AUTOWARE_TFL_MAP = {
     "RED": 0,
     "RED/AMB": 0,
+    "REDVAMB": 0,
+    "RED\\AMB": 0,
     "AMBER-RED": 0,
     "AMBERRED" : 0,
     "YELLOW": 0,
