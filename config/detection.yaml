@@ -51,10 +51,10 @@ mqtt_traffic_light_detector:
   mqtt_port: 8883
   mqtt_topic: Tartu/#
   timeout: 2.0
-  id_string: "_api"      # string added to traffic light result and displayed in rviz
+  id_string: " api"      # string added to traffic light result and displayed in rviz
 
 traffic_light_majority_merger:
-  id_string: "_cam"      # string added to traffic light result and displayed in rviz
+  id_string: " cam"      # string added to traffic light result and displayed in rviz
   
 camera_fl/camera_traffic_light_detector_left:
   traffic_light_bulb_radius: 0.1    # meters

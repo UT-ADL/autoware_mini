@@ -60,6 +60,7 @@
         <arg name="use_manual_control"                  value="$(arg use_manual_control)" />
         <arg name="use_cam"                             value="$(arg use_cam)" />
         <arg name="detector"                            value="$(arg detector)" />
+        <arg name="tfl_detector"                        value="$(arg tfl_detector)" />
         <arg name="localizer"                           value="$(arg localizer)" />
         <arg name="generate_traffic"                    value="$(arg generate_traffic)" />
         <arg name="scenario_runner_path"                value="$(arg scenario_runner_path)" />
