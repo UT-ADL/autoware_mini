@@ -3,6 +3,8 @@
 import rospy
 import json
 import time
+import traceback
+
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 
@@ -17,6 +19,7 @@ from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 MQTT_TO_AUTOWARE_TFL_MAP = {
     "RED": 0,
     "RED/AMB": 0,
+    "REDVAMB": 0,
     "AMBER-RED": 0,
     "AMBERRED" : 0,
     "YELLOW": 0,
@@ -100,33 +103,36 @@ class MqttTrafficLightDetector:
         """
         
         # combine self.stop_line_ids[line.id] and self.tfl_status[tl_id]
+        try:
 
-        # iterate over stoplines and create TrafficLightResultArray
-        tfl_status = TrafficLightResultArray()
-        tfl_status.header.stamp = rospy.Time.now()
+            # iterate over stoplines and create TrafficLightResultArray
+            tfl_status = TrafficLightResultArray()
+            tfl_status.header.stamp = rospy.Time.now()
 
-        for lane_id, api_id in self.stop_line_ids.items():
+            for lane_id, api_id in self.stop_line_ids.items():
 
-            result_str = "UNKNOWN"
-            result = MQTT_TO_AUTOWARE_TFL_MAP[result_str]
+                result_str = "UNKNOWN"
+                result = MQTT_TO_AUTOWARE_TFL_MAP[result_str]
 
-            # extract status from mqtt_status if key exits
-            if api_id in self.mqtt_status:
-                if self.mqtt_status[api_id]["timestamp"] < int((time.time() - self.timeout) * 1000):
-                    rospy.logwarn('%s - timeout of stopline: %s, by %f seconds', rospy.get_name(), api_id, (self.mqtt_status[api_id]["timestamp"] - time.time() * 1000) / 1000)
-                else:
-                    result_str = self.mqtt_status[api_id]["status"]
-                    result = MQTT_TO_AUTOWARE_TFL_MAP[result_str]
+                # extract status from mqtt_status if key exits
+                if api_id in self.mqtt_status:
+                    if self.mqtt_status[api_id]["timestamp"] < int((time.time() - self.timeout) * 1000):
+                        rospy.logwarn('%s - timeout of stopline: %s, by %f seconds', rospy.get_name(), api_id, (self.mqtt_status[api_id]["timestamp"] - time.time() * 1000) / 1000)
+                    else:
+                        result_str = self.mqtt_status[api_id]["status"]
+                        result = MQTT_TO_AUTOWARE_TFL_MAP[result_str]
 
-            tfl_result = TrafficLightResult()
-            tfl_result.light_id = 0
-            tfl_result.lane_id = lane_id
-            tfl_result.recognition_result = result
-            tfl_result.recognition_result_str = result_str
-            tfl_status.results.append(tfl_result)
+                tfl_result = TrafficLightResult()
+                tfl_result.light_id = 0
+                tfl_result.lane_id = lane_id
+                tfl_result.recognition_result = result
+                tfl_result.recognition_result_str = result_str
+                tfl_status.results.append(tfl_result)
 
-        self.tfl_status_pub.publish(tfl_status)
+            self.tfl_status_pub.publish(tfl_status)
 
+        except Exception as e:
+            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
     def run(self):
         while not rospy.is_shutdown():
