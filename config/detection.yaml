@@ -51,21 +51,19 @@ mqtt_traffic_light_detector:
   mqtt_port: 8883
   mqtt_topic: Tartu/#
   timeout: 2.0
-  id_string: "api"      # string added to traffic light result and displayed in rviz
+  id_string: "_api"      # string added to traffic light result and displayed in rviz
 
 traffic_light_majority_merger:
-  id_string: "cam"      # string added to traffic light result and displayed in rviz
+  id_string: "_cam"      # string added to traffic light result and displayed in rviz
   
 camera_fl/camera_traffic_light_detector_left:
-  nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   traffic_light_bulb_radius: 0.1    # meters
-  radius_to_roi_multiplier: 5.0  # multiplier for radius to get roi size
+  radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
   rectify_image: True
   output_roi_image: True
 
 camera_fr/camera_traffic_light_detector_right:
-  nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   traffic_light_bulb_radius: 0.1    # meters
-  radius_to_roi_multiplier: 5.0  # multiplier for radius to get roi size
+  radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
   rectify_image: True
   output_roi_image: True

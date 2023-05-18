@@ -123,7 +123,7 @@ class MqttTrafficLightDetector:
             tfl_result.light_id = 0
             tfl_result.lane_id = lane_id
             tfl_result.recognition_result = result
-            tfl_result.recognition_result_str = result_str + " " + self.id_string
+            tfl_result.recognition_result_str = result_str + self.id_string
             tfl_status.results.append(tfl_result)
 
         self.tfl_status_pub.publish(tfl_status)

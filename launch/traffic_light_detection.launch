@@ -14,7 +14,7 @@
     <!-- MQTT traffic light detector -->
     <node if="$(eval arg('tfl_detector')=='mqtt' or arg('tfl_detector')=='fusion')" pkg="autoware_mini" type="mqtt_traffic_light_detector.py" name="mqtt_traffic_light_detector" output="screen" required="true">
         <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
-        <remap if="$(eval arg('tfl_detector')=='fusion')" from="/detection/traffic_light_status" to="/detection/mqtt_traffic_light_status"/>
+        <remap if="$(eval arg('tfl_detector')=='fusion')" from="traffic_light_status" to="mqtt/traffic_light_status"/>
     </node>
 
     <!-- Camera based traffic light detection -->
@@ -37,12 +37,12 @@
         </node>
 
         <node pkg="autoware_mini" type="traffic_light_majority_merger.py" name="traffic_light_majority_merger" output="screen" required="true" >
-            <remap if="$(eval arg('tfl_detector')=='fusion')" from="traffic_light_status" to="camera_traffic_light_status"/>
+            <remap if="$(eval arg('tfl_detector')=='fusion')" from="traffic_light_status" to="camera/traffic_light_status"/>
         </node>
 
         <node if="$(eval arg('tfl_detector')=='fusion')" pkg="autoware_mini" type="traffic_light_priority_merger.py" name="traffic_light_priority_merger" output="screen" required="true" >
-            <remap from="tfl_status_topic_1" to="mqtt_traffic_light_status"/>
-            <remap from="tfl_status_topic_2" to="camera_traffic_light_status"/>
+            <remap from="tfl_status_topic_1" to="mqtt/traffic_light_status"/>
+            <remap from="tfl_status_topic_2" to="camera/traffic_light_status"/>
         </node>
 
     </group>
