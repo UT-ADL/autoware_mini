@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from collections import defaultdict
+import traceback
 
 import rospy
 import tf2_ros
@@ -58,49 +59,53 @@ class RadarDetector:
         ego_speed: geometry_msgs/TwistStamped
         publish: DetectedObjectArray
         """
-        detected_objects_array = DetectedObjectArray()
-        detected_objects_array.header.frame_id = self.output_frame
-        detected_objects_array.header.stamp = tracks.header.stamp
+        try:
+            detected_objects_array = DetectedObjectArray()
+            detected_objects_array.header.frame_id = self.output_frame
+            detected_objects_array.header.stamp = tracks.header.stamp
 
-        # read source frame to output frame transform
-        source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, tracks.header.frame_id, tracks.header.stamp)
+            # read source frame to output frame transform
+            source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, tracks.header.frame_id, rospy.Time(0))
 
-        for i, track in enumerate(tracks.tracks):  # type: radar_msgs/RadarTrack
-            # generate integer id from uuid
-            uuid = track.uuid.uuid
-            if uuid not in self.uuid_map:
-                integer_id = self.id_counter
-                self.uuid_map[uuid] = integer_id
-                # wrap around ids at 1 million
-                self.id_counter = (self.id_counter + 1) % 1000000
-            else:
-                integer_id = self.uuid_map[uuid]
+            for i, track in enumerate(tracks.tracks):  # type: radar_msgs/RadarTrack
+                # generate integer id from uuid
+                uuid = track.uuid.uuid
+                if uuid not in self.uuid_map:
+                    integer_id = self.id_counter
+                    self.uuid_map[uuid] = integer_id
+                    # wrap around ids at 1 million
+                    self.id_counter = (self.id_counter + 1) % 1000000
+                else:
+                    integer_id = self.uuid_map[uuid]
 
-            # Check if the radar id is consistent over a few frames. Number of frames is dictated by the param named consistency_check
-            self.uuid_count[uuid] += 1
-            if self.uuid_count[uuid] < self.consistency_check:
-                continue
+                # Check if the radar id is consistent over a few frames. Number of frames is dictated by the param named consistency_check
+                self.uuid_count[uuid] += 1
+                if self.uuid_count[uuid] < self.consistency_check:
+                    continue
 
-            # Detected object
-            detected_object = DetectedObject()
-            detected_object.header.frame_id = self.output_frame
-            detected_object.header.stamp = tracks.header.stamp
-            detected_object.id = integer_id
-            detected_object.label = RADAR_CLASSIFICATION[track.classification]
-            detected_object.color = RED
-            detected_object.valid = True
-            detected_object.pose_reliable = True
-            detected_object.pose = self.get_tfed_pose(track.position, source_frame_to_output_tf)
-            detected_object.velocity_reliable = True
-            detected_object.velocity.linear = self.get_tfed_velocity(track.velocity, ego_speed.twist.linear, source_frame_to_output_tf)
-            detected_object.acceleration_reliable = True
-            detected_object.acceleration.linear = self.get_tfed_vector3(track.acceleration, source_frame_to_output_tf)
-            detected_object.dimensions = track.size
-            detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, tracks.header.stamp)
+                # Detected object
+                detected_object = DetectedObject()
+                detected_object.header.frame_id = self.output_frame
+                detected_object.header.stamp = tracks.header.stamp
+                detected_object.id = integer_id
+                detected_object.label = RADAR_CLASSIFICATION[track.classification]
+                detected_object.color = RED
+                detected_object.valid = True
+                detected_object.pose_reliable = True
+                detected_object.pose = self.get_tfed_pose(track.position, source_frame_to_output_tf)
+                detected_object.velocity_reliable = True
+                detected_object.velocity.linear = self.get_tfed_velocity(track.velocity, ego_speed.twist.linear, source_frame_to_output_tf)
+                detected_object.acceleration_reliable = True
+                detected_object.acceleration.linear = self.get_tfed_vector3(track.acceleration, source_frame_to_output_tf)
+                detected_object.dimensions = track.size
+                detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, tracks.header.stamp)
 
-            detected_objects_array.objects.append(detected_object)
+                detected_objects_array.objects.append(detected_object)
 
-        self.detected_objs_pub.publish(detected_objects_array)
+            self.detected_objs_pub.publish(detected_objects_array)
+
+        except Exception as e:
+            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
     def get_tfed_velocity(self, track_velocity, ego_speed, source_frame_to_output_tf):
 
