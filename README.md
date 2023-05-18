@@ -101,14 +101,14 @@ The detection topics in bag are remapped to dummy topic names and new detections
 
 ### Download Carla + Tartu map (Skip if already done)
 
-1. Download [Carla 0.9.13](https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz) and extract it. We will call this extracted folder `<CARLA ROOT>`.
+1. Download [Carla 0.9.13](https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz) and extract it with `tar xzvf CARLA_0.9.13.tar.gz`. We will call this extracted folder `<CARLA ROOT>`.
 2. Download [Tartu.tar.gz](https://drive.google.com/file/d/10CHEOjHyiLJgD13g6WwDZ2_AWoLasG2F/view?usp=share_link).
-3. Copy `Tartu.tar.gz` inside the import folder under `<CARLA ROOT>` directory.
-4. Run `./ImportAssets.sh` from the `<CARLA ROOT>` directory. This will install the Tartu map. (You can now delete the `Tartu.tar.gz` file from the import folder.)
-5. Since we will be referring to `<CARLA ROOT>` a lot, let's export it as an environment variable. Make sure to replace the path where Carla is downloaded.
+3. Copy `Tartu.tar.gz` inside the `Import` folder under `<CARLA ROOT>` directory.
+4. Run `./ImportAssets.sh` from the `<CARLA ROOT>` directory. This will install the Tartu map. (You can now delete the `Tartu.tar.gz` file from the `Import` folder.)
+5. Since we will be referring to `<CARLA ROOT>` a lot, let's export it as an environment variable. Make sure to replace the path where Carla is extracted.
 
    ```
-   export CARLA_ROOT=/path/to/your/carla/installation
+   export CARLA_ROOT=$HOME/path/to/carla
    ```
 
 6. Now, enter the following command. (**NOTE:** Here we assume that `CARLA_ROOT`  was set from the previous command.)
