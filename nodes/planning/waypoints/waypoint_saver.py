@@ -2,6 +2,7 @@
 
 import math
 import csv
+import traceback
 import rospy
 import message_filters
 import tf
@@ -59,26 +60,31 @@ class WaypointSaver:
 
     def data_callback(self, current_pose, current_velocity):
         
-        x = current_pose.pose.position.x
-        y = current_pose.pose.position.y
+        try:
 
-        # distance between current and last written waypoint coordinates
-        distance = math.sqrt((self.written_x - x) ** 2 + (self.written_y - y) ** 2)
+            x = current_pose.pose.position.x
+            y = current_pose.pose.position.y
 
-        if distance >= self.interval:
-            # calculate current_heading
-            current_heading = get_current_heading_degrees(current_pose.pose.orientation)
-            # write data to waypoints.csv file
-            self.write_to_waypoints_file(x, y, current_pose.pose.position.z, current_heading, current_velocity.twist.linear.x, self.turn_signal)
-            # create and publish a marker of the waypoint
-            self.publish_wp_marker(current_pose, current_velocity.twist.linear.x)
+            # distance between current and last written waypoint coordinates
+            distance = math.sqrt((self.written_x - x) ** 2 + (self.written_y - y) ** 2)
 
-            # update stored values
-            self.written_x = x
-            self.written_y = y
+            if distance >= self.interval:
+                # calculate current_heading
+                current_heading = get_current_heading_degrees(current_pose.pose.orientation)
+                # write data to waypoints.csv file
+                self.write_to_waypoints_file(x, y, current_pose.pose.position.z, current_heading, current_velocity.twist.linear.x, self.turn_signal)
+                # create and publish a marker of the waypoint
+                self.publish_wp_marker(current_pose, current_velocity.twist.linear.x)
 
-            # increment wp_id
-            self.wp_id += 1
+                # update stored values
+                self.written_x = x
+                self.written_y = y
+
+                # increment wp_id
+                self.wp_id += 1
+
+        except Exception as e:
+            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
     def write_to_waypoints_file(self, x, y, z, yaw, v, steering_flag):
         

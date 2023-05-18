@@ -8,6 +8,7 @@
 converts carla GNSS and odometry to novatel OEM7 messages
 """
 import math
+import traceback
 import rospy
 import message_filters
 
@@ -39,34 +40,39 @@ class CarlaNovatelDriver():
         callback GNSS sensor
         """
 
-        msg = INSPVA()
-        msg.header.stamp = gnss_data.header.stamp
-        msg.status.status = InertialSolutionStatus.INS_SOLUTION_GOOD
-        msg.latitude = gnss_data.latitude
-        msg.longitude = gnss_data.longitude
+        try:
 
-        msg.height = gnss_data.altitude
-        msg.roll = 0
-        msg.pitch = 0 
-        msg.north_velocity = math.sqrt(odometry_data.twist.twist.linear.x**2 + odometry_data.twist.twist.linear.y**2 + odometry_data.twist.twist.linear.z**2)
-        msg.east_velocity = 0.0
+            msg = INSPVA()
+            msg.header.stamp = gnss_data.header.stamp
+            msg.status.status = InertialSolutionStatus.INS_SOLUTION_GOOD
+            msg.latitude = gnss_data.latitude
+            msg.longitude = gnss_data.longitude
 
-        lat_init = math.radians(gnss_data.latitude)
-        lat_final = math.radians(gnss_forward_data.latitude)
+            msg.height = gnss_data.altitude
+            msg.roll = 0
+            msg.pitch = 0 
+            msg.north_velocity = math.sqrt(odometry_data.twist.twist.linear.x**2 + odometry_data.twist.twist.linear.y**2 + odometry_data.twist.twist.linear.z**2)
+            msg.east_velocity = 0.0
 
-        lon_init = math.radians(gnss_data.longitude)
-        lon_final = math.radians(gnss_forward_data.longitude)
+            lat_init = math.radians(gnss_data.latitude)
+            lat_final = math.radians(gnss_forward_data.latitude)
 
-        # NOTE: Azimuth angle is required. CARLA simulator doesn't provide it.
-        msg.azimuth, _, _ = self.geodesic.inv(lon_init, lat_init, lon_final, lat_final)
+            lon_init = math.radians(gnss_data.longitude)
+            lon_final = math.radians(gnss_forward_data.longitude)
 
-        self.inspva_pub.publish(msg)
+            # NOTE: Azimuth angle is required. CARLA simulator doesn't provide it.
+            msg.azimuth, _, _ = self.geodesic.inv(lon_init, lat_init, lon_final, lat_final)
 
-        bestposMsg = BESTPOS()
-        bestposMsg.header.stamp = gnss_data.header.stamp
-        # publish with zero undulation
+            self.inspva_pub.publish(msg)
 
-        self.bestpos_pub.publish(bestposMsg)
+            bestposMsg = BESTPOS()
+            bestposMsg.header.stamp = gnss_data.header.stamp
+            # publish with zero undulation
+
+            self.bestpos_pub.publish(bestposMsg)
+
+        except Exception as e:
+            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
 
     def run(self):

@@ -2,6 +2,7 @@
 
 import math
 import sys
+import traceback
 
 import rospy
 import message_filters
@@ -183,44 +184,49 @@ class SSCInterface:
                 self.engage = False
 
     def ssc_feedbacks_callback(self, curvature_msg, throttle_msg, brake_msg, gear_msg, steering_msg, velocity_accel_msg):
-        # calculate adaptive gear ratio, guard against division by zero later
-        self.adaptive_gear_ratio = max(self.agr_coef_a + self.agr_coef_b * velocity_accel_msg.velocity**2 - self.agr_coef_c * steering_msg.steering_wheel_angle, sys.float_info.min)
+        try:
 
-        # current steering curvature
-        if self.use_adaptive_gear_ratio:
-            curvature = math.tan(steering_msg.steering_wheel_angle / self.adaptive_gear_ratio) / self.wheel_base
-        else:
-            curvature = curvature_msg.curvature
+            # calculate adaptive gear ratio, guard against division by zero later
+            self.adaptive_gear_ratio = max(self.agr_coef_a + self.agr_coef_b * velocity_accel_msg.velocity**2 - self.agr_coef_c * steering_msg.steering_wheel_angle, sys.float_info.min)
 
-        vehicle_status = VehicleStatus()
-        vehicle_status.header.frame_id = 'base_link'
-        vehicle_status.header.stamp = rospy.Time.now()
+            # current steering curvature
+            if self.use_adaptive_gear_ratio:
+                curvature = math.tan(steering_msg.steering_wheel_angle / self.adaptive_gear_ratio) / self.wheel_base
+            else:
+                curvature = curvature_msg.curvature
 
-        # current drive and steering mode
-        if self.dbw_enabled:
-            vehicle_status.drivemode = VehicleStatus.MODE_AUTO
-        else:
-            vehicle_status.drivemode = VehicleStatus.MODE_MANUAL
-        vehicle_status.steeringmode = vehicle_status.drivemode
+            vehicle_status = VehicleStatus()
+            vehicle_status.header.frame_id = 'base_link'
+            vehicle_status.header.stamp = rospy.Time.now()
 
-        # current speed km/h
-        vehicle_status.speed = velocity_accel_msg.velocity * 3.6
-        
-        # current pedal positions [0,1000]
-        vehicle_status.drivepedal = int(1000 * throttle_msg.throttle_pedal)
-        vehicle_status.brakepedal = int(1000 * brake_msg.brake_pedal)
+            # current drive and steering mode
+            if self.dbw_enabled:
+                vehicle_status.drivemode = VehicleStatus.MODE_AUTO
+            else:
+                vehicle_status.drivemode = VehicleStatus.MODE_MANUAL
+            vehicle_status.steeringmode = vehicle_status.drivemode
 
-        # steering angle in radians
-        vehicle_status.angle = math.atan(curvature * self.wheel_base)
+            # current speed km/h
+            vehicle_status.speed = velocity_accel_msg.velocity * 3.6
+            
+            # current pedal positions [0,1000]
+            vehicle_status.drivepedal = int(1000 * throttle_msg.throttle_pedal)
+            vehicle_status.brakepedal = int(1000 * brake_msg.brake_pedal)
 
-        # current gear
-        vehicle_status.current_gear.gear = gear_msg.current_gear.gear
+            # steering angle in radians
+            vehicle_status.angle = math.atan(curvature * self.wheel_base)
 
-        # turn signals
-        vehicle_status.lamp = TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP[self.turn_signals]
+            # current gear
+            vehicle_status.current_gear.gear = gear_msg.current_gear.gear
 
-        # publish the status message
-        self.vehicle_status_pub.publish(vehicle_status)
+            # turn signals
+            vehicle_status.lamp = TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP[self.turn_signals]
+
+            # publish the status message
+            self.vehicle_status_pub.publish(vehicle_status)
+
+        except Exception as e:
+            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
     def turn_rpt_callback(self, turn_rpt_msg):
         self.turn_signals = turn_rpt_msg.output

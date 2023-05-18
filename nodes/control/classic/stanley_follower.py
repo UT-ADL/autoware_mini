@@ -4,6 +4,8 @@ import rospy
 import math
 import message_filters
 import threading
+import traceback
+
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
@@ -77,78 +79,83 @@ class StanleyFollower:
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
-        if self.publish_debug_info:
-            start_time = rospy.get_time()
+        try:
 
-        with self.lock:
-            waypoints = self.waypoints
-            waypoint_tree = self.waypoint_tree
-            closest_object_distance = self.closest_object_distance
-            closest_object_velocity = self.closest_object_velocity
-    
-        stamp = current_pose_msg.header.stamp
-        current_pose = current_pose_msg.pose
-        current_velocity = current_velocity_msg.twist.linear.x
-        current_heading = get_heading_from_orientation(current_pose.orientation)
+            if self.publish_debug_info:
+                start_time = rospy.get_time()
 
-        if waypoint_tree is None:
-            # if no waypoints received yet or global_path cancelled, stop the vehicle
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
-            return
+            with self.lock:
+                waypoints = self.waypoints
+                waypoint_tree = self.waypoint_tree
+                closest_object_distance = self.closest_object_distance
+                closest_object_velocity = self.closest_object_velocity
+        
+            stamp = current_pose_msg.header.stamp
+            current_pose = current_pose_msg.pose
+            current_velocity = current_velocity_msg.twist.linear.x
+            current_heading = get_heading_from_orientation(current_pose.orientation)
 
-        # Find pose for the front wheel and 2 closest waypoint idx (fw_)
-        front_wheel_position = get_point_using_heading_and_distance(current_pose.position, current_heading, self.wheel_base)
-        fw_back_wp_idx, fw_front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, front_wheel_position.x, front_wheel_position.y)
-        cross_track_error = get_cross_track_error(front_wheel_position, waypoints[fw_back_wp_idx].pose.pose.position, waypoints[fw_front_wp_idx].pose.pose.position)
+            if waypoint_tree is None:
+                # if no waypoints received yet or global_path cancelled, stop the vehicle
+                self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
+                return
 
-        # get closest point to base_link on path (line defined by 2 closest waypoints) - (bl_)
-        bl_back_wp_idx, bl_front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
+            # Find pose for the front wheel and 2 closest waypoint idx (fw_)
+            front_wheel_position = get_point_using_heading_and_distance(current_pose.position, current_heading, self.wheel_base)
+            fw_back_wp_idx, fw_front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, front_wheel_position.x, front_wheel_position.y)
+            cross_track_error = get_cross_track_error(front_wheel_position, waypoints[fw_back_wp_idx].pose.pose.position, waypoints[fw_front_wp_idx].pose.pose.position)
 
-        if bl_front_wp_idx == len(waypoints)-1:
-            # stop vehicle if last waypoint is reached
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
-            rospy.logwarn_throttle(10, "%s - last waypoint reached", rospy.get_name())
-            return
-    
-        bl_nearest_point = get_closest_point_on_line(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
-        lookahead_point, _ = get_point_and_orientation_on_path_within_distance(waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
+            # get closest point to base_link on path (line defined by 2 closest waypoints) - (bl_)
+            bl_back_wp_idx, bl_front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
 
-        track_heading = get_heading_between_two_points(bl_nearest_point, lookahead_point)
-        heading_error = normalize_heading_error(track_heading - current_heading)
+            if bl_front_wp_idx == len(waypoints)-1:
+                # stop vehicle if last waypoint is reached
+                self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
+                rospy.logwarn_throttle(10, "%s - last waypoint reached", rospy.get_name())
+                return
+        
+            bl_nearest_point = get_closest_point_on_line(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
+            lookahead_point, _ = get_point_and_orientation_on_path_within_distance(waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
 
-        if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_error)) > self.heading_angle_limit:
-            # stop vehicle if cross track error or heading angle difference is over limit
-            self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
-            rospy.logerr_throttle(10, "%s - lateral error or heading angle difference over limit", rospy.get_name())
-            return
+            track_heading = get_heading_between_two_points(bl_nearest_point, lookahead_point)
+            heading_error = normalize_heading_error(track_heading - current_heading)
 
-        # calculate steering angle
-        delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))
-        steering_angle = heading_error + delta_error
+            if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_error)) > self.heading_angle_limit:
+                # stop vehicle if cross track error or heading angle difference is over limit
+                self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
+                rospy.logerr_throttle(10, "%s - lateral error or heading angle difference over limit", rospy.get_name())
+                return
 
-        # target_velocity from map and based on closest object
-        target_velocity = interpolate_velocity_between_waypoints(bl_nearest_point, waypoints[bl_back_wp_idx], waypoints[bl_front_wp_idx])
+            # calculate steering angle
+            delta_error = math.atan(self.cte_gain * cross_track_error / (current_velocity + 0.0001))
+            steering_angle = heading_error + delta_error
 
-        # if decelerating because of obstacle then calculate necessary deceleration to stop at safety distance
-        if closest_object_distance - self.braking_safety_distance > 0:
-            # always allow minimum deceleration, to be able to adapt to map speeds
-            acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), -self.speed_deceleration_limit)
-        # otherwise use vehicle default deceleration limit
-        else:
-            acceleration = 0.0
+            # target_velocity from map and based on closest object
+            target_velocity = interpolate_velocity_between_waypoints(bl_nearest_point, waypoints[bl_back_wp_idx], waypoints[bl_front_wp_idx])
 
-        # fix for Carla - acceleration cannot be negative if target velocity is higher than current velocity
-        if acceleration < 0.0 and target_velocity > current_velocity:
-            acceleration = 0.0
+            # if decelerating because of obstacle then calculate necessary deceleration to stop at safety distance
+            if closest_object_distance - self.braking_safety_distance > 0:
+                # always allow minimum deceleration, to be able to adapt to map speeds
+                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), -self.speed_deceleration_limit)
+            # otherwise use vehicle default deceleration limit
+            else:
+                acceleration = 0.0
 
-        # blinkers
-        left_blinker, right_blinker  = get_blinker_state(waypoints[bl_front_wp_idx].wpstate.steering_state)
+            # fix for Carla - acceleration cannot be negative if target velocity is higher than current velocity
+            if acceleration < 0.0 and target_velocity > current_velocity:
+                acceleration = 0.0
 
-        # Publish
-        self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker)
-        if self.publish_debug_info:
-            self.publish_stanley_markers(stamp, bl_nearest_point, lookahead_point, front_wheel_position, heading_error)
-            self.follower_debug_pub.publish(Float32MultiArray(data=[(rospy.get_time() - start_time), current_heading, track_heading, heading_error, cross_track_error, target_velocity]))
+            # blinkers
+            left_blinker, right_blinker  = get_blinker_state(waypoints[bl_front_wp_idx].wpstate.steering_state)
+
+            # Publish
+            self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker)
+            if self.publish_debug_info:
+                self.publish_stanley_markers(stamp, bl_nearest_point, lookahead_point, front_wheel_position, heading_error)
+                self.follower_debug_pub.publish(Float32MultiArray(data=[(rospy.get_time() - start_time), current_heading, track_heading, heading_error, cross_track_error, target_velocity]))
+
+        except Exception as e:
+            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
 
     def publish_vehicle_command(self, stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker):
