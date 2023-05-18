@@ -4,9 +4,9 @@
     <arg name="bag_file"                default="2023-03-14-20-34-16_vella_odom_compensation_ms.bag" doc="bag file to play" />
     <arg name="localizer"               default="novatel"   doc="novatel, carla"/>
     <arg name="detector"                default="cluster"   doc="cluster, sim, carla"/>
-    <arg name="tfl_detector"            default="none"      doc="mqtt" />
-    <arg name="global_planner"          default="none"      doc="waypoints, lanelet2"/>
-    <arg name="local_planner"           default="none"      doc="speed_only"/>
+    <arg name="tfl_detector"            default="camera"      doc="camera, mqtt, fusion" />
+    <arg name="global_planner"          default="lanelet2"      doc="waypoints, lanelet2"/>
+    <arg name="local_planner"           default="speed_only"      doc="speed_only"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
     <arg name="use_tf"                  default="true"      doc="replaces tf-s in bag with the current ones"/>
@@ -37,6 +37,12 @@
         <remap from="/planning/smoothed_path_markers" to="/bag/planning/smoothed_path_markers" if="$(arg use_planning)"/>
         <remap from="/planning/local_path" to="/bag/planning/local_path" if="$(arg use_planning)"/>
         <remap from="/planning/local_path_markers" to="/bag/planning/local_path_markers" if="$(arg use_planning)"/>
+        <remap from="/planning/stop_line_markers" to="/bag/planning/stop_line_markers" if="$(arg use_planning)"/>
+        <remap from="/detection/traffic_light_status" to="/bag/detection/traffic_light_status" if="$(arg use_detection)"/>
+        <remap from="/detection/camera_fl/traffic_light_status" to="/bag/detection/camera_fl/traffic_light_status" if="$(arg use_detection)"/>
+        <remap from="/detection/camera_fr/traffic_light_status" to="/bag/detection/camera_fr/traffic_light_status" if="$(arg use_detection)"/>
+        <remap from="/detection/camera/traffic_light_status" to="/bag/detection/camera/traffic_light_status" if="$(arg use_detection)"/>
+        <remap from="/detection/mqtt/traffic_light_status" to="/bag/detection/mqtt/traffic_light_status" if="$(arg use_detection)"/>
         <!-- For compatibility with older bags and Vella bags -->
         <remap from="/points_raw_center" to="/lidar_center/points_raw"/>
         <remap from="/points_raw_front" to="/lidar_front/points_raw"/>

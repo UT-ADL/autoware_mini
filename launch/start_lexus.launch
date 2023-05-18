@@ -9,7 +9,7 @@
     <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
-    <arg name="tfl_detector"            default="mqtt"              doc="mqtt" />
+    <arg name="tfl_detector"            default="mqtt"              doc="mqtt, camera, fusion" />
     <arg name="max_speed"               default="30" />
     
     <!-- Localization -->
@@ -42,6 +42,8 @@
     <include file="$(find autoware_mini)/launch/platform/lexus.launch">
         <arg name="max_speed" value="$(arg max_speed)" />
         <arg name="use_lidar_center"  value="$(eval arg('detector')!='vella')" />
+        <arg name="use_camera_fl"     value="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')" />
+        <arg name="use_camera_fr"     value="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')" />
     </include>
 
     <!-- Rviz -->

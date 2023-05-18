@@ -2,6 +2,9 @@
 <launch>
     <arg name="max_speed"           default="30" />
     <arg name="use_lidar_center"    default="false" />
+    <arg name="use_camera_fl"       default="false" />
+    <arg name="use_camera_fr"       default="false" />
+    <arg name="use_radar_fc"        default="false" />
 
     <!-- Vehicle platform -->
     <include file="$(find vehicle_platform)/launch/platform.launch">
@@ -11,6 +14,9 @@
         <arg name="use_dbw"             value="true" />
         <arg name="use_ssc"             value="true" />
         <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
+        <arg name="use_camera_fl"       value="$(arg use_camera_fl)" />
+        <arg name="use_camera_fr"       value="$(arg use_camera_fr)" />
+        <arg name="use_radar_fc"        value="$(arg use_radar_fc)" />
     </include>
 
     <group ns="vehicle">

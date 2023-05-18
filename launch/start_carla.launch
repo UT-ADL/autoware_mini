@@ -7,8 +7,8 @@
     <arg name="use_path_smoothing"      default="true" />
     <arg name="localizer"               default="carla"                 doc="novatel, carla" />
     <arg name="detector"                default="carla"                 doc="cluster, carla" />
-    <arg name="tfl_detector"            default="carla"                 doc="carla" />
-    <arg name="use_cam"                 default="false" />
+    <arg name="tfl_detector"            default="carla"                 doc="carla, camera, fusion" />
+    <arg name="use_cam"                 default="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')" />
     <arg name='map_name'                default='tartu'/>
     <arg name="follower"                default="pure_pursuit"          doc="pure_pursuit, stanley" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
@@ -60,6 +60,7 @@
         <arg name="use_manual_control"                  value="$(arg use_manual_control)" />
         <arg name="use_cam"                             value="$(arg use_cam)" />
         <arg name="detector"                            value="$(arg detector)" />
+        <arg name="tfl_detector"                        value="$(arg tfl_detector)" />
         <arg name="localizer"                           value="$(arg localizer)" />
         <arg name="generate_traffic"                    value="$(arg generate_traffic)" />
         <arg name="scenario_runner_path"                value="$(arg scenario_runner_path)" />

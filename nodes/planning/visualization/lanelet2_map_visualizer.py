@@ -23,20 +23,16 @@ WHITE = ColorRGBA(1.0, 1.0, 1.0, 0.6)
 CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.3)
 WHITE100 = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
+TRAFFIC_LIGHT_STATE_TO_MARKER_COLOR = {
+    0: RED,     # red and yellow
+    1: GREEN,
+    2: WHITE
+}
+
 LANELET_COLOR_TO_MARKER_COLOR = {
-    "RED": RED,
-    "RED/AMB": RED,
-    "REDVAMB": RED,
-    "AMBER-RED": RED,
-    "AMBERRED" : RED,
-    "YELLOW": YELLOW,
-    "AMBER": YELLOW,
-    "AMB FLASH": YELLOW,
-    "AMBER FLASH": YELLOW,
-    "GREEN": GREEN,
-    "GREEN FLASH": GREEN,
-    "UNKNOWN": WHITE,
-    "OFF": WHITE,
+    "red": RED,
+    "yellow": YELLOW,
+    "green": GREEN,
 }
 
 class Lanelet2MapVisualizer:
@@ -88,10 +84,10 @@ class Lanelet2MapVisualizer:
             points = [Point(x=p.x, y=p.y, z=p.z + 0.01) for p in stop_line]
 
             # choose the color of stopline based on the traffic light state
-            if result.recognition_result_str in LANELET_COLOR_TO_MARKER_COLOR:
-                color = LANELET_COLOR_TO_MARKER_COLOR[result.recognition_result_str]
+            if result.recognition_result in TRAFFIC_LIGHT_STATE_TO_MARKER_COLOR:
+                color = TRAFFIC_LIGHT_STATE_TO_MARKER_COLOR[result.recognition_result]
             else:
-                rospy.logwarn("%s - unrecognized traffic light state: %s", rospy.get_name(), result.recognition_result_str)
+                rospy.logwarn("%s - unrecognized traffic light state: %d", rospy.get_name(), result.recognition_result)
                 color = WHITE
 
             # check if string contains "FLASH" string in it
@@ -196,7 +192,7 @@ def visualize_regulatoryElementLayer(map):
                     marker.scale.y = 0.2
                     marker.scale.z = 0.2
                     # marker.color = map.pointLayer.get(bulb.id).attributes["color"]
-                    marker.color = LANELET_COLOR_TO_MARKER_COLOR[map.pointLayer.get(bulb.id).attributes["color"].upper()]
+                    marker.color = LANELET_COLOR_TO_MARKER_COLOR[map.pointLayer.get(bulb.id).attributes["color"]]
                     marker.pose.position.x = bulb.x
                     marker.pose.position.y = bulb.y
                     marker.pose.position.z = bulb.z

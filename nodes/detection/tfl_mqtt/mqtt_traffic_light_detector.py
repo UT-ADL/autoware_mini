@@ -24,6 +24,7 @@ MQTT_TO_AUTOWARE_TFL_MAP = {
     "AMBERRED" : 0,
     "YELLOW": 0,
     "AMBER": 0,
+    "FLASH" : 1,
     "AMB FLASH" : 1,
     "AMBER FLASH" : 1,
     "GREEN FLASH": 1,
@@ -40,6 +41,7 @@ class MqttTrafficLightDetector:
         self.mqtt_topic = rospy.get_param('~mqtt_topic')
         self.timeout = rospy.get_param('~timeout')
         self.rate = rospy.Rate(10) # 10hz
+        self.id_string = rospy.get_param('~id_string')
 
         # self.use_offset = rospy.get_param("~use_offset", default=True)  # not necessary? will use lane_id
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
@@ -120,13 +122,16 @@ class MqttTrafficLightDetector:
                         rospy.logwarn('%s - timeout of stopline: %s, by %f seconds', rospy.get_name(), api_id, (self.mqtt_status[api_id]["timestamp"] - time.time() * 1000) / 1000)
                     else:
                         result_str = self.mqtt_status[api_id]["status"]
-                        result = MQTT_TO_AUTOWARE_TFL_MAP[result_str]
+                        if result_str in MQTT_TO_AUTOWARE_TFL_MAP:
+                            result = MQTT_TO_AUTOWARE_TFL_MAP[result_str]
+                        else:
+                            rospy.logwarn('%s - unknown stopline state: %s', rospy.get_name(), result_str)
 
                 tfl_result = TrafficLightResult()
                 tfl_result.light_id = 0
                 tfl_result.lane_id = lane_id
                 tfl_result.recognition_result = result
-                tfl_result.recognition_result_str = result_str
+                tfl_result.recognition_result_str = result_str + self.id_string
                 tfl_status.results.append(tfl_result)
 
             self.tfl_status_pub.publish(tfl_status)
@@ -137,7 +142,11 @@ class MqttTrafficLightDetector:
     def run(self):
         while not rospy.is_shutdown():
             self.combine_tfl_results_and_publish()
-            self.rate.sleep()
+            try:
+                self.rate.sleep()
+            except rospy.exceptions.ROSTimeMovedBackwardsException:
+                pass
+
 
 
 if __name__ == '__main__':
