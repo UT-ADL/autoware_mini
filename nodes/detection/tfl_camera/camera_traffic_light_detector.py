@@ -108,7 +108,7 @@ class CameraTrafficLightDetector:
             self.tfl_roi_pub = rospy.Publisher('traffic_light_roi', Image, queue_size=1)
 
         # Camera model
-        camera_info = rospy.wait_for_message('camera_info', CameraInfo, timeout=4)
+        camera_info = rospy.wait_for_message('camera_info', CameraInfo, timeout=15)
         self.camera_model = PinholeCameraModel()
         self.camera_model.fromCameraInfo(camera_info)
 
