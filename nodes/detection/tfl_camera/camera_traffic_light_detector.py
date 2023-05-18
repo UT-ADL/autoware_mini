@@ -100,7 +100,7 @@ class CameraTrafficLightDetector:
         self.stopline_tree = NearestNeighbors(n_neighbors=1, algorithm="auto").fit(self.stopline_array[:,1:3])
 
         self.bridge = CvBridge()
-        self.model = onnxruntime.InferenceSession(onnx_path)
+        self.model = onnxruntime.InferenceSession(onnx_path, providers=['CUDAExecutionProvider'])
 
         # Publishers
         self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)

@@ -42,6 +42,8 @@
     <include file="$(find autoware_mini)/launch/platform/lexus.launch">
         <arg name="max_speed" value="$(arg max_speed)" />
         <arg name="use_lidar_center"  value="$(eval arg('detector')!='vella')" />
+        <arg name="use_camera_fl"     value="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')" />
+        <arg name="use_camera_fr"     value="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')" />
     </include>
 
     <!-- Rviz -->
