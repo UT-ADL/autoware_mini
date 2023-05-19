@@ -15,17 +15,17 @@
         </node>
 
         <!-- Waypoint loader -->
-        <node if="$(eval arg('global_planner')=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
+        <node if="$(eval global_planner=='waypoints')"  pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
             <param name="waypoints_file" value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
         </node>
 
         <!-- Lanelet2 global planner -->
-        <node if="$(eval arg('global_planner')=='lanelet2')" pkg="autoware_mini" type="lanelet2_global_planner.py" name="lanelet2_global_planner" output="screen" required="true">
+        <node if="$(eval global_planner=='lanelet2')" pkg="autoware_mini" type="lanelet2_global_planner.py" name="lanelet2_global_planner" output="screen" required="true">
             <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
         </node>
 
         <!-- Carla waypoints publisher -->
-        <node if="$(eval arg('global_planner')=='carla')" pkg='autoware_mini' type='carla_waypoints_publisher.py' name='carla_waypoints_publisher' output='screen' required="true" />
+        <node if="$(eval global_planner=='carla')" pkg='autoware_mini' type='carla_waypoints_publisher.py' name='carla_waypoints_publisher' output='screen' required="true" />
 
         <!-- Global path visualizer -->
         <node pkg="autoware_mini" type="global_path_visualizer.py" name="global_path_visualizer" output="screen" required="true"/>
@@ -41,13 +41,13 @@
         <node unless="$(arg use_path_smoothing)" pkg="topic_tools" type="relay" args="/planning/global_path /planning/smoothed_path" name="smoothed_path_relay" output="screen" required="true" />
 
         <!-- Local planner -->
-        <group if="$(eval arg('local_planner')=='speed_only')">
+        <group if="$(eval local_planner=='speed_only')">
             <node pkg="autoware_mini" type="speed_only_local_planner.py" name="speed_only_local_planner" output="screen" required="true">
                 <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
             </node>
             <node pkg="autoware_mini" type="local_path_visualizer.py" name="local_path_visualizer" output="screen" required="true"/>
         </group>
-        <node if="$(eval arg('local_planner')=='none')" pkg="topic_tools" type="relay" args="/planning/smoothed_path /planning/local_path" name="local_path_relay" output="screen" required="true" />
+        <node if="$(eval local_planner=='none')" pkg="topic_tools" type="relay" args="/planning/smoothed_path /planning/local_path" name="local_path_relay" output="screen" required="true" />
 
         <!-- Config -->
         <rosparam command="load" file="$(find autoware_mini)/config/planning.yaml" />

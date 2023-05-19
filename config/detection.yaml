@@ -10,7 +10,7 @@ lidar:
     max_z: 0.1
     cell_size: 0.6
     tolerance: 0.15
-    filter: none                    # none, median, average, minimum
+    filter: average                    # none, median, average, minimum
     filter_size: 3
   points_clusterer:
     sample_size: 10000

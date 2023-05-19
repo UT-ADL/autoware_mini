@@ -2,9 +2,9 @@
 <launch>
 
   <!-- Module type -->
-  <arg name="detector"                                            default="carla"/>
-  <arg name="tfl_detector"                                        default="carla"/>
-  <arg name="localizer"                                           default="carla"/>
+  <arg name="use_lidar"                                           default="false"/>
+  <arg name="use_radar"                                           default="false"/>
+  <arg name="use_gnss"                                            default="false"/>
   <arg name="use_cam"                                             default="false" />
     
   <arg name='host'                                                default='localhost' />
@@ -20,14 +20,14 @@
   <!-- Control -->
   <arg name='passive'                                             default='' />     <!-- Enable/disable passive mode -->
   <arg name='synchronous_mode_wait_for_vehicle_control_command'   default='false' /><!-- Synchronous mode-->
-  <arg name='fixed_delta_seconds'                                 default="$(eval 0.05 if arg('detector') == 'carla' and arg('tfl_detector') == 'carla' else 0.1)" />
+  <arg name='fixed_delta_seconds'                                 default="$(eval 0.1 if use_lidar or use_radar or use_cam else 0.05)" />
   <arg name='use_manual_control'                                  default='false' /><!-- Toggle manual control-->
 
   <!-- Load correct sensor configurations-->
-  <arg if="$(eval arg('detector') == 'carla' and use_cam)"      name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_lidars_and_radars.json" />
-  <arg if="$(eval arg('detector') == 'carla' and not use_cam)"  name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_minimal.json" />
-  <arg if="$(eval arg('detector') != 'carla' and use_cam)"      name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors.json" />
-  <arg if="$(eval arg('detector') != 'carla' and not use_cam)"  name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_cam.json" />
+  <arg if="$(eval not use_lidar and not use_radar and use_cam)"       name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_lidars_and_radars.json" />
+  <arg if="$(eval not use_lidar and not use_radar and not use_cam)"   name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_minimal.json" />
+  <arg if="$(eval (use_lidar or use_radar) and use_cam)"              name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors.json" />
+  <arg if="$(eval (use_lidar or use_radar) and not use_cam)"          name="objects_definition_file"    default="$(find autoware_mini)/config/carla/sensors_no_cam.json" />
 
   <!-- Generate Traffic -->
   <arg name='generate_traffic'                                    default='true'/>
@@ -91,9 +91,9 @@
       <arg name='host'                                              value='$(arg host)' />
       <arg name='port'                                              value='$(arg port)' />
       <!-- If using tartu map then run Tartu environment of Carla -->
-      <arg if="$(eval 'tartu' in arg('map_name').lower())"
+      <arg if="$(eval 'tartu' in map_name.lower())"
            name='town'                                              value='Tartu'/>
-      <arg unless="$(eval 'tartu' in arg('map_name').lower())"
+      <arg unless="$(eval 'tartu' in map_name.lower())"
            name='town'                                              value='$(arg map_name)'/>
       <arg name='timeout'                                           value='$(arg timeout)' />
       <arg name='passive'                                           value='$(arg passive)' />
@@ -141,8 +141,8 @@
     <!-- If traffic is enabled then run traffic generator -->
     <node if="$(arg generate_traffic)" pkg="autoware_mini" type="carla_traffic_generator.sh" name="carla_traffic_generator" args="--async end_of_args" output="screen" required="true" />
 
-    <!-- If localizer is novatel then change child_frame to ego_vehicle and run carla_to_novatel msgs converter -->
-    <group if="$(eval localizer.lower() == 'novatel')">
+    <!-- If using gnss localization then change child_frame to ego_vehicle and run carla_to_novatel msgs converter -->
+    <group if="$(eval use_gnss)">
       <param  name="/localization/novatel_oem7_localizer/child_frame" value="ego_vehicle" />
       <node pkg='autoware_mini' type='carla_novatel_driver.py' name='carla_novatel_driver' output='screen' required="true" />
     </group>

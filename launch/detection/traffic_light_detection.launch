@@ -1,24 +1,24 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="tfl_detector"        default="none"      doc="carla, mqtt, camera, fusion" />
+    <arg name="tfl_detector"        default="none"      doc="carla, mqtt, camera, mqtt_camera_fusion" />
     <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
     <arg name="onnx_path"           default="$(find autoware_mini)/config/traffic_lights/tlr_model.onnx" doc="onnx model path" />
 
 
     <!-- Carla's ground truth traffic lights -->
-    <node if="$(eval arg('tfl_detector')=='carla')" pkg="autoware_mini" type="carla_traffic_light_detector.py" name="carla_traffic_light_detector" output="screen" required="true">
+    <node if="$(eval tfl_detector=='carla')" pkg="autoware_mini" type="carla_traffic_light_detector.py" name="carla_traffic_light_detector" output="screen" required="true">
         <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
     </node>
 
 
     <!-- MQTT traffic light detector -->
-    <node if="$(eval arg('tfl_detector')=='mqtt' or arg('tfl_detector')=='fusion')" pkg="autoware_mini" type="mqtt_traffic_light_detector.py" name="mqtt_traffic_light_detector" output="screen" required="true">
+    <node if="$(eval 'mqtt' in tfl_detector)" pkg="autoware_mini" type="mqtt_traffic_light_detector.py" name="mqtt_traffic_light_detector" output="screen" required="true">
         <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
-        <remap if="$(eval arg('tfl_detector')=='fusion')" from="traffic_light_status" to="mqtt/traffic_light_status"/>
+        <remap if="$(eval tfl_detector=='mqtt_camera_fusion')" from="traffic_light_status" to="mqtt/traffic_light_status"/>
     </node>
 
     <!-- Camera based traffic light detection -->
-    <group if="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')">
+    <group if="$(eval 'camera' in tfl_detector)">
         
         <!-- Camera FL -->
         <node pkg="autoware_mini" type="camera_traffic_light_detector.py" name="camera_traffic_light_detector_left" output="screen" required="true" ns="camera_fl">
@@ -37,10 +37,10 @@
         </node>
 
         <node pkg="autoware_mini" type="traffic_light_majority_merger.py" name="traffic_light_majority_merger" output="screen" required="true" >
-            <remap if="$(eval arg('tfl_detector')=='fusion')" from="traffic_light_status" to="camera/traffic_light_status"/>
+            <remap if="$(eval tfl_detector=='mqtt_camera_fusion')" from="traffic_light_status" to="camera/traffic_light_status"/>
         </node>
 
-        <node if="$(eval arg('tfl_detector')=='fusion')" pkg="autoware_mini" type="traffic_light_priority_merger.py" name="traffic_light_priority_merger" output="screen" required="true" >
+        <node if="$(eval tfl_detector=='mqtt_camera_fusion')" pkg="autoware_mini" type="traffic_light_priority_merger.py" name="traffic_light_priority_merger" output="screen" required="true" >
             <remap from="tfl_status_topic_1" to="mqtt/traffic_light_status"/>
             <remap from="tfl_status_topic_2" to="camera/traffic_light_status"/>
         </node>

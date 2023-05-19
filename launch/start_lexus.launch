@@ -2,14 +2,14 @@
 <launch>
 
     <arg name="localizer"               default="novatel"           doc="novatel, carla"/>
-    <arg name="detector"                default="cluster"           doc="cluster, sim, carla"/>
+    <arg name="detector"                default="lidar_cluster"     doc="lidar_cluster, sim, carla"/>
     <arg name="follower"                default="pure_pursuit"      doc="pure_pursuit, stanley" />
     <arg name="global_planner"          default="lanelet2"          doc="waypoints, lanelet2" />
     <arg name="local_planner"           default="speed_only"        doc="speed_only, none"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
-    <arg name="tfl_detector"            default="mqtt"              doc="mqtt, camera, fusion" />
+    <arg name="tfl_detector"            default="mqtt"              doc="mqtt, camera, mqtt_camera_fusion" />
     <arg name="max_speed"               default="30" />
     
     <!-- Localization -->
@@ -41,10 +41,10 @@
     <!-- Vehicle -->
     <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
         <arg name="max_speed"           value="$(arg max_speed)" />
-        <arg name="use_lidar_center"    value="$(eval arg('detector')=='cluster' or arg('detector')=='sfa' or arg('detector')=='fusion')" />
-        <arg name="use_camera_fl"       value="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')" />
-        <arg name="use_camera_fr"       value="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')" />
-        <arg name="use_radar_fc"        value="$(eval arg('detector')=='radar' or arg('detector')=='fusion')" />
+        <arg name="use_lidar_center"    value="$(eval 'lidar' in detector and detector != 'lidar_vella'" />
+        <arg name="use_camera_fl"       value="$(eval 'camera' in tfl_detector" />
+        <arg name="use_camera_fr"       value="$(eval 'camera' in tfl_detector" />
+        <arg name="use_radar_fc"        value="$(eval 'radar' in detector" />
     </include>
 
     <!-- Rviz -->

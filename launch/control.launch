@@ -7,9 +7,9 @@
 
         <!-- Follower -->
 
-        <node if="$(eval arg('follower')=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" required="true" />
+        <node if="$(eval follower=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_follower.py" name="pure_pursuit_follower" output="screen" required="true" />
 
-        <node if="$(eval arg('follower')=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" required="true" />
+        <node if="$(eval follower=='stanley')" pkg="autoware_mini" type="stanley_follower.py" name="stanley_follower" output="screen" required="true" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/control.yaml"/>
 

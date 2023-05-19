@@ -7,10 +7,10 @@ class Timer:
         self.reset()
 
     def reset(self):
-        self.t = time.time()
+        self.t = time.perf_counter()
 
     def __call__(self, key):
-        t = time.time()
+        t = time.perf_counter()
         self.dict[key] += t - self.t
         self.t = t
         return self.dict[key]

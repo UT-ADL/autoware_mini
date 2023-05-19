@@ -7,13 +7,12 @@
     <arg name="use_path_smoothing"      default="true" />
     <arg name="localizer"               default="carla"                 doc="novatel, carla" />
     <arg name="detector"                default="carla"                 doc="cluster, carla" />
-    <arg name="tfl_detector"            default="carla"                 doc="carla, camera, fusion" />
-    <arg name="use_cam"                 default="$(eval arg('tfl_detector')=='camera' or arg('tfl_detector')=='fusion')" />
+    <arg name="tfl_detector"            default="carla"                 doc="carla, camera, mqtt_camera_fusion" />
     <arg name='map_name'                default='tartu'/>
     <arg name="follower"                default="pure_pursuit"          doc="pure_pursuit, stanley" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm"     if="$(eval arg('localizer')=='carla')" />
-    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" if="$(eval arg('localizer')!='carla')" />
+    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm"     if="$(eval localizer=='carla')" />
+    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" if="$(eval localizer!='carla')" />
     <arg name='use_lexus_model'         default='true'/>
     <arg name='generate_traffic'        default='true'/>
     
@@ -58,10 +57,10 @@
     <include file="$(find autoware_mini)/launch/platform/carla.launch">
         <arg name='map_name'                            value='$(arg map_name)'/>
         <arg name="use_manual_control"                  value="$(arg use_manual_control)" />
-        <arg name="use_cam"                             value="$(arg use_cam)" />
-        <arg name="detector"                            value="$(arg detector)" />
-        <arg name="tfl_detector"                        value="$(arg tfl_detector)" />
-        <arg name="localizer"                           value="$(arg localizer)" />
+        <arg name="use_lidar"                           value="$(eval 'lidar' in detector and detector != 'lidar_vella')" />
+        <arg name="use_radar"                           value="$(eval 'radar' in detector)" />
+        <arg name="use_gnss"                            value="$(eval localizer == 'novatel')" />
+        <arg name="use_cam"                             value="$(eval 'camera' in tfl_detector)" />
         <arg name="generate_traffic"                    value="$(arg generate_traffic)" />
         <arg name="scenario_runner_path"                value="$(arg scenario_runner_path)" />
         <arg name="use_scenario_runner"                 value="$(arg use_scenario_runner)" />
