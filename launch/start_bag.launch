@@ -45,6 +45,13 @@
         <remap from="/detection/camera_fr/traffic_light_roi" to="/bag/detection/camera_fr/traffic_light_roi" if="$(arg use_detection)"/>
         <remap from="/detection/camera/traffic_light_status" to="/bag/detection/camera/traffic_light_status" if="$(arg use_detection)"/>
         <remap from="/detection/mqtt/traffic_light_status" to="/bag/detection/mqtt/traffic_light_status" if="$(arg use_detection)"/>
+        <remap from="/dashboard/current_speed" to="/bag/dashboard/current_speed" />
+        <remap from="/dashboard/target_speed" to="/bag/dashboard/target_speed" />
+        <remap from="/dashboard/closest_object_distance" to="/bag/dashboard/closest_object_distance" />
+        <remap from="/dashboard/closest_object_speed" to="closest_object_speed" />
+        <remap from="/dashboard/acceleration" to="/bag/dashboard/acceleration" />
+        <remap from="/dashboard/acceleration_limit" to="/bag/dashboard/acceleration_limit" />
+        <remap from="/dashboard/deceleration_limit" to="/bag/dashboard/deceleration_limit" />
         <!-- For compatibility with older bags and Vella bags -->
         <remap from="/points_raw_center" to="/lidar_center/points_raw"/>
         <remap from="/points_raw_front" to="/lidar_front/points_raw"/>
