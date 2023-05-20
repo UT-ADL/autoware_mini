@@ -67,11 +67,11 @@ traffic_light_majority_merger:
 camera_fl/camera_traffic_light_detector_left:
   traffic_light_bulb_radius: 0.1    # meters
   radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
-  rectify_image: True
+  rectify_image: False  # the distortions of Mako cameras are so small they don't matter
   output_roi_image: True
 
 camera_fr/camera_traffic_light_detector_right:
   traffic_light_bulb_radius: 0.1    # meters
   radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
-  rectify_image: True
+  rectify_image: False  # the distortions of Mako cameras are so small they don't matter
   output_roi_image: True
