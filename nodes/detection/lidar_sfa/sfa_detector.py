@@ -100,22 +100,13 @@ class SFADetector:
         back_points = self.get_filtered_points(points, is_front=False)
         back_bev_map = self.make_bev_map(back_points)
         back_bev_map = np.flip(back_bev_map, (1, 2))
-        all_dets = self.do_detection(front_bev_map, back_bev_map)
+        detections = self.do_detection(front_bev_map, back_bev_map)
 
-        # if no detections, return empty array of shape (0,9)
-        if len(all_dets) == 0:
-            return np.empty((0, 9))
+        front_detections = self.post_processing(detections[0])
+        back_detections = self.post_processing(detections[1])
+        back_detections[:, [1,2]] *= -1
 
-        # if all detections list has length 1 (only front detections), return the detections array as it is
-        if len(all_dets) == 1:
-            return all_dets[0]
-
-        # if all detections has length 2 (both front and back detections), flip the back detctions and return as a sigle array of shape
-        # (num_detections, 9)
-        if len(all_dets) == 2:
-            all_dets[1][:, 1] *= -1
-            all_dets[1][:, 2] *= -1
-            return np.concatenate(all_dets, axis=0)
+        return np.concatenate((front_detections, back_detections), axis=0)
 
     def get_filtered_points(self, points, is_front=True):
 
@@ -168,7 +159,6 @@ class SFADetector:
 
         # detections size (batch_size, K, 10)
         detections = self.decode(hm_cen, cen_offset, directions, z_coors, dimensions, self.top_k)
-        detections = self.post_processing(detections)
 
         return detections
 
@@ -287,24 +277,23 @@ class SFADetector:
         # (scores-0:1, xs-1:2, ys-2:3, z_coor-3:4, dim-4:7, direction-7:9, clses-9:10)
         :return:
         """
-        final_detections = []
-        for batch_num in range(detections.shape[0]):
-            # score based filtering
-            keep_inds = (detections[batch_num][:, 0] > self.score_thresh)
-            filtered_detections = detections[batch_num][keep_inds, :]
-            if filtered_detections.shape[0] > 0:
-                classes = filtered_detections[:, 9]
-                scores = filtered_detections[:, 0]
-                x = (filtered_detections[:, 2] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_X + self.MIN_FRONT_X
-                y = (filtered_detections[:, 1] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_Y + self.MIN_Y
-                z = filtered_detections[:, 3] + self.MIN_Z
-                heights = filtered_detections[:, 4]
-                widths = filtered_detections[:, 5]
-                lengths = filtered_detections[:, 6]
-                yaw = self.get_yaw(filtered_detections[:,7:9]).astype(np.float32)
-                final_detections.append(np.column_stack((classes, x, y, z, heights, widths, lengths, yaw, scores)))
+        # score based filtering
+        keep_inds = (detections[:, 0] > self.score_thresh)
+        filtered_detections = detections[keep_inds, :]
+        if filtered_detections.shape[0] > 0:
+            classes = filtered_detections[:, 9]
+            scores = filtered_detections[:, 0]
+            x = (filtered_detections[:, 2] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_X + self.MIN_FRONT_X
+            y = (filtered_detections[:, 1] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_Y + self.MIN_Y
+            z = filtered_detections[:, 3] + self.MIN_Z
+            heights = filtered_detections[:, 4]
+            widths = filtered_detections[:, 5]
+            lengths = filtered_detections[:, 6]
+            yaw = self.get_yaw(filtered_detections[:,7:9]).astype(np.float32)
 
-        return final_detections
+            return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw, scores))
+        else:
+            return np.empty((0,9))
 
     def get_yaw(self, direction):
         return -np.arctan2(direction[:, 0:1], direction[:, 1:2])
