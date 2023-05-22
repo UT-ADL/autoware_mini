@@ -4,8 +4,8 @@ from collections import defaultdict
 import traceback
 
 import rospy
-import tf2_ros
 import message_filters
+from tf2_ros import Buffer, TransformListener, TransformException
 
 from geometry_msgs.msg import TwistStamped
 from autoware_msgs.msg import DetectedObject, DetectedObjectArray
@@ -35,8 +35,8 @@ class RadarDetector:
         self.detected_objs_pub = rospy.Publisher("detected_objects", DetectedObjectArray, queue_size=1)
 
         # Dynamic transform listener
-        self.tf_buffer = tf2_ros.Buffer()
-        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer)
         # allow time for tf buffer to fill
         rospy.sleep(0.5)
 
@@ -64,8 +64,12 @@ class RadarDetector:
             detected_objects_array.header.frame_id = self.output_frame
             detected_objects_array.header.stamp = tracks.header.stamp
 
-            # read source frame to output frame transform
-            source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, tracks.header.frame_id, rospy.Time(0))
+            try:
+                # read source frame to output frame transform
+                source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, tracks.header.frame_id, rospy.Time(0))
+            except TransformException as e:
+                rospy.logwarn("%s - %s", rospy.get_name(), e)
+                return
 
             for i, track in enumerate(tracks.tracks):  # type: radar_msgs/RadarTrack
                 # generate integer id from uuid

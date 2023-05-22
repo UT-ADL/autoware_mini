@@ -188,7 +188,7 @@ class SpeedOnlyLocalPlanner:
         try:
             transform = self.tf_buffer.lookup_transform("base_link", msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
         except TransformException as e:
-            rospy.logerr("%s - unable to transform object speed to base frame, using speed 0: %s", rospy.get_name(), str(e))
+            rospy.logwarn("%s - unable to transform object speed to base frame, using speed 0: %s", rospy.get_name(), e)
             transform = None
 
         # extract object points from detected objects

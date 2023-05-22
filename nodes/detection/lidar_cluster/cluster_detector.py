@@ -6,6 +6,7 @@ import numpy as np
 import cv2
 
 import tf
+import tf2_ros
 from ros_numpy import numpify, msgify
 
 from sensor_msgs.msg import PointCloud2
@@ -45,7 +46,11 @@ class ClusterDetector:
         if msg.header.frame_id != self.output_frame:
             # wait for target frame transform to be available
             if self.transform_timeout > 0:
-                self.tf_listener.waitForTransform(self.output_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
+                try:
+                    self.tf_listener.waitForTransform(self.output_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
+                except tf2_ros.TransformException as e:
+                    rospy.logwarn("%s - %s", rospy.get_name(), e)
+                    return
             # fetch transform for target frame
             tf_matrix = self.tf_listener.asMatrix(self.output_frame, msg.header).astype(np.float32).T
             # make copy of points

@@ -153,7 +153,7 @@ class CameraTrafficLightDetector:
             try:
                 image = self.bridge.imgmsg_to_cv2(camera_image_msg,  desired_encoding='rgb8')
             except CvBridgeError as e:
-                rospy.logerr("%s - CvBridgeError: %s", rospy.get_name(), str(e))
+                rospy.logerr("%s - %s", rospy.get_name(), e)
                 return
 
             if self.rectify_image:
@@ -164,8 +164,8 @@ class CameraTrafficLightDetector:
                 # extract transform
                 try:
                     transform = self.tf_buffer.lookup_transform(transform_to_frame, transform_from_frame, image_time_stamp)
-                except tf2_ros.TransformException as ex:
-                    rospy.logerr("%s - Could not load transform from %s to %s: %s", rospy.get_name(), transform_from_frame, transform_to_frame, str(ex))
+                except tf2_ros.TransformException as e:
+                    rospy.logwarn("%s - %s", rospy.get_name(), e)
                     return
 
                 rois = self.calculate_roi_coordinates(traffic_lights, transform)
@@ -293,7 +293,7 @@ class CameraTrafficLightDetector:
         try:
             img_msg = self.bridge.cv2_to_imgmsg(image, encoding='rgb8')
         except CvBridgeError as e:
-            rospy.logerr("%s - CVBridge cant't convert image to message: %s", rospy.get_name(), str(e))
+            rospy.logerr("%s - %s", rospy.get_name(), e)
         
         img_msg.header.stamp = image_time_stamp
         self.tfl_roi_pub.publish(img_msg)

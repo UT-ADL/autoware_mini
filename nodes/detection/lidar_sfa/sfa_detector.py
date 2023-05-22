@@ -4,7 +4,7 @@ import rospy
 import numpy as np
 import cv2
 
-from tf2_ros import TransformListener, Buffer
+from tf2_ros import TransformListener, Buffer, TransformException
 from ros_numpy import numpify
 
 from sensor_msgs.msg import PointCloud2
@@ -73,8 +73,12 @@ class SFADetector:
         pointcloud: raw lidar data points
         return: None - publish autoware DetectedObjects
         """
-        # get the transform from lidar frame to output frame at the time when the poinctloud msg was published
-        transform = self.tf_buffer.lookup_transform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp, rospy.Duration(self.transform_timeout))
+        try:
+            # get the transform from lidar frame to output frame at the time when the poinctloud msg was published
+            transform = self.tf_buffer.lookup_transform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp, rospy.Duration(self.transform_timeout))
+        except TransformException as e:
+            rospy.logwarn("%s - %s", rospy.get_name(), e)
+            return
 
         # Unpack pointcloud2 msg ype to numpy array
         pcd_array = numpify(pointcloud)

@@ -4,7 +4,7 @@ from __future__ import print_function
 from __future__ import division
 
 import rospy
-from tf2_ros import Buffer, TransformListener
+from tf2_ros import Buffer, TransformListener, TransformException
 
 from std_msgs.msg import ColorRGBA
 from vella_msgs.msg import Track3DArray
@@ -49,8 +49,12 @@ class VellaDetector:
         detected_objects_array.header.frame_id = self.output_frame
         detected_objects_array.header.stamp = vella_tracks.header.stamp
 
-        # get the transform from lidar_frame to output frame at the time when vella track was published
-        transform = self.tf_buffer.lookup_transform(self.output_frame, self.lidar_frame, vella_tracks.header.stamp, rospy.Duration(self.transform_timeout))
+        try:
+            # get the transform from lidar_frame to output frame at the time when vella track was published
+            transform = self.tf_buffer.lookup_transform(self.output_frame, self.lidar_frame, vella_tracks.header.stamp, rospy.Duration(self.transform_timeout))
+        except TransformException as e:
+            rospy.logwarn("%s - %s", rospy.get_name(), e)
+            return
 
         # loop over each track and discard the ones not satisfying our filtering criteria
         for vella_track in vella_tracks.detections:
