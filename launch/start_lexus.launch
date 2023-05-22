@@ -41,10 +41,10 @@
     <!-- Vehicle -->
     <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
         <arg name="max_speed"           value="$(arg max_speed)" />
-        <arg name="use_lidar_center"    value="$(eval 'lidar' in detector and detector != 'lidar_vella'" />
-        <arg name="use_camera_fl"       value="$(eval 'camera' in tfl_detector" />
-        <arg name="use_camera_fr"       value="$(eval 'camera' in tfl_detector" />
-        <arg name="use_radar_fc"        value="$(eval 'radar' in detector" />
+        <arg name="use_lidar_center"    value="$(eval 'lidar' in detector and detector != 'lidar_vella')" />
+        <arg name="use_camera_fl"       value="$(eval 'camera' in tfl_detector)" />
+        <arg name="use_camera_fr"       value="$(eval 'camera' in tfl_detector)" />
+        <arg name="use_radar_fc"        value="$(eval 'radar' in detector)" />
     </include>
 
     <!-- Rviz -->
