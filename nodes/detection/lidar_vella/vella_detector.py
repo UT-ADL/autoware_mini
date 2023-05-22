@@ -3,19 +3,15 @@
 from __future__ import print_function
 from __future__ import division
 
-import numpy as np
-
 import rospy
 from tf2_ros import Buffer, TransformListener
-from tf2_geometry_msgs import do_transform_pose
-from tf.transformations import quaternion_multiply, euler_from_quaternion
 
 from std_msgs.msg import ColorRGBA
 from vella_msgs.msg import Track3DArray
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
-from geometry_msgs.msg import PolygonStamped, Point, PoseStamped
 
 from helpers.detection import create_hull
+from helpers.transform import transform_pose, transform_vector3
 
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 MPH_TO_MS_MULTIPLIER = 0.447 # if we find out that vella speeds are indeed given in mph then multiply our speed with this constant  to get speeds in m/s
@@ -89,15 +85,12 @@ class VellaDetector:
         detected_object.color = LIGHT_BLUE
         detected_object.valid = True
 
-        # Transform position and orientation to output frame using the transformation saved when callback was received
-        detected_object.pose = do_transform_pose(PoseStamped(pose=vella_track.pose.pose), transform).pose
+        # transform position and orientation to output frame using the transformation saved when callback was received
+        detected_object.pose = transform_pose(vella_track.pose.pose, transform)
         detected_object.pose_reliable = True
 
-        # compute norm of velocity predicted by vella
-        detected_object.velocity.linear.x = np.linalg.norm([
-                                            vella_track.velocity.twist.linear.x,
-                                            vella_track.velocity.twist.linear.y,
-                                            vella_track.velocity.twist.linear.z])
+        # transform velocity to output frame using the transformation saved when callback was received
+        detected_object.velocity.linear = transform_vector3(vella_track.velocity.twist.linear, transform)
         detected_object.velocity_reliable = True
         detected_object.acceleration_reliable = False
 

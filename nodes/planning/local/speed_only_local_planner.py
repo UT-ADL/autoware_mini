@@ -5,7 +5,6 @@ import copy
 import math
 import threading
 from tf2_ros import Buffer, TransformListener, TransformException
-from tf2_geometry_msgs import do_transform_vector3
 
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
@@ -14,11 +13,12 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 from autoware_msgs.msg import Lane, DetectedObjectArray, TrafficLightResultArray
-from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped, Point
+from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3, Point
 from std_msgs.msg import ColorRGBA
 
 from helpers.geometry import get_closest_point_on_line, get_distance_between_two_points_2d
 from helpers.waypoints import get_two_nearest_waypoint_idx
+from helpers.transform import transform_vector3
 
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.4)
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
@@ -195,16 +195,15 @@ class SpeedOnlyLocalPlanner:
         for obj in msg.objects:
             # project object velocity to base_link frame to get longitudinal speed
             # TODO: project velocity to the path
-            velocity = Vector3Stamped(header=msg.header, vector=obj.velocity.linear)
             # in case there is no transform assume the object is not moving
             if transform is not None:
-                velocity = do_transform_vector3(velocity, transform)
+                velocity = transform_vector3(obj.velocity.linear, transform)
             else:
-                velocity.vector.x = 0.0
+                velocity = Vector3()
             # add object center point and convex hull points to the points list
-            points_list.append([obj.pose.position.x, obj.pose.position.y, obj.pose.position.z, velocity.vector.x])
+            points_list.append([obj.pose.position.x, obj.pose.position.y, obj.pose.position.z, velocity.x])
             for point in obj.convex_hull.polygon.points:
-                points_list.append([point.x, point.y, point.z, velocity.vector.x])
+                points_list.append([point.x, point.y, point.z, velocity.x])
 
         # add stop line points to the points list
         for stop_line in stop_lines.values():

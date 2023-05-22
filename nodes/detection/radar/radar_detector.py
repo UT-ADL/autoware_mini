@@ -5,15 +5,15 @@ import traceback
 
 import rospy
 import tf2_ros
-import tf2_geometry_msgs
 import message_filters
 
-from geometry_msgs.msg import Vector3, Vector3Stamped, TwistStamped, PoseStamped
+from geometry_msgs.msg import TwistStamped
 from autoware_msgs.msg import DetectedObject, DetectedObjectArray
 from radar_msgs.msg import RadarTracks
 from std_msgs.msg import ColorRGBA
 
 from helpers.detection import create_hull
+from helpers.transform import transform_point, transform_vector3
 
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
 RADAR_CLASSIFICATION = {0:'unknown', 1:'static', 2:'dynamic'}
@@ -91,12 +91,12 @@ class RadarDetector:
                 detected_object.label = RADAR_CLASSIFICATION[track.classification]
                 detected_object.color = RED
                 detected_object.valid = True
+                detected_object.pose.position = transform_point(track.position, source_frame_to_output_tf)
                 detected_object.pose_reliable = True
-                detected_object.pose = self.get_tfed_pose(track.position, source_frame_to_output_tf)
+                detected_object.velocity.linear = self.transform_velocity(track.velocity, ego_speed.twist.linear, source_frame_to_output_tf)
                 detected_object.velocity_reliable = True
-                detected_object.velocity.linear = self.get_tfed_velocity(track.velocity, ego_speed.twist.linear, source_frame_to_output_tf)
+                detected_object.acceleration.linear = transform_vector3(track.acceleration, source_frame_to_output_tf)
                 detected_object.acceleration_reliable = True
-                detected_object.acceleration.linear = self.get_tfed_vector3(track.acceleration, source_frame_to_output_tf)
                 detected_object.dimensions = track.size
                 detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, tracks.header.stamp)
 
@@ -107,47 +107,15 @@ class RadarDetector:
         except Exception as e:
             rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
-    def get_tfed_velocity(self, track_velocity, ego_speed, source_frame_to_output_tf):
-
-        """
-        track: radar track (radar_msgs/RadarTrack)
-        :param ego_speed: speed of our vehicle (geometry_msgs/TwistStamped)
-        :param source_frame: frame in which to transform the velocity vector. Map in  most cases unless specifically required and changed
-        :return: velocity vector transformed to map frame (geometry_msgs/Twist)
-        """
+    def transform_velocity(self, track_velocity, ego_velocity, source_frame_to_output_tf):
         # compute ego_velocity in radar_fc frame
-        ego_speed_in_radar = self.get_tfed_vector3(ego_speed, self.base_link_to_radar_tf)
+        velocity = transform_vector3(ego_velocity, self.base_link_to_radar_tf)
         # Computing speed relative to map.
-        velocity_x = ego_speed_in_radar.x + track_velocity.x
-        velocity_y = ego_speed_in_radar.y + track_velocity.y # this value is zero for track velocity
-        velocity_z = ego_speed_in_radar.z + track_velocity.z # this value is zero for track velocity
-        velocity_vector = Vector3(velocity_x, velocity_y, velocity_z)
-
+        velocity.x += track_velocity.x
+        velocity.y += track_velocity.y # this value is zero for track velocity
+        velocity.z += track_velocity.z # this value is zero for track velocity
         # transforming the velocity vector to the output frame
-        return self.get_tfed_vector3(velocity_vector, source_frame_to_output_tf)
-
-    def get_tfed_pose(self, position, source_frame_to_output_tf):
-        """
-        :type pose_with_cov: PoseWithCovariance
-        :type source_frame: str
-        :returns: tfed Pose to the output_frame
-        """
-        # To apply a TF we need a pose stamped
-        pose_stamped = PoseStamped()
-        pose_stamped.pose.position = position
-        tfed_pose = tf2_geometry_msgs.do_transform_pose(pose_stamped, source_frame_to_output_tf).pose
-        return tfed_pose
-
-    def get_tfed_vector3(self, vector3, source_frame_to_output_tf):
-        """
-        :type vector3: Vector3
-        :type source_frame: str
-        :returns: tfed Vector3 to the output_frame class variable
-        """
-        # To apply a TF we need a Vector3 stamped
-        vector3_stamped = Vector3Stamped(vector=vector3)
-        tfed_vector3 = tf2_geometry_msgs.do_transform_vector3(vector3_stamped, source_frame_to_output_tf).vector
-        return tfed_vector3
+        return transform_vector3(velocity, source_frame_to_output_tf)
 
     def run(self):
         rospy.spin()

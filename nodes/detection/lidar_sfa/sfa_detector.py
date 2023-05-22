@@ -5,11 +5,9 @@ import numpy as np
 import cv2
 
 from tf2_ros import TransformListener, Buffer
-from tf2_geometry_msgs import do_transform_pose
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
+from tf.transformations import quaternion_from_euler
 from ros_numpy import numpify
 
-from geometry_msgs.msg import Quaternion, Point, PolygonStamped, PoseStamped
 from sensor_msgs.msg import PointCloud2
 from std_msgs.msg import ColorRGBA
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
@@ -17,6 +15,7 @@ from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 import onnxruntime
 
 from helpers.detection import create_hull
+from helpers.transform import transform_pose
 
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 
@@ -342,11 +341,15 @@ class SFADetector:
             detected_object.label = CLASS_NAMES[cls_id]
             detected_object.color = LIGHT_BLUE
             detected_object.valid = True
-            pose_stamped = PoseStamped()
-            pose_stamped.pose.position = Point(x, y, z)
+            detected_object.pose.position.x = x
+            detected_object.pose.position.y = y
+            detected_object.pose.position.z = z
             x, y, z, w = quaternion_from_euler(0, 0, yaw)
-            pose_stamped.pose.orientation = Quaternion(x, y, z, w) 
-            detected_object.pose = do_transform_pose(pose_stamped, transform).pose
+            detected_object.pose.orientation.x = x
+            detected_object.pose.orientation.y = y
+            detected_object.pose.orientation.z = z
+            detected_object.pose.orientation.w = w
+            detected_object.pose = transform_pose(detected_object.pose, transform)
             detected_object.pose_reliable = True
 
             # object dimensions

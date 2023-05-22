@@ -5,7 +5,6 @@ import numpy as np
 import cv2
 import traceback
 import tf2_ros
-import tf2_geometry_msgs
 import onnxruntime
 import message_filters
 
@@ -15,13 +14,15 @@ from image_geometry import PinholeCameraModel
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 
-from geometry_msgs.msg import PointStamped
+from geometry_msgs.msg import Point
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CameraInfo
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 from autoware_msgs.msg import Lane
 
 from cv_bridge import CvBridge, CvBridgeError
+
+from helpers.transform import transform_point
 
 # Classifier outputs 4 classes (LightState)
 CLASSIFIER_RESULT_TO_STRING = {
@@ -215,9 +216,9 @@ class CameraTrafficLightDetector:
         # reorg signals (individual bulbs) into traffic lights dict
         for linkId, plId, signalId, type, map_x,  map_y,  map_z in signals_on_path:
             if int(plId) in traffic_lights:
-                traffic_lights[int(plId)].append([linkId, plId, signalId, type, map_x,  map_y,  map_z])
+                traffic_lights[int(plId)].append([linkId, plId, signalId, type, map_x, map_y, map_z])
             else:
-                traffic_lights[int(plId)] = [[linkId, plId, signalId, type, map_x,  map_y,  map_z]]
+                traffic_lights[int(plId)] = [[linkId, plId, signalId, type, map_x, map_y, map_z]]
 
         return traffic_lights
 
@@ -229,13 +230,9 @@ class CameraTrafficLightDetector:
             us = []
             vs = []
             for linkId, _, _, _, x, y, z in signals:
-                point_map = PointStamped()
-                point_map.point.x = float(x)
-                point_map.point.y = float(y)
-                point_map.point.z = float(z)
-
+                point_map = Point(x=float(x), y=float(y), z=float(z))
                 # transform point to camera frame and then to image frame
-                point_camera = tf2_geometry_msgs.do_transform_point(point_map, transform).point
+                point_camera = transform_point(point_map, transform)
                 u, v = self.camera_model.project3dToPixel((point_camera.x, point_camera.y, point_camera.z))
 
                 # check with image limits using the camera model
