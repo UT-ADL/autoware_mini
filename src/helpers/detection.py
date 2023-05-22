@@ -1,7 +1,9 @@
 import math
 import cv2
-from tf.transformations import euler_from_quaternion
+
 from geometry_msgs.msg import PolygonStamped, Point
+
+from helpers.geometry import get_heading_from_orientation
 
 def create_hull(obj_pose, obj_dims, output_frame, stamp):
 
@@ -18,8 +20,7 @@ def create_hull(obj_pose, obj_dims, output_frame, stamp):
     convex_hull.header.stamp = stamp
 
     # compute heading angle from object's orientation
-    _, _, heading = euler_from_quaternion(
-        (obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w))
+    heading = get_heading_from_orientation(obj_pose.orientation)
 
     # use cv2.boxPoints to get a rotated rectangle given the angle
     points = cv2.boxPoints((

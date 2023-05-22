@@ -5,13 +5,14 @@ import math
 
 import rospy
 from tf2_ros import TransformBroadcaster
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Quaternion, Point
 from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
 
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
+
+from helpers.geometry import get_orientation_from_heading, get_heading_from_orientation
 
 class BicycleSimulation:
 
@@ -54,9 +55,7 @@ class BicycleSimulation:
         self.y = msg.pose.pose.position.y
 
         # extract heading angle from orientation
-        orientation = msg.pose.pose.orientation
-        quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
-        _, _, self.heading_angle = euler_from_quaternion(quaternion)
+        self.heading_angle = get_heading_from_orientation(msg.pose.pose.orientation)
 
         rospy.loginfo("%s - initial position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame", rospy.get_name(), 
                     msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z,
@@ -112,8 +111,7 @@ class BicycleSimulation:
         self.heading_angle += heading_angle_dot * delta_t
 
         # create quaternion from heading angle to be used later in tf and pose and marker messages
-        x, y, z, w = quaternion_from_euler(0, 0, self.heading_angle)
-        self.orientation = Quaternion(x, y, z, w)
+        self.orientation = get_orientation_from_heading(self.heading_angle)
 
     def run(self):
         # start separate thread for spinning subcribers

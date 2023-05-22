@@ -166,3 +166,12 @@ def get_angle_three_points_2d(point1, point2, point3):
 
     return angle
 
+def norm2d(x, y):
+    """
+    Calculate 2d norm
+    :param x: x
+    :param y: y
+    :return: norm
+    """
+
+    return math.sqrt(x ** 2 + y ** 2)

@@ -13,7 +13,6 @@ import rospy
 from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import PolygonStamped, Point
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
-from tf.transformations import euler_from_quaternion
 from derived_object_msgs.msg import ObjectArray, Object
 from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 from helpers.detection import create_hull

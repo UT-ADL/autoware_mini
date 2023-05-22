@@ -5,12 +5,13 @@ import csv
 import traceback
 import rospy
 import message_filters
-import tf
 
 from autoware_msgs.msg import WaypointState, VehicleStatus
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import ColorRGBA
+
+from helpers.geometry import get_heading_from_orientation
 
 VEHICLE_STATUS_LAMP_TO_WAYPOINT_STATE_MAP = {
     0: WaypointState.STR_STRAIGHT,
@@ -70,7 +71,7 @@ class WaypointSaver:
 
             if distance >= self.interval:
                 # calculate current_heading
-                current_heading = get_current_heading_degrees(current_pose.pose.orientation)
+                current_heading = math.degrees(get_heading_from_orientation(current_pose.pose.orientation))
                 # write data to waypoints.csv file
                 self.write_to_waypoints_file(x, y, current_pose.pose.position.z, current_heading, current_velocity.twist.linear.x, self.turn_signal)
                 # create and publish a marker of the waypoint
@@ -134,13 +135,6 @@ class WaypointSaver:
 
     def run(self):
         rospy.spin()
-
-def get_current_heading_degrees(orientation):
-    # convert quaternion to euler angles
-    quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
-    _, _, yaw = tf.transformations.euler_from_quaternion(quaternion)
-
-    return math.degrees(yaw)
 
 
 if __name__ == '__main__':

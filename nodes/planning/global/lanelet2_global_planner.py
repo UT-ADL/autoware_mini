@@ -15,8 +15,8 @@ from geometry_msgs.msg import PoseStamped, Point
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
 from std_msgs.msg import Bool, ColorRGBA
 from visualization_msgs.msg import MarkerArray, Marker
-from tf.transformations import quaternion_from_euler
-from helpers.geometry import get_heading_between_two_points, get_distance_between_two_points_2d
+
+from helpers.geometry import get_heading_between_two_points, get_distance_between_two_points_2d, get_orientation_from_heading
 from helpers.waypoints import get_closest_point_on_path
 
 LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
@@ -207,11 +207,7 @@ class Lanelet2GlobalPlanner:
                     heading = get_heading_between_two_points(lanelet.centerline[idx-1], lanelet.centerline[idx])
                 else:
                     heading = get_heading_between_two_points(lanelet.centerline[idx], lanelet.centerline[idx+1])
-                x, y, z, w = quaternion_from_euler(0, 0, heading)
-                waypoint.pose.pose.orientation.x = x
-                waypoint.pose.pose.orientation.y = y
-                waypoint.pose.pose.orientation.z = z
-                waypoint.pose.pose.orientation.w = w
+                waypoint.pose.pose.orientation = get_orientation_from_heading(heading)
 
                 waypoint.twist.twist.linear.x = speed
                 waypoint.dtlane.lw = self.wp_left_width

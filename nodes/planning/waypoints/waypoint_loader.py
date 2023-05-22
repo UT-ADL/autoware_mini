@@ -2,10 +2,11 @@
 
 import rospy
 import csv
-import tf
 import math
 
 from autoware_msgs.msg import Lane, Waypoint
+
+from helpers.geometry import get_orientation_from_heading
 
 class WaypointLoader:
     def __init__(self):
@@ -53,12 +54,8 @@ class WaypointLoader:
                 waypoint.pose.pose.position.z = float(row[2])
 
                 # convert yaw (contains heading in waypoints file) to quaternion
-                x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, math.radians(float(row[3])))
-                waypoint.pose.pose.orientation.x = x
-                waypoint.pose.pose.orientation.y = y
-                waypoint.pose.pose.orientation.z = z
-                waypoint.pose.pose.orientation.w = w
-
+                waypoint.pose.pose.orientation = get_orientation_from_heading(math.radians(float(row[3])))
+                # set waypoint velocity
                 waypoint.twist.twist.linear.x = float(row[4])
 
                 # set waypoint flags

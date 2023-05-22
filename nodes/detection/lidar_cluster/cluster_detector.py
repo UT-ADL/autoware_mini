@@ -7,12 +7,13 @@ import cv2
 
 import tf
 from ros_numpy import numpify, msgify
-from tf.transformations import quaternion_from_euler
 
 from sensor_msgs.msg import PointCloud2
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from std_msgs.msg import ColorRGBA, Header
-from geometry_msgs.msg import Point32
+from geometry_msgs.msg import Point32, Quaternion
+
+from helpers.geometry import get_orientation_from_heading
 
 BLUE80P = ColorRGBA(0.0, 0.0, 1.0, 0.8)
 
@@ -80,14 +81,13 @@ class ClusterDetector:
                 dim_x, dim_y, dim_z = maxs - mins
 
                 # always pointing forward
-                qx = qy = qz = 0.0
-                qw = 1.0
+                orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
             elif self.bounding_box_type == 'min_area':
                 # calculate minimum area bounding box
                 (center_x, center_y), (dim_x, dim_y), heading_angle = cv2.minAreaRect(points2d)
 
                 # calculate quaternion for heading angle
-                qx, qy, qz, qw = quaternion_from_euler(0.0, 0.0, math.radians(heading_angle))
+                orientation = get_orientation_from_heading(math.radians(heading_angle))
 
                 # calculate height and vertical position
                 max_z = np.max(points3d[:,2])
@@ -107,10 +107,7 @@ class ClusterDetector:
             object.pose.position.x = center_x
             object.pose.position.y = center_y
             object.pose.position.z = center_z
-            object.pose.orientation.x = qx
-            object.pose.orientation.y = qy
-            object.pose.orientation.z = qz
-            object.pose.orientation.w = qw
+            object.pose.orientation = orientation
             object.dimensions.x = dim_x
             object.dimensions.y = dim_y
             object.dimensions.z = dim_z

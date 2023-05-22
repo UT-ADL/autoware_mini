@@ -2,7 +2,7 @@
 
 import math
 import rospy
-import tf
+from tf.transformations import quaternion_from_euler
 from tf2_ros import TransformBroadcaster
 
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
@@ -11,6 +11,8 @@ from nav_msgs.msg import Odometry
 
 from localization.WGS84ToUTMTransformer import WGS84ToUTMTransformer
 from localization.WGS84ToLest97Transformer import WGS84ToLest97Transformer
+
+from helpers.geometry import norm2d
 
 
 class NovatelOem7Localizer:
@@ -60,7 +62,7 @@ class NovatelOem7Localizer:
         x, y = self.transformer.transform_lat_lon(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height)
         azimuth = self.transformer.correct_azimuth(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.azimuth)
 
-        velocity = calculate_velocity(inspva_msg.east_velocity, inspva_msg.north_velocity)
+        velocity = norm2d(inspva_msg.east_velocity, inspva_msg.north_velocity)
 
         # angles from GNSS (degrees) need to be converted to orientation (quaternion) in map frame
         orientation = convert_angles_to_orientation(inspva_msg.roll, inspva_msg.pitch, azimuth)
@@ -145,10 +147,6 @@ class NovatelOem7Localizer:
 
 # Helper functions
 
-def calculate_velocity(x_vel, y_vel):
-    return math.sqrt(y_vel * y_vel + x_vel * x_vel)
-
-
 def convert_angles_to_orientation(roll, pitch, yaw):
     
     # convert angles to radians
@@ -157,7 +155,7 @@ def convert_angles_to_orientation(roll, pitch, yaw):
     yaw = math.radians(yaw)
 
     roll, pitch, yaw = convertAzimuthToENU(roll, pitch, yaw)
-    x, y, z, w = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+    x, y, z, w = quaternion_from_euler(roll, pitch, yaw)
     return Quaternion(x, y, z, w)
 
 

@@ -5,7 +5,6 @@ import numpy as np
 import cv2
 
 from tf2_ros import TransformListener, Buffer
-from tf.transformations import quaternion_from_euler
 from ros_numpy import numpify
 
 from sensor_msgs.msg import PointCloud2
@@ -14,6 +13,7 @@ from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 
 import onnxruntime
 
+from helpers.geometry import get_orientation_from_heading
 from helpers.detection import create_hull
 from helpers.transform import transform_pose
 
@@ -344,11 +344,7 @@ class SFADetector:
             detected_object.pose.position.x = x
             detected_object.pose.position.y = y
             detected_object.pose.position.z = z
-            x, y, z, w = quaternion_from_euler(0, 0, yaw)
-            detected_object.pose.orientation.x = x
-            detected_object.pose.orientation.y = y
-            detected_object.pose.orientation.z = z
-            detected_object.pose.orientation.w = w
+            detected_object.pose.orientation = get_orientation_from_heading(yaw)
             detected_object.pose = transform_pose(detected_object.pose, transform)
             detected_object.pose_reliable = True
 
