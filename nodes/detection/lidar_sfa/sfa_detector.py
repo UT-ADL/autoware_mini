@@ -17,6 +17,7 @@ from helpers.geometry import get_orientation_from_heading
 from helpers.detection import create_hull
 from helpers.transform import transform_pose
 
+
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 
 ## Model params
@@ -31,7 +32,6 @@ class SFADetector:
         # Params
         self.onnx_path = rospy.get_param("~onnx_path")  # path of the trained model
 
-        self.only_front = rospy.get_param("~only_front")  # only front detections. If False, both front and back detections enabled
         self.MIN_FRONT_X = rospy.get_param("~min_front_x")  # minimum distance on lidar +ve x-axis to process points at (front_detections)
         self.MAX_FRONT_X = rospy.get_param("~max_front_x")  # maximum distance on lidar +ve x-axis to process points at (back detections)
         self.MIN_BACK_X = rospy.get_param("~min_back_x")  # maxmimum distance on lidar -ve x-axis to process points at
@@ -94,40 +94,26 @@ class SFADetector:
         detected_objects_array.header.stamp = pointcloud.header.stamp
         detected_objects_array.header.frame_id = self.output_frame
 
-        final_detections = self.detect(points, only_front=self.only_front)
+        final_detections = self.detect(points)
         detected_objects_array.objects = self.generate_autoware_objects(final_detections, pointcloud.header, transform)
         self.detected_object_array_pub.publish(detected_objects_array)
 
-    def detect(self, points, only_front):
+    def detect(self, points):
 
-        if only_front:
-            # process only detection from front FOV and return detections
-            front_points = self.get_filtered_points(points)
-            front_bev_map = self.make_bev_map(front_points)
-            front_final_dets= self.do_detection(front_bev_map)
-            return front_final_dets
-        else:
-            # process detections from both front and back FOVs and return detections
-            #front
-            front_points = self.get_filtered_points(points, is_front=True)
-            front_bev_map = self.make_bev_map(front_points)
-            front_final_dets = self.do_detection(front_bev_map)
-            # back
-            back_points = self.get_filtered_points(points, is_front=False)
-            back_bev_map = self.make_bev_map(back_points)
-            back_bev_map = np.flip(back_bev_map, (1, 2))
-            back_final_dets = self.do_detection(back_bev_map)
-            if back_final_dets.shape[0] != 0:
-                back_final_dets[:, 1] *= -1
-                back_final_dets[:, 2] *= -1
+        front_points = self.get_filtered_points(points, is_front=True)
+        front_bev_map = self.make_bev_map(front_points)
+        back_points = self.get_filtered_points(points, is_front=False)
+        back_bev_map = self.make_bev_map(back_points)
+        back_bev_map = np.flip(back_bev_map, (1, 2))
 
-            # if returning both front and back detections concatenate them along rows
-            if len(front_final_dets) == 0:
-                return back_final_dets
-            elif len(back_final_dets) == 0:
-                return front_final_dets
-            else:
-                return np.concatenate((front_final_dets, back_final_dets), axis=0)
+        input_bev_maps = np.stack((front_bev_map, back_bev_map)).astype(np.float32)
+        detections = self.do_detection(input_bev_maps)
+
+        front_detections = self.post_processing(detections[0])
+        back_detections = self.post_processing(detections[1])
+        back_detections[:, 1:3] *= -1
+
+        return np.concatenate((front_detections, back_detections), axis=0)
 
     def get_filtered_points(self, points, is_front=True):
 
@@ -169,18 +155,15 @@ class SFADetector:
 
         return hid_map
 
-    def do_detection(self, bevmap):
-
-        input_bev_maps = np.expand_dims(bevmap, axis=0).astype(np.float32)
-        hm_cen, cen_offset, directions, z_coors, dimensions = self.model.run([], {"input":input_bev_maps})
+    def do_detection(self, bevmaps):
 
         # unpacking onnx outputs
+        hm_cen, cen_offset, directions, z_coors, dimensions = self.model.run([], {"input":bevmaps})
         hm_cen = self.sigmoid(hm_cen)
         cen_offset = self.sigmoid(cen_offset)
 
         # detections size (batch_size, K, 10)
         detections = self.decode(hm_cen, cen_offset, directions, z_coors, dimensions, self.top_k)
-        detections = self.post_processing(detections, add_scores=False)
 
         return detections
 
@@ -226,9 +209,10 @@ class SFADetector:
         hmax = np.zeros(heat.shape)
 
         # Apply cv2 dilate function on each channel individually
-        hmax[0, 0, :, :] = cv2.dilate(heat[0, 0, :, :], kernel, borderType=cv2.BORDER_CONSTANT, borderValue=-np.inf)
-        hmax[0, 1, :, :] = cv2.dilate(heat[0, 1, :, :], kernel, borderType=cv2.BORDER_CONSTANT, borderValue=-np.inf)
-        hmax[0, 2, :, :] = cv2.dilate(heat[0, 2, :, :], kernel, borderType=cv2.BORDER_CONSTANT, borderValue=-np.inf)
+        for batch_num in range(heat.shape[0]):
+            hmax[batch_num, 0, :, :] = cv2.dilate(heat[batch_num, 0, :, :], kernel, borderType=cv2.BORDER_CONSTANT, borderValue=-np.inf)
+            hmax[batch_num, 1, :, :] = cv2.dilate(heat[batch_num, 1, :, :], kernel, borderType=cv2.BORDER_CONSTANT, borderValue=-np.inf)
+            hmax[batch_num, 2, :, :] = cv2.dilate(heat[batch_num, 2, :, :], kernel, borderType=cv2.BORDER_CONSTANT, borderValue=-np.inf)
         # Compute keep mask
         keep = (hmax == heat).astype(np.float32)
         # Apply keep mask to input tensor
@@ -291,7 +275,7 @@ class SFADetector:
         feat = self.gather_feat(feat, ind)
         return feat
 
-    def post_processing(self, detections, add_scores):
+    def post_processing(self, detections):
         """
         :param detections: [batch_size, K, 10]
         # (scores x 1, xs x 1, ys x 1, z_coor x 1, dim x 3, direction x 2, clses x 1)
@@ -299,10 +283,10 @@ class SFADetector:
         :return:
         """
         # score based filtering
-        keep_inds = (detections[0][:, 0] > self.score_thresh)
-        filtered_detections = detections[0][keep_inds, :]
+        keep_inds = (detections[:, 0] > self.score_thresh)
+        filtered_detections = detections[keep_inds, :]
         if filtered_detections.shape[0] > 0:
-            classes = filtered_detections[:, -1]
+            classes = filtered_detections[:, 9]
             scores = filtered_detections[:, 0]
             x = (filtered_detections[:, 2] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_X + self.MIN_FRONT_X
             y = (filtered_detections[:, 1] * DOWN_RATIO) /BEV_HEIGHT * self.BOUND_SIZE_Y + self.MIN_Y
@@ -312,15 +296,9 @@ class SFADetector:
             lengths = filtered_detections[:, 6]
             yaw = self.get_yaw(filtered_detections[:,7:9]).astype(np.float32)
 
-            if add_scores:
-                return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw, scores))
-            else:
-                return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw))
+            return np.column_stack((classes, x, y, z, heights, widths, lengths, yaw, scores))
         else:
-            if add_scores:
-                return np.empty((0, 9))
-            else:
-                return np.empty((0, 8))
+            return np.empty((0,9))
 
     def get_yaw(self, direction):
         return -np.arctan2(direction[:, 0:1], direction[:, 1:2])
@@ -336,7 +314,7 @@ class SFADetector:
         :return: AutowareDetectedObject
         """
         detected_objects_list = []
-        for i, (cls_id, x, y, z, height, width, length, yaw) in enumerate(detections):
+        for i, (cls_id, x, y, z, height, width, length, yaw, score) in enumerate(detections):
 
             detected_object = DetectedObject()
             detected_object.id = i
@@ -345,6 +323,7 @@ class SFADetector:
             detected_object.label = CLASS_NAMES[cls_id]
             detected_object.color = LIGHT_BLUE
             detected_object.valid = True
+            detected_object.score = score
             detected_object.pose.position.x = x
             detected_object.pose.position.y = y
             detected_object.pose.position.z = z
