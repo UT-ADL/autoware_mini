@@ -71,24 +71,10 @@ class CameraTrafficLightDetector:
         else:
             rospy.logfatal("%s - only utm currently supported for lanelet2 map loading", rospy.get_name())
             exit(1)
-        self.lanelet2_map = load(lanelet2_map_name, projector)
+        lanelet2_map = load(lanelet2_map_name, projector)
 
         # Etract all stop lines and signals from the map
-        stoplines=[]
-        self.traffic_lights = {}
-
-        for reg_el in self.lanelet2_map.regulatoryElementLayer:
-            if reg_el.attributes["subtype"] == "traffic_light":
-                # ref_line is the stop line and there is only 1 stopline per traffic light reg_el
-                linkId = reg_el.parameters["ref_line"][0].id
-                stoplines.extend([[linkId, point.x, point.y] for point in reg_el.parameters["ref_line"][0]])
-
-                for bulbs in reg_el.parameters["light_bulbs"]:
-                    plId = bulbs.id
-                    bulb_data = [[bulb.id, bulb.attributes["color"], bulb.x, bulb.y, bulb.z] for bulb in bulbs]
-                    self.traffic_lights.setdefault(linkId, {}).setdefault(plId, []).extend(bulb_data)
-
-        stoplines = np.array(stoplines)
+        stoplines, self.signals = self.get_stoplines_signals(lanelet2_map)
 
         # Disable the warnings from sklearn
         warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
@@ -144,11 +130,8 @@ class CameraTrafficLightDetector:
                 stoplines_on_path = self.get_stoplines_on_path(local_path_msg.waypoints)
 
             # extract image
-            try:
-                image = self.bridge.imgmsg_to_cv2(camera_image_msg,  desired_encoding='rgb8')
-            except CvBridgeError as e:
-                rospy.logerr("%s - CvBridgeError: %s", rospy.get_name(), str(e))
-                return
+            image = self.bridge.imgmsg_to_cv2(camera_image_msg,  desired_encoding='rgb8')
+
 
             if self.rectify_image:
                 self.camera_model.rectifyImage(image, image)
@@ -156,11 +139,7 @@ class CameraTrafficLightDetector:
             if len(stoplines_on_path) > 0:
 
                 # extract transform
-                try:
-                    transform = self.tf_buffer.lookup_transform(transform_to_frame, transform_from_frame, image_time_stamp)
-                except tf2_ros.TransformException as ex:
-                    rospy.logerr("%s - Could not load transform from %s to %s: %s", rospy.get_name(), transform_from_frame, transform_to_frame, str(ex))
-                    return
+                transform = self.tf_buffer.lookup_transform(transform_to_frame, transform_from_frame, image_time_stamp)
 
                 rois = self.calculate_roi_coordinates(stoplines_on_path, transform)
 
@@ -204,13 +183,33 @@ class CameraTrafficLightDetector:
         stopline_idx = stopline_idx[stopline_idx != 0]
 
         return stopline_idx
+    
+    def get_stoplines_signals(self, lanelet2_map):
+        
+        stoplines=[]
+        signals = {}
+
+        for reg_el in lanelet2_map.regulatoryElementLayer:
+            if reg_el.attributes["subtype"] == "traffic_light":
+                # ref_line is the stop line and there is only 1 stopline per traffic light reg_el
+                linkId = reg_el.parameters["ref_line"][0].id
+                stoplines.extend([[linkId, point.x, point.y] for point in reg_el.parameters["ref_line"][0]])
+
+                for bulbs in reg_el.parameters["light_bulbs"]:
+                    plId = bulbs.id
+                    bulb_data = [[bulb.id, bulb.attributes["color"], bulb.x, bulb.y, bulb.z] for bulb in bulbs]
+                    signals.setdefault(linkId, {}).setdefault(plId, []).extend(bulb_data)
+
+        stoplines = np.array(stoplines)
+
+        return stoplines, signals
 
     def calculate_roi_coordinates(self, stoplines_on_path, transform):
 
         rois = []
 
         for linkId in stoplines_on_path:
-            for plId, signals in self.traffic_lights[linkId].items():
+            for plId, signals in self.signals[linkId].items():
 
                 us = []
                 vs = []
