@@ -3,6 +3,7 @@
 import rospy
 import message_filters
 import numpy as np
+import traceback
 
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 
