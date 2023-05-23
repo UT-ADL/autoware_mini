@@ -9,7 +9,8 @@ import tf2_geometry_msgs
 import onnxruntime
 import message_filters
 
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import RadiusNeighborsClassifier
+import warnings
 from image_geometry import PinholeCameraModel
 
 from lanelet2.io import Origin, load
@@ -73,32 +74,26 @@ class CameraTrafficLightDetector:
         self.lanelet2_map = load(lanelet2_map_name, projector)
 
         # Etract all stop lines and signals from the map
-        stopline = []
-        signal = []
+        stoplines=[]
+        self.traffic_lights = {}
 
         for reg_el in self.lanelet2_map.regulatoryElementLayer:
             if reg_el.attributes["subtype"] == "traffic_light":
-                
                 # ref_line is the stop line and there is only 1 stopline per traffic light reg_el
                 linkId = reg_el.parameters["ref_line"][0].id
+                stoplines.extend([[linkId, point.x, point.y] for point in reg_el.parameters["ref_line"][0]])
 
-                # add stoplines to list
-                for point in reg_el.parameters["ref_line"][0]:
-                    stopline.append([linkId, point.x, point.y, point.z])
-
-                # add signals to list
                 for bulbs in reg_el.parameters["light_bulbs"]:
-                    # bulb group is used for the signal group and as plId (pole id) - one traffic light
                     plId = bulbs.id
-                    for bulb in bulbs:
-                        #              linkId, plId, signalId, type,                    map_x,  map_y,  map_z
-                        signal.append([linkId, plId, bulb.id, bulb.attributes["color"], bulb.x, bulb.y, bulb.z])
-        
-        self.stopline_array = np.array(stopline)
-        self.signal_array = np.array(signal)
+                    bulb_data = [[bulb.id, bulb.attributes["color"], bulb.x, bulb.y, bulb.z] for bulb in bulbs]
+                    self.traffic_lights.setdefault(linkId, {}).setdefault(plId, []).extend(bulb_data)
 
-        # Spatial index for nearest neighbor search - xy coordinates only
-        self.stopline_tree = NearestNeighbors(n_neighbors=1, algorithm="auto").fit(self.stopline_array[:,1:3])
+        stoplines = np.array(stoplines)
+
+        # Disable the warnings from sklearn
+        warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
+        # Create the classifier
+        self.classifier = RadiusNeighborsClassifier(radius=self.waypoint_interval / 2, outlier_label=0).fit(stoplines[:,1:], stoplines[:,0])
 
         self.bridge = CvBridge()
         self.model = onnxruntime.InferenceSession(onnx_path, providers=['CUDAExecutionProvider'])
@@ -140,13 +135,13 @@ class CameraTrafficLightDetector:
             tfl_status = TrafficLightResultArray()
             tfl_status.header.stamp = image_time_stamp
 
-            traffic_lights = {}
+            stoplines_on_path = []
             rois = []
             classes = []
             scores = []
 
             if len(local_path_msg.waypoints) > 0:
-                traffic_lights = self.get_traffic_lights_on_path(local_path_msg.waypoints)
+                stoplines_on_path = self.get_stoplines_on_path(local_path_msg.waypoints)
 
             # extract image
             try:
@@ -158,7 +153,7 @@ class CameraTrafficLightDetector:
             if self.rectify_image:
                 self.camera_model.rectifyImage(image, image)
 
-            if len(traffic_lights) > 0:
+            if len(stoplines_on_path) > 0:
 
                 # extract transform
                 try:
@@ -167,7 +162,7 @@ class CameraTrafficLightDetector:
                     rospy.logerr("%s - Could not load transform from %s to %s: %s", rospy.get_name(), transform_from_frame, transform_to_frame, str(ex))
                     return
 
-                rois = self.calculate_roi_coordinates(traffic_lights, transform)
+                rois = self.calculate_roi_coordinates(stoplines_on_path, transform)
 
                 if len(rois) > 0:
                     roi_images = self.create_roi_images(image, rois)
@@ -200,65 +195,57 @@ class CameraTrafficLightDetector:
             rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
 
-    def get_traffic_lights_on_path(self, waypoints):
-        
-        traffic_lights = {}
-        
+    def get_stoplines_on_path(self, waypoints):
+
         # Extract waypoints and create array - xy coordinates only
         waypoints_xy = np.array([(wp.pose.pose.position.x, wp.pose.pose.position.y) for wp in waypoints])
-        _, stopline_idx = self.stopline_tree.radius_neighbors(waypoints_xy, self.waypoint_interval / 2, return_distance=True)
-        # flatten the stopline_idx and remove duplicates
-        stopline_idx = np.unique(np.hstack(stopline_idx))
-        stoplines_on_path = [int(self.stopline_array[idx][0]) for idx in stopline_idx]
-        signals_on_path = list(filter(lambda signal: int(signal[0]) in stoplines_on_path, self.signal_array))
+        stopline_idx = np.unique(self.classifier.predict(waypoints_xy))
+        # remove zeros
+        stopline_idx = stopline_idx[stopline_idx != 0]
 
-        # reorg signals (individual bulbs) into traffic lights dict
-        for linkId, plId, signalId, type, map_x,  map_y,  map_z in signals_on_path:
-            if int(plId) in traffic_lights:
-                traffic_lights[int(plId)].append([linkId, plId, signalId, type, map_x,  map_y,  map_z])
-            else:
-                traffic_lights[int(plId)] = [[linkId, plId, signalId, type, map_x,  map_y,  map_z]]
+        return stopline_idx
 
-        return traffic_lights
-
-    def calculate_roi_coordinates(self, traffic_lights, transform):
+    def calculate_roi_coordinates(self, stoplines_on_path, transform):
 
         rois = []
 
-        for plId, signals in traffic_lights.items():
-            us = []
-            vs = []
-            for linkId, _, _, _, x, y, z in signals:
-                point_map = PointStamped()
-                point_map.point.x = float(x)
-                point_map.point.y = float(y)
-                point_map.point.z = float(z)
+        for linkId in stoplines_on_path:
+            for plId, signals in self.traffic_lights[linkId].items():
 
-                # transform point to camera frame and then to image frame
-                point_camera = tf2_geometry_msgs.do_transform_point(point_map, transform).point
-                u, v = self.camera_model.project3dToPixel((point_camera.x, point_camera.y, point_camera.z))
+                us = []
+                vs = []
+                for _, _, x, y, z in signals:
+                    point_map = PointStamped()
+                    point_map.point.x = float(x)
+                    point_map.point.y = float(y)
+                    point_map.point.z = float(z)
 
-                # check with image limits using the camera model
-                if u < 0 or u >= self.camera_model.width or v < 0 or v >= self.camera_model.height:
-                    break
+                    # transform point to camera frame and then to image frame
+                    point_camera = tf2_geometry_msgs.do_transform_point(point_map, transform).point
+                    u, v = self.camera_model.project3dToPixel((point_camera.x, point_camera.y, point_camera.z))
 
-                # calculate radius of the bulb in pixels
-                d = np.linalg.norm([point_camera.x, point_camera.y, point_camera.z])
-                radius = self.camera_model.fx() * self.traffic_light_bulb_radius / d
+                    # check with image limits using the camera model
+                    if u < 0 or u >= self.camera_model.width or v < 0 or v >= self.camera_model.height:
+                        break
 
-                # calc extent for every signal then generate roi using min/max and rounding
-                us += [u + radius * self.radius_to_roi_multiplier, u - radius * self.radius_to_roi_multiplier]
-                vs += [v + radius * self.radius_to_roi_multiplier, v - radius * self.radius_to_roi_multiplier]
+                    # calculate radius of the bulb in pixels
+                    d = np.linalg.norm([point_camera.x, point_camera.y, point_camera.z])
+                    radius = self.camera_model.fx() * self.traffic_light_bulb_radius / d
 
-            # not all signals were in image, take next traffic light
-            if len(us) < 6:
-                continue
-            # round and clip against image limits
-            us = np.clip(np.round(np.array(us)), 0, self.camera_model.width)
-            vs = np.clip(np.round(np.array(vs)), 0, self.camera_model.height)
-            # extract one roi per traffic light
-            rois.append([int(linkId), plId, int(np.min(us)), int(np.max(us)), int(np.min(vs)), int(np.max(vs))])
-        
+                    # calc extent for every signal then generate roi using min/max and rounding
+                    extent = radius * self.radius_to_roi_multiplier
+                    us.extend([u + extent, u - extent])
+                    vs.extend([v + extent, v - extent])
+
+                # not all signals were in image, take next traffic light
+                if len(us) < 6:
+                    continue
+                # round and clip against image limits
+                us = np.clip(np.round(np.array(us)), 0, self.camera_model.width)
+                vs = np.clip(np.round(np.array(vs)), 0, self.camera_model.height)
+                # extract one roi per traffic light
+                rois.append([int(linkId), plId, int(np.min(us)), int(np.max(us)), int(np.min(vs)), int(np.max(vs))])
+
         return rois
 
     def create_roi_images(self, image, rois):
