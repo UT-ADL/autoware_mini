@@ -56,8 +56,8 @@ class CameraTrafficLightDetector:
         self.rectify_image = rospy.get_param('~rectify_image')
         self.traffic_light_bulb_radius = rospy.get_param("~traffic_light_bulb_radius")
         self.radius_to_roi_multiplier = rospy.get_param("~radius_to_roi_multiplier")
-        self.waypoint_interval = rospy.get_param("/planning/path_smoothing/waypoint_interval")
 
+        self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
         use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
