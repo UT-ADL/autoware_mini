@@ -3,10 +3,9 @@
 import rospy
 import numpy as np
 import cv2
-import traceback
+import threading
 import tf2_ros
 import onnxruntime
-import message_filters
 
 from sklearn.neighbors import RadiusNeighborsClassifier
 import warnings
@@ -57,6 +56,7 @@ class CameraTrafficLightDetector:
         self.rectify_image = rospy.get_param('~rectify_image')
         self.traffic_light_bulb_radius = rospy.get_param("~traffic_light_bulb_radius")
         self.radius_to_roi_multiplier = rospy.get_param("~radius_to_roi_multiplier")
+        self.min_roi_width = rospy.get_param("~min_roi_width")
         self.waypoint_interval = rospy.get_param("/planning/path_smoothing/waypoint_interval")
 
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
@@ -64,7 +64,6 @@ class CameraTrafficLightDetector:
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
-
 
         # Load the map using Lanelet2
         if coordinate_transformer == "utm":
@@ -74,7 +73,7 @@ class CameraTrafficLightDetector:
             exit(1)
         lanelet2_map = load(lanelet2_map_name, projector)
 
-        # Etract all stop lines and signals from the map
+        # Extract all stop lines and signals from the map
         stoplines, self.signals = self.get_stoplines_signals(lanelet2_map)
 
         # Disable the warnings from sklearn
@@ -98,107 +97,120 @@ class CameraTrafficLightDetector:
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
         # Subscribers
-        local_path_sub = message_filters.Subscriber('/planning/local_path', Lane)
-        camera_image_sub = message_filters.Subscriber('image_raw', Image)
-        self.ts = message_filters.ApproximateTimeSynchronizer([local_path_sub, camera_image_sub], queue_size=5, slop=0.1)
-        self.ts.registerCallback(self.local_path_camera_image_callback)
+        self.stoplines_on_path = None
+        self.lock = threading.Lock()
+        rospy.Subscriber('/planning/local_path', Lane, self.local_path_callback, queue_size=1)
+        rospy.Subscriber('image_raw', Image, self.camera_image_callback, queue_size=1)
 
     def camera_info_callback(self, camera_info_msg):
         if self.camera_model is None:
-            self.camera_model = PinholeCameraModel()
-            self.camera_model.fromCameraInfo(camera_info_msg)
+            camera_model = PinholeCameraModel()
+            camera_model.fromCameraInfo(camera_info_msg)
+            # assignment is atomic in python
+            self.camera_model = camera_model
 
-    def local_path_camera_image_callback(self, local_path_msg, camera_image_msg):
+    def local_path_callback(self, local_path_msg):
+        if len(local_path_msg.waypoints) > 0:
+            # extract waypoints and create array - xy coordinates only
+            waypoints_xy = np.array([(wp.pose.pose.position.x, wp.pose.pose.position.y) for wp in local_path_msg.waypoints])
+            # predict which stoplines are on the path
+            stopline_idx = np.unique(self.classifier.predict(waypoints_xy))
+            # remove zeros
+            stopline_idx = stopline_idx[stopline_idx != 0]
+        else:
+            stopline_idx = []
 
-        try:
-            if self.camera_model is None:
-                rospy.logwarn_throttle(10, "%s - No camera model received, skipping image", rospy.get_name())
+        with self.lock:
+            self.stoplines_on_path = stopline_idx
+            self.transform_from_frame = local_path_msg.header.frame_id
+
+    def camera_image_callback(self, camera_image_msg):
+
+        if self.camera_model is None:
+            rospy.logwarn_throttle(10, "%s - No camera model received, skipping image", rospy.get_name())
+            return
+
+        with self.lock:
+            if self.stoplines_on_path is None:
+                rospy.logwarn_throttle(10, "%s - No path received, skipping image", rospy.get_name())
+                return
+            stoplines_on_path = self.stoplines_on_path
+            transform_from_frame = self.transform_from_frame
+
+        image_time_stamp = camera_image_msg.header.stamp
+        transform_to_frame = camera_image_msg.header.frame_id
+
+        tfl_status = TrafficLightResultArray()
+        tfl_status.header.stamp = image_time_stamp
+
+        rois = []
+        classes = []
+        scores = []
+
+        # extract image
+        image = self.bridge.imgmsg_to_cv2(camera_image_msg,  desired_encoding='rgb8')
+
+        # rectify image
+        if self.rectify_image:
+            self.camera_model.rectifyImage(image, image)
+
+        if len(stoplines_on_path) > 0:
+
+            # extract transform
+            try:
+                transform = self.tf_buffer.lookup_transform(transform_to_frame, transform_from_frame, image_time_stamp)
+            except tf2_ros.TransformException as e:
+                rospy.logwarn("%s - %s", rospy.get_name(), e)
                 return
 
-            image_time_stamp = camera_image_msg.header.stamp
-            transform_to_frame = camera_image_msg.header.frame_id
-            transform_from_frame = local_path_msg.header.frame_id
+            rois = self.calculate_roi_coordinates(stoplines_on_path, transform)
 
-            tfl_status = TrafficLightResultArray()
-            tfl_status.header.stamp = image_time_stamp
+            if len(rois) > 0:
+                roi_images = self.create_roi_images(image, rois)
 
-            stoplines_on_path = []
-            rois = []
-            classes = []
-            scores = []
+                # run model and do prediction
+                predictions = self.model.run(None, {'conv2d_1_input': roi_images})[0]
 
-            if len(local_path_msg.waypoints) > 0:
-                stoplines_on_path = self.get_stoplines_on_path(local_path_msg.waypoints)
+                assert len(predictions) == len(rois), "Number of predictions (%d) does not match number of rois (%d)" % (len(predictions), len(rois))
 
-            # extract image
-            image = self.bridge.imgmsg_to_cv2(camera_image_msg,  desired_encoding='rgb8')
-
-
-            if self.rectify_image:
-                self.camera_model.rectifyImage(image, image)
-
-            if len(stoplines_on_path) > 0:
-
-                # extract transform
-                transform = self.tf_buffer.lookup_transform(transform_to_frame, transform_from_frame, image_time_stamp)
-
-                rois = self.calculate_roi_coordinates(stoplines_on_path, transform)
-
-                if len(rois) > 0:
-                    roi_images = self.create_roi_images(image, rois)
-
-                    # run model and do prediction
-                    predictions = self.model.run(None, {'conv2d_1_input': roi_images})[0]
-
-                    assert len(predictions) == len(rois), "Number of predictions (%d) does not match number of rois (%d)" % (len(predictions), len(rois))
-
-                    classes = np.argmax(predictions, axis=1)
-                    scores = np.max(predictions, axis=1)
-                    
-                    # extract results in sync with rois
-                    for cl, (linkId, plId, _, _, _, _) in zip(classes, rois):
-
-                        tfl_result = TrafficLightResult()
-                        tfl_result.light_id = plId
-                        tfl_result.lane_id = linkId
-                        tfl_result.recognition_result = CLASSIFIER_RESULT_TO_TLRESULT[cl]
-                        tfl_result.recognition_result_str = CLASSIFIER_RESULT_TO_STRING[cl]
-
-                        tfl_status.results.append(tfl_result)
-
-            self.tfl_status_pub.publish(tfl_status)
-
-            if self.output_roi_image:
-                self.publish_roi_images(image, rois, classes, scores, image_time_stamp)
+                classes = np.argmax(predictions, axis=1)
+                scores = np.max(predictions, axis=1)
                 
-        except Exception as e:
-            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
+                # extract results in sync with rois
+                for cl, (linkId, plId, _, _, _, _) in zip(classes, rois):
 
+                    tfl_result = TrafficLightResult()
+                    tfl_result.light_id = plId
+                    tfl_result.lane_id = linkId
+                    tfl_result.recognition_result = CLASSIFIER_RESULT_TO_TLRESULT[cl]
+                    tfl_result.recognition_result_str = CLASSIFIER_RESULT_TO_STRING[cl]
 
-    def get_stoplines_on_path(self, waypoints):
+                    tfl_status.results.append(tfl_result)
 
-        # Extract waypoints and create array - xy coordinates only
-        waypoints_xy = np.array([(wp.pose.pose.position.x, wp.pose.pose.position.y) for wp in waypoints])
-        stopline_idx = np.unique(self.classifier.predict(waypoints_xy))
-        # remove zeros
-        stopline_idx = stopline_idx[stopline_idx != 0]
+        self.tfl_status_pub.publish(tfl_status)
 
-        return stopline_idx
+        if self.output_roi_image:
+            self.publish_roi_images(image, rois, classes, scores, image_time_stamp)
     
     def get_stoplines_signals(self, lanelet2_map):
         
-        stoplines=[]
+        stoplines = []
         signals = {}
 
         for reg_el in lanelet2_map.regulatoryElementLayer:
             if reg_el.attributes["subtype"] == "traffic_light":
                 # ref_line is the stop line and there is only 1 stopline per traffic light reg_el
                 linkId = reg_el.parameters["ref_line"][0].id
+                # add all stopline points to the list
                 stoplines.extend([[linkId, point.x, point.y] for point in reg_el.parameters["ref_line"][0]])
 
                 for bulbs in reg_el.parameters["light_bulbs"]:
+                    # plId represents the traffic light (pole), one stop line can be associated with multiple traffic lights
                     plId = bulbs.id
+                    # one traffic light has red, yellow and green bulbs
                     bulb_data = [[bulb.id, bulb.attributes["color"], bulb.x, bulb.y, bulb.z] for bulb in bulbs]
+                    # signals is a dictionary indexed by stopline id and contains dictionary of traffic lights indexed by pole id
+                    # which in turn contains a list of bulbs
                     signals.setdefault(linkId, {}).setdefault(plId, []).extend(bulb_data)
 
         stoplines = np.array(stoplines)
@@ -210,11 +222,11 @@ class CameraTrafficLightDetector:
         rois = []
 
         for linkId in stoplines_on_path:
-            for plId, signals in self.signals[linkId].items():
+            for plId, bulbs in self.signals[linkId].items():
 
                 us = []
                 vs = []
-                for _, _, x, y, z in signals:
+                for _, _, x, y, z in bulbs:
                     point_map = Point()
                     point_map.x = float(x)
                     point_map.y = float(y)
@@ -241,10 +253,17 @@ class CameraTrafficLightDetector:
                 if len(us) < 6:
                     continue
                 # round and clip against image limits
-                us = np.clip(np.round(np.array(us)), 0, self.camera_model.width)
-                vs = np.clip(np.round(np.array(vs)), 0, self.camera_model.height)
+                us = np.clip(np.round(np.array(us)), 0, self.camera_model.width - 1)
+                vs = np.clip(np.round(np.array(vs)), 0, self.camera_model.height - 1)
                 # extract one roi per traffic light
-                rois.append([int(linkId), plId, int(np.min(us)), int(np.max(us)), int(np.min(vs)), int(np.max(vs))])
+                min_u = int(np.min(us))
+                max_u = int(np.max(us))
+                min_v = int(np.min(vs))
+                max_v = int(np.max(vs))
+                # check if roi is too small
+                if max_u - min_u < self.min_roi_width:
+                    continue
+                rois.append([int(linkId), plId, min_u, max_u, min_v, max_v])
 
         return rois
 
@@ -268,16 +287,18 @@ class CameraTrafficLightDetector:
             for cl, score, (_, _, min_u, max_u, min_v, max_v) in zip(classes, scores, rois):
 
                 text_string = "%s %.2f" % (CLASSIFIER_RESULT_TO_STRING[cl], score)
-                text_orig_u = int(min_u + (max_u - min_u) / 2 - (cv2.getTextSize(text_string, cv2.FONT_HERSHEY_SIMPLEX, 1, 2))[0][0] / 2)
+                text_width, text_height = cv2.getTextSize(text_string, cv2.FONT_HERSHEY_SIMPLEX, 1.5, 2)[0]
+                text_orig_u = int(min_u + (max_u - min_u) / 2 - text_width / 2)
+                text_orig_v = max_v + text_height + 3
 
                 start_point = (min_u, min_v)
                 end_point = (max_u, max_v)
                 cv2.rectangle(image, start_point, end_point, color=CLASSIFIER_RESULT_TO_COLOR[cl] , thickness=3)
                 cv2.putText(image,
                     text_string,
-                    org=(text_orig_u, max_v + 24),
+                    org=(text_orig_u, text_orig_v),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=1,
+                    fontScale=1.5,
                     color=CLASSIFIER_RESULT_TO_COLOR[cl], 
                     thickness=2)
 
