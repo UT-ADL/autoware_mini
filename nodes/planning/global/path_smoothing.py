@@ -11,7 +11,7 @@ class PathSmoothing:
     def __init__(self):
 
         # Parameters
-        self.waypoint_interval = rospy.get_param("~waypoint_interval")
+        self.waypoint_interval = rospy.get_param("waypoint_interval")
         self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves")
         self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration")
         self.adjust_endpoint_speed_to_zero = rospy.get_param("~adjust_endpoint_speed_to_zero")

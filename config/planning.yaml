@@ -1,7 +1,8 @@
 current_pose_to_car_front: 4.0  # m
 braking_safety_distance: 4.0
 braking_reaction_time: 1.6
-car_safety_radius: 1.2
+car_safety_width: 1.0           # m
+waypoint_interval: 1.0          # m
 speed_deceleration_limit: 1.0
 
 lanelet2_global_planner:
@@ -22,7 +23,6 @@ waypoint_saver:
   interval: 1.0
 
 path_smoothing:
-  waypoint_interval: 1.0                  # m
   adjust_speeds_in_curves: True
   adjust_speeds_using_deceleration: True
   speed_averaging_window: 21              # window size (will be applied only if > 1)
