@@ -13,7 +13,11 @@ class LocalPathVisualizer:
 
         # Parameters
         self.car_safety_width = rospy.get_param("car_safety_width")
+<<<<<<< HEAD
         self.close_obstacle_limit = rospy.get_param("close_obstacle_limit")
+=======
+        self.waypoint_interval= rospy.get_param("waypoint_interval")
+>>>>>>> additional car_safety_width realted changes
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.braking_safety_distance = rospy.get_param("braking_safety_distance")
 
