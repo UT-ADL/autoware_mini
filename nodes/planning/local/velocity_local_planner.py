@@ -45,6 +45,11 @@ class VelocityLocalPlanner:
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
+        # TODO: temporary - need to remove?
+        self.waypoint_interval = rospy.get_param("waypoint_interval")
+        # TODO - will the calculation give exact result - circles intersect at that distance?
+        self.car_safety_radius = math.sqrt(self.car_safety_width**2 + (self.waypoint_interval / 2.0)**2)
+
         # Load the map using Lanelet2
         if coordinate_transformer == "utm":
             projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
