@@ -217,9 +217,11 @@ class VelocityLocalPlanner:
             # create spatial index over obstacles for quick search
             obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,:2])
             # find closest obstacle points to local path
-            obstacle_dists, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:2], self.car_safety_radius, return_distance=True)
+            _, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:2], self.car_safety_radius, return_distance=True)
             # calculate obstacle distances from the start of the local path
-            obstacle_dists = [local_path_dists[i] + d for i, d in enumerate(obstacle_dists)]
+            
+            # TODO will be done later
+            # obstacle_dists = [local_path_dists[i] + d for i, d in enumerate(obstacle_dists)]
 
             # If any calculated target_vel drops close to 0 then use this boolean to set all following wp speeds to 0
             zero_speeds_onwards = False
@@ -239,14 +241,21 @@ class VelocityLocalPlanner:
                 # list of points on path from the current waypoint
                 obstacles_ahead_idx = np.concatenate(obstacle_idx[i:])
                 if len(obstacles_ahead_idx) > 0:
+
+                    obs_within_width = self.filer_obstacles_using_car_safety_width(obstacles_ahead_idx, obstacle_array, global_path_tree, global_path_waypoints, wp_backward, local_path_dists)
+
                     # distances of obstacles ahead
-                    obstacles_ahead_dists = np.concatenate(obstacle_dists[i:])
+                    # REPLACED
+                    # obstacles_ahead_dists = np.concatenate(obstacle_dists[i:])
+                    obstacles_ahead_dists = obs_within_width[:,1]
 
                     # subtract current waypoint distance from ahead distances
                     obstacles_ahead_dists -= local_path_dists[i]
 
+                    # REPLACED
                     # get speeds of those obstacles
-                    obstacles_ahead_speeds = obstacle_array[obstacles_ahead_idx, 3]
+                    # obstacles_ahead_speeds = obstacle_array[obstacles_ahead_idx, 3]
+                    obstacles_ahead_speeds = obs_within_width[:,3]
 
                     # calculate stopping distances - following distance increased when obstacle has higher speed
                     stopping_distances = obstacles_ahead_dists - self.current_pose_to_car_front - self.braking_safety_distance \
@@ -277,6 +286,32 @@ class VelocityLocalPlanner:
                         zero_speeds_onwards = True
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked)
+
+    def filer_obstacles_using_car_safety_width(self, obstacles_ahead_idx, obstacle_array, global_path_tree, global_path_waypoints, global_wp_backward, local_path_dists):
+
+        obstacles_unique = np.unique(obstacles_ahead_idx)
+        obstacle_array_unique = obstacle_array[obstacles_unique]
+
+        objects_within_width = []
+        # iterate over obstacle_array_unique and calc 2 closest waypoint indexes
+        for x, y, z, v in obstacle_array_unique:
+            # TODO - there will be wrong distance at the goal point if the OBJ is in last circle!?
+            wp_backward, wp_forward = get_two_nearest_waypoint_idx(global_path_tree, x, y)
+            closest_point = get_closest_point_on_line(Point(x=x, y=y, z=z), global_path_waypoints[wp_backward].pose.pose.position, global_path_waypoints[wp_forward].pose.pose.position)
+            d_from_path = get_distance_between_two_points_2d(Point(x=x, y=y, z=z), closest_point)
+            
+            # ignore obstacles that are too far from the path
+            if d_from_path > self.car_safety_radius:
+                continue
+
+            d_from_prev_wp = get_distance_between_two_points_2d(global_path_waypoints[wp_backward].pose.pose.position, closest_point)
+            wp_ind_local = wp_backward - global_wp_backward
+            d_from_localpath_start = local_path_dists[wp_ind_local] + d_from_prev_wp
+            objects_within_width.append([wp_ind_local, d_from_localpath_start, d_from_path, v])
+
+
+        return np.array(objects_within_width)
+
 
 
     def publish_local_path_wp(self, local_path_waypoints, stamp, output_frame, closest_object_distance=0, closest_object_velocity=0, blocked=False):
