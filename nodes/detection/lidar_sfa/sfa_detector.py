@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 
 import rospy
-import math
 import numpy as np
 import cv2
 
-import tf
-from tf.transformations import quaternion_multiply, quaternion_from_euler, euler_from_quaternion
+from tf2_ros import TransformListener, Buffer, TransformException
 from ros_numpy import numpify
 
-from geometry_msgs.msg import Quaternion, Point, PolygonStamped, Pose
 from sensor_msgs.msg import PointCloud2
 from std_msgs.msg import ColorRGBA
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 
 import onnxruntime
+
+from helpers.geometry import get_orientation_from_heading
+from helpers.detection import create_hull
+from helpers.transform import transform_pose
+
 
 LIGHT_BLUE = ColorRGBA(0.5, 0.5, 1.0, 0.8)
 
@@ -28,36 +30,37 @@ CLASS_NAMES = {0: "pedestrian", 1: "car", 2: "cyclist"}
 class SFADetector:
     def __init__(self):
         # Params
-        self.onnx_path = rospy.get_param("~onnx_path")  # path of the trained model
+        self.onnx_path = rospy.get_param("~onnx_path", "../../../config/sfa/kilynuaron_dynamic_batch.onnx")  # path of the trained model
 
-        self.MIN_FRONT_X = rospy.get_param("~min_front_x")  # minimum distance on lidar +ve x-axis to process points at (front_detections)
-        self.MAX_FRONT_X = rospy.get_param("~max_front_x")  # maximum distance on lidar +ve x-axis to process points at (back detections)
-        self.MIN_BACK_X = rospy.get_param("~min_back_x")  # maxmimum distance on lidar -ve x-axis to process points at
-        self.MAX_BACK_X = rospy.get_param("~max_back_x")  # minimum distance on lidar -ve x-axis to process points at
-        self.MIN_Y = rospy.get_param("~min_y")  # maxmimum distance on lidar -ve y-axis to process points at
-        self.MAX_Y = rospy.get_param("~max_y")  # maxmimum distance on lidar +ve y-axis to process points at
-        self.MIN_Z = rospy.get_param("~min_z")  # maxmimum distance on lidar -ve z-axis to process points at
-        self.MAX_Z = rospy.get_param("~max_z")  # maxmimum distance on lidar +ve z-axis to process points at
+        self.MIN_FRONT_X = rospy.get_param("~min_front_x" ,0)  # minimum distance on lidar +ve x-axis to process points at (front_detections)
+        self.MAX_FRONT_X = rospy.get_param("~max_front_x", 50)  # maximum distance on lidar +ve x-axis to process points at (back detections)
+        self.MIN_BACK_X = rospy.get_param("~min_back_x", -50)  # maxmimum distance on lidar -ve x-axis to process points at
+        self.MAX_BACK_X = rospy.get_param("~max_back_x", 0)  # minimum distance on lidar -ve x-axis to process points at
+        self.MIN_Y = rospy.get_param("~min_y", -25)  # maxmimum distance on lidar -ve y-axis to process points at
+        self.MAX_Y = rospy.get_param("~max_y", 25)  # maxmimum distance on lidar +ve y-axis to process points at
+        self.MIN_Z = rospy.get_param("~min_z", -2.73)  # maxmimum distance on lidar -ve z-axis to process points at
+        self.MAX_Z = rospy.get_param("~max_z", 1.27)  # maxmimum distance on lidar +ve z-axis to process points at
         self.DISCRETIZATION = (self.MAX_FRONT_X - self.MIN_FRONT_X) / BEV_HEIGHT  # 3D world discretization to 2D image: distance encoded by 1 pixel
         self.BOUND_SIZE_X = self.MAX_FRONT_X - self.MIN_FRONT_X
         self.BOUND_SIZE_Y = self.MAX_Y - self.MIN_Y
         self.MAX_HEIGHT = np.abs(self.MAX_Z - self.MIN_Z)
 
-        self.score_thresh = rospy.get_param("~score_thresh")  # score filter
-        self.top_k = rospy.get_param("~top_k")  # number of top scoring detections to process
-        self.output_frame = rospy.get_param("~output_frame")  # transform detected objects from lidar frame to this frame
-        self.transform_timeout = rospy.get_param('~transform_timeout') # transform timeout when waiting for transform to output frame
+        self.score_thresh = rospy.get_param("~score_thresh", 0.2)  # score filter
+        self.top_k = rospy.get_param("~top_k", 50)  # number of top scoring detections to process
+        self.output_frame = rospy.get_param("~output_frame", 'map')  # transform detected objects from lidar frame to this frame
+        self.transform_timeout = rospy.get_param('~transform_timeout', 0.05) # transform timeout when waiting for transform to output frame
 
         self.model = self.load_onnx(self.onnx_path) # get onnx model
 
         rospy.loginfo("sfa_detector - loaded ONNX model file %s", self.onnx_path)
 
         # transform listener
-        self.tf_listener = tf.TransformListener()
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer)
 
         # Subscribers and Publishers
-        self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
-        rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1, buff_size=2*1024*1024)
+        self.detected_object_array_pub = rospy.Publisher('/detected_objects', DetectedObjectArray, queue_size=1)
+        rospy.Subscriber('/lidar_center/points_raw', PointCloud2, self.pointcloud_callback, queue_size=1, buff_size=2*1024*1024)
 
         rospy.loginfo("sfa_detector - initialized")
 
@@ -70,11 +73,13 @@ class SFADetector:
         pointcloud: raw lidar data points
         return: None - publish autoware DetectedObjects
         """
-        self.tf_listener.waitForTransform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp, rospy.Duration(self.transform_timeout))
-        # get the transform (translation and rotation) from lidar frame to output frame at the time when the poinctloud msg was published
-        trans, tf_rot = self.tf_listener.lookupTransform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp)
-        # convert the looked up transform to a 4x4 homogenous transformation matrix.
-        tf_matrix = self.tf_listener.fromTranslationRotation(trans, tf_rot)
+        try:
+            # get the transform from lidar frame to output frame at the time when the poinctloud msg was published
+            transform = self.tf_buffer.lookup_transform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp, rospy.Duration(self.transform_timeout))
+        except TransformException as e:
+            rospy.logwarn("%s - %s", rospy.get_name(), e)
+            return
+
         # Unpack pointcloud2 msg ype to numpy array
         pcd_array = numpify(pointcloud)
 
@@ -89,8 +94,8 @@ class SFADetector:
         detected_objects_array.header.stamp = pointcloud.header.stamp
         detected_objects_array.header.frame_id = self.output_frame
 
-        detections = self.detect(points)
-        detected_objects_array.objects = self.generate_autoware_objects(detections, pointcloud.header, tf_matrix, tf_rot)
+        final_detections = self.detect(points)
+        detected_objects_array.objects = self.generate_autoware_objects(final_detections, pointcloud.header, transform)
         self.detected_object_array_pub.publish(detected_objects_array)
 
     def detect(self, points):
@@ -100,11 +105,13 @@ class SFADetector:
         back_points = self.get_filtered_points(points, is_front=False)
         back_bev_map = self.make_bev_map(back_points)
         back_bev_map = np.flip(back_bev_map, (1, 2))
-        detections = self.do_detection(front_bev_map, back_bev_map)
+
+        input_bev_maps = np.stack((front_bev_map, back_bev_map)).astype(np.float32)
+        detections = self.do_detection(input_bev_maps)
 
         front_detections = self.post_processing(detections[0])
         back_detections = self.post_processing(detections[1])
-        back_detections[:, [1,2]] *= -1
+        back_detections[:, 1:3] *= -1
 
         return np.concatenate((front_detections, back_detections), axis=0)
 
@@ -148,12 +155,10 @@ class SFADetector:
 
         return hid_map
 
-    def do_detection(self, front_bevmap, back_bev_map):
-
-        input_bev_maps = np.stack((front_bevmap, back_bev_map)).astype(np.float32)
-        hm_cen, cen_offset, directions, z_coors, dimensions = self.model.run([], {"input":input_bev_maps})
+    def do_detection(self, bevmaps):
 
         # unpacking onnx outputs
+        hm_cen, cen_offset, directions, z_coors, dimensions = self.model.run([], {"input":bevmaps})
         hm_cen = self.sigmoid(hm_cen)
         cen_offset = self.sigmoid(cen_offset)
 
@@ -298,7 +303,7 @@ class SFADetector:
     def get_yaw(self, direction):
         return -np.arctan2(direction[:, 0:1], direction[:, 1:2])
 
-    def generate_autoware_objects(self, detections, header, tf_matrix, tf_rot):
+    def generate_autoware_objects(self, detections, header, transform):
 
         """
         Generate Autoware DetectedObject from Detections
@@ -309,7 +314,7 @@ class SFADetector:
         :return: AutowareDetectedObject
         """
         detected_objects_list = []
-        for i, (cls_id, x, y, z, height, width, length, yaw, score) in enumerate(detections):
+        for i, (cls_id, x, y, z, height, width, length, yaw) in enumerate(detections):
 
             detected_object = DetectedObject()
             detected_object.id = i
@@ -318,12 +323,11 @@ class SFADetector:
             detected_object.label = CLASS_NAMES[cls_id]
             detected_object.color = LIGHT_BLUE
             detected_object.valid = True
-            detected_object.score = score
-
-            position_in_lidar = np.array([x, y, z, 1])
-            orientation_in_lidar = quaternion_from_euler(0, 0, yaw)
-
-            detected_object.pose = self.transform_pose(position_in_lidar, orientation_in_lidar, tf_matrix, tf_rot)
+            detected_object.pose.position.x = x
+            detected_object.pose.position.y = y
+            detected_object.pose.position.z = z
+            detected_object.pose.orientation = get_orientation_from_heading(yaw)
+            detected_object.pose = transform_pose(detected_object.pose, transform)
             detected_object.pose_reliable = True
 
             # object dimensions
@@ -331,54 +335,11 @@ class SFADetector:
             detected_object.dimensions.y = width
             detected_object.dimensions.z = height
             # Populate convex hull
-            detected_object.convex_hull = self.produce_hull(detected_object.pose, detected_object.dimensions, header.stamp)
+            detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, header.stamp)
 
             detected_objects_list.append(detected_object)
 
         return detected_objects_list
-
-    def transform_pose(self, position, orientation, tf_matrix, tf_rot):
-
-        # create Pose object.
-        transformed_pose = Pose()
-        # transform input pose's position using the transformation matrix
-        transformed_x, transformed_y, transformed_z, _ = np.dot(tf_matrix, position)
-        transformed_pose.position = Point(transformed_x, transformed_y, transformed_z)
-
-        # transform the objects' orientation quaternion to output frame by multiplying it with the transform quaternion.
-        # Note: it's not an ordinary element-wise multiplication
-        x, y, z, w = quaternion_multiply(tf_rot, orientation)
-        transformed_pose.orientation = Quaternion(x, y, z, w)
-
-        return transformed_pose
-
-    def produce_hull(self, obj_pose, obj_dims, stamp):
-
-        """
-        Produce convex hull for an object given its pose and dimensions
-        :param obj_pose: geometry_msgs/Pose. Position and orientation of object
-        :param obj_dims: Vector3 - length, width and height of object
-        :param vella_stamp: Time stamp at which the lidar pointcloud was created
-        :return: geometry_msgs/PolygonStamped
-        """
-        convex_hull = PolygonStamped()
-        convex_hull.header.frame_id = self.output_frame
-        convex_hull.header.stamp = stamp
-
-        # Taken from Autoware mini
-        # compute heading angle from object's orientation
-        _, _, heading = euler_from_quaternion(
-            (obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w))
-
-        # use cv2.boxPoints to get a rotated rectangle given the angle
-        points = cv2.boxPoints((
-            (obj_pose.position.x, obj_pose.position.y),
-            (obj_dims.x, obj_dims.y),
-            math.degrees(heading)
-        ))
-        convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
-
-        return convex_hull
 
     def run(self):
         rospy.spin()
