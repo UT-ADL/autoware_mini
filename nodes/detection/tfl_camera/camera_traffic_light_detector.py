@@ -250,15 +250,15 @@ class CameraTrafficLightDetector:
 
     def create_roi_images(self, image, rois):
 
-            roi_images = []
+        roi_images = []
 
-            for _, _, min_u, max_u, min_v, max_v in rois:
+        for _, _, min_u, max_u, min_v, max_v in rois:
 
-                roi_image = image[min_v:max_v, min_u:max_u, :]
-                roi_image = cv2.resize(roi_image, (128, 128), interpolation=cv2.INTER_LINEAR)
-                roi_images.append(roi_image.astype(np.float32))
+            roi_image = image[min_v:max_v, min_u:max_u, :]
+            roi_image = cv2.resize(roi_image, (128, 128), interpolation=cv2.INTER_LINEAR)
+            roi_images.append(roi_image.astype(np.float32))
 
-            return np.stack(roi_images, axis=0) / 255.0
+        return np.stack(roi_images, axis=0) / 255.0
 
 
     def publish_roi_images(self, image, rois, classes, scores, image_time_stamp):
@@ -266,24 +266,22 @@ class CameraTrafficLightDetector:
         # add rois to image
         if len(rois) > 0:
             for cl, score, (_, _, min_u, max_u, min_v, max_v) in zip(classes, scores, rois):
-                
-                text_orig_u = int(min_u + (max_u - min_u) / 2 - (cv2.getTextSize(CLASSIFIER_RESULT_TO_STRING[cl] + " " + str(score)[:4], cv2.FONT_HERSHEY_SIMPLEX, 1, 2))[0][0] / 2)
+
+                text_string = "%s %.2f" % (CLASSIFIER_RESULT_TO_STRING[cl], score)
+                text_orig_u = int(min_u + (max_u - min_u) / 2 - (cv2.getTextSize(text_string, cv2.FONT_HERSHEY_SIMPLEX, 1, 2))[0][0] / 2)
 
                 start_point = (min_u, min_v)
                 end_point = (max_u, max_v)
-                cv2.rectangle(image, start_point, end_point, CLASSIFIER_RESULT_TO_COLOR[cl] , thickness = 3)
+                cv2.rectangle(image, start_point, end_point, color=CLASSIFIER_RESULT_TO_COLOR[cl] , thickness=3)
                 cv2.putText(image,
-                    CLASSIFIER_RESULT_TO_STRING[cl] + " " + str(score)[:4],
-                    org = (text_orig_u, max_v + 24),
-                    fontFace = cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale = 1,
-                    color = CLASSIFIER_RESULT_TO_COLOR[cl], 
-                    thickness = 2)
+                    text_string,
+                    org=(text_orig_u, max_v + 24),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                    fontScale=1,
+                    color=CLASSIFIER_RESULT_TO_COLOR[cl], 
+                    thickness=2)
 
-        try:
-            img_msg = self.bridge.cv2_to_imgmsg(image, encoding='rgb8')
-        except CvBridgeError as e:
-            rospy.logerr("%s - %s", rospy.get_name(), e)
+        img_msg = self.bridge.cv2_to_imgmsg(image, encoding='rgb8')
         
         img_msg.header.stamp = image_time_stamp
         self.tfl_roi_pub.publish(img_msg)
