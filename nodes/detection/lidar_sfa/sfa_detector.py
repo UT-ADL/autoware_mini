@@ -47,12 +47,12 @@ class SFADetector:
 
         self.score_thresh = rospy.get_param("~score_thresh")  # score filter
         self.top_k = rospy.get_param("~top_k")  # number of top scoring detections to process
-        self.output_frame = rospy.get_param("~output_frame")  # transform detected objects from lidar frame to this frame
+        self.output_frame = rospy.get_param("/detection/output_frame")  # transform detected objects from lidar frame to this frame
         self.transform_timeout = rospy.get_param('~transform_timeout') # transform timeout when waiting for transform to output frame
 
         self.model = self.load_onnx(self.onnx_path) # get onnx model
 
-        rospy.loginfo("sfa_detector - loaded ONNX model file %s", self.onnx_path)
+        rospy.loginfo("%s - loaded ONNX model file %s", rospy.get_name(), self.onnx_path)
 
         # transform listener
         self.tf_buffer = Buffer()
@@ -62,7 +62,7 @@ class SFADetector:
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         rospy.Subscriber('points_raw', PointCloud2, self.pointcloud_callback, queue_size=1, buff_size=2*1024*1024)
 
-        rospy.loginfo("sfa_detector - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def load_onnx(self, onnx_path):
 
@@ -119,14 +119,14 @@ class SFADetector:
 
         if is_front:
             # Remove the point out of range x,y,z
-            mask = (points[:, 0] >= self.MIN_FRONT_X) & (points[:, 0] <= self.MAX_FRONT_X) & \
-                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] <= self.MAX_Y) & \
-                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] <= self.MAX_Z) \
+            mask = (points[:, 0] >= self.MIN_FRONT_X) & (points[:, 0] < self.MAX_FRONT_X) & \
+                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] < self.MAX_Y) & \
+                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] < self.MAX_Z) \
 
         else:
-            mask = (points[:, 0] >= self.MIN_BACK_X) & (points[:, 0] <= self.MAX_BACK_X) & \
-                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] <= self.MAX_Y) & \
-                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] <= self.MAX_Z) \
+            mask = (points[:, 0] >= self.MIN_BACK_X) & (points[:, 0] < self.MAX_BACK_X) & \
+                    (points[:, 1] >= self.MIN_Y) & (points[:, 1] < self.MAX_Y) & \
+                    (points[:, 2] >= self.MIN_Z) & (points[:, 2] < self.MAX_Z) \
 
         points = points[mask]
         points[:, 2] -= self.MIN_Z
