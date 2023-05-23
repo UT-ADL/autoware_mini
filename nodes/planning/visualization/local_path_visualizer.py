@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
+import math
 from autoware_msgs.msg import Lane
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
@@ -10,9 +11,15 @@ class LocalPathVisualizer:
     def __init__(self):
 
         # Parameters
-        self.car_safety_radius = rospy.get_param("car_safety_radius")
+        self.car_safety_width = rospy.get_param("car_safety_width")
+        self.waypoint_interval= rospy.get_param("waypoint_interval")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.braking_safety_distance = rospy.get_param("braking_safety_distance")
+
+        # calculate radius of waypoint so that circles intersect in car width distance from path
+        self.waypoint_radius = math.sqrt(self.car_safety_width**2 + (self.waypoint_interval / 2.0)**2)
+
+        print("car_safety_width, wp_interval, and radius ", self.car_safety_width, self.waypoint_interval, self.waypoint_radius)
 
         # Publishers
         self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, latch=True)
@@ -38,8 +45,8 @@ class LocalPathVisualizer:
             marker.type = marker.CYLINDER
             marker.action = marker.ADD
             marker.pose = waypoint.pose.pose
-            marker.scale.x = 2 * self.car_safety_radius
-            marker.scale.y = 2 * self.car_safety_radius
+            marker.scale.x = 2 * self.waypoint_radius
+            marker.scale.y = 2 * self.waypoint_radius
             marker.scale.z = 0.3
             marker.color = ColorRGBA(waypoint.cost, 1.0 - waypoint.cost, 0.0, 0.2)
             marker_array.markers.append(marker)
