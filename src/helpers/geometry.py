@@ -15,16 +15,6 @@ def get_heading_from_orientation(orientation):
 
     return heading
 
-def get_heading_between_two_points(back_p, forward_p):
-    """
-    Get heading between two points
-    :param back_p: Point
-    :param forward_p: Point
-    :return: heading in radians
-    """
-
-    return math.atan2(forward_p.y - back_p.y, forward_p.x - back_p.x)
-
 def get_orientation_from_heading(heading):
     """
     Get orientation from heading (-pi...pi)
@@ -34,6 +24,16 @@ def get_orientation_from_heading(heading):
 
     x, y, z, w = quaternion_from_euler(0, 0, heading)
     return Quaternion(x, y, z, w)
+
+def get_heading_between_two_points(back_p, forward_p):
+    """
+    Get heading between two points
+    :param back_p: Point
+    :param forward_p: Point
+    :return: heading in radians
+    """
+
+    return math.atan2(forward_p.y - back_p.y, forward_p.x - back_p.x)
 
 def get_cross_track_error(ego_pos, pos1, pos2):
     """
@@ -166,12 +166,11 @@ def get_angle_three_points_2d(point1, point2, point3):
 
     return angle
 
-def norm2d(x, y):
+def get_vector_norm_3d(vec):
     """
-    Calculate 2d norm
-    :param x: x
-    :param y: y
+    Get norm of 3d vector
+    :param vec: vector
     :return: norm
     """
 
-    return math.sqrt(x ** 2 + y ** 2)
+    return math.sqrt(vec.x ** 2 + vec.y ** 2 + vec.z ** 2)

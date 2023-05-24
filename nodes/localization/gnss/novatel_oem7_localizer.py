@@ -12,8 +12,6 @@ from nav_msgs.msg import Odometry
 from localization.WGS84ToUTMTransformer import WGS84ToUTMTransformer
 from localization.WGS84ToLest97Transformer import WGS84ToLest97Transformer
 
-from helpers.geometry import norm2d
-
 
 class NovatelOem7Localizer:
     def __init__(self):
@@ -62,7 +60,7 @@ class NovatelOem7Localizer:
         x, y = self.transformer.transform_lat_lon(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height)
         azimuth = self.transformer.correct_azimuth(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.azimuth)
 
-        velocity = norm2d(inspva_msg.east_velocity, inspva_msg.north_velocity)
+        velocity = math.sqrt(inspva_msg.east_velocity**2 + inspva_msg.north_velocity**2)
 
         # angles from GNSS (degrees) need to be converted to orientation (quaternion) in map frame
         orientation = convert_angles_to_orientation(inspva_msg.roll, inspva_msg.pitch, azimuth)

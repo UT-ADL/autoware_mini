@@ -11,6 +11,8 @@ import message_filters
 from autoware_msgs.msg import DetectedObjectArray
 from std_msgs.msg import ColorRGBA
 
+from helpers.geometry import get_distance_between_two_points_2d, get_vector_norm_3d
+
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.8)
 
 class LidarRadarFusion:
@@ -56,7 +58,7 @@ class LidarRadarFusion:
                 # or if the distance between the two centroids is smaller than the self.maching_distance param
                 for radar_detection in radar_detections.objects:
                     # calculate norm of radar detection's speed
-                    radar_speed = self.compute_norm(radar_detection.velocity.linear)
+                    radar_speed = get_vector_norm_3d(radar_detection.velocity.linear)
                     # filter out all stationary radar objects
                     if radar_speed <= self.radar_speed_threshold:
                         continue
@@ -65,7 +67,7 @@ class LidarRadarFusion:
                     is_within_hull = cv2.pointPolygonTest(lidar_hull, radar_object_centroid, measureDist=False) >= 0
 
                     # calculate distance between lidar and radar objects
-                    distance = self.compute_distance(lidar_detection, radar_detection)
+                    distance = get_distance_between_two_points_2d(lidar_detection.pose.position, radar_detection.pose.position)
 
                     # check if matched
                     if is_within_hull or distance < self.matching_distance:
@@ -95,7 +97,7 @@ class LidarRadarFusion:
             for radar_detection in radar_detections.objects:
                 if radar_detection.id not in used_radar_detections:
                     # calculate norm of radar detection's speed
-                    radar_speed = self.compute_norm(radar_detection.velocity.linear)
+                    radar_speed = get_vector_norm_3d(radar_detection.velocity.linear)
 
                     # add only moving radar objects
                     if radar_speed >= self.radar_speed_threshold:
@@ -108,14 +110,6 @@ class LidarRadarFusion:
 
         except Exception as e:
             rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
-
-    @staticmethod
-    def compute_distance(obj1, obj2):
-        return sqrt((obj1.pose.position.x - obj2.pose.position.x)**2 + (obj1.pose.position.y - obj2.pose.position.y)**2)
-
-    @staticmethod
-    def compute_norm(vec):
-        return sqrt(vec.x**2 + vec.y**2 + vec.z**2)
 
     def run(self):
         rospy.spin()
