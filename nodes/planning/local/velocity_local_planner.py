@@ -20,12 +20,8 @@ from helpers.geometry import get_closest_point_on_line, get_distance_between_two
 from helpers.waypoints import get_two_nearest_waypoint_idx
 from helpers.transform import transform_vector3
 
-GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.4)
-RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
-YELLOW = ColorRGBA(0.8, 0.8, 0.0, 0.4)
 
-
-class SpeedOnlyLocalPlanner:
+class VelocityLocalPlanner:
 
     def __init__(self):
 
@@ -296,6 +292,6 @@ class SpeedOnlyLocalPlanner:
 
 
 if __name__ == '__main__':
-    rospy.init_node('speed_only_local_planner')
-    node = SpeedOnlyLocalPlanner()
+    rospy.init_node('velocity_local_planner')
+    node = VelocityLocalPlanner()
     node.run()

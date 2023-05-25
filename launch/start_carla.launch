@@ -3,7 +3,7 @@
     
     <arg name="use_manual_control"      default="false"                 doc="use manual control for carla"/>
     <arg name="global_planner"          default="lanelet2"              doc="waypoints, lanelet2" />
-    <arg name="local_planner"           default="speed_only"            doc="speed_only, none"/>
+    <arg name="local_planner"           default="velocity"              doc="velocity, none"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="localizer"               default="carla"                 doc="novatel, carla" />
     <arg name="detector"                default="carla"                 doc="cluster, carla" />

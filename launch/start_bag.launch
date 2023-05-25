@@ -2,17 +2,17 @@
 <launch>
     
     <arg name="bag_file"                default="2023-03-14-20-34-16_vella_odom_compensation_ms.bag" doc="bag file to play" />
-    <arg name="localizer"               default="novatel"   doc="novatel, carla"/>
-    <arg name="detector"                default="lidar_cluster"   doc="cluster, sim, carla"/>
-    <arg name="tfl_detector"            default="camera"      doc="camera, mqtt, mqtt_camera_fusion" />
+    <arg name="localizer"               default="novatel"       doc="novatel, carla"/>
+    <arg name="detector"                default="lidar_cluster" doc="cluster, sim, carla"/>
+    <arg name="tfl_detector"            default="camera"        doc="camera, mqtt, mqtt_camera_fusion" />
     <arg name="global_planner"          default="lanelet2"      doc="waypoints, lanelet2"/>
-    <arg name="local_planner"           default="speed_only"      doc="speed_only"/>
+    <arg name="local_planner"           default="velocity"      doc="velocity"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
-    <arg name="use_tf"                  default="true"      doc="replaces tf-s in bag with the current ones"/>
+    <arg name="use_tf"                  default="true"          doc="replaces tf-s in bag with the current ones"/>
     <arg name="use_localization"        default="$(arg use_tf)" doc="replace localization topics"/>
-    <arg name="use_detection"           default="true"      doc="replace object detection topics"/>
-    <arg name="use_planning"            default="true"      doc="replace planning topics"/>
+    <arg name="use_detection"           default="true"          doc="replace object detection topics"/>
+    <arg name="use_planning"            default="true"          doc="replace planning topics"/>
 
     <!-- Use simulation time from bag -->
     <param name="/use_sim_time" value="true" />
