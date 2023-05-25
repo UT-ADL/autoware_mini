@@ -30,7 +30,7 @@ class LidarRadarFusion:
         lidar_detections_sub = message_filters.Subscriber('lidar/detected_objects', DetectedObjectArray, queue_size=1)
 
         # Sync
-        ts = message_filters.ApproximateTimeSynchronizer([lidar_detections_sub, radar_detections_sub], queue_size=10, slop=0.06)
+        ts = message_filters.ApproximateTimeSynchronizer([lidar_detections_sub, radar_detections_sub], queue_size=20, slop=0.06)
         ts.registerCallback(self.lidar_radar_callback)
 
         rospy.loginfo("%s - initialized", rospy.get_name())
