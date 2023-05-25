@@ -52,7 +52,7 @@ class VellaDetector:
         try:
             # get the transform from lidar_frame to output frame at the time when vella track was published
             transform = self.tf_buffer.lookup_transform(self.output_frame, self.lidar_frame, vella_tracks.header.stamp, rospy.Duration(self.transform_timeout))
-        except TransformException as e:
+        except (TransformException, rospy.ROSTimeMovedBackwardsException) as e:
             rospy.logwarn("%s - %s", rospy.get_name(), e)
             return
 

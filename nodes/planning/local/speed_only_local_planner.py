@@ -187,7 +187,7 @@ class SpeedOnlyLocalPlanner:
         # fetch the transform from the object frame to the base_link frame to align the speed with ego vehicle
         try:
             transform = self.tf_buffer.lookup_transform("base_link", msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
-        except TransformException as e:
+        except (TransformException, rospy.ROSTimeMovedBackwardsException) as e:
             rospy.logwarn("%s - unable to transform object speed to base frame, using speed 0: %s", rospy.get_name(), e)
             transform = None
 

@@ -48,7 +48,7 @@ class ClusterDetector:
             if self.transform_timeout > 0:
                 try:
                     self.tf_listener.waitForTransform(self.output_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
-                except tf2_ros.TransformException as e:
+                except (tf2_ros.TransformException, rospy.ROSTimeMovedBackwardsException) as e:
                     rospy.logwarn("%s - %s", rospy.get_name(), e)
                     return
             # fetch transform for target frame

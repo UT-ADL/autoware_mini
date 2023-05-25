@@ -21,7 +21,7 @@ lidar:
     bounding_box_type: axis_aligned # axis_aligned, min_area
     enable_pointcloud: False
     enable_convex_hull: True
-    transform_timeout: 0.05         # needed for Carla
+    transform_timeout: 0.06         # needed for Carla
 
   sfa_detector:
     min_front_x: 0
@@ -34,17 +34,18 @@ lidar:
     max_z: 1.27
     score_thresh: 0.2
     top_k: 50
-    transform_timeout: 0.05
+    transform_timeout: 0.06
 
   vella_detector:
     confidence_filter: 0.5
     track_length_filter: 0
     lidar_frame: lidar_center
-    transform_timeout: 0.05
+    transform_timeout: 0.06
 
 radar:
   radar_detector:
     consistency_check: 5 # Number of consecutive detections over which a radar object is detected before it is published/used further
+    transform_timeout: 0.06
 
 lidar_radar_fusion:
   matching_distance: 1.6 # radius threshold value around lidar centroid for a radar object to be considered matched
@@ -63,16 +64,20 @@ mqtt_traffic_light_detector:
 traffic_light_majority_merger:
   id_string: " cam"      # string added to traffic light result and displayed in rviz
   
-camera_fl/camera_traffic_light_detector_left:
-  traffic_light_bulb_radius: 0.1    # meters
-  radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
-  min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
-  rectify_image: False  # the distortions of Mako cameras are so small they don't matter
-  output_roi_image: True
+camera_fl:
+  camera_traffic_light_detector_left:
+    traffic_light_bulb_radius: 0.1    # meters
+    radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
+    min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
+    rectify_image: False  # the distortions of Mako cameras are so small they don't matter
+    output_roi_image: True
+    transform_timeout: 0.06
 
-camera_fr/camera_traffic_light_detector_right:
-  traffic_light_bulb_radius: 0.1    # meters
-  radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
-  min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
-  rectify_image: False  # the distortions of Mako cameras are so small they don't matter
-  output_roi_image: True
+camera_fr:
+  camera_traffic_light_detector_right:
+    traffic_light_bulb_radius: 0.1    # meters
+    radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
+    min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
+    rectify_image: False  # the distortions of Mako cameras are so small they don't matter
+    output_roi_image: True
+    transform_timeout: 0.06

@@ -76,7 +76,7 @@ class SFADetector:
         try:
             # get the transform from lidar frame to output frame at the time when the poinctloud msg was published
             transform = self.tf_buffer.lookup_transform(self.output_frame, pointcloud.header.frame_id, pointcloud.header.stamp, rospy.Duration(self.transform_timeout))
-        except TransformException as e:
+        except (TransformException, rospy.ROSTimeMovedBackwardsException) as e:
             rospy.logwarn("%s - %s", rospy.get_name(), e)
             return
 

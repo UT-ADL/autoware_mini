@@ -25,6 +25,7 @@ class RadarDetector:
         # Parameters
         self.output_frame = rospy.get_param("/detection/output_frame")
         self.consistency_check = rospy.get_param("~consistency_check") # number of frames a radar detection is received before it is considered  true radar detection. Based on ID count
+        self.transform_timeout = rospy.get_param("~transform_timeout")
 
         # Internal variables
         self.uuid_count = defaultdict(int) # dictionary that keeps track of radar objects and their id count. Used for checking consistency of object ids in consistency filter
@@ -66,8 +67,8 @@ class RadarDetector:
 
             try:
                 # read source frame to output frame transform
-                source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, tracks.header.frame_id, rospy.Time(0))
-            except TransformException as e:
+                source_frame_to_output_tf = self.tf_buffer.lookup_transform(self.output_frame, tracks.header.frame_id, tracks.header.stamp, rospy.Duration(self.transform_timeout))
+            except (TransformException, rospy.ROSTimeMovedBackwardsException) as e:
                 rospy.logwarn("%s - %s", rospy.get_name(), e)
                 return
 

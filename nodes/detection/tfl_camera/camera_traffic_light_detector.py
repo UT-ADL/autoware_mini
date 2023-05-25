@@ -57,6 +57,7 @@ class CameraTrafficLightDetector:
         self.traffic_light_bulb_radius = rospy.get_param("~traffic_light_bulb_radius")
         self.radius_to_roi_multiplier = rospy.get_param("~radius_to_roi_multiplier")
         self.min_roi_width = rospy.get_param("~min_roi_width")
+        self.transform_timeout = rospy.get_param("~transform_timeout")
         self.waypoint_interval = rospy.get_param("/planning/path_smoothing/waypoint_interval")
 
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
@@ -158,8 +159,8 @@ class CameraTrafficLightDetector:
 
             # extract transform
             try:
-                transform = self.tf_buffer.lookup_transform(transform_to_frame, transform_from_frame, image_time_stamp)
-            except tf2_ros.TransformException as e:
+                transform = self.tf_buffer.lookup_transform(transform_to_frame, transform_from_frame, image_time_stamp, rospy.Duration(self.transform_timeout))
+            except (tf2_ros.TransformException, rospy.ROSTimeMovedBackwardsException) as e:
                 rospy.logwarn("%s - %s", rospy.get_name(), e)
                 return
 
