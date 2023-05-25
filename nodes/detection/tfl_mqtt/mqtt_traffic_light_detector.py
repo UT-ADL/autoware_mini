@@ -30,6 +30,7 @@ MQTT_TO_AUTOWARE_TFL_MAP = {
     "AMBER FLASH" : 1,
     "GREEN FLASH": 1,
     "GREEN": 1,
+    "OFF": 1,
     "UNKNOWN": 2
 }
 
