@@ -248,18 +248,17 @@ class VelocityLocalPlanner:
 
                     obs_within_width = self.filer_obstacles_using_car_safety_width(obstacles_ahead_idx, obstacle_array, global_path_tree, global_path_waypoints, wp_backward, local_path_dists)
 
-                    # distances of obstacles ahead
                     # REPLACED
+                    # distances of obstacles ahead
                     # obstacles_ahead_dists = np.concatenate(obstacle_dists[i:])
+                    # get speeds of those obstacles
+                    # obstacles_ahead_speeds = obstacle_array[obstacles_ahead_idx, 3]
+                    # BY THESE
                     obstacles_ahead_dists = obs_within_width[:,1]
+                    obstacles_ahead_speeds = obs_within_width[:,3]
 
                     # subtract current waypoint distance from ahead distances
                     obstacles_ahead_dists -= local_path_dists[i]
-
-                    # REPLACED
-                    # get speeds of those obstacles
-                    # obstacles_ahead_speeds = obstacle_array[obstacles_ahead_idx, 3]
-                    obstacles_ahead_speeds = obs_within_width[:,3]
 
                     # calculate stopping distances - following distance increased when obstacle has higher speed
                     stopping_distances = obstacles_ahead_dists - self.current_pose_to_car_front - self.braking_safety_distance \
@@ -303,7 +302,7 @@ class VelocityLocalPlanner:
             wp_backward, wp_forward = get_two_nearest_waypoint_idx(global_path_tree, x, y)
             closest_point = get_closest_point_on_line(Point(x=x, y=y, z=z), global_path_waypoints[wp_backward].pose.pose.position, global_path_waypoints[wp_forward].pose.pose.position)
             d_from_path = get_distance_between_two_points_2d(Point(x=x, y=y, z=z), closest_point)
-            
+
             # ignore obstacles that are too far from the path
             if d_from_path > self.car_safety_radius:
                 continue
