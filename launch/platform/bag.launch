@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="use_tf"  default="true" />
+
+    <!-- Vehicle platform -->
+    <include file="$(find vehicle_platform)/launch/platform.launch">
+        <arg name="use_tf"          value="$(arg use_tf)" />
+        <arg name="use_lexus_model" value="true" />
+    </include>
+
+    <group ns="vehicle">
+        <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />
+    </group>
+
+</launch>

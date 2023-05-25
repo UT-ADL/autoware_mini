@@ -7,12 +7,14 @@
     <arg name="tfl_detector"            default="camera"        doc="camera, mqtt, mqtt_camera_fusion" />
     <arg name="global_planner"          default="lanelet2"      doc="waypoints, lanelet2"/>
     <arg name="local_planner"           default="velocity"      doc="velocity"/>
+    <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
     <arg name="use_tf"                  default="true"          doc="replaces tf-s in bag with the current ones"/>
     <arg name="use_localization"        default="$(arg use_tf)" doc="replace localization topics"/>
     <arg name="use_detection"           default="true"          doc="replace object detection topics"/>
     <arg name="use_planning"            default="true"          doc="replace planning topics"/>
+    <arg name="use_control"             default="true"          doc="replace control topics"/>
 
     <!-- Use simulation time from bag -->
     <param name="/use_sim_time" value="true" />
@@ -28,6 +30,10 @@
         <remap from="/detection/lidar/points_ground" to="/bag/detection/lidar/points_ground" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/points_no_ground" to="/bag/detection/lidar/points_no_ground" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/points_clustered" to="/bag/detection/lidar/points_clustered" if="$(arg use_detection)"/>
+        <remap from="/detection/lidar/detected_objects" to="/bag/detection/lidar/detected_objects" if="$(arg use_detection)"/>
+        <remap from="/detection/lidar/detected_objects_markers" to="/bag/detection/lidar/detected_objects_markers" if="$(arg use_detection)"/>
+        <remap from="/detection/radar/detected_objects" to="/bag/detection/radar/detected_objects" if="$(arg use_detection)"/>
+        <remap from="/detection/radar/detected_objects_markers" to="/bag/detection/radar/detected_objects_markers" if="$(arg use_detection)"/>
         <remap from="/detection/detected_objects" to="/bag/detection/detected_objects" if="$(arg use_detection)"/>
         <remap from="/detection/detected_objects_markers" to="/bag/detection/detected_objects_markers" if="$(arg use_detection)"/>
         <remap from="/planning/lanelet2_map_markers" to="/bag/planning/lanelet2_map_markers" if="$(arg use_planning)"/>
@@ -45,6 +51,7 @@
         <remap from="/detection/camera_fr/traffic_light_roi" to="/bag/detection/camera_fr/traffic_light_roi" if="$(arg use_detection)"/>
         <remap from="/detection/camera/traffic_light_status" to="/bag/detection/camera/traffic_light_status" if="$(arg use_detection)"/>
         <remap from="/detection/mqtt/traffic_light_status" to="/bag/detection/mqtt/traffic_light_status" if="$(arg use_detection)"/>
+        <remap from="/control/vehicle_cmd" to="/bag/control/vehicle_cmd" if="$(arg use_control)"/>
         <remap from="/dashboard/current_speed" to="/bag/dashboard/current_speed" />
         <remap from="/dashboard/target_speed" to="/bag/dashboard/target_speed" />
         <remap from="/dashboard/closest_object_distance" to="/bag/dashboard/closest_object_distance" />
@@ -78,10 +85,14 @@
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>
 
-    <!-- Vehicle platform -->
-    <include file="$(find vehicle_platform)/launch/platform.launch">
+    <!-- Control -->
+    <include if="$(arg use_control)" file="$(find autoware_mini)/launch/control.launch">
+        <arg name="follower"        value="$(arg follower)" />
+    </include>
+
+    <!-- Bag platform -->
+    <include file="$(find autoware_mini)/launch/platform/bag.launch">
         <arg name="use_tf"          value="$(arg use_tf)" />
-        <arg name="use_lexus_model" value="true" />
     </include>
 
     <!-- Rviz -->
