@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     
-    <arg name="bag_file"                default="2023-03-14-20-34-16_vella_odom_compensation_ms.bag" doc="bag file to play" />
+    <arg name="bag_file"                default="2023-05-25-14-21-10_sensors_Raekoda.bag" doc="bag file to play" />
     <arg name="localizer"               default="novatel"       doc="novatel, carla"/>
     <arg name="detector"                default="lidar_cluster" doc="cluster, sim, carla"/>
     <arg name="tfl_detector"            default="camera"        doc="camera, mqtt, mqtt_camera_fusion" />
