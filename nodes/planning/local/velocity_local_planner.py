@@ -354,11 +354,7 @@ class VelocityLocalPlanner:
         lane.closest_object_distance = closest_object_distance
         lane.closest_object_velocity = closest_object_velocity
         lane.is_blocked = blocked
-<<<<<<< HEAD:nodes/planning/local/velocity_local_planner.py
         lane.cost = cost
-=======
-
->>>>>>> rearrangements and formatting:nodes/planning/local/speed_only_local_planner.py
         self.local_path_pub.publish(lane)
 
     def run(self):
