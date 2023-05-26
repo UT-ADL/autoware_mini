@@ -231,7 +231,7 @@ class SSCInterface:
     def turn_rpt_callback(self, turn_rpt_msg):
         self.turn_signals = turn_rpt_msg.output
 
-    def publish_speed_command(self, header, desired_mode, desired_speed, acceleration_limit, deceleration_limit):
+    def publish_speed_command(self, header, desired_mode, desired_speed, acceleration_limit=0.0, deceleration_limit=0.0):
         # publish speed command
         msg = SpeedMode(header = header)
         msg.mode = desired_mode
