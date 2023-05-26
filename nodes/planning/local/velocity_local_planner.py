@@ -222,40 +222,30 @@ class VelocityLocalPlanner:
             obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,:2])
             # find closest obstacle points to local path
             _, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:2], self.car_safety_radius, return_distance=True)
-            # calculate obstacle distances from the start of the local path
-            
-            # TODO will be done later
-            # obstacle_dists = [local_path_dists[i] + d for i, d in enumerate(obstacle_dists)]
 
             # If any calculated target_vel drops close to 0 then use this boolean to set all following wp speeds to 0
             zero_speeds_onwards = False
 
-            # calculate velocity based on distance to obstacle using deceleration limit
-            for i, wp in enumerate(local_path_waypoints):
+            # list of points on path from the current waypoint
+            obstacles_ahead_idx = np.concatenate(obstacle_idx[:])
+            obstacles_within_width = self.filer_obstacles_using_car_safety_width(obstacles_ahead_idx, obstacle_array, global_path_tree, global_path_waypoints, wp_backward, local_path_dists)
 
-                # mark waypoints with obstacles for visualizer
-                if len(obstacle_idx[i]) > 0:
-                    wp.cost = 1.0
+            if len(obstacles_within_width) > 0:
 
-                # once we get zero speed, keep it that way
-                if zero_speeds_onwards:
-                    wp.twist.twist.linear.x = 0.0
-                    continue
+                # calculate velocity based on distance to obstacle using deceleration limit
+                for i, wp in enumerate(local_path_waypoints):
 
-                # list of points on path from the current waypoint
-                obstacles_ahead_idx = np.concatenate(obstacle_idx[i:])
-                if len(obstacles_ahead_idx) > 0:
+                    # mark waypoints with obstacles for visualizer
+                    if i in np.unique(obstacles_within_width[:,0]):
+                        wp.cost = 1.0
 
-                    obs_within_width = self.filer_obstacles_using_car_safety_width(obstacles_ahead_idx, obstacle_array, global_path_tree, global_path_waypoints, wp_backward, local_path_dists)
+                    # once we get zero speed, keep it that way
+                    if zero_speeds_onwards:
+                        wp.twist.twist.linear.x = 0.0
+                        continue
 
-                    # REPLACED
-                    # distances of obstacles ahead
-                    # obstacles_ahead_dists = np.concatenate(obstacle_dists[i:])
-                    # get speeds of those obstacles
-                    # obstacles_ahead_speeds = obstacle_array[obstacles_ahead_idx, 3]
-                    # BY THESE
-                    obstacles_ahead_dists = obs_within_width[:,1]
-                    obstacles_ahead_speeds = obs_within_width[:,3]
+                    obstacles_ahead_dists = obstacles_within_width[:,1]
+                    obstacles_ahead_speeds = obstacles_within_width[:,3]
 
                     # subtract current waypoint distance from ahead distances
                     obstacles_ahead_dists -= local_path_dists[i]
@@ -292,27 +282,29 @@ class VelocityLocalPlanner:
 
     def filer_obstacles_using_car_safety_width(self, obstacles_ahead_idx, obstacle_array, global_path_tree, global_path_waypoints, global_wp_backward, local_path_dists):
 
+        # obstacle point can be in multiple waypoint circles
         obstacles_unique = np.unique(obstacles_ahead_idx)
         obstacle_array_unique = obstacle_array[obstacles_unique]
 
-        objects_within_width = []
+        obstacles_within_width = []
         # iterate over obstacle_array_unique and calc 2 closest waypoint indexes
         for x, y, z, v in obstacle_array_unique:
-            # TODO - there will be wrong distance at the goal point if the OBJ is in last circle!?
+            # TODO - there will be wrong distance at the goal point if the OBJ is in last circle!? and beyond the last wp
+            # calculation places it between 2 closest wp's
             wp_backward, wp_forward = get_two_nearest_waypoint_idx(global_path_tree, x, y)
             closest_point = get_closest_point_on_line(Point(x=x, y=y, z=z), global_path_waypoints[wp_backward].pose.pose.position, global_path_waypoints[wp_forward].pose.pose.position)
             d_from_path = get_distance_between_two_points_2d(Point(x=x, y=y, z=z), closest_point)
 
             # ignore obstacles that are too far from the path
-            if d_from_path > self.car_safety_radius:
+            if d_from_path > self.car_safety_width:
                 continue
 
             d_from_prev_wp = get_distance_between_two_points_2d(global_path_waypoints[wp_backward].pose.pose.position, closest_point)
             wp_ind_local = wp_backward - global_wp_backward
             d_from_localpath_start = local_path_dists[wp_ind_local] + d_from_prev_wp
-            objects_within_width.append([wp_ind_local, d_from_localpath_start, d_from_path, v])
+            obstacles_within_width.append([wp_ind_local, d_from_localpath_start, d_from_path, v])
 
-        return np.array(objects_within_width)
+        return np.array(obstacles_within_width)
 
 
 
