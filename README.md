@@ -109,7 +109,7 @@ The detection topics in bag are remapped to dummy topic names and new detections
 roslaunch autoware_mini start_bag.launch detector:=lidar_sfa
 ```
 
-Other possible `detector` argument values worth trying are `radar`, `lidar_cluster_radar_fusion` and `lidar_sfa_radar_fusion`.
+Other possible `detector` argument values worth trying are `radar`, `lidar_cluster_radar_fusion` and `lidar_sfa_radar_fusion`. Notice that blue dots represent lidar detections, red dots represent radar detections and green dots represent fused detections.
 
 Another possible test is to run camera-based traffic light detection against bag:
 
