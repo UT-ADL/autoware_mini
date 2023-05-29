@@ -2,12 +2,14 @@
 
 import math
 import rospy
+import message_filters
 from tf.transformations import quaternion_from_euler
 from tf2_ros import TransformBroadcaster
 
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
 from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion, TransformStamped
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Imu
 
 from localization.WGS84ToUTMTransformer import WGS84ToUTMTransformer
 from localization.WGS84ToLest97Transformer import WGS84ToLest97Transformer
@@ -46,13 +48,17 @@ class NovatelOem7Localizer:
         # Subscribers
         if self.use_msl_height:
             self.bestpos_sub = rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback)
-        self.inspva_sub = rospy.Subscriber('/novatel/oem7/inspva', INSPVA, self.inspva_callback)
 
+        inspva_sub = message_filters.Subscriber('/novatel/oem7/inspva', INSPVA, queue_size=1)
+        imu_sub = message_filters.Subscriber('/gps/imu', Imu, queue_size=1)
+
+        ts = message_filters.ApproximateTimeSynchronizer([inspva_sub, imu_sub], queue_size=5, slop=0.03)
+        ts.registerCallback(self.synchronized_callback)
         # output information to console
         rospy.loginfo("%s - localizer initialized using %s coordinates", rospy.get_name(), str(self.coordinate_transformer))
 
 
-    def inspva_callback(self, inspva_msg):
+    def synchronized_callback(self, inspva_msg, imu_msg):
 
         stamp = inspva_msg.header.stamp
 
@@ -60,7 +66,8 @@ class NovatelOem7Localizer:
         x, y = self.transformer.transform_lat_lon(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height)
         azimuth = self.transformer.correct_azimuth(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.azimuth)
 
-        velocity = math.sqrt(inspva_msg.east_velocity**2 + inspva_msg.north_velocity**2)
+        linear_velocity = math.sqrt(inspva_msg.east_velocity**2 + inspva_msg.north_velocity**2)
+        angular_velocity = imu_msg.angular_velocity
 
         # angles from GNSS (degrees) need to be converted to orientation (quaternion) in map frame
         orientation = convert_angles_to_orientation(inspva_msg.roll, inspva_msg.pitch, azimuth)
@@ -72,9 +79,9 @@ class NovatelOem7Localizer:
 
         # Publish 
         self.publish_current_pose(stamp, x, y, height, orientation)
-        self.publish_current_velocity(stamp, velocity)
+        self.publish_current_velocity(stamp, linear_velocity, angular_velocity)
         self.publish_map_to_baselink_tf(stamp, x, y, height, orientation)
-        self.publish_odometry(stamp, velocity, x, y, height, orientation)
+        self.publish_odometry(stamp, linear_velocity, x, y, height, orientation, angular_velocity)
 
     def bestpos_callback(self, bestpos_msg):
         self.undulation = bestpos_msg.undulation
@@ -95,17 +102,19 @@ class NovatelOem7Localizer:
         self.current_pose_pub.publish(pose_msg)
 
 
-    def publish_current_velocity(self, stamp, velocity):
+    def publish_current_velocity(self, stamp, linear_velocity, angular_velocity):
         
         vel_msg = TwistStamped()
 
         vel_msg.header.stamp = stamp
         vel_msg.header.frame_id = self.child_frame
-        vel_msg.twist.linear.x = velocity
+        vel_msg.twist.linear.x = linear_velocity
+
+        vel_msg.twist.angular = angular_velocity
 
         self.current_velocity_pub.publish(vel_msg)
 
-    def publish_odometry(self, stamp, velocity, x, y, height, orientation):
+    def publish_odometry(self, stamp, velocity, x, y, height, orientation, angular_velocity):
 
         odom_msg = Odometry()
         odom_msg.header.stamp = stamp
@@ -118,6 +127,8 @@ class NovatelOem7Localizer:
 
         odom_msg.pose.pose.orientation = orientation
         odom_msg.twist.twist.linear.x = velocity
+
+        odom_msg.twist.twist.angular = angular_velocity
 
         self.odometry_pub.publish(odom_msg)
 

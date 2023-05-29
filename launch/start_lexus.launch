@@ -38,6 +38,8 @@
         <arg name="follower"        value="$(arg follower)" />
     </include>
 
+    <!-- remap to let /radar_fc/vehicle_motion subscribe to /localization/current_velocity      -->
+    <remap from="/radar_fc/vehicle_motion" to="/localization/current_velocity" />
     <!-- Vehicle -->
     <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
         <arg name="max_speed"           value="$(arg max_speed)" />
