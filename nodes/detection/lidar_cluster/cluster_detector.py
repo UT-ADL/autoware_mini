@@ -5,8 +5,7 @@ import rospy
 import numpy as np
 import cv2
 
-import tf
-import tf2_ros
+from tf2_ros import TransformListener, Buffer, TransformException
 from ros_numpy import numpify, msgify
 
 from sensor_msgs.msg import PointCloud2
@@ -15,6 +14,7 @@ from std_msgs.msg import ColorRGBA, Header
 from geometry_msgs.msg import Point32, Quaternion
 
 from helpers.geometry import get_orientation_from_heading
+from helpers.timer import Timer
 
 BLUE80P = ColorRGBA(0.0, 0.0, 1.0, 0.8)
 
@@ -27,7 +27,8 @@ class ClusterDetector:
         self.output_frame = rospy.get_param('/detection/output_frame')
         self.transform_timeout = rospy.get_param('~transform_timeout')
 
-        self.tf_listener = tf.TransformListener()
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer)
 
         self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
         rospy.Subscriber('points_clustered', PointCloud2, self.cluster_callback, queue_size=1, buff_size=1024*1024)
@@ -44,15 +45,13 @@ class ClusterDetector:
 
         # if target frame does not match the header frame
         if msg.header.frame_id != self.output_frame:
-            # wait for target frame transform to be available
-            if self.transform_timeout > 0:
-                try:
-                    self.tf_listener.waitForTransform(self.output_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
-                except (tf2_ros.TransformException, rospy.ROSTimeMovedBackwardsException) as e:
-                    rospy.logwarn("%s - %s", rospy.get_name(), e)
-                    return
             # fetch transform for target frame
-            tf_matrix = self.tf_listener.asMatrix(self.output_frame, msg.header).astype(np.float32).T
+            try:
+                transform = self.tf_buffer.lookup_transform(self.output_frame, msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
+            except (TransformException, rospy.ROSTimeMovedBackwardsException) as e:
+                rospy.logwarn("%s - %s", rospy.get_name(), e)
+                return
+            tf_matrix = numpify(transform.transform).astype(np.float32).T
             # make copy of points
             points = points.copy()
             # turn into homogeneous coordinates
