@@ -73,20 +73,20 @@ class GroundRemovalNode:
 
         # filter out closest points to minimum point up to some tolerance
         ground_mask = (zi <= (self.cols[xi, yi] + self.tolerance))
-        ground_data = data_filtered[ground_mask]
-        non_ground_data = data_filtered[~ground_mask]
-
-        # publish ground points
-        ground_msg = msgify(PointCloud2, ground_data)
-        ground_msg.header.stamp = msg.header.stamp
-        ground_msg.header.frame_id = msg.header.frame_id
-        self.ground_pub.publish(ground_msg)
 
         # publish non-ground points
+        non_ground_data = data_filtered[~ground_mask]
         non_ground_msg = msgify(PointCloud2, non_ground_data)
         non_ground_msg.header.stamp = msg.header.stamp
         non_ground_msg.header.frame_id = msg.header.frame_id
         self.no_ground_pub.publish(non_ground_msg)
+
+        # publish ground points
+        ground_data = data_filtered[ground_mask]
+        ground_msg = msgify(PointCloud2, ground_data)
+        ground_msg.header.stamp = msg.header.stamp
+        ground_msg.header.frame_id = msg.header.frame_id
+        self.ground_pub.publish(ground_msg)
 
     def run(self):
         rospy.spin()
