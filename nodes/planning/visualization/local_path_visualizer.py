@@ -24,8 +24,6 @@ class LocalPathVisualizer:
         # calculate radius of waypoint so that circles intersect in car width distance from path
         self.waypoint_radius = math.sqrt(self.car_safety_width**2 + (self.waypoint_interval / 2.0)**2)
 
-        print("car_safety_width, wp_interval, and radius ", self.car_safety_width, self.waypoint_interval, self.waypoint_radius)
-
         # Publishers
         self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, latch=True)
 
