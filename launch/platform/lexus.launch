@@ -6,6 +6,8 @@
     <arg name="use_camera_fr"       default="false" />
     <arg name="use_radar_fc"        default="false" />
 
+    <!-- remap to let /radar_fc/vehicle_motion subscribe to /localization/current_velocity      -->
+    <remap from="/radar_fc/vehicle_motion" to="/localization/current_velocity" />
     <!-- Vehicle platform -->
     <include file="$(find vehicle_platform)/launch/platform.launch">
         <arg name="use_tf"              value="true" />

@@ -109,7 +109,6 @@ class NovatelOem7Localizer:
         vel_msg.header.stamp = stamp
         vel_msg.header.frame_id = self.child_frame
         vel_msg.twist.linear.x = linear_velocity
-
         vel_msg.twist.angular = angular_velocity
 
         self.current_velocity_pub.publish(vel_msg)
@@ -127,7 +126,6 @@ class NovatelOem7Localizer:
 
         odom_msg.pose.pose.orientation = orientation
         odom_msg.twist.twist.linear.x = velocity
-
         odom_msg.twist.twist.angular = angular_velocity
 
         self.odometry_pub.publish(odom_msg)
