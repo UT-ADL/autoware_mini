@@ -66,7 +66,7 @@
     </node>
 
     <!-- Localization -->
-    <include if="$(arg use_tf)" file="$(find autoware_mini)/launch/localization.launch">
+    <include if="$(arg use_localization)" file="$(find autoware_mini)/launch/localization.launch">
         <arg name="localizer"       value="$(arg localizer)" />
     </include>
 
