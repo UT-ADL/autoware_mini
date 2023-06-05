@@ -5,6 +5,7 @@
     <arg name="use_camera_fl"       default="false" />
     <arg name="use_camera_fr"       default="false" />
     <arg name="use_radar_fc"        default="false" />
+    <arg name="use_nvidia_cameras"  default="false" />
 
     <!-- remap to let /radar_fc/vehicle_motion subscribe to /localization/current_velocity      -->
     <remap from="/radar_fc/vehicle_motion" to="/localization/current_velocity" />
@@ -19,6 +20,7 @@
         <arg name="use_camera_fl"       value="$(arg use_camera_fl)" />
         <arg name="use_camera_fr"       value="$(arg use_camera_fr)" />
         <arg name="use_radar_fc"        value="$(arg use_radar_fc)" />
+        <arg name="use_nvidia_cameras"  value="$(arg use_nvidia_cameras)" />
     </include>
 
     <group ns="vehicle">
