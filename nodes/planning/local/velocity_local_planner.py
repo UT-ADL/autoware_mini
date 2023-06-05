@@ -21,6 +21,7 @@ from helpers.geometry import get_closest_point_on_line, get_distance_between_two
 from helpers.waypoints import get_two_nearest_waypoint_idx
 from helpers.transform import transform_vector3
 
+from helpers.timer import Timer
 
 class VelocityLocalPlanner:
 
@@ -44,11 +45,6 @@ class VelocityLocalPlanner:
         use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
-
-        # TODO: temporary - need to remove?
-        self.waypoint_interval = rospy.get_param("waypoint_interval")
-        # TODO - will the calculation give exact result - circles intersect at that distance?
-        self.car_safety_radius = math.sqrt(self.car_safety_width**2 + (self.waypoint_interval / 2.0)**2)
 
         # Load the map using Lanelet2
         if coordinate_transformer == "utm":
