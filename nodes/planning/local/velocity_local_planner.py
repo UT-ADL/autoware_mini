@@ -20,6 +20,7 @@ from helpers.geometry import get_closest_point_on_line, get_distance_between_two
 from helpers.waypoints import get_two_nearest_waypoint_idx
 from helpers.transform import transform_vector3
 
+from helpers.timer import Timer
 
 class VelocityLocalPlanner:
 
@@ -32,6 +33,7 @@ class VelocityLocalPlanner:
         self.braking_safety_distance = rospy.get_param("braking_safety_distance")
         self.braking_reaction_time = rospy.get_param("braking_reaction_time")
         self.car_safety_width = rospy.get_param("car_safety_width")
+        self.wp_safety_radius = rospy.get_param("wp_safety_radius")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
 
@@ -40,11 +42,6 @@ class VelocityLocalPlanner:
         use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
-
-        # TODO: temporary - need to remove?
-        self.waypoint_interval = rospy.get_param("waypoint_interval")
-        # TODO - will the calculation give exact result - circles intersect at that distance?
-        self.car_safety_radius = math.sqrt(self.car_safety_width**2 + (self.waypoint_interval / 2.0)**2)
 
         # Load the map using Lanelet2
         if coordinate_transformer == "utm":
@@ -217,7 +214,7 @@ class VelocityLocalPlanner:
             # create spatial index over obstacles for quick search
             obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,:2])
             # find closest obstacle points to local path
-            _, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:2], self.car_safety_radius, return_distance=True)
+            _, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:2], self.wp_safety_radius, return_distance=True)
 
             # If any calculated target_vel drops close to 0 then use this boolean to set all following wp speeds to 0
             zero_speeds_onwards = False
@@ -282,18 +279,25 @@ class VelocityLocalPlanner:
         obstacles_within_car_safety_width = []
         # iterate over obstacle_array_unique and calc 2 closest waypoint indexes
         for x, y, z, v in obstacles_on_local_path:
-            # TODO - there will be wrong distance at the goal point if the OBJ is in last circle!? and beyond the last wp
-            # calculation places it between 2 closest wp's
             wp_backward, wp_forward = get_two_nearest_waypoint_idx(global_path_tree, x, y)
-            closest_point = get_closest_point_on_line(Point(x=x, y=y, z=z), global_path_waypoints[wp_backward].pose.pose.position, global_path_waypoints[wp_forward].pose.pose.position)
-            d_from_path = get_distance_between_two_points_2d(Point(x=x, y=y, z=z), closest_point)
+            # if obstacle in between or after 2 last wp in global path, don't clamp calculated point_on_line coordinates
+            if wp_forward == len(global_path_waypoints) - 1:
+                closest_point = get_closest_point_on_line(Point(x=x, y=y, z=z), global_path_waypoints[wp_backward].pose.pose.position, global_path_waypoints[wp_forward].pose.pose.position, clamp_output=False)
+            else:
+                closest_point = get_closest_point_on_line(Point(x=x, y=y, z=z), global_path_waypoints[wp_backward].pose.pose.position, global_path_waypoints[wp_forward].pose.pose.position)
 
-            # ignore obstacles that are too far from the path
+            d_from_path = get_distance_between_two_points_2d(Point(x=x, y=y, z=z), closest_point)
+            # ignore obstacles that are further than car_safety_width
             if d_from_path > self.car_safety_width:
                 continue
 
             d_from_prev_wp = get_distance_between_two_points_2d(global_path_waypoints[wp_backward].pose.pose.position, closest_point)
             wp_ind_local = wp_backward - global_wp_backward
+
+            # if wp_safety_radius is large then it can include obstacle that are not within the reach of local_path
+            if wp_ind_local > 99:
+                continue
+
             d_from_localpath_start = local_path_dists[wp_ind_local] + d_from_prev_wp
             obstacles_within_car_safety_width.append([wp_ind_local, d_from_localpath_start, d_from_path, v])
 
