@@ -84,7 +84,7 @@ class DetectedObjectsVisualizer:
             marker.pose.position = object.pose.position
             yaw = math.atan2(object.velocity.linear.y, object.velocity.linear.x)
             marker.pose.orientation = get_orientation_from_heading(yaw)
-            marker.scale.x = math.sqrt(object.velocity.linear.x**2 + object.velocity.linear.y**2)
+            marker.scale.x = max(math.sqrt(object.velocity.linear.x**2 + object.velocity.linear.y**2), 0.01)
             marker.scale.y = 0.1
             marker.scale.z = 0.1
             marker.color = ColorRGBA(1.0, 1.0, 0.0, 1.0)
