@@ -117,8 +117,13 @@ class EMATracker:
 
         # update tracked object speeds
         new_velocities = (detected_objects_array[matched_detection_indicies, :2] - self.tracked_objects_array[matched_track_indices, :2]) / time_delta
-        current_velocities = self.tracked_objects_array[matched_track_indices, 6:8] 
-        detected_objects_array[matched_detection_indicies, 6:8] = (1 - self.velocity_gain) * current_velocities + self.velocity_gain * new_velocities
+        old_velocities = self.tracked_objects_array[matched_track_indices, 6:8] 
+        detected_objects_array[matched_detection_indicies, 6:8] = (1 - self.velocity_gain) * old_velocities + self.velocity_gain * new_velocities
+
+        # update tracked object accelerations
+        new_accelerations = (detected_objects_array[matched_detection_indicies, 6:8] - self.tracked_objects_array[matched_track_indices, 6:8]) / time_delta
+        old_accelerations = self.tracked_objects_array[matched_track_indices, 8:10] 
+        detected_objects_array[matched_detection_indicies, 8:10] = (1 - self.acceleration_gain) * old_accelerations + self.acceleration_gain * new_accelerations
 
         # Replace tracked objects with detected objects, keeping the same ID
         for track_idx, detection_idx in zip(matched_track_indices, matched_detection_indicies):
