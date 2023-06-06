@@ -53,6 +53,7 @@ lidar:
     detection_counter_threshold: 1
     missed_counter_threshold: 2
     velocity_gain: 0.1
+    acceleration_gain: 0.1
 
   sfa_detector:
     min_front_x: 0
