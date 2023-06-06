@@ -9,6 +9,8 @@ Panels:
         - /Detection1
         - /Detection1/Lidar1
         - /Detection1/Detected objects1/Namespaces1
+        - /Detection1/Tracked objects1
+        - /Detection1/Tracked objects1/Namespaces1
         - /Planning1
         - /Planning1/Global path1/Namespaces1
         - /Planning1/Smoothed path1/Namespaces1
@@ -294,12 +296,7 @@ Visualization Manager:
           Marker Topic: /planning/lanelet2_map_markers
           Name: Lanelet2 map
           Namespaces:
-            Centerline: true
-            Crosswalk: true
-            Left boundary: true
-            Right boundary: true
-            Stop line: true
-            Traffic lights: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -406,8 +403,7 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               Accel limit: true
@@ -443,6 +439,7 @@ Visualization Manager:
                 Right ROI image: true
                 Stop line status: true
                 Value: true
+              Tracked objects: true
               Value: true
             Grid: true
             Map:
@@ -486,8 +483,7 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               Accel limit: true
@@ -523,6 +519,7 @@ Visualization Manager:
                 Right ROI image: true
                 Stop line status: true
                 Value: true
+              Tracked objects: true
               Value: true
             Grid: true
             Map:
@@ -815,9 +812,17 @@ Visualization Manager:
           Enabled: false
           Name: Radar
         - Class: rviz/MarkerArray
-          Enabled: true
+          Enabled: false
           Marker Topic: /detection/detected_objects_markers
           Name: Detected objects
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /detection/lidar/tracked_objects_markers
+          Name: Tracked objects
           Namespaces:
             bounding_box: false
             centroid: true
@@ -993,6 +998,7 @@ Visualization Manager:
               Radar:
                 Radar detections: true
                 Value: true
+              Tracked objects: true
               Traffic lights:
                 Left ROI image: true
                 Right ROI image: true
