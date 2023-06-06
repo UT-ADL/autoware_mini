@@ -14,7 +14,7 @@ lidar:
     filter_size: 3
   points_clusterer:
     sample_size: 10000
-    cluster_epsilon: 1.0
+    cluster_epsilon: 0.9
     cluster_min_size: 5
   cluster_detector:
     min_cluster_size: 5
@@ -26,6 +26,7 @@ lidar:
     detection_counter_threshold: 1
     missed_counter_threshold: 2
     velocity_gain: 0.1
+    acceleration_gain: 0.1
 
   sfa_detector:
     min_front_x: 0
