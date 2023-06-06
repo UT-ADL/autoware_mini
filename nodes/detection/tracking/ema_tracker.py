@@ -28,10 +28,21 @@ class EMATracker:
         rospy.Subscriber('detected_objects', DetectedObjectArray, self.detected_objects_callback, queue_size=1)
 
     def detected_objects_callback(self, msg):
-        assert len(self.tracked_objects) == len(self.tracked_objects_array), str(len(self.tracked_objects)) + ' ' + str(len(self.tracked_objects_array))
+        # calculate time difference between current and previous message
+        if self.stamp is not None:
+            time_delta = (msg.header.stamp - self.stamp).to_sec()
+        else:
+            time_delta = 0.1
+        self.stamp = msg.header.stamp
 
-        detected_objects = msg.objects
+        # move tracked objects forward in time
+        assert len(self.tracked_objects) == len(self.tracked_objects_array), str(len(self.tracked_objects)) + ' ' + str(len(self.tracked_objects_array))
+        position_change = time_delta * self.tracked_objects_array[:, 6:8]
+        self.tracked_objects_array[:, :2] += position_change
+        self.tracked_objects_array[:, 2:4] += position_change
+
         # convert detected objects into Numpy array
+        detected_objects = msg.objects
         detected_objects_array = np.empty((len(msg.objects), 12), dtype=np.float32)
         for i, obj in enumerate(msg.objects):
             detected_objects_array[i] = [
@@ -56,13 +67,6 @@ class EMATracker:
         matched_track_indices = matched_track_indices[matches]
         matched_detection_indicies = matched_detection_indicies[matches]
         assert len(matched_track_indices) == len(matched_detection_indicies)
-
-        # calculate time difference between current and previous message
-        if self.stamp is not None:
-            time_delta = (msg.header.stamp - self.stamp).to_sec()
-        else:
-            time_delta = 0.1
-        self.stamp = msg.header.stamp
 
         # update tracked object speeds
         new_velocities = (detected_objects_array[matched_detection_indicies, :2] - self.tracked_objects_array[matched_track_indices, :2]) / time_delta
