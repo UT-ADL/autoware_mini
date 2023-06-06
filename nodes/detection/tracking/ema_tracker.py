@@ -115,13 +115,6 @@ class EMATracker:
 
         ### 5. UPDATE TRACKED OBJECTS ###
 
-        # calculate time difference between current and previous message
-        if self.stamp is not None:
-            time_delta = (msg.header.stamp - self.stamp).to_sec()
-        else:
-            time_delta = 0.1
-        self.stamp = msg.header.stamp
-
         # update tracked object speeds
         new_velocities = (detected_objects_array[matched_detection_indicies, :2] - self.tracked_objects_array[matched_track_indices, :2]) / time_delta
         current_velocities = self.tracked_objects_array[matched_track_indices, 6:8] 

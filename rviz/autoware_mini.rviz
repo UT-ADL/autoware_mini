@@ -405,13 +405,7 @@ Visualization Manager:
               "": true
               Value: true
             Dashboard:
-              Accel limit: true
-              Acceleration: true
-              Closest obj dist: true
-              Closest obj spd: true
-              Current speed: true
-              Decel limit: true
-              Target speed: true
+              "": true
               Value: true
             Detection:
               Detected objects: true
@@ -445,11 +439,7 @@ Visualization Manager:
               "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -465,8 +455,7 @@ Visualization Manager:
               Carla image view: true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -485,13 +474,7 @@ Visualization Manager:
               "": true
               Value: true
             Dashboard:
-              Accel limit: true
-              Acceleration: true
-              Closest obj dist: true
-              Closest obj spd: true
-              Current speed: true
-              Decel limit: true
-              Target speed: true
+              "": true
               Value: true
             Detection:
               Detected objects: true
@@ -525,11 +508,7 @@ Visualization Manager:
               "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -545,8 +524,7 @@ Visualization Manager:
               Carla image view: true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -974,8 +952,7 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               Accel limit: true
@@ -1019,11 +996,7 @@ Visualization Manager:
               "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
