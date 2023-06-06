@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
+import rospy
 import numpy as np
 from scipy.optimize import linear_sum_assignment
-
-import rospy
-
 from autoware_msgs.msg import DetectedObjectArray
 from helpers.detection import calculate_iou
 
@@ -28,19 +26,6 @@ class EMATracker:
         rospy.Subscriber('detected_objects', DetectedObjectArray, self.detected_objects_callback, queue_size=1)
 
     def detected_objects_callback(self, msg):
-        # calculate time difference between current and previous message
-        if self.stamp is not None:
-            time_delta = (msg.header.stamp - self.stamp).to_sec()
-        else:
-            time_delta = 0.1
-        self.stamp = msg.header.stamp
-
-        # move tracked objects forward in time
-        assert len(self.tracked_objects) == len(self.tracked_objects_array), str(len(self.tracked_objects)) + ' ' + str(len(self.tracked_objects_array))
-        position_change = time_delta * self.tracked_objects_array[:, 6:8]
-        self.tracked_objects_array[:, :2] += position_change
-        self.tracked_objects_array[:, 2:4] += position_change
-
         # convert detected objects into Numpy array
         detected_objects = msg.objects
         detected_objects_array = np.empty((len(msg.objects), 12), dtype=np.float32)
@@ -53,6 +38,19 @@ class EMATracker:
                 obj.acceleration.linear.x, obj.acceleration.linear.y,
                 0, 1]   # zero missed detections, one detection
         assert len(detected_objects) == len(detected_objects_array)
+
+        # calculate time difference between current and previous message
+        if self.stamp is not None:
+            time_delta = (msg.header.stamp - self.stamp).to_sec()
+        else:
+            time_delta = 0.1
+        self.stamp = msg.header.stamp
+
+        # move tracked objects forward in time
+        assert len(self.tracked_objects) == len(self.tracked_objects_array), str(len(self.tracked_objects)) + ' ' + str(len(self.tracked_objects_array))
+        position_change = time_delta * self.tracked_objects_array[:, 6:8]
+        self.tracked_objects_array[:, :2] += position_change
+        self.tracked_objects_array[:, 2:4] += position_change
 
         # Calculate the IOU between the tracked objects and the detected objects
         iou = calculate_iou(self.tracked_objects_array[:, :4], detected_objects_array[:, :4])
