@@ -49,6 +49,9 @@ lidar:
     enable_pointcloud: False
     enable_convex_hull: True
     transform_timeout: 0.06         # needed for Carla
+  ema_tracker:
+    detection_counter_threshold: 3
+    missed_counter_threshold: 3
 
   sfa_detector:
     min_front_x: 0

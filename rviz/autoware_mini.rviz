@@ -295,12 +295,7 @@ Visualization Manager:
           Marker Topic: /planning/lanelet2_map_markers
           Name: Lanelet2 map
           Namespaces:
-            Centerline: true
-            Crosswalk: true
-            Left boundary: true
-            Right boundary: true
-            Stop line: true
-            Traffic lights: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -407,8 +402,7 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               Accel limit: true
@@ -488,8 +482,7 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               Accel limit: true
