@@ -52,6 +52,7 @@ lidar:
   ema_tracker:
     detection_counter_threshold: 3
     missed_counter_threshold: 3
+    velocity_gain: 0.2
 
   sfa_detector:
     min_front_x: 0
