@@ -40,7 +40,7 @@ lidar:
     min_range_front: 1.2  # radius value within which the points from ouster are discarded. Done after transforming to lidar_center frame
   points_clusterer:
     sample_size: 10000
-    cluster_epsilon: 1.0
+    cluster_epsilon: 0.9
     cluster_min_size: 5
     dbscan_implementation: cuml     # cuml, sklearnx, sklearn
   cluster_detector:
@@ -53,6 +53,7 @@ lidar:
     detection_counter_threshold: 1
     missed_counter_threshold: 2
     velocity_gain: 0.1
+    acceleration_gain: 0.1
 
   sfa_detector:
     min_front_x: 0
