@@ -14,10 +14,12 @@ class EMATracker:
         # Parameters
         self.detection_counter_threshold = rospy.get_param('~detection_counter_threshold')
         self.missed_counter_threshold = rospy.get_param('~missed_counter_threshold')
+        self.velocity_gain = rospy.get_param('~velocity_gain')
 
         self.tracked_objects = []
         self.tracked_objects_array = np.empty((0, 12), dtype=np.float32)
         self.track_id_counter = 0
+        self.stamp = None
 
         # Publishers
         self.tracked_objects_pub = rospy.Publisher('tracked_objects', DetectedObjectArray, queue_size=1)
@@ -55,11 +57,27 @@ class EMATracker:
         matched_detection_indicies = matched_detection_indicies[matches]
         assert len(matched_track_indices) == len(matched_detection_indicies)
 
+        # calculate time difference between current and previous message
+        if self.stamp is not None:
+            time_delta = (msg.header.stamp - self.stamp).to_sec()
+        else:
+            time_delta = 0.1
+        self.stamp = msg.header.stamp
+
+        # update tracked object speeds
+        new_velocities = (detected_objects_array[matched_detection_indicies, :2] - self.tracked_objects_array[matched_track_indices, :2]) / time_delta
+        current_velocities = self.tracked_objects_array[matched_track_indices, 6:8] 
+        detected_objects_array[matched_detection_indicies, 6:8] = (1 - self.velocity_gain) * current_velocities + self.velocity_gain * new_velocities
+
         # Replace tracked objects with detected objects, keeping the same ID
         for track_idx, detection_idx in zip(matched_track_indices, matched_detection_indicies):
             tracked_obj = self.tracked_objects[track_idx]
             detected_obj = detected_objects[detection_idx]
             detected_obj.id = tracked_obj.id
+            if not detected_obj.velocity_reliable:
+                detected_obj.velocity.linear.x = detected_objects_array[detection_idx, 6]
+                detected_obj.velocity.linear.y = detected_objects_array[detection_idx, 7]
+                detected_obj.velocity_reliable = True
             self.tracked_objects[track_idx] = detected_obj
         self.tracked_objects_array[matched_track_indices, :10] = detected_objects_array[matched_detection_indicies, :10]
 
