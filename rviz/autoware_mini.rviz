@@ -204,7 +204,7 @@ Visualization Manager:
           linewidth: 1
           max color: 255; 0; 0
           max value: 30
-          min value: 16
+          min value: 10
           show caption: true
           text size: 10
           top: 10
@@ -376,30 +376,19 @@ Visualization Manager:
               "": true
               Value: true
             Dashboard:
-              Accel limit: true
-              Acceleration: true
-              Closest obj dist: true
-              Closest obj spd: true
-              Current speed: true
-              Decel limit: true
-              Target speed: true
+              "": true
               Value: true
             Detection:
               "":
                 "": true
                 Value: true
-              Tracked objects: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -414,8 +403,7 @@ Visualization Manager:
               Carla image view: true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -434,30 +422,19 @@ Visualization Manager:
               "": true
               Value: true
             Dashboard:
-              Accel limit: true
-              Acceleration: true
-              Closest obj dist: true
-              Closest obj spd: true
-              Current speed: true
-              Decel limit: true
-              Target speed: true
+              "": true
               Value: true
             Detection:
               "":
                 "": true
                 Value: true
-              Tracked objects: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -472,8 +449,7 @@ Visualization Manager:
               Carla image view: true
               Value: true
             System:
-              Lexus model: true
-              TF: true
+              "": true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -605,6 +581,7 @@ Visualization Manager:
             bounding_box: false
             centroid: true
             convex_hull: true
+            speed: true
             text: true
           Queue Size: 100
           Value: true
@@ -757,21 +734,8 @@ Visualization Manager:
               Target speed: true
               Value: true
             Detection:
-              Detected objects: true
-              Lidar:
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Tracked objects: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
@@ -845,7 +809,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.0010000000474974513
-      Scale: 22.838207244873047
+      Scale: 29.6350040435791
       Target Frame: base_link
       X: 0
       Y: 0
