@@ -13,6 +13,7 @@ class EMATracker:
         self.detection_counter_threshold = rospy.get_param('~detection_counter_threshold')
         self.missed_counter_threshold = rospy.get_param('~missed_counter_threshold')
         self.velocity_gain = rospy.get_param('~velocity_gain')
+        self.acceleration_gain = rospy.get_param('~acceleration_gain')
 
         self.tracked_objects = []
         self.tracked_objects_array = np.empty((0, 12), dtype=np.float32)
@@ -68,8 +69,13 @@ class EMATracker:
 
         # update tracked object speeds
         new_velocities = (detected_objects_array[matched_detection_indicies, :2] - self.tracked_objects_array[matched_track_indices, :2]) / time_delta
-        current_velocities = self.tracked_objects_array[matched_track_indices, 6:8] 
-        detected_objects_array[matched_detection_indicies, 6:8] = (1 - self.velocity_gain) * current_velocities + self.velocity_gain * new_velocities
+        old_velocities = self.tracked_objects_array[matched_track_indices, 6:8] 
+        detected_objects_array[matched_detection_indicies, 6:8] = (1 - self.velocity_gain) * old_velocities + self.velocity_gain * new_velocities
+
+        # update tracked object accelerations
+        new_accelerations = (detected_objects_array[matched_detection_indicies, 6:8] - self.tracked_objects_array[matched_track_indices, 6:8]) / time_delta
+        old_accelerations = self.tracked_objects_array[matched_track_indices, 8:10] 
+        detected_objects_array[matched_detection_indicies, 8:10] = (1 - self.acceleration_gain) * old_accelerations + self.acceleration_gain * new_accelerations
 
         # Replace tracked objects with detected objects, keeping the same ID
         for track_idx, detection_idx in zip(matched_track_indices, matched_detection_indicies):
@@ -80,6 +86,10 @@ class EMATracker:
                 detected_obj.velocity.linear.x = detected_objects_array[detection_idx, 6]
                 detected_obj.velocity.linear.y = detected_objects_array[detection_idx, 7]
                 detected_obj.velocity_reliable = True
+            if not detected_obj.acceleration_reliable:
+                detected_obj.acceleration.linear.x = detected_objects_array[detection_idx, 8]
+                detected_obj.acceleration.linear.y = detected_objects_array[detection_idx, 9]
+                detected_obj.acceleration_reliable = True
             self.tracked_objects[track_idx] = detected_obj
         self.tracked_objects_array[matched_track_indices, :10] = detected_objects_array[matched_detection_indicies, :10]
 
