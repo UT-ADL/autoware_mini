@@ -27,6 +27,8 @@ class EMATracker:
         rospy.Subscriber('detected_objects', DetectedObjectArray, self.detected_objects_callback, queue_size=1)
 
     def detected_objects_callback(self, msg):
+        ### 1. PREPARE DETECTIONS ###
+
         # convert detected objects into Numpy array
         detected_objects = msg.objects
         detected_objects_array = np.empty((len(msg.objects), 12), dtype=np.float32)
@@ -40,6 +42,8 @@ class EMATracker:
                 0, 1]   # zero missed detections, one detection
         assert len(detected_objects) == len(detected_objects_array)
 
+        ### 2. PROPAGATE EXISTING TRACKS FORWARD ###
+
         # calculate time difference between current and previous message
         if self.stamp is not None:
             time_delta = (msg.header.stamp - self.stamp).to_sec()
@@ -52,6 +56,8 @@ class EMATracker:
         position_change = time_delta * self.tracked_objects_array[:, 6:8]
         self.tracked_objects_array[:, :2] += position_change
         self.tracked_objects_array[:, 2:4] += position_change
+
+        ### 3. MATCH TRACKS WITH DETECTIONS ###
 
         # Calculate the IOU between the tracked objects and the detected objects
         iou = calculate_iou(self.tracked_objects_array[:, :4], detected_objects_array[:, :4])
@@ -67,15 +73,19 @@ class EMATracker:
         matched_detection_indicies = matched_detection_indicies[matches]
         assert len(matched_track_indices) == len(matched_detection_indicies)
 
-        # update tracked object speeds
+        ### 4. CALCULATE TRACKED OBJECT SPEEDS AND ACCELERATIONS ###
+
+        # update tracked object speeds with exponential moving average
         new_velocities = (detected_objects_array[matched_detection_indicies, :2] - self.tracked_objects_array[matched_track_indices, :2]) / time_delta
         old_velocities = self.tracked_objects_array[matched_track_indices, 6:8] 
         detected_objects_array[matched_detection_indicies, 6:8] = (1 - self.velocity_gain) * old_velocities + self.velocity_gain * new_velocities
 
-        # update tracked object accelerations
+        # update tracked object accelerations with exponential moving average
         new_accelerations = (detected_objects_array[matched_detection_indicies, 6:8] - self.tracked_objects_array[matched_track_indices, 6:8]) / time_delta
         old_accelerations = self.tracked_objects_array[matched_track_indices, 8:10] 
         detected_objects_array[matched_detection_indicies, 8:10] = (1 - self.acceleration_gain) * old_accelerations + self.acceleration_gain * new_accelerations
+
+        ### 5. UPDATE TRACKED OBJECTS ###
 
         # Replace tracked objects with detected objects, keeping the same ID
         for track_idx, detection_idx in zip(matched_track_indices, matched_detection_indicies):
@@ -92,6 +102,8 @@ class EMATracker:
                 detected_obj.acceleration_reliable = True
             self.tracked_objects[track_idx] = detected_obj
         self.tracked_objects_array[matched_track_indices, :10] = detected_objects_array[matched_detection_indicies, :10]
+
+        ### 6. MANAGE TRACK STATUS ###
 
         # create missed track indices
         all_track_indices = np.arange(0, len(self.tracked_objects), 1, dtype=int)
@@ -111,9 +123,9 @@ class EMATracker:
 
         # delete stale tracks
         stale_track_indices = np.where(self.tracked_objects_array[:, 10] >= self.missed_counter_threshold)[0]
-        self.tracked_objects_array = np.delete(self.tracked_objects_array, stale_track_indices, axis=0)
         for idx in sorted(stale_track_indices, reverse=True):
             del self.tracked_objects[idx]
+        self.tracked_objects_array = np.delete(self.tracked_objects_array, stale_track_indices, axis=0)
         assert len(self.tracked_objects) == len(self.tracked_objects_array), str(len(self.tracked_objects)) + ' ' + str(len(self.tracked_objects_array))
 
         # add new detections
@@ -124,6 +136,8 @@ class EMATracker:
             self.track_id_counter += 1
         self.tracked_objects_array = np.vstack((self.tracked_objects_array, detected_objects_array[new_detection_indices]))
         assert len(self.tracked_objects) == len(self.tracked_objects_array)
+
+        ### 7. PUBLISH CURRENT TRACKS ###
 
         # filter out objects with enough detections
         tracked_objects_indices = np.where(self.tracked_objects_array[:, 11] >= self.detection_counter_threshold)[0]
