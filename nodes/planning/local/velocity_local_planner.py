@@ -69,7 +69,7 @@ class VelocityLocalPlanner:
         rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)
         rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
         rospy.Subscriber('/localization/current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1)
-        rospy.Subscriber('/detection/detected_objects', DetectedObjectArray, self.detected_objects_callback, queue_size=1)
+        rospy.Subscriber('/detection/final_objects', DetectedObjectArray, self.detected_objects_callback, queue_size=1)
         rospy.Subscriber('/detection/traffic_light_status', TrafficLightResultArray, self.traffic_light_status_callback, queue_size=1)
 
 
