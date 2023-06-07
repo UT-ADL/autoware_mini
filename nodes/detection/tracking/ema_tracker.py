@@ -101,7 +101,7 @@ class EMATracker:
         else:
             assert False, 'Unknown association method: ' + self.association_method
 
-        ### 4. CALCULATE TRACKED OBJECT SPEEDS AND ACCELERATIONS ###
+        ### 4. ESTIMATE TRACKED OBJECT SPEEDS AND ACCELERATIONS ###
 
         # update tracked object speeds with exponential moving average
         new_velocities = (detected_objects_array['centroid'][matched_detection_indicies] - self.tracked_objects_array['centroid'][matched_track_indices]) / time_delta
