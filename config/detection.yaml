@@ -50,10 +50,12 @@ lidar:
     enable_convex_hull: True
     transform_timeout: 0.06         # needed for Carla
   ema_tracker:
-    detection_counter_threshold: 1
+    detection_counter_threshold: 2
     missed_counter_threshold: 2
     velocity_gain: 0.1
     acceleration_gain: 0.1
+    association_method: iou   # iou, euclidean
+    max_euclidean_distance: 2.0
 
   sfa_detector:
     min_front_x: 0
