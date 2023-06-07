@@ -2,7 +2,7 @@
 
 import rospy
 import numpy as np
-from scipy.optimize import linear_sum_assignment
+import scipy
 from autoware_msgs.msg import DetectedObjectArray
 from helpers.detection import calculate_iou
 
@@ -14,6 +14,8 @@ class EMATracker:
         self.missed_counter_threshold = rospy.get_param('~missed_counter_threshold')
         self.velocity_gain = rospy.get_param('~velocity_gain')
         self.acceleration_gain = rospy.get_param('~acceleration_gain')
+        self.association_method = rospy.get_param('~association_method')
+        self.max_euclidean_distance = rospy.get_param('~max_euclidean_distance')
 
         self.tracked_objects = []
         self.tracked_objects_array = np.empty((0,), dtype=[
@@ -69,19 +71,35 @@ class EMATracker:
 
         ### 3. MATCH TRACKS WITH DETECTIONS ###
 
-        # Calculate the IOU between the tracked objects and the detected objects
-        iou = calculate_iou(self.tracked_objects_array['bbox'], detected_objects_array['bbox'])
-        assert iou.shape == (len(self.tracked_objects_array), len(detected_objects_array))
+        if self.association_method == 'iou':
+            # Calculate the IOU between the tracked objects and the detected objects
+            iou = calculate_iou(self.tracked_objects_array['bbox'], detected_objects_array['bbox'])
+            assert iou.shape == (len(self.tracked_objects_array), len(detected_objects_array))
 
-        # Calculate the association between the tracked objects and the detected objects
-        matched_track_indices, matched_detection_indicies = linear_sum_assignment(-iou)
-        assert len(matched_track_indices) == len(matched_detection_indicies)
+            # Calculate the association between the tracked objects and the detected objects
+            matched_track_indices, matched_detection_indicies = scipy.optimize.linear_sum_assignment(-iou)
+            assert len(matched_track_indices) == len(matched_detection_indicies)
 
-        # Only keep those matches where the IOU is greater than 0.0
-        matches = iou[matched_track_indices, matched_detection_indicies] > 0.0
-        matched_track_indices = matched_track_indices[matches]
-        matched_detection_indicies = matched_detection_indicies[matches]
-        assert len(matched_track_indices) == len(matched_detection_indicies)
+            # Only keep those matches where the IOU is greater than 0.0
+            matches = iou[matched_track_indices, matched_detection_indicies] > 0.0
+            matched_track_indices = matched_track_indices[matches]
+            matched_detection_indicies = matched_detection_indicies[matches]
+            assert len(matched_track_indices) == len(matched_detection_indicies)
+        elif self.association_method == 'euclidean':
+            # Calculate euclidean distance between the tracked object and the detected object centroids
+            dists = scipy.spatial.distance.cdist(self.tracked_objects_array['centroid'], detected_objects_array['centroid'])
+            assert dists.shape == (len(self.tracked_objects_array), len(detected_objects_array))
+
+            # Calculate the association between the tracked objects and the detected objects
+            matched_track_indices, matched_detection_indicies = scipy.optimize.linear_sum_assignment(dists)
+
+            # Only keep those matches where the distance is less than threshold
+            matches = dists[matched_track_indices, matched_detection_indicies] <= self.max_euclidean_distance
+            matched_track_indices = matched_track_indices[matches]
+            matched_detection_indicies = matched_detection_indicies[matches]
+            assert len(matched_track_indices) == len(matched_detection_indicies)
+        else:
+            assert False, 'Unknown association method: ' + self.association_method
 
         ### 4. CALCULATE TRACKED OBJECT SPEEDS AND ACCELERATIONS ###
 
