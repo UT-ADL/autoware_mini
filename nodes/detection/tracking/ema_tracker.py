@@ -4,7 +4,7 @@ import rospy
 import numpy as np
 import scipy
 from autoware_msgs.msg import DetectedObjectArray
-from helpers.detection import calculate_iou
+from helpers.detection import calculate_iou, get_axis_oriented_bounding_box
 
 class EMATracker:
     def __init__(self):
@@ -43,8 +43,7 @@ class EMATracker:
         detected_objects_array = np.empty((len(detected_objects)), dtype=self.tracked_objects_array.dtype)
         for i, obj in enumerate(detected_objects):
             detected_objects_array[i]['centroid'] = (obj.pose.position.x, obj.pose.position.y)
-            detected_objects_array[i]['bbox'] = (obj.pose.position.x - obj.dimensions.x / 2, obj.pose.position.y - obj.dimensions.y / 2, 
-                 obj.pose.position.x + obj.dimensions.x / 2, obj.pose.position.y + obj.dimensions.y / 2)
+            detected_objects_array[i]['bbox'] = get_axis_oriented_bounding_box(obj)
             detected_objects_array[i]['velocity'] = (obj.velocity.linear.x, obj.velocity.linear.y) 
             detected_objects_array[i]['acceleration'] = (obj.acceleration.linear.x, obj.acceleration.linear.y)
             detected_objects_array[i]['missed_counter'] = 0
@@ -101,7 +100,7 @@ class EMATracker:
         else:
             assert False, 'Unknown association method: ' + self.association_method
 
-        ### 4. CALCULATE TRACKED OBJECT SPEEDS AND ACCELERATIONS ###
+        ### 4. ESTIMATE TRACKED OBJECT SPEEDS AND ACCELERATIONS ###
 
         # update tracked object speeds with exponential moving average
         new_velocities = (detected_objects_array['centroid'][matched_detection_indicies] - self.tracked_objects_array['centroid'][matched_track_indices]) / time_delta
