@@ -16,7 +16,14 @@ class EMATracker:
         self.acceleration_gain = rospy.get_param('~acceleration_gain')
 
         self.tracked_objects = []
-        self.tracked_objects_array = np.empty((0, 12), dtype=np.float32)
+        self.tracked_objects_array = np.empty((0,), dtype=[
+            ('centroid', np.float32, (2,)),
+            ('bbox', np.float32, (4,)),
+            ('velocity', np.float32, (2,)),
+            ('acceleration', np.float32, (2,)),
+            ('missed_counter', np.int32),
+            ('detection_counter', np.int32),
+        ])
         self.track_id_counter = 0
         self.stamp = None
 
@@ -31,15 +38,15 @@ class EMATracker:
 
         # convert detected objects into Numpy array
         detected_objects = msg.objects
-        detected_objects_array = np.empty((len(msg.objects), 12), dtype=np.float32)
-        for i, obj in enumerate(msg.objects):
-            detected_objects_array[i] = [
-                obj.pose.position.x, obj.pose.position.y,
-                obj.pose.position.x + obj.dimensions.x, obj.pose.position.y + obj.dimensions.y,
-                obj.dimensions.x, obj.dimensions.y,
-                obj.velocity.linear.x, obj.velocity.linear.y, 
-                obj.acceleration.linear.x, obj.acceleration.linear.y,
-                0, 1]   # zero missed detections, one detection
+        detected_objects_array = np.empty((len(detected_objects)), dtype=self.tracked_objects_array.dtype)
+        for i, obj in enumerate(detected_objects):
+            detected_objects_array[i]['centroid'] = (obj.pose.position.x, obj.pose.position.y)
+            detected_objects_array[i]['bbox'] = (obj.pose.position.x - obj.dimensions.x / 2, obj.pose.position.y - obj.dimensions.y / 2, 
+                 obj.pose.position.x + obj.dimensions.x / 2, obj.pose.position.y + obj.dimensions.y / 2)
+            detected_objects_array[i]['velocity'] = (obj.velocity.linear.x, obj.velocity.linear.y) 
+            detected_objects_array[i]['acceleration'] = (obj.acceleration.linear.x, obj.acceleration.linear.y)
+            detected_objects_array[i]['missed_counter'] = 0
+            detected_objects_array[i]['detection_counter'] = 1
         assert len(detected_objects) == len(detected_objects_array)
 
         ### 2. PROPAGATE EXISTING TRACKS FORWARD ###
@@ -53,15 +60,18 @@ class EMATracker:
 
         # move tracked objects forward in time
         assert len(self.tracked_objects) == len(self.tracked_objects_array), str(len(self.tracked_objects)) + ' ' + str(len(self.tracked_objects_array))
-        position_change = time_delta * self.tracked_objects_array[:, 6:8]
-        self.tracked_objects_array[:, :2] += position_change
-        self.tracked_objects_array[:, 2:4] += position_change
+        position_change = time_delta * self.tracked_objects_array['velocity']
+        self.tracked_objects_array['centroid'] += position_change
+        self.tracked_objects_array['bbox'][:,:2] += position_change
+        self.tracked_objects_array['bbox'][:,2:4] += position_change
+        velocity_change = time_delta * self.tracked_objects_array['acceleration']
+        self.tracked_objects_array['velocity'] += velocity_change
 
         ### 3. MATCH TRACKS WITH DETECTIONS ###
 
         # Calculate the IOU between the tracked objects and the detected objects
-        iou = calculate_iou(self.tracked_objects_array[:, :4], detected_objects_array[:, :4])
-        assert iou.shape == (len(self.tracked_objects), len(detected_objects))
+        iou = calculate_iou(self.tracked_objects_array['bbox'], detected_objects_array['bbox'])
+        assert iou.shape == (len(self.tracked_objects_array), len(detected_objects_array))
 
         # Calculate the association between the tracked objects and the detected objects
         matched_track_indices, matched_detection_indicies = linear_sum_assignment(-iou)
@@ -76,14 +86,14 @@ class EMATracker:
         ### 4. CALCULATE TRACKED OBJECT SPEEDS AND ACCELERATIONS ###
 
         # update tracked object speeds with exponential moving average
-        new_velocities = (detected_objects_array[matched_detection_indicies, :2] - self.tracked_objects_array[matched_track_indices, :2]) / time_delta
-        old_velocities = self.tracked_objects_array[matched_track_indices, 6:8] 
-        detected_objects_array[matched_detection_indicies, 6:8] = (1 - self.velocity_gain) * old_velocities + self.velocity_gain * new_velocities
+        new_velocities = (detected_objects_array['centroid'][matched_detection_indicies] - self.tracked_objects_array['centroid'][matched_track_indices]) / time_delta
+        old_velocities = self.tracked_objects_array['velocity'][matched_track_indices]
+        detected_objects_array['velocity'][matched_detection_indicies] = (1 - self.velocity_gain) * old_velocities + self.velocity_gain * new_velocities
 
         # update tracked object accelerations with exponential moving average
-        new_accelerations = (detected_objects_array[matched_detection_indicies, 6:8] - self.tracked_objects_array[matched_track_indices, 6:8]) / time_delta
-        old_accelerations = self.tracked_objects_array[matched_track_indices, 8:10] 
-        detected_objects_array[matched_detection_indicies, 8:10] = (1 - self.acceleration_gain) * old_accelerations + self.acceleration_gain * new_accelerations
+        new_accelerations = (detected_objects_array['velocity'][matched_detection_indicies] - self.tracked_objects_array['velocity'][matched_track_indices]) / time_delta
+        old_accelerations = self.tracked_objects_array['acceleration'][matched_track_indices]
+        detected_objects_array['acceleration'][matched_detection_indicies] = (1 - self.acceleration_gain) * old_accelerations + self.acceleration_gain * new_accelerations
 
         ### 5. UPDATE TRACKED OBJECTS ###
 
@@ -93,15 +103,14 @@ class EMATracker:
             detected_obj = detected_objects[detection_idx]
             detected_obj.id = tracked_obj.id
             if not detected_obj.velocity_reliable:
-                detected_obj.velocity.linear.x = detected_objects_array[detection_idx, 6]
-                detected_obj.velocity.linear.y = detected_objects_array[detection_idx, 7]
+                detected_obj.velocity.linear.x, detected_obj.velocity.linear.y = detected_objects_array['velocity'][detection_idx]
                 detected_obj.velocity_reliable = True
             if not detected_obj.acceleration_reliable:
-                detected_obj.acceleration.linear.x = detected_objects_array[detection_idx, 8]
-                detected_obj.acceleration.linear.y = detected_objects_array[detection_idx, 9]
+                detected_obj.acceleration.linear.x, detected_obj.acceleration.linear.y = detected_objects_array['acceleration'][detection_idx]
                 detected_obj.acceleration_reliable = True
             self.tracked_objects[track_idx] = detected_obj
-        self.tracked_objects_array[matched_track_indices, :10] = detected_objects_array[matched_detection_indicies, :10]
+        self.tracked_objects_array[['centroid', 'bbox', 'velocity', 'acceleration']][matched_track_indices] = \
+            detected_objects_array[['centroid', 'bbox', 'velocity', 'acceleration']][matched_detection_indicies]
 
         ### 6. MANAGE TRACK STATUS ###
 
@@ -114,15 +123,15 @@ class EMATracker:
         new_detection_indices = np.delete(all_detection_indices, matched_detection_indicies)
 
         # zero missed counter and increase detected counter for matched objects
-        self.tracked_objects_array[matched_track_indices, 10] = 0
-        self.tracked_objects_array[matched_track_indices, 11] += 1
+        self.tracked_objects_array['missed_counter'][matched_track_indices] = 0
+        self.tracked_objects_array['detection_counter'][matched_track_indices] += 1
 
         # increase missed counter and zero detection counter for non-matched tracks
-        self.tracked_objects_array[missed_track_indices, 10] += 1
-        self.tracked_objects_array[missed_track_indices, 11] = 0
+        self.tracked_objects_array['missed_counter'][missed_track_indices] += 1
+        #self.tracked_objects_array['detection_counter'][missed_track_indices] = 0
 
         # delete stale tracks
-        stale_track_indices = np.where(self.tracked_objects_array[:, 10] >= self.missed_counter_threshold)[0]
+        stale_track_indices = np.where(self.tracked_objects_array['missed_counter'] >= self.missed_counter_threshold)[0]
         for idx in sorted(stale_track_indices, reverse=True):
             del self.tracked_objects[idx]
         self.tracked_objects_array = np.delete(self.tracked_objects_array, stale_track_indices, axis=0)
@@ -132,15 +141,15 @@ class EMATracker:
         for obj_idx in new_detection_indices:
             detected_obj = detected_objects[obj_idx]
             detected_obj.id = self.track_id_counter
-            self.tracked_objects.append(detected_obj)
             self.track_id_counter += 1
-        self.tracked_objects_array = np.vstack((self.tracked_objects_array, detected_objects_array[new_detection_indices]))
+            self.tracked_objects.append(detected_obj)
+        self.tracked_objects_array = np.concatenate((self.tracked_objects_array, detected_objects_array[new_detection_indices]))
         assert len(self.tracked_objects) == len(self.tracked_objects_array)
 
         ### 7. PUBLISH CURRENT TRACKS ###
 
         # filter out objects with enough detections
-        tracked_objects_indices = np.where(self.tracked_objects_array[:, 11] >= self.detection_counter_threshold)[0]
+        tracked_objects_indices = np.where(self.tracked_objects_array['detection_counter'] >= self.detection_counter_threshold)[0]
         tracked_objects = [self.tracked_objects[idx] for idx in tracked_objects_indices]
         assert len(tracked_objects) == len(tracked_objects_indices)
 
