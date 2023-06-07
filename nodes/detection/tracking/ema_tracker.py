@@ -118,14 +118,14 @@ class EMATracker:
         ### 4. CALCULATE TRACKED OBJECT SPEEDS AND ACCELERATIONS ###
 
         # update tracked object speeds with exponential moving average
-        new_velocities = (detected_objects_array[matched_detection_indicies, :2] - self.tracked_objects_array[matched_track_indices, :2]) / time_delta
-        old_velocities = self.tracked_objects_array[matched_track_indices, 6:8] 
-        detected_objects_array[matched_detection_indicies, 6:8] = (1 - self.velocity_gain) * old_velocities + self.velocity_gain * new_velocities
+        new_velocities = (detected_objects_array['centroid'][matched_detection_indicies] - self.tracked_objects_array['centroid'][matched_track_indices]) / time_delta
+        old_velocities = self.tracked_objects_array['velocity'][matched_track_indices]
+        detected_objects_array['velocity'][matched_detection_indicies] = (1 - self.velocity_gain) * old_velocities + self.velocity_gain * new_velocities
 
         # update tracked object accelerations with exponential moving average
-        new_accelerations = (detected_objects_array[matched_detection_indicies, 6:8] - self.tracked_objects_array[matched_track_indices, 6:8]) / time_delta
-        old_accelerations = self.tracked_objects_array[matched_track_indices, 8:10] 
-        detected_objects_array[matched_detection_indicies, 8:10] = (1 - self.acceleration_gain) * old_accelerations + self.acceleration_gain * new_accelerations
+        new_accelerations = (detected_objects_array['velocity'][matched_detection_indicies] - self.tracked_objects_array['velocity'][matched_track_indices]) / time_delta
+        old_accelerations = self.tracked_objects_array['acceleration'][matched_track_indices]
+        detected_objects_array['acceleration'][matched_detection_indicies] = (1 - self.acceleration_gain) * old_accelerations + self.acceleration_gain * new_accelerations
 
         ### 5. UPDATE TRACKED OBJECTS ###
 
@@ -143,8 +143,6 @@ class EMATracker:
             self.tracked_objects[track_idx] = detected_obj
         self.tracked_objects_array[['centroid', 'bbox', 'velocity', 'acceleration']][matched_track_indices] = \
             detected_objects_array[['centroid', 'bbox', 'velocity', 'acceleration']][matched_detection_indicies]
-
-        ### 6. MANAGE TRACK STATUS ###
 
         ### 6. MANAGE TRACK STATUS ###
 
