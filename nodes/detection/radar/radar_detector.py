@@ -104,7 +104,7 @@ class RadarDetector:
                 detected_object.acceleration.linear = transform_vector3(track.acceleration, source_frame_to_output_tf)
                 detected_object.acceleration_reliable = True
                 detected_object.dimensions = track.size
-                detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, tracks.header.stamp)
+                detected_object.convex_hull = create_hull(detected_object, self.output_frame, tracks.header.stamp)
 
                 detected_objects_array.objects.append(detected_object)
 

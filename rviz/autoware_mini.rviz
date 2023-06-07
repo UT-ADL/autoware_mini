@@ -9,7 +9,6 @@ Panels:
         - /Detection1
         - /Detection1/Lidar1
         - /Detection1/Detected objects1/Namespaces1
-        - /Detection1/Tracked objects1
         - /Detection1/Tracked objects1/Namespaces1
         - /Planning1
         - /Planning1/Global path1/Namespaces1
@@ -296,7 +295,12 @@ Visualization Manager:
           Marker Topic: /planning/lanelet2_map_markers
           Name: Lanelet2 map
           Namespaces:
-            {}
+            Centerline: true
+            Crosswalk: true
+            Left boundary: true
+            Right boundary: true
+            Stop line: true
+            Traffic lights: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -403,10 +407,17 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              "": true
+              Current pose: true
+              Follower markers: true
               Value: true
             Dashboard:
-              "": true
+              Accel limit: true
+              Acceleration: true
+              Closest obj dist: true
+              Closest obj spd: true
+              Current speed: true
+              Decel limit: true
+              Target speed: true
               Value: true
             Detection:
               Detected objects: true
@@ -433,13 +444,18 @@ Visualization Manager:
                 Right ROI image: true
                 Stop line status: true
                 Value: true
+              Final objects: true
               Value: true
             Grid: true
             Map:
               "": true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -455,7 +471,8 @@ Visualization Manager:
               Carla image view: true
               Value: true
             System:
-              "": true
+              Lexus model: true
+              TF: true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -471,10 +488,17 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              "": true
+              Current pose: true
+              Follower markers: true
               Value: true
             Dashboard:
-              "": true
+              Accel limit: true
+              Acceleration: true
+              Closest obj dist: true
+              Closest obj spd: true
+              Current speed: true
+              Decel limit: true
+              Target speed: true
               Value: true
             Detection:
               Detected objects: true
@@ -501,13 +525,18 @@ Visualization Manager:
                 Right ROI image: true
                 Stop line status: true
                 Value: true
+              Final objects: true
               Value: true
             Grid: true
             Map:
               "": true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -523,7 +552,8 @@ Visualization Manager:
               Carla image view: true
               Value: true
             System:
-              "": true
+              Lexus model: true
+              TF: true
               Value: true
             Value: true
           Zoom Factor: 1
@@ -796,9 +826,17 @@ Visualization Manager:
           Queue Size: 100
           Value: false
         - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /detection/lidar/tracked_objects_markers
+          Enabled: false
+          Marker Topic: /detection/tracked_objects_markers
           Name: Tracked objects
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /detection/final_objects_markers
+          Name: Final objects
           Namespaces:
             bounding_box: false
             centroid: true
@@ -981,10 +1019,11 @@ Visualization Manager:
                 Right ROI image: true
                 Stop line status: true
                 Value: true
+              Final objects: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               Global path: true

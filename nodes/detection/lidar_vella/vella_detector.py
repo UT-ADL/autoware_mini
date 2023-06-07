@@ -104,7 +104,7 @@ class VellaDetector:
         detected_object.dimensions.z = vella_track.height
 
         # produce convex hull
-        detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, vella_stamp)
+        detected_object.convex_hull = create_hull(detected_object, self.output_frame, vella_stamp)
 
         return detected_object
 
