@@ -6,12 +6,11 @@ from geometry_msgs.msg import PolygonStamped, Point
 
 from helpers.geometry import get_heading_from_orientation
 
-def create_hull(obj_pose, obj_dims, output_frame, stamp):
+def create_hull(obj, output_frame, stamp):
 
     """
     Produce convex hull for an object given its pose and dimensions
-    :param obj_pose: geometry_msgs/Pose. Position and orientation of object
-    :param obj_dims: Vector3 - length, width and height of object
+    :param obj: autoware_msgs/DetectedObject
     :param output_frame: string frame_id for the convex hull
     :param stamp: Time stamp at which the lidar pointcloud was created
     :return: geometry_msgs/PolygonStamped
@@ -21,15 +20,15 @@ def create_hull(obj_pose, obj_dims, output_frame, stamp):
     convex_hull.header.stamp = stamp
 
     # compute heading angle from object's orientation
-    heading = get_heading_from_orientation(obj_pose.orientation)
+    heading = get_heading_from_orientation(obj.pose.orientation)
 
     # use cv2.boxPoints to get a rotated rectangle given the angle
     points = cv2.boxPoints((
-        (obj_pose.position.x, obj_pose.position.y),
-        (obj_dims.x, obj_dims.y),
+        (obj.pose.position.x, obj.pose.position.y),
+        (obj.dimensions.x, obj.dimensions.y),
         math.degrees(heading)
     ))
-    convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
+    convex_hull.polygon.points = [Point(x, y, obj.pose.position.z) for x, y in points]
 
     return convex_hull
 
@@ -65,6 +64,28 @@ def calculate_iou(boxes1, boxes2):
 
     return iou
 
+
+def get_axis_oriented_bounding_box(obj):
+    """
+    Get the axis-oriented bounding box of an object
+    :param obj: autoware_msgs/DetectedObject
+    :return: tuple of minx, miny, maxx, maxy
+    """
+    # compute heading angle from object's orientation
+    heading = get_heading_from_orientation(obj.pose.orientation)
+
+    # use cv2.boxPoints to get a rotated rectangle given the angle
+    points = cv2.boxPoints((
+        (obj.pose.position.x, obj.pose.position.y),
+        (obj.dimensions.x, obj.dimensions.y),
+        math.degrees(heading)
+    ))
+
+    # find axis-oriented bounding box
+    minx, miny = np.min(points, axis=0)
+    maxx, maxy = np.max(points, axis=0)
+
+    return minx, miny, maxx, maxy
 
 if __name__ == '__main__':
     boxes1 = np.array([[0, 0, 10, 10], [10, 10, 20, 20]])

@@ -9,12 +9,14 @@
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp.osm" />
     <arg name="detector"                default="sim"           doc="usually sim" />
     <arg name="tfl_detector"            default="none"          doc="mqtt" />
+    <arg name="use_tracking"            default="false" />
 
     <!-- Detection -->
     <include file="$(find autoware_mini)/launch/detection.launch">
         <arg name="detector"            value="$(arg detector)" />
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+        <arg name="use_tracking"        value="$(arg use_tracking)" />
     </include>
 
     <!-- Planning -->

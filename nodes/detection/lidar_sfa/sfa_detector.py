@@ -336,7 +336,7 @@ class SFADetector:
             detected_object.dimensions.y = width
             detected_object.dimensions.z = height
             # Populate convex hull
-            detected_object.convex_hull = create_hull(detected_object.pose, detected_object.dimensions, self.output_frame, header.stamp)
+            detected_object.convex_hull = create_hull(detected_object, self.output_frame, header.stamp)
 
             detected_objects_list.append(detected_object)
 
