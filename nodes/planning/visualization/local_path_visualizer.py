@@ -43,7 +43,7 @@ class LocalPathVisualizer:
             marker.scale.x = 2 * self.wp_safety_radius
             marker.scale.y = 2 * self.wp_safety_radius
             marker.scale.z = 0.3
-            marker.color = ColorRGBA(waypoint.cost, 1.0 - waypoint.cost, 0.0, 0.2)
+            marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.2)
             marker_array.markers.append(marker)
 
         # velocity labels
