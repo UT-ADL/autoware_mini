@@ -79,28 +79,6 @@ def get_axis_oriented_bounding_box(obj):
 
     return minx, miny, maxx, maxy
 
-def get_axis_oriented_bounding_box(obj):
-    """
-    Get the axis-oriented bounding box of an object
-    :param obj: autoware_msgs/DetectedObject
-    :return: tuple of minx, miny, maxx, maxy
-    """
-    # compute heading angle from object's orientation
-    heading = get_heading_from_orientation(obj.pose.orientation)
-
-    # use cv2.boxPoints to get a rotated rectangle given the angle
-    points = cv2.boxPoints((
-        (obj.pose.position.x, obj.pose.position.y),
-        (obj.dimensions.x, obj.dimensions.y),
-        math.degrees(heading)
-    ))
-
-    # find axis-oriented bounding box
-    minx, miny = np.min(points, axis=0)
-    maxx, maxy = np.max(points, axis=0)
-
-    return minx, miny, maxx, maxy
-
 if __name__ == '__main__':
     boxes1 = np.array([[0, 0, 10, 10], [10, 10, 20, 20]])
     boxes2 = np.array([[5, 5, 15, 15], [15, 15, 25, 25]])
