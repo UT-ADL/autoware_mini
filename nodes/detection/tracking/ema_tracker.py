@@ -63,17 +63,17 @@ class EMATracker:
         # move tracked objects forward in time
         assert len(self.tracked_objects) == len(self.tracked_objects_array), str(len(self.tracked_objects)) + ' ' + str(len(self.tracked_objects_array))
         position_change = time_delta * self.tracked_objects_array['velocity']
-        self.tracked_objects_array['centroid'] += position_change
-        self.tracked_objects_array['bbox'][:,:2] += position_change
-        self.tracked_objects_array['bbox'][:,2:4] += position_change
-        velocity_change = time_delta * self.tracked_objects_array['acceleration']
-        self.tracked_objects_array['velocity'] += velocity_change
+        tracked_object_centroids = self.tracked_objects_array['centroid'].copy()
+        tracked_object_centroids += position_change
+        tracked_object_bboxes = self.tracked_objects_array['bbox'].copy()
+        tracked_object_bboxes[:,:2] += position_change
+        tracked_object_bboxes[:,2:4] += position_change
 
         ### 3. MATCH TRACKS WITH DETECTIONS ###
 
         if self.association_method == 'iou':
             # Calculate the IOU between the tracked objects and the detected objects
-            iou = calculate_iou(self.tracked_objects_array['bbox'], detected_objects_array['bbox'])
+            iou = calculate_iou(tracked_object_bboxes, detected_objects_array['bbox'])
             assert iou.shape == (len(self.tracked_objects_array), len(detected_objects_array))
 
             # Calculate the association between the tracked objects and the detected objects
@@ -87,7 +87,7 @@ class EMATracker:
             assert len(matched_track_indices) == len(matched_detection_indicies)
         elif self.association_method == 'euclidean':
             # Calculate euclidean distance between the tracked object and the detected object centroids
-            dists = cdist(self.tracked_objects_array['centroid'], detected_objects_array['centroid'])
+            dists = cdist(tracked_object_centroids, detected_objects_array['centroid'])
             assert dists.shape == (len(self.tracked_objects_array), len(detected_objects_array))
 
             # Calculate the association between the tracked objects and the detected objects
