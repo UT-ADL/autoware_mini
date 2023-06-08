@@ -15,12 +15,12 @@ from sklearn.neighbors import NearestNeighbors
 from autoware_msgs.msg import Lane, DetectedObjectArray, TrafficLightResultArray
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3, Point
 from std_msgs.msg import ColorRGBA
+from visualization_msgs.msg import Marker
 
 from helpers.geometry import get_closest_point_on_line, get_distance_between_two_points_2d
 from helpers.waypoints import get_two_nearest_waypoint_idx
 from helpers.transform import transform_vector3
 
-from helpers.timer import Timer
 
 class VelocityLocalPlanner:
 
@@ -66,6 +66,7 @@ class VelocityLocalPlanner:
 
         # Publishers
         self.local_path_pub = rospy.Publisher('local_path', Lane, queue_size=1)
+        self.collision_points_pub = rospy.Publisher('collision_points', Marker, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)
@@ -233,10 +234,6 @@ class VelocityLocalPlanner:
                 # calculate velocity based on distance to obstacle using deceleration limit
                 for i, wp in enumerate(local_path_waypoints):
 
-                    # mark waypoints with obstacles for visualizer
-                    if i in np.unique(obstacles_within_car_safety_width[:,0]):
-                        wp.cost = 1.0
-
                     # once we get zero speed, keep it that way
                     if zero_speeds_onwards:
                         wp.twist.twist.linear.x = 0.0
@@ -277,6 +274,7 @@ class VelocityLocalPlanner:
                         zero_speeds_onwards = True
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked)
+        self.publish_collision_points(obstacles_within_car_safety_width, msg.header.stamp, output_frame)
 
     def filer_obstacles_using_car_safety_width(self, obstacles_on_local_path, global_path_tree, global_path_waypoints, global_wp_backward, local_path_dists):
 
@@ -303,7 +301,7 @@ class VelocityLocalPlanner:
                 continue
 
             d_from_localpath_start = local_path_dists[wp_ind_local] + d_from_prev_wp
-            obstacles_within_car_safety_width.append([wp_ind_local, d_from_localpath_start, d_from_path, v])
+            obstacles_within_car_safety_width.append([wp_ind_local, d_from_localpath_start, d_from_path, v, closest_point.x, closest_point.y, closest_point.z])
 
         return np.array(obstacles_within_car_safety_width)
 
@@ -321,6 +319,24 @@ class VelocityLocalPlanner:
 
         self.local_path_pub.publish(lane)
 
+    def publish_collision_points(self, obstacles_within_car_safety_width, stamp, output_frame):
+
+        marker = Marker()
+        marker.header.frame_id = output_frame
+        marker.header.stamp = stamp
+        marker.ns = "Collision points"
+        marker.id = 0
+        marker.type = Marker.SPHERE_LIST
+        marker.action = Marker.ADD
+        marker.pose.orientation.w = 1.0
+        marker.scale.x = 0.3
+        marker.scale.y = 0.3
+        marker.scale.z = 0.3
+        marker.color = ColorRGBA(a=1.0, r=1.0, g=0.0, b=0.0)
+        for _, _, _, _, cx, cy, cz in obstacles_within_car_safety_width:
+            marker.points.append(Point(x=cx, y=cy, z=cz))
+
+        self.collision_points_pub.publish(marker)
 
     def run(self):
         rospy.spin()
