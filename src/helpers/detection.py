@@ -64,22 +64,14 @@ def calculate_iou(boxes1, boxes2):
 
     return iou
 
-
 def get_axis_oriented_bounding_box(obj):
     """
     Get the axis-oriented bounding box of an object
     :param obj: autoware_msgs/DetectedObject
     :return: tuple of minx, miny, maxx, maxy
     """
-    # compute heading angle from object's orientation
-    heading = get_heading_from_orientation(obj.pose.orientation)
-
-    # use cv2.boxPoints to get a rotated rectangle given the angle
-    points = cv2.boxPoints((
-        (obj.pose.position.x, obj.pose.position.y),
-        (obj.dimensions.x, obj.dimensions.y),
-        math.degrees(heading)
-    ))
+    # take all points from the convex hull
+    points = np.array([(p.x, p.y) for p in obj.convex_hull.polygon.points], dtype=np.float32)
 
     # find axis-oriented bounding box
     minx, miny = np.min(points, axis=0)
