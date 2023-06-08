@@ -21,7 +21,6 @@ from helpers.geometry import get_closest_point_on_line, get_distance_between_two
 from helpers.waypoints import get_two_nearest_waypoint_idx
 from helpers.transform import transform_vector3
 
-from helpers.timer import Timer
 
 class VelocityLocalPlanner:
 
@@ -69,6 +68,7 @@ class VelocityLocalPlanner:
 
         # Publishers
         self.local_path_pub = rospy.Publisher('local_path', Lane, queue_size=1)
+        self.collision_points_pub = rospy.Publisher('collision_points', Marker, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)

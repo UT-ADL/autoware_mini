@@ -1,14 +1,11 @@
 current_pose_to_car_front: 4.0  # m
 braking_safety_distance: 4.0
 braking_reaction_time: 1.6
-<<<<<<< HEAD
 car_safety_width: 1.1           # m
 close_obstacle_limit: 1.6       # m
 wp_safety_radius: 1.9           # m
-=======
 car_safety_width: 1.0           # m
-wp_safety_radius: 2.5           # m
->>>>>>> separated params to car_safety_width and wp_safety_radius, added clamp_output boolean to solve obs wrong distance at path end, added ignore obs out of local_path extent
+wp_safety_radius: 2.0           # m
 waypoint_interval: 1.0          # m
 speed_deceleration_limit: 1.0
 
