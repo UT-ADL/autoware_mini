@@ -2,7 +2,7 @@ current_pose_to_car_front: 4.0  # m
 braking_safety_distance: 4.0
 braking_reaction_time: 1.6
 car_safety_width: 1.0           # m
-wp_safety_radius: 2.5           # m
+wp_safety_radius: 2.0           # m
 waypoint_interval: 1.0          # m
 speed_deceleration_limit: 1.0
 
