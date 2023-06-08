@@ -2,7 +2,8 @@
 
 import rospy
 import numpy as np
-import scipy
+from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cdist
 from autoware_msgs.msg import DetectedObjectArray
 from helpers.detection import calculate_iou, get_axis_oriented_bounding_box
 
@@ -76,7 +77,7 @@ class EMATracker:
             assert iou.shape == (len(self.tracked_objects_array), len(detected_objects_array))
 
             # Calculate the association between the tracked objects and the detected objects
-            matched_track_indices, matched_detection_indicies = scipy.optimize.linear_sum_assignment(-iou)
+            matched_track_indices, matched_detection_indicies = linear_sum_assignment(-iou)
             assert len(matched_track_indices) == len(matched_detection_indicies)
 
             # Only keep those matches where the IOU is greater than 0.0
@@ -86,11 +87,11 @@ class EMATracker:
             assert len(matched_track_indices) == len(matched_detection_indicies)
         elif self.association_method == 'euclidean':
             # Calculate euclidean distance between the tracked object and the detected object centroids
-            dists = scipy.spatial.distance.cdist(self.tracked_objects_array['centroid'], detected_objects_array['centroid'])
+            dists = cdist(self.tracked_objects_array['centroid'], detected_objects_array['centroid'])
             assert dists.shape == (len(self.tracked_objects_array), len(detected_objects_array))
 
             # Calculate the association between the tracked objects and the detected objects
-            matched_track_indices, matched_detection_indicies = scipy.optimize.linear_sum_assignment(dists)
+            matched_track_indices, matched_detection_indicies = linear_sum_assignment(dists)
 
             # Only keep those matches where the distance is less than threshold
             matches = dists[matched_track_indices, matched_detection_indicies] <= self.max_euclidean_distance
