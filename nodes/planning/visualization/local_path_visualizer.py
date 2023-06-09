@@ -31,20 +31,20 @@ class LocalPathVisualizer:
         marker.action = Marker.DELETEALL
         marker_array.markers.append(marker)
 
-        for i, waypoint in enumerate(lane.waypoints):
-            marker = Marker()
-            marker.header.frame_id = lane.header.frame_id
-            marker.header.stamp = rospy.Time.now()
-            marker.ns = "Waypoints"
-            marker.id = i
-            marker.type = marker.CYLINDER
-            marker.action = marker.ADD
-            marker.pose = waypoint.pose.pose
-            marker.scale.x = 2 * self.wp_safety_radius
-            marker.scale.y = 2 * self.wp_safety_radius
-            marker.scale.z = 0.3
-            marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.2)
-            marker_array.markers.append(marker)
+        # local path line_strip
+        marker = Marker()
+        marker.header.frame_id = lane.header.frame_id
+        marker.header.stamp = rospy.Time.now()
+        marker.ns = "Local path"
+        marker.type = marker.LINE_STRIP
+        marker.action = marker.ADD
+        marker.id = 0
+        marker.pose.orientation.w = 1.0
+        marker.scale.x = 2*self.car_safety_width
+        marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
+        for waypoint in lane.waypoints:
+            marker.points.append(waypoint.pose.pose.position)
+        marker_array.markers.append(marker)
 
         # velocity labels
         for i, waypoint in enumerate(lane.waypoints):
