@@ -13,7 +13,7 @@ from sklearn.neighbors import NearestNeighbors
 
 from geometry_msgs.msg import PoseStamped, Point
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
-from std_msgs.msg import Bool, ColorRGBA
+from std_msgs.msg import Empty, ColorRGBA
 from visualization_msgs.msg import MarkerArray, Marker
 
 from helpers.geometry import get_heading_between_two_points, get_distance_between_two_points_2d, get_orientation_from_heading
@@ -75,7 +75,7 @@ class Lanelet2GlobalPlanner:
         # Subscribers
         rospy.Subscriber('/move_base_simple/goal', PoseStamped, self.goal_callback, queue_size=1)
         rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
-        rospy.Subscriber('cancel_route', Bool, self.cancel_route_callback, queue_size=1)
+        rospy.Subscriber('cancel_route', Empty, self.cancel_route_callback, queue_size=1)
 
     def goal_callback(self, msg):
         rospy.loginfo("%s - goal position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame", rospy.get_name(),
@@ -160,11 +160,10 @@ class Lanelet2GlobalPlanner:
                 rospy.logwarn("%s - goal reached, clearing path!", rospy.get_name())
 
     def cancel_route_callback(self, msg):
-        if msg.data:
-            self.waypoints = []
-            self.goal_point = None
-            self.publish_waypoints(self.waypoints)
-            rospy.logwarn("%s - route cancelled!", rospy.get_name())
+        self.waypoints = []
+        self.goal_point = None
+        self.publish_waypoints(self.waypoints)
+        rospy.logwarn("%s - route cancelled!", rospy.get_name())
 
     def create_waypoint_on_path(self, waypoints, closest_idx, origin_point):
         wp = copy.deepcopy(waypoints[closest_idx])
