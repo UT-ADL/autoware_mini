@@ -36,6 +36,7 @@ class VelocityLocalPlanner:
         self.wp_safety_radius = rospy.get_param("wp_safety_radius")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
+        self.publish_debug_info = rospy.get_param("~publish_debug_info")
 
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
@@ -66,7 +67,8 @@ class VelocityLocalPlanner:
 
         # Publishers
         self.local_path_pub = rospy.Publisher('local_path', Lane, queue_size=1)
-        self.collision_points_pub = rospy.Publisher('collision_points', Marker, queue_size=1)
+        if self.publish_debug_info:
+            self.collision_points_pub = rospy.Publisher('collision_points', Marker, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)
@@ -227,7 +229,7 @@ class VelocityLocalPlanner:
             # list of points on path from the current waypoint
             obstacles_ahead_idx = np.unique(np.concatenate(obstacle_idx[:]))
             obstacles_on_local_path = obstacle_array[obstacles_ahead_idx]
-            obstacles_within_car_safety_width = self.filer_obstacles_using_car_safety_width(obstacles_on_local_path, global_path_tree, global_path_waypoints, wp_backward, local_path_dists)
+            obstacles_within_car_safety_width = self.filter_obstacles_using_car_safety_width(obstacles_on_local_path, global_path_tree, global_path_waypoints, wp_backward, local_path_dists)
 
             if len(obstacles_within_car_safety_width) > 0:
 
@@ -274,9 +276,10 @@ class VelocityLocalPlanner:
                         zero_speeds_onwards = True
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked)
-        self.publish_collision_points(obstacles_within_car_safety_width, msg.header.stamp, output_frame)
+        if self.publish_debug_info:
+            self.publish_collision_points(obstacles_within_car_safety_width, msg.header.stamp, output_frame)
 
-    def filer_obstacles_using_car_safety_width(self, obstacles_on_local_path, global_path_tree, global_path_waypoints, global_wp_backward, local_path_dists):
+    def filter_obstacles_using_car_safety_width(self, obstacles_on_local_path, global_path_tree, global_path_waypoints, global_wp_backward, local_path_dists):
 
         obstacles_within_car_safety_width = []
         # iterate over obstacle_array_unique and calc 2 closest waypoint indexes
