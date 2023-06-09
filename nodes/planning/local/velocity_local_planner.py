@@ -38,6 +38,7 @@ class VelocityLocalPlanner:
         self.dense_wp_interval = rospy.get_param("~dense_wp_interval")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
+        self.publish_debug_info = rospy.get_param("~publish_debug_info")
 
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
@@ -68,7 +69,8 @@ class VelocityLocalPlanner:
 
         # Publishers
         self.local_path_pub = rospy.Publisher('local_path', Lane, queue_size=1)
-        self.collision_points_pub = rospy.Publisher('collision_points', Marker, queue_size=1)
+        if self.publish_debug_info:
+            self.collision_points_pub = rospy.Publisher('collision_points', Marker, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('smoothed_path', Lane, self.path_callback, queue_size=1)
