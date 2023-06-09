@@ -55,7 +55,10 @@ class CarlaTrafficLightDetector:
 
         # Create a classifier to find the closest traffic light on map
         tfl_coords, tfl_ids = self.extractTrafficLights(lanelet2_map)
-        self.classifier = RadiusNeighborsClassifier(radius=1.0).fit(tfl_coords, tfl_ids)
+        self.classifier = RadiusNeighborsClassifier(radius=1.0)
+        if len(tfl_coords) > 0:
+            assert len(tfl_coords) == len(tfl_ids)
+            self.classifier.fit(tfl_coords, tfl_ids)
         self.tlf_id_to_coords_map = {}
 
         # Publishers

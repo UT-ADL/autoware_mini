@@ -179,7 +179,10 @@ class Lanelet2GlobalPlanner:
         last_lanelet = False
 
         for i , lanelet in enumerate(lanelet_sequence):
-            blinker = LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP[lanelet.attributes['turn_direction']]
+            if 'turn_direction' in lanelet.attributes:
+                blinker = LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP[lanelet.attributes['turn_direction']]
+            else:
+                blinker = WaypointState.STR_STRAIGHT
 
             if i == len(lanelet_sequence)-1:
                 last_lanelet = True
