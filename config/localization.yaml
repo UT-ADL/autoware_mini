@@ -1,7 +1,7 @@
 coordinate_transformer: utm         # utm, lest97
 use_custom_origin: True
-utm_origin_lat: 0.0
-utm_origin_lon: 0.0
+utm_origin_lat: 58.385345
+utm_origin_lon: 26.726272
 lest97_origin_northing: 6465000.0
 lest97_origin_easting: 650000.0
 
