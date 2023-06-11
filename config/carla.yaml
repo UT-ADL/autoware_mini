@@ -1,5 +1,5 @@
 carla:
-    use_offset: false
+    use_offset: true
 
 carla_vehicle_interface:
     max_steer_angle: 70.0

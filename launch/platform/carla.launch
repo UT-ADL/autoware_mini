@@ -37,7 +37,7 @@
   <arg name='scenario_runner_path'                                default='$(optenv SCENARIO_RUNNER_ROOT)'/>
   <!-- By default we use an example follow leading vehicle scenario file -->
   <arg name='scenario_name'                                       default='FollowLeadingVehicle'/>
-  <arg name='scenario_file'                                       default='$(find autoware_mini)/data/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/>
+  <arg name='scenario_file'                                       default='$(find autoware_mini)/config/carla/scenarios/$(arg map_name)/$(arg scenario_name).xosc'/>
 
 
   <!--
@@ -156,6 +156,9 @@
     ##############################################
   -->
   <group if="$(arg use_scenario_runner)">
+
+    <include file="$(find carla_ad_agent)/launch/carla_ad_agent.launch"/>
+
     <include  file="$(find carla_waypoint_publisher)/launch/carla_waypoint_publisher.launch">
       <arg name='host'      value='$(arg host)'/>
       <arg name='port'      value='$(arg port)'/>
@@ -189,6 +192,12 @@
 
   <rosparam command="load" file="$(find autoware_mini)/config/carla.yaml" />
 
+  <group if="$(eval 'town' in map_name.lower())">
+    <param name="/localization/utm_origin_lat" type="double" value="0.0" />
+    <param name="/localization/utm_origin_lon" type="double" value="0.0" />
+    <param name="/carla/use_offset" type="boolean" value="false" />
+  </group>
+  
   <group ns="vehicle">
       <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />
   </group>
