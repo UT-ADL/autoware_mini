@@ -8,7 +8,7 @@
     <arg name="localizer"               default="carla"                 doc="novatel, carla" />
     <arg name="detector"                default="carla"                 doc="cluster, carla" />
     <arg name="tfl_detector"            default="carla"                 doc="carla, camera, mqtt_camera_fusion" />
-    <arg name='map_name'                default='tartu'/>
+    <arg name='map_name'                default='tartu_demo_l_c_wp'/>
     <arg name="follower"                default="pure_pursuit"          doc="pure_pursuit, stanley" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="$(arg map_name).osm"   unless="$(eval 'tartu' in map_name.lower())" />
