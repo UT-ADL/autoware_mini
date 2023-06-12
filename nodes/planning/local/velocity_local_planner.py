@@ -21,6 +21,7 @@ from helpers.geometry import get_closest_point_on_line, get_distance_between_two
 from helpers.waypoints import get_two_nearest_waypoint_idx
 from helpers.transform import transform_vector3
 
+from helpers.timer import Timer
 
 class VelocityLocalPlanner:
 
@@ -135,6 +136,8 @@ class VelocityLocalPlanner:
 
     def detected_objects_callback(self, msg):
 
+        t = Timer()
+
         # get global path
         with self.lock:
             output_frame = self.output_frame
@@ -179,6 +182,17 @@ class VelocityLocalPlanner:
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
         local_path_dists = np.insert(local_path_dists, 0, 0.0)
 
+        ## INTERPOLATE DENSE LOCAL PATH
+        # make local_path dense 10cm? - TODO: hardcoded 0.1 m
+        local_path_dense_dists = np.linspace(0, local_path_dists[-1], num=int(local_path_dists[-1] / 0.1))
+
+        # interpolate x_new, y_new, z_new
+        x_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,0])
+        y_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,1])
+        z_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,2])
+
+        local_path_dense = np.stack((x_new, y_new, z_new), axis=1)
+
         # initialize closest object distance and velocity
         closest_object_distance = 0.0 
         closest_object_velocity = 0.0
@@ -216,8 +230,23 @@ class VelocityLocalPlanner:
             obstacle_array = np.array(points_list)
             # create spatial index over obstacles for quick search
             obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,:2])
-            # find closest obstacle points to local path
-            _, obstacle_idx = obstacle_tree.radius_neighbors(local_path_array[:,:2], self.wp_safety_radius, return_distance=True)
+            # find closest obstacle local?path points to obstacles - lateral dist from path
+            obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors(local_path_dense[:,:2], self.wp_safety_radius, return_distance=True)
+            # create indexes for obstacles with respect to local_path_dense
+            index_array = np.repeat(np.arange(len(obstacle_idx)), [len(i) for i in obstacle_idx])
+            obstacles_dense_path = np.vstack((index_array, np.concatenate(obstacle_idx), np.concatenate(obstacle_d))).T
+            # sort and min d
+            obstacles_dense_path = obstacles_dense_path[obstacles_dense_path[:,2].argsort()]
+            _, unique_indices = np.unique(obstacles_dense_path[:, 1], return_index=True)
+            obstacles_dense_path = obstacles_dense_path[unique_indices]
+            print("obstacles_dense_path: \n", obstacles_dense_path)
+
+            #filtered_array = np.delete(unique_rows, np.where(unique_rows[:,2] > self.car_safety_width), axis=0)
+            # print("filtered_array: \n", filtered_array)
+
+            obstacle_speed = obstacle_array[obstacles_dense_path[:,1].astype(int)][:,3]
+            obstacle_dists = local_path_dense_dists[obstacles_dense_path[:,0].astype(int)]
+
 
             # If any calculated target_vel drops close to 0 then use this boolean to set all following wp speeds to 0
             zero_speeds_onwards = False
@@ -274,6 +303,9 @@ class VelocityLocalPlanner:
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked)
         if self.publish_debug_info:
             self.publish_collision_points(obstacles_within_car_safety_width, msg.header.stamp, output_frame)
+
+        t('obs_cb end')
+        print(t)
 
     def filter_obstacles_using_car_safety_width(self, obstacles_on_local_path, global_path_tree, global_path_waypoints, global_wp_backward, local_path_dists):
 
