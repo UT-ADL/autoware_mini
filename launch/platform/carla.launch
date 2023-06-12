@@ -15,7 +15,7 @@
 
   <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
   <arg if="$(eval 'tartu' in map_name.lower())"  name="spawn_point"    default="4.70,342.07,36,0,0,-98" />    
-  <arg if="$(eval map_name.lower() == 'town01')" name="spawn_point"    default="150,-133.5,10,0,0,0" />
+  <arg unless="$(eval 'tartu' in map_name.lower())" name="spawn_point" default="" />
 
   <!-- Control -->
   <arg name='passive'                                             default='' />     <!-- Enable/disable passive mode -->
