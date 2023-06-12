@@ -5,13 +5,13 @@
     <arg name="local_planner"           default="velocity"  doc="none, velocity" />
     <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
+    <arg name="lanelet2_map_name"       default="tartu_demo.osm" />
 
     <group ns="planning">
 
         <!-- Lanelet2 map visualizer -->
         <node pkg="autoware_mini" type="lanelet2_map_visualizer.py" name="lanelet2_map_visualizer" output="screen" required="true">
-            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/maps/$(arg lanelet2_map_name)" />
         </node>
 
         <!-- Waypoint loader -->
@@ -21,7 +21,7 @@
 
         <!-- Lanelet2 global planner -->
         <node if="$(eval global_planner=='lanelet2')" pkg="autoware_mini" type="lanelet2_global_planner.py" name="lanelet2_global_planner" output="screen" required="true">
-            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/maps/$(arg lanelet2_map_name)" />
         </node>
 
         <!-- Carla waypoints publisher -->
@@ -43,7 +43,7 @@
         <!-- Local planner -->
         <group if="$(eval local_planner=='velocity')">
             <node pkg="autoware_mini" type="velocity_local_planner.py" name="velocity_local_planner" output="screen" required="true">
-                <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
+                <param name="lanelet2_map_name" value="$(find autoware_mini)/data/maps/$(arg lanelet2_map_name)" />
             </node>
             <node pkg="autoware_mini" type="local_path_visualizer.py" name="local_path_visualizer" output="screen" required="true"/>
         </group>

@@ -8,7 +8,7 @@
     <arg name="local_planner"           default="velocity"          doc="velocity, none"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
+    <arg name="lanelet2_map_name"       default="tartu_demo.osm" />
     <arg name="tfl_detector"            default="mqtt"              doc="mqtt, camera, mqtt_camera_fusion" />
     <arg name="max_speed"               default="30" />
     

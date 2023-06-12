@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="detector"            default="lidar_cluster"   doc="lidar_cluster,lidar_sfa,lidar_vella,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion,carla,sim" />
-    <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
+    <arg name="detector"            default="lidar_cluster"     doc="lidar_cluster,lidar_sfa,lidar_vella,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion,carla,sim" />
+    <arg name="lanelet2_map_name"   default="tartu_demo.osm"    doc="for carla traffic light detector" />
 
     <group if="$(eval 'lidar' in detector)" ns="lidar">
         <remap from="points_raw" to="/lidar_center/points_raw" />
