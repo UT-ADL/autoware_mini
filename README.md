@@ -168,6 +168,26 @@ To see the traffic light detections enable **Detections** > **Traffic lights** >
    roslaunch autoware_mini start_carla.launch tfl_detector:=camera
    ```
 
+### Launching with Scenario Runner
+
+1. Clone [Scenario Runner](https://github.com/carla-simulator/scenario_runner) to a directory of your choice
+   ```
+   git clone git@github.com:carla-simulator/scenario_runner.git
+   ```
+2. Install requirements
+   ```
+   pip install -r scenario_runner/requirements.txt
+   ```
+3. Point environment variable SCENARIO_RUNNER_ROOT to the Scenario Runner location
+   ```
+   export SCENARIO_RUNNER_ROOT=<path_to>/scenario_runner
+   ```
+4. Launch Autoware Mini with `use_scenario_runner=true` parameter
+   ```
+   roslaunch autoware_mini start_carla.launch use_scenario_runner=true
+   ```
+   At the moment you need to manually set the destination for the ego car.
+
 ## Launching in Lexus
 
 ```
