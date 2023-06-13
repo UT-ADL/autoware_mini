@@ -6,6 +6,7 @@ import numpy as np
 import cv2
 
 from tf2_ros import TransformListener, Buffer, TransformException
+from numpy.lib.recfunctions import structured_to_unstructured
 from ros_numpy import numpify, msgify
 
 from sensor_msgs.msg import PointCloud2
@@ -41,7 +42,7 @@ class ClusterDetector:
         # make copy of labels
         labels = data['label']
         # convert data to ndarray
-        points = data.view((np.float32, 4))
+        points = structured_to_unstructured(data[['x', 'y', 'z', 'label']], dtype=np.float32)
 
         # if target frame does not match the header frame
         if msg.header.frame_id != self.output_frame:

@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 
 from tf2_ros import TransformListener, Buffer, TransformException
+from numpy.lib.recfunctions import structured_to_unstructured
 from ros_numpy import numpify
 
 from sensor_msgs.msg import PointCloud2
@@ -84,11 +85,7 @@ class SFADetector:
         pcd_array = numpify(pointcloud)
 
         # Reshape the array into shape -> (num_points, 4). 4 corresponds to the fields -> x,y,z,intensity
-        points = np.zeros((pcd_array.shape[0], 4))
-        points[:, 0] = pcd_array['x']
-        points[:, 1] = pcd_array['y']
-        points[:, 2] = pcd_array['z']
-        points[:, 3] = pcd_array['intensity']
+        points = structured_to_unstructured(pcd_array[['x', 'y', 'z', 'intensity']], dtype=np.float32)
 
         detected_objects_array = DetectedObjectArray()
         detected_objects_array.header.stamp = pointcloud.header.stamp

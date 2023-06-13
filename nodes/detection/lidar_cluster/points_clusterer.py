@@ -3,6 +3,7 @@
 import rospy
 import numpy as np
 
+from numpy.lib.recfunctions import structured_to_unstructured, unstructured_to_structured
 from ros_numpy import numpify, msgify
 try:
     from sklearnex.cluster import DBSCAN
@@ -36,28 +37,24 @@ class PointsClusterer:
             data = np.random.choice(data, size=self.sample_size, replace=False)
 
         # convert point cloud into ndarray, take only xyz coordinates
-        points = np.empty((data.shape[0], 3), dtype=np.float32)
-        points[:, 0] = data['x']
-        points[:, 1] = data['y']
-        points[:, 2] = data['z']
+        points = structured_to_unstructured(data[['x', 'y', 'z']], dtype=np.float32)
 
         # get labels for clusters
         labels = self.clusterer.fit_predict(points)
 
-        # populate data with labels
-        data = np.empty(points.shape[0], dtype=[
+        # concatenate points with labels
+        points_labeled = np.hstack((points, labels.reshape(-1, 1)))
+
+        # filter out noise points
+        points_labeled = points_labeled[labels != -1]
+
+        # convert labeled points to PointCloud2 format
+        data = unstructured_to_structured(points_labeled, dtype=np.dtype([
             ('x', np.float32),
             ('y', np.float32),
             ('z', np.float32),
             ('label', np.int32)
-        ])
-        data['x'] = points[:, 0]
-        data['y'] = points[:, 1]
-        data['z'] = points[:, 2]
-        data['label'] = labels
-
-        # filter out noise points
-        data = data[labels != -1]
+        ]))
 
         # publish clustered points message
         cluster_msg = msgify(PointCloud2, data)
