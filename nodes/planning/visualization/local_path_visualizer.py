@@ -31,6 +31,10 @@ class LocalPathVisualizer:
         marker.action = Marker.DELETEALL
         marker_array.markers.append(marker)
 
+        color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
+        if lane.cost > 0.0:
+            color = ColorRGBA(0.8, 1.0, 0.0, 0.5)
+
         # local path line_strip
         marker = Marker()
         marker.header.frame_id = lane.header.frame_id
@@ -41,7 +45,7 @@ class LocalPathVisualizer:
         marker.id = 0
         marker.pose.orientation.w = 1.0
         marker.scale.x = 2*self.car_safety_width
-        marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
+        marker.color = color
         for waypoint in lane.waypoints:
             marker.points.append(waypoint.pose.pose.position)
         marker_array.markers.append(marker)
@@ -62,7 +66,7 @@ class LocalPathVisualizer:
             marker_array.markers.append(marker)
 
         # stop position visualization
-        if len(lane.waypoints) > 1 and lane.closest_object_distance > 0:
+        if len(lane.waypoints) > 1 and lane.closest_object_distance > 0 and lane.cost == 0.0:
 
             stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance)
 
