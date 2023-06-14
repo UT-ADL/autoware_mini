@@ -15,7 +15,7 @@
 
   <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
   <arg if="$(eval 'tartu' in map_name.lower())"  name="spawn_point"    default="4.70,342.07,36,0,0,-98" />    
-  <arg if="$(eval map_name.lower() == 'town01')" name="spawn_point"    default="150,-133.5,10,0,0,0" />
+  <arg unless="$(eval 'tartu' in map_name.lower())" name="spawn_point" default="" />
 
   <!-- Control -->
   <arg name='passive'                                             default='' />     <!-- Enable/disable passive mode -->
@@ -37,7 +37,7 @@
   <arg name='scenario_runner_path'                                default='$(optenv SCENARIO_RUNNER_ROOT)'/>
   <!-- By default we use an example follow leading vehicle scenario file -->
   <arg name='scenario_name'                                       default='FollowLeadingVehicle'/>
-  <arg name='scenario_file'                                       default='$(find autoware_mini)/data/maps/$(arg map_name)/scenarios/$(arg scenario_name).xosc'/>
+  <arg name='scenario_file'                                       default='$(find autoware_mini)/data/scenarios/$(arg map_name)/$(arg scenario_name).xosc'/>
 
 
   <!--
@@ -55,7 +55,7 @@
   <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fr/image" to="/camera_fr/image_raw" />
   <remap from="/carla/ego_vehicle/base_link/gnss_forward" to="/gps/fix_forward" />
   <remap from="/carla/ego_vehicle/base_link/gnss" to="/gps/fix" />
-  <remap from="/carla/ego_vehicle/imu" to="/gps/imu" />
+  <remap from="/carla/ego_vehicle/base_link/imu" to="/gps/imu" />
   <remap from="/carla/ego_vehicle/odometry" to="/carla/odometry" />
   <remap from="/carla/ego_vehicle/objects" to="/carla/ground_truth_objects" />
   <remap from="/carla/ego_vehicle/goal" to="/move_base_simple/goal" />
@@ -156,6 +156,7 @@
     ##############################################
   -->
   <group if="$(arg use_scenario_runner)">
+
     <include  file="$(find carla_waypoint_publisher)/launch/carla_waypoint_publisher.launch">
       <arg name='host'      value='$(arg host)'/>
       <arg name='port'      value='$(arg port)'/>
@@ -189,6 +190,12 @@
 
   <rosparam command="load" file="$(find autoware_mini)/config/carla.yaml" />
 
+  <group if="$(eval 'town' in map_name.lower())">
+    <param name="/localization/utm_origin_lat" type="double" value="0.0" />
+    <param name="/localization/utm_origin_lon" type="double" value="0.0" />
+    <param name="/carla/use_offset" type="boolean" value="false" />
+  </group>
+  
   <group ns="vehicle">
       <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />
   </group>

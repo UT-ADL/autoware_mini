@@ -2,7 +2,7 @@
 <launch>
     <arg name="detector"            default="lidar_cluster"   doc="lidar_cluster,lidar_sfa,lidar_vella,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion,carla,sim" />
     <arg name="tfl_detector"        default="none"      doc="carla, mqtt, camera, mqtt_camera_fusion" />
-    <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
+    <arg name="lanelet2_map_name"   default="tartu_demo.osm" doc="for carla traffic light detector" />
 
     <group ns="detection">
 
