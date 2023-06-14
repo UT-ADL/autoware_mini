@@ -296,7 +296,12 @@ Visualization Manager:
           Marker Topic: /planning/lanelet2_map_markers
           Name: Lanelet2 map
           Namespaces:
-            {}
+            Centerline: true
+            Crosswalk: true
+            Left boundary: true
+            Right boundary: true
+            Stop line: true
+            Traffic lights: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -459,10 +464,14 @@ Visualization Manager:
               Value: true
             Grid: true
             Map:
-              "": true
+              Lanelet2 map: true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -473,7 +482,9 @@ Visualization Manager:
               Radar raw: true
               Value: true
             Simulation:
-              "": true
+              Bicycle markers: true
+              Carla camera view: true
+              Carla image view: true
               Value: true
             System:
               Lexus model: true
@@ -549,10 +560,14 @@ Visualization Manager:
               Value: true
             Grid: true
             Map:
-              "": true
+              Lanelet2 map: true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -563,7 +578,9 @@ Visualization Manager:
               Radar raw: true
               Value: true
             Simulation:
-              "": true
+              Bicycle markers: true
+              Carla camera view: true
+              Carla image view: true
               Value: true
             System:
               Lexus model: true
@@ -899,7 +916,8 @@ Visualization Manager:
               Marker Topic: /planning/stop_line_markers
               Name: Stop line status
               Namespaces:
-                {}
+                Status text: true
+                Stop line: true
               Queue Size: 100
               Value: true
           Enabled: true
@@ -914,8 +932,8 @@ Visualization Manager:
           Name: Global path
           Namespaces:
             Path: true
-            Velocity label: false
-            Waypoint pose: false
+            Velocity label: true
+            Waypoint pose: true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -1223,7 +1241,7 @@ Window Geometry:
     collapsed: false
   Displays:
     collapsed: false
-  Height: 1403
+  Height: 1369
   Hide Left Dock: false
   Hide Right Dock: false
   Left ROI image:
@@ -1239,6 +1257,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 2560
-  X: 0
-  Y: 0
+  Width: 2488
+  X: 72
+  Y: 34
