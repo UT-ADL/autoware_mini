@@ -21,7 +21,6 @@ from helpers.geometry import get_closest_point_on_line, get_distance_between_two
 from helpers.waypoints import get_two_nearest_waypoint_idx
 from helpers.transform import transform_vector3
 
-from helpers.timer import Timer
 
 class VelocityLocalPlanner:
 
@@ -135,8 +134,6 @@ class VelocityLocalPlanner:
 
 
     def detected_objects_callback(self, msg):
-
-        t = Timer()
 
         # get global path
         with self.lock:
@@ -299,6 +296,7 @@ class VelocityLocalPlanner:
                     # from stop point onwards all speeds are zero
                     if math.isclose(wp.twist.twist.linear.x, 0.0):
                         zero_speeds_onwards = True
+        self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked, cost)
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked, cost)
 
