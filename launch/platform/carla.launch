@@ -157,8 +157,6 @@
   -->
   <group if="$(arg use_scenario_runner)">
 
-    <include file="$(find carla_ad_agent)/launch/carla_ad_agent.launch"/>
-
     <include  file="$(find carla_waypoint_publisher)/launch/carla_waypoint_publisher.launch">
       <arg name='host'      value='$(arg host)'/>
       <arg name='port'      value='$(arg port)'/>
