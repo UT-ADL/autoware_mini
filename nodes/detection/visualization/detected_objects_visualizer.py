@@ -67,12 +67,11 @@ class DetectedObjectsVisualizer:
                 marker.id = object.id
                 marker.type = marker.LINE_STRIP
                 marker.action = marker.ADD
-                marker.pose.position = object.pose.position
-                marker.pose.orientation = Quaternion(0, 0, 0, 1)
+                marker.pose.orientation.w = 1.0
                 marker.scale.x = 0.1
                 marker.color = ColorRGBA(0.0, 1.0, 0.0, 0.8)
-                marker.points = [Point(p.x - object.pose.position.x, p.y - object.pose.position.y, p.z - object.pose.position.z) for p in object.convex_hull.polygon.points]
-                marker.points.append(Point(object.convex_hull.polygon.points[0].x - object.pose.position.x, object.convex_hull.polygon.points[0].y - object.pose.position.y, object.convex_hull.polygon.points[0].z - object.pose.position.z))
+                marker.points = [Point(p.x, p.y, p.z) for p in object.convex_hull.polygon.points]
+                marker.points.append(marker.points[0])
                 markers.markers.append(marker)
 
             # speed arrow
@@ -89,6 +88,19 @@ class DetectedObjectsVisualizer:
             marker.scale.z = 0.1
             marker.color = ColorRGBA(1.0, 1.0, 0.0, 1.0)
             markers.markers.append(marker)
+
+            # candidate trajectories
+            if len(object.candidate_trajectories.lanes) > 0:
+                marker = Marker(header=header)
+                marker.ns = 'candidate_trajectories'
+                marker.id = object.id
+                marker.type = marker.LINE_STRIP
+                marker.action = marker.ADD
+                marker.pose.orientation.w = 1.0
+                marker.scale.x = 0.1
+                marker.color = ColorRGBA(1.0, 1.0, 0.0, 1.0)
+                marker.points = [Point(wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z) for wp in object.candidate_trajectories.lanes[0].waypoints]
+                markers.markers.append(marker)
 
             # text
             marker = Marker(header=header)
@@ -127,6 +139,12 @@ class DetectedObjectsVisualizer:
 
             marker = Marker(header=header)
             marker.ns = 'speed'
+            marker.id = id
+            marker.action = marker.DELETE
+            markers.markers.append(marker)
+
+            marker = Marker(header=header)
+            marker.ns = 'candidate_trajectories'
             marker.id = id
             marker.action = marker.DELETE
             markers.markers.append(marker)

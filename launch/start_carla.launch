@@ -9,6 +9,7 @@
     <arg name="detector"                default="carla"                 doc="cluster, carla" />
     <arg name="tfl_detector"            default="carla"                 doc="carla, camera, mqtt_camera_fusion" />
     <arg name="use_tracking"            default="$(eval detector != 'carla')" />
+    <arg name="use_prediction"          default="false" />
     <arg name='map_name'                default='tartu'/>
     <arg name="follower"                default="pure_pursuit"          doc="pure_pursuit, stanley" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
@@ -38,6 +39,7 @@
         <arg name='use_lidar_center'    value='$(arg use_lidar_center)'/>
         <arg name='use_lidar_front'     value='$(arg use_lidar_front)'/>
         <arg name="use_tracking"        value="$(arg use_tracking)" />
+        <arg name="use_prediction"      value="$(arg use_prediction)" />
     </include>
 
     <!-- Planning -->

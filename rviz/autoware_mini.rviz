@@ -10,6 +10,7 @@ Panels:
         - /Detection1/Lidar1
         - /Detection1/Detected objects1/Namespaces1
         - /Detection1/Tracked objects1/Namespaces1
+        - /Detection1/Final objects1/Namespaces1
         - /Planning1
         - /Planning1/Global path1/Namespaces1
         - /Planning1/Smoothed path1/Namespaces1
@@ -445,10 +446,25 @@ Visualization Manager:
                 Stop line status: true
                 Value: true
               Final objects: true
+              Lidar:
+                Lidar detections: true
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
+              Radar:
+                Radar detections: true
+                Value: true
+              Tracked objects: true
+              Traffic lights:
+                Left ROI image: true
+                Right ROI image: true
+                Stop line status: true
+                Value: true
               Value: true
             Grid: true
             Map:
-              "": true
+              Lanelet2 map: true
               Value: true
             Planning:
               Global path: true
@@ -526,10 +542,25 @@ Visualization Manager:
                 Stop line status: true
                 Value: true
               Final objects: true
+              Lidar:
+                Lidar detections: true
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
+              Radar:
+                Radar detections: true
+                Value: true
+              Tracked objects: true
+              Traffic lights:
+                Left ROI image: true
+                Right ROI image: true
+                Stop line status: true
+                Value: true
               Value: true
             Grid: true
             Map:
-              "": true
+              Lanelet2 map: true
               Value: true
             Planning:
               Global path: true
@@ -839,9 +870,10 @@ Visualization Manager:
           Name: Final objects
           Namespaces:
             bounding_box: false
+            candidate_trajectories: true
             centroid: true
             convex_hull: true
-            speed: true
+            speed: false
             text: true
           Queue Size: 100
           Value: true
@@ -970,7 +1002,7 @@ Visualization Manager:
           Queue Size: 100
           Value: true
         - Class: rviz/Camera
-          Enabled: false
+          Enabled: true
           Image Rendering: background and overlay
           Image Topic: /carla/rgb_view/image_raw
           Name: Carla camera view
@@ -978,7 +1010,7 @@ Visualization Manager:
           Queue Size: 2
           Transport Hint: raw
           Unreliable: false
-          Value: false
+          Value: true
           Visibility:
             Control:
               Current pose: true
@@ -1020,13 +1052,32 @@ Visualization Manager:
                 Stop line status: true
                 Value: true
               Final objects: true
+              Lidar:
+                Lidar detections: true
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
+              Radar:
+                Radar detections: true
+                Value: true
+              Tracked objects: true
+              Traffic lights:
+                Left ROI image: true
+                Right ROI image: true
+                Stop line status: true
+                Value: true
               Value: true
             Grid: true
             Map:
-              "": true
+              Lanelet2 map: true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -1100,8 +1151,8 @@ Visualization Manager:
       Near Clip Distance: 0.0010000000474974513
       Scale: 17.5113582611084
       Target Frame: base_link
-      X: 0
-      Y: 0
+      X: 1.8473445177078247
+      Y: 7.554811954498291
     Saved:
       - Angle: 0
         Class: rviz/TopDownOrtho
