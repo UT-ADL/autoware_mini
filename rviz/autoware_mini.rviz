@@ -35,7 +35,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: Carla camera view
+    SyncSource: ""
   - Class: jsk_rviz_plugin/PublishTopic
     Name: Cancel route
     Topic: /planning/cancel_route
@@ -459,7 +459,7 @@ Visualization Manager:
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               "": true
@@ -549,7 +549,7 @@ Visualization Manager:
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               "": true
@@ -899,8 +899,7 @@ Visualization Manager:
               Marker Topic: /planning/stop_line_markers
               Name: Stop line status
               Namespaces:
-                Status text: true
-                Stop line: true
+                {}
               Queue Size: 100
               Value: true
           Enabled: true
@@ -928,14 +927,14 @@ Visualization Manager:
           Queue Size: 100
           Value: false
         - Class: rviz/MarkerArray
-          Enabled: true
+          Enabled: false
           Marker Topic: /planning/local_path_markers
           Name: Local path
           Namespaces:
             Velocity label: true
             Waypoints: true
           Queue Size: 100
-          Value: true
+          Value: false
         - Class: rviz/Marker
           Enabled: true
           Marker Topic: /planning/stop_point_visualization
@@ -993,7 +992,7 @@ Visualization Manager:
           Queue Size: 100
           Value: true
         - Class: rviz/Camera
-          Enabled: true
+          Enabled: false
           Image Rendering: background and overlay
           Image Topic: /carla/rgb_view/image_raw
           Name: Carla camera view
@@ -1001,7 +1000,7 @@ Visualization Manager:
           Queue Size: 2
           Transport Hint: raw
           Unreliable: false
-          Value: true
+          Value: false
           Visibility:
             Control:
               Current pose: true
@@ -1142,8 +1141,8 @@ Visualization Manager:
       Near Clip Distance: 0.0010000000474974513
       Scale: 20
       Target Frame: base_link
-      X: 1.8473445177078247
-      Y: 7.554811954498291
+      X: 0
+      Y: 0
     Saved:
       - Angle: 0
         Class: rviz/TopDownOrtho
