@@ -10,6 +10,7 @@
     <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="use_tracking"            default="true" />
+    <arg name="use_prediction"          default="false" />
     <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
     <arg name="use_tf"                  default="true"          doc="replaces tf-s in bag with the current ones"/>
     <arg name="use_localization"        default="$(arg use_tf)" doc="replace localization topics"/>
@@ -77,6 +78,7 @@
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
         <arg name="use_tracking"        value="$(arg use_tracking)" />
+        <arg name="use_prediction"      value="$(arg use_prediction)" />
     </include>
 
     <!-- Planning -->
