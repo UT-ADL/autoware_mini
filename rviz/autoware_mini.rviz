@@ -8,7 +8,6 @@ Panels:
         - /Detection1
         - /Detection1/Detected objects1/Namespaces1
         - /Detection1/Tracked objects1/Namespaces1
-        - /Detection1/Final objects1/Namespaces1
         - /Planning1
         - /Planning1/Global path1/Namespaces1
         - /Planning1/Smoothed path1/Namespaces1
@@ -294,12 +293,7 @@ Visualization Manager:
           Marker Topic: /planning/lanelet2_map_markers
           Name: Lanelet2 map
           Namespaces:
-            Centerline: true
-            Crosswalk: true
-            Left boundary: true
-            Right boundary: true
-            Stop line: true
-            Traffic lights: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -391,35 +385,16 @@ Visualization Manager:
               Target speed: true
               Value: true
             Detection:
-              Detected objects: true
-              Final objects: true
-              Lidar:
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Predicted objects: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Tracked objects: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -429,9 +404,7 @@ Visualization Manager:
               Radar raw: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -464,35 +437,16 @@ Visualization Manager:
               Target speed: true
               Value: true
             Detection:
-              Detected objects: true
-              Final objects: true
-              Lidar:
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Predicted objects: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Tracked objects: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -502,9 +456,7 @@ Visualization Manager:
               Radar raw: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -654,10 +606,9 @@ Visualization Manager:
           Name: Final objects
           Namespaces:
             bounding_box: false
-            candidate_trajectories: true
             centroid: true
             convex_hull: true
-            speed: false
+            speed: true
             text: true
           Queue Size: 100
           Value: true
@@ -708,8 +659,8 @@ Visualization Manager:
           Name: Global path
           Namespaces:
             Path: true
-            Velocity label: true
-            Waypoint pose: true
+            Velocity label: false
+            Waypoint pose: false
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -721,13 +672,15 @@ Visualization Manager:
           Queue Size: 100
           Value: false
         - Class: rviz/MarkerArray
-          Enabled: false
+          Enabled: true
           Marker Topic: /planning/local_path_markers
           Name: Local path
           Namespaces:
-            {}
+            Stopping point: true
+            Velocity label: true
+            Waypoints: true
           Queue Size: 100
-          Value: false
+          Value: true
         - Class: rviz/Marker
           Enabled: true
           Marker Topic: /planning/stop_point_visualization
@@ -809,23 +762,8 @@ Visualization Manager:
               Target speed: true
               Value: true
             Detection:
-              Detected objects: true
-              Final objects: true
-              Lidar:
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Predicted objects: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Tracked objects: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
@@ -840,7 +778,12 @@ Visualization Manager:
               Stop point: true
               Value: true
             Sensing:
-              "": true
+              Camera Image Left: true
+              Camera Image Right: true
+              Camera View Left: true
+              Camera View Right: true
+              Points raw center: true
+              Radar raw: true
               Value: true
             Simulation:
               Bicycle markers: true
