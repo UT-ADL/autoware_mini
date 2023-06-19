@@ -196,7 +196,8 @@ class VelocityLocalPlanner:
         for stop_line in red_stop_lines.values():
 
             tfl_local_path_index = stop_line['global_path_index'] - wp_backward
-            if tfl_local_path_index >= self.local_path_length or tfl_local_path_index < 0:
+            # if the stop line is not on the local path, ignore it
+            if tfl_local_path_index >= self.local_path_length or tfl_local_path_index <= 0:
                 continue
 
             # calculate deceleration needed to stop for the traffic light
