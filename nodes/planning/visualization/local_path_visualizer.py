@@ -6,13 +6,14 @@ from autoware_msgs.msg import Lane
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 from helpers.waypoints import get_point_and_orientation_on_path_within_distance
+from geometry_msgs.msg import Point
 
 class LocalPathVisualizer:
     def __init__(self):
 
         # Parameters
         self.car_safety_width = rospy.get_param("car_safety_width")
-        self.wp_safety_radius = rospy.get_param("wp_safety_radius")
+        self.close_obstacle_limit = rospy.get_param("close_obstacle_limit")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.braking_safety_distance = rospy.get_param("braking_safety_distance")
 
@@ -31,15 +32,19 @@ class LocalPathVisualizer:
         marker.action = Marker.DELETEALL
         marker_array.markers.append(marker)
 
-        color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
+        stamp = rospy.Time.now()
+        color = ColorRGBA(0.0, 0.6, 0.0, 0.3)
         if lane.cost > 0.0:
-            color = ColorRGBA(0.8, 1.0, 0.0, 0.5)
+            color = ColorRGBA(0.8, 1.0, 0.0, 0.3)
+        if lane.is_blocked:
+            color = ColorRGBA(0.4, 0.0, 0.0, 0.3)
+
 
         # local path line_strip
         marker = Marker()
         marker.header.frame_id = lane.header.frame_id
-        marker.header.stamp = rospy.Time.now()
-        marker.ns = "Local path"
+        marker.header.stamp = stamp
+        marker.ns = "Car safety width"
         marker.type = marker.LINE_STRIP
         marker.action = marker.ADD
         marker.id = 0
@@ -50,11 +55,26 @@ class LocalPathVisualizer:
             marker.points.append(waypoint.pose.pose.position)
         marker_array.markers.append(marker)
 
+        # local path line_strip
+        marker_obs = Marker()
+        marker_obs.header.frame_id = lane.header.frame_id
+        marker_obs.header.stamp = stamp
+        marker_obs.ns = "Close obstacle limit"
+        marker_obs.type = marker.LINE_STRIP
+        marker_obs.action = marker.ADD
+        marker_obs.id = 1
+        marker_obs.pose.orientation.w = 1.0
+        marker_obs.scale.x = 2*self.close_obstacle_limit
+        marker_obs.color = color
+        for waypoint in lane.waypoints:
+            marker_obs.points.append(waypoint.pose.pose.position)
+        marker_array.markers.append(marker_obs)
+
         # velocity labels
         for i, waypoint in enumerate(lane.waypoints):
             marker = Marker()
             marker.header.frame_id = lane.header.frame_id
-            marker.header.stamp = rospy.Time.now()
+            marker.header.stamp = stamp
             marker.ns = "Velocity label"
             marker.id = i
             marker.type = marker.TEXT_VIEW_FACING
@@ -78,7 +98,7 @@ class LocalPathVisualizer:
 
             marker = Marker()
             marker.header.frame_id = lane.header.frame_id
-            marker.header.stamp = rospy.Time.now()
+            marker.header.stamp = stamp
             marker.ns = "Stopping point"
             marker.id = 0
             marker.type = marker.CUBE
