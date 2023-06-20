@@ -86,7 +86,7 @@ class CarlaDetector:
             object_msg.dimensions.z = obj.shape.dimensions[2]
             object_msg.velocity = obj.twist
             object_msg.acceleration = obj.accel
-            object_msg.convex_hull = create_hull(object_msg.pose, object_msg.dimensions, self.output_frame, object_msg.header.stamp)
+            object_msg.convex_hull = create_hull(object_msg, self.output_frame, object_msg.header.stamp)
             object_msg.pose_reliable = True
             object_msg.velocity_reliable = True
             object_msg.acceleration_reliable = True
