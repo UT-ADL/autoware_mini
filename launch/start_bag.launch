@@ -4,6 +4,8 @@
     <arg name="bag_file"                default="2023-05-25-14-21-10_sensors_Raekoda.bag" doc="bag file to play" />
     <arg name="localizer"               default="novatel"       doc="novatel, carla"/>
     <arg name="detector"                default="lidar_cluster" doc="cluster, sim, carla"/>
+    <arg name="use_lidar_center"        default="true"          doc="use velodyne lidar"/>
+    <arg name="use_lidar_front"         default="false"         doc="use ouster lidar"/>
     <arg name="tfl_detector"            default="camera"        doc="camera, mqtt, mqtt_camera_fusion" />
     <arg name="global_planner"          default="lanelet2"      doc="waypoints, lanelet2"/>
     <arg name="local_planner"           default="velocity"      doc="velocity"/>
@@ -73,6 +75,8 @@
     <!-- Detection -->
     <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
         <arg name="detector"            value="$(arg detector)" />
+        <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
+        <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>

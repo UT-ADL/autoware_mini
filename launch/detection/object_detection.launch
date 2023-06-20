@@ -2,19 +2,47 @@
 <launch>
     <arg name="detector"            default="lidar_cluster"     doc="lidar_cluster,lidar_sfa,lidar_vella,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion,carla,sim" />
     <arg name="lanelet2_map_name"   default="tartu_demo.osm"    doc="for carla traffic light detector" />
+    <arg name="use_lidar_center"    default="true"              doc="use velodyne lidar"/>
+    <arg name="use_lidar_front"     default="false"             doc="use velodyne lidar"/>
 
     <group if="$(eval 'lidar' in detector)" ns="lidar">
-        <remap from="points_raw" to="/lidar_center/points_raw" />
-        <remap unless="$(eval 'fusion' in detector)" from="detected_objects" to="/detection/detected_objects" />
 
+        <remap unless="$(eval 'fusion' in detector)" from="detected_objects" to="/detection/detected_objects" />
         <group if="$(eval 'lidar_cluster' in detector)">
-            <node type="ground_removal.py" name="ground_removal" pkg="autoware_mini" output="screen" required="true" />
+            <group if="$(arg use_lidar_center)" ns="center">
+                <node type="ground_removal.py" name="ground_removal" pkg="autoware_mini" output="screen" required="true">
+                    <remap from="points_raw" to="/lidar_center/points_raw" />
+                    <remap unless="$(arg use_lidar_front)" from="points_ground" to="/detection/lidar/points_ground" />
+                    <remap unless="$(arg use_lidar_front)" from="points_no_ground" to="/detection/lidar/points_no_ground" />
+                </node>
+            </group>
+            <group if="$(arg use_lidar_front)" ns="front">
+                <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" required="true" />
+                <node pkg="nodelet" type="nodelet" name="crop_box" args="load pcl/CropBox pcl_manager" output="screen" required="true">
+                    <remap from="~input" to="/lidar_front/points" />
+                    <remap from="~output" to="/lidar_front/points_filtered" />
+                </node>
+                <node type="ground_removal.py" name="ground_removal" pkg="autoware_mini" output="screen" required="true">
+                    <remap from="points_raw" to="/lidar_front/points_filtered" />
+                    <remap unless="$(arg use_lidar_center)" from="points_ground" to="/detection/lidar/points_ground" />
+                    <remap unless="$(arg use_lidar_center)" from="points_no_ground" to="/detection/lidar/points_no_ground" />
+                </node>
+            </group>
+            <group if="$(eval use_lidar_center and use_lidar_front)">
+                <node type="points_concatenator.py" name="points_concatenator" pkg="autoware_mini" output="screen" required="true">
+                    <remap from="points1" to="center/points_no_ground" />
+                    <remap from="points2" to="front/points_no_ground" />
+                    <remap from="points_concatenated" to="points_no_ground" />
+                </node>
+            </group>
             <node type="points_clusterer.py" name="points_clusterer" pkg="autoware_mini" output="screen" required="true" />
             <node type="cluster_detector.py" name="cluster_detector" pkg="autoware_mini" output="screen" required="true" />
         </group>
 
         <node if="$(eval 'lidar_sfa' in detector)" pkg="autoware_mini" type="sfa_detector.py" name="sfa_detector" output="screen" required="true">
             <param name="onnx_path"  value="$(find autoware_mini)/config/sfa/kilynuaron_model.onnx"/>
+            <remap if="$(eval use_lidar_center and not use_lidar_front)" from="points_raw" to="/lidar_center/points_raw" />
+            <remap if="$(eval use_lidar_front and not use_lidar_center)" from="points_raw" to="/lidar_front/points" />
         </node>
 
         <!-- Velodyne Vella detections -->

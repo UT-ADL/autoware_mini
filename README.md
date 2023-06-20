@@ -190,6 +190,36 @@ To see the traffic light detections enable **Detections** > **Traffic lights** >
 
 ## Launching in Lexus
 
-```
-roslaunch autoware_mini start_lexus.launch
-```
+### Ouster driver installation (one time only)
+
+1. Ensure all dependencies are installed:
+
+   ```
+   sudo apt install -y build-essential libeigen3-dev libjsoncpp-dev libspdlog-dev libcurl4-openssl-dev
+   ```
+
+2. Go to the autoware_mini src directory:
+   
+   ```
+   cd ~/autoware_mini_ws/src
+   ```
+3. Clone the latest Ouster driver repository:  
+
+   ```
+   git clone --recurse-submodules https://github.com/ouster-lidar/ouster-ros.git
+   ```
+4. Move to the Autoware mini catkin workspace:
+
+   ```
+   cd ~/autoware_mini_ws
+   ```
+5. Build the Ouster driver:
+   
+   ```
+   catkin build --cmake-args -DCMAKE_BUILD_TYPE=Release 
+   ```
+### Launching Autoware mini
+
+   ```
+   roslaunch autoware_mini start_lexus.launch
+   ```

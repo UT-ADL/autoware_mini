@@ -2,6 +2,8 @@
 <launch>
 
     <arg name="localizer"               default="novatel"           doc="novatel, carla"/>
+    <arg name="use_lidar_center"        default="true"              doc="use velodyne lidar"/>
+    <arg name="use_lidar_front"         default="false"             doc="use ouster lidar"/>
     <arg name="detector"                default="lidar_cluster"     doc="lidar_cluster, sim, carla"/>
     <arg name="follower"                default="pure_pursuit"      doc="pure_pursuit, stanley" />
     <arg name="global_planner"          default="lanelet2"          doc="waypoints, lanelet2" />
@@ -19,6 +21,8 @@
 
     <!-- Detection -->
     <include file="$(find autoware_mini)/launch/detection.launch">
+        <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
+        <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
         <arg name="detector"            value="$(arg detector)" />
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
@@ -41,7 +45,8 @@
     <!-- Vehicle -->
     <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
         <arg name="max_speed"           value="$(arg max_speed)" />
-        <arg name="use_lidar_center"    value="$(eval 'lidar' in detector and detector != 'lidar_vella')" />
+        <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
+        <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
         <arg name="use_camera_fl"       value="$(eval 'camera' in tfl_detector)" />
         <arg name="use_camera_fr"       value="$(eval 'camera' in tfl_detector)" />
         <arg name="use_radar_fc"        value="$(eval 'radar' in detector)" />
