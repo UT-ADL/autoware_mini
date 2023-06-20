@@ -5,14 +5,6 @@ import numpy as np
 
 from numpy.lib.recfunctions import structured_to_unstructured, unstructured_to_structured
 from ros_numpy import numpify, msgify
-try:
-    from sklearnex.cluster import DBSCAN
-    DBSCAN_ALGORITHM = 'auto'
-    rospy.loginfo("Intel® Extension for Scikit-learn found")
-except ImportError:
-    rospy.logwarn("Intel® Extension for Scikit-learn not found, reverting to original Scikit-learn. To speed up clustering install Intel® Extension for Scikit-learn, see https://intel.github.io/scikit-learn-intelex/.")
-    from sklearn.cluster import DBSCAN
-    DBSCAN_ALGORITHM = 'ball_tree'
 
 from sensor_msgs.msg import PointCloud2
 
@@ -21,8 +13,25 @@ class PointsClusterer:
         self.sample_size = rospy.get_param('~sample_size')
         self.cluster_epsilon = rospy.get_param('~cluster_epsilon')
         self.cluster_min_size = rospy.get_param('~cluster_min_size')
+        self.dbscan_implementation = rospy.get_param('~dbscan_implementation')
 
-        self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm=DBSCAN_ALGORITHM)
+        if self.dbscan_implementation == 'cuml':
+            from cuml.cluster import DBSCAN
+            self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size)
+            rospy.loginfo("Using DBSCAN from cuML")
+
+        elif self.dbscan_implementation == 'sklearnx':
+            from sklearnex.cluster import DBSCAN
+            self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='auto')
+            rospy.loginfo("Using DBSCAN  from Intel® Extension for Scikit-learn")
+
+        elif self.dbscan_implementation == 'sklearn':
+            from sklearn.cluster import DBSCAN
+            self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='ball_tree')
+            rospy.loginfo("Using DBSCAN from Scikit-learn")
+
+        else:
+            raise Exception("{} is is an unrecognized value for 'dbscan_implementation' param. Chosse from: [cuml, sklearnx, sklearn]".format(self.dbscan_implementation))
 
         self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=1)
         rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=1024*1024)

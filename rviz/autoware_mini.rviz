@@ -5,7 +5,9 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Map1/Lanelet2 map1/Namespaces1
+        - /Sensing1
         - /Detection1
+        - /Detection1/Lidar1
         - /Detection1/Detected objects1/Namespaces1
         - /Planning1
         - /Planning1/Global path1/Namespaces1
@@ -31,7 +33,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Points front filtered
   - Class: jsk_rviz_plugin/PublishTopic
     Name: Cancel route
     Topic: /planning/cancel_route
@@ -332,6 +334,34 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: false
+        - Alpha: 1
+          Autocompute Intensity Bounds: true
+          Autocompute Value Bounds:
+            Max Value: 10
+            Min Value: -10
+            Value: true
+          Axis: Z
+          Channel Name: intensity
+          Class: rviz/PointCloud2
+          Color: 255; 255; 255
+          Color Transformer: Intensity
+          Decay Time: 0
+          Enabled: false
+          Invert Rainbow: false
+          Max Color: 255; 255; 255
+          Min Color: 0; 0; 0
+          Name: Points raw front
+          Position Transformer: XYZ
+          Queue Size: 10
+          Selectable: true
+          Size (Pixels): 3
+          Size (m): 0.10000000149011612
+          Style: Flat Squares
+          Topic: /lidar_front/points
+          Unreliable: false
+          Use Fixed Frame: true
+          Use rainbow: true
+          Value: false
         - Class: rviz/MarkerArray
           Enabled: false
           Marker Topic: /radar_fc/can_viz_markers
@@ -376,8 +406,7 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               Accel limit: true
@@ -389,44 +418,27 @@ Visualization Manager:
               Target speed: true
               Value: true
             Detection:
-              Detected objects: true
-              Lidar:
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
               Camera Image Right: true
               Camera View Right: true
               Points raw center: true
+              Points raw front: true
               Radar raw: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -446,8 +458,7 @@ Visualization Manager:
           Value: false
           Visibility:
             Control:
-              Current pose: true
-              Follower markers: true
+              "": true
               Value: true
             Dashboard:
               Accel limit: true
@@ -459,44 +470,27 @@ Visualization Manager:
               Target speed: true
               Value: true
             Detection:
-              Detected objects: true
-              Lidar:
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
               Camera Image Right: true
               Camera View Left: true
               Points raw center: true
+              Points raw front: true
               Radar raw: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -510,6 +504,154 @@ Visualization Manager:
       Displays:
         - Class: rviz/Group
           Displays:
+            - Class: rviz/Group
+              Displays:
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: false
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points center ground
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /detection/lidar/center/points_ground
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: false
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: true
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points center no ground
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /detection/lidar/center/points_no_ground
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: true
+              Enabled: false
+              Name: Center
+            - Class: rviz/Group
+              Displays:
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: false
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points front filtered
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /lidar_front/points_filtered
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: false
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: false
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points front ground
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /detection/lidar/front/points_ground
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: false
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: true
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points front no ground
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /detection/lidar/front/points_no_ground
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: true
+              Enabled: false
+              Name: Front
             - Alpha: 1
               Autocompute Intensity Bounds: true
               Autocompute Value Bounds:
@@ -602,7 +744,7 @@ Visualization Manager:
                 {}
               Queue Size: 100
               Value: false
-          Enabled: false
+          Enabled: true
           Name: Lidar
         - Class: rviz/Group
           Displays:
@@ -658,8 +800,7 @@ Visualization Manager:
               Marker Topic: /planning/stop_line_markers
               Name: Stop line status
               Namespaces:
-                Status text: true
-                Stop line: true
+                {}
               Queue Size: 100
               Value: true
           Enabled: true
@@ -674,8 +815,8 @@ Visualization Manager:
           Name: Global path
           Namespaces:
             Path: true
-            Velocity label: false
-            Waypoint pose: false
+            Velocity label: true
+            Waypoint pose: true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -776,31 +917,25 @@ Visualization Manager:
               Target speed: true
               Value: true
             Detection:
-              Detected objects: true
-              Lidar:
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               "": true
               Value: true
             Sensing:
-              "": true
+              Camera Image Left: true
+              Camera Image Right: true
+              Camera View Left: true
+              Camera View Right: true
+              Points raw center: true
+              Points raw front: true
+              Radar raw: true
               Value: true
             Simulation:
               Bicycle markers: true
@@ -863,7 +998,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.0010000000474974513
-      Scale: 20
+      Scale: 17.5113582611084
       Target Frame: base_link
       X: 0
       Y: 0
