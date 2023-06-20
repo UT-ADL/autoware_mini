@@ -8,9 +8,6 @@
     <arg name="use_prediction"      default="false"             doc="use prediction after tracking" />
 
     <group if="$(eval 'lidar' in detector)" ns="lidar">
-        <remap from="points_raw" to="/lidar_center/points_raw" />
-        <remap unless="$(eval 'fusion' in detector)" from="detected_objects" to="/detection/detected_objects" />
-
         <remap unless="$(eval 'fusion' in detector)" from="detected_objects" to="/detection/detected_objects" />
         <group if="$(eval 'lidar_cluster' in detector)">
             <group if="$(arg use_lidar_center)" ns="center">
@@ -86,7 +83,7 @@
             <remap from="detected_objects_markers" to="tracked_objects_markers" />
         </node>
     </group>
-    <node unless="$(arg use_tracking)" pkg="topic_tools" type="relay" args="/detection/detected_objects /detection/tracked_objects" name="detected_objects_relay" output="screen" required="true" />
+    <node unless="$(arg use_tracking)" pkg="topic_tools" type="relay" args="detected_objects tracked_objects" name="detected_objects_relay" output="screen" required="true" />
 
     <group if="$(arg use_prediction)">
         <remap from="predicted_objects" to="final_objects" />
@@ -96,7 +93,7 @@
             <remap from="detected_objects_markers" to="predicted_objects_markers" />
         </node>
     </group>
-    <node unless="$(arg use_prediction)" pkg="topic_tools" type="relay" args="/detection/tracked_objects /detection/final_objects" name="tracked_objects_relay" output="screen" required="true" />
+    <node unless="$(arg use_prediction)" pkg="topic_tools" type="relay" args="tracked_objects final_objects" name="tracked_objects_relay" output="screen" required="true" />
 
     <!-- Final objects visualizer -->
     <node type="detected_objects_visualizer.py" name="final_objects_visualizer" pkg="autoware_mini" output="screen" required="true">
