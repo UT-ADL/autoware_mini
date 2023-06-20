@@ -7,9 +7,6 @@
     <arg name="use_tracking"        default="true"              doc="use tracking after detection" />
 
     <group if="$(eval 'lidar' in detector)" ns="lidar">
-        <remap from="points_raw" to="/lidar_center/points_raw" />
-        <remap unless="$(eval 'fusion' in detector)" from="detected_objects" to="/detection/detected_objects" />
-
         <remap unless="$(eval 'fusion' in detector)" from="detected_objects" to="/detection/detected_objects" />
         <group if="$(eval 'lidar_cluster' in detector)">
             <group if="$(arg use_lidar_center)" ns="center">
