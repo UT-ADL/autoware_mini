@@ -89,6 +89,10 @@ ema_tracker:
   association_method: iou   # iou, euclidean
   max_euclidean_distance: 2.0
 
+naive_predictor:
+  prediction_horizon: 1.0
+  prediction_interval: 0.1
+
 mqtt_traffic_light_detector:
   mqtt_host: mqtt.cloud.ut.ee
   mqtt_port: 8883

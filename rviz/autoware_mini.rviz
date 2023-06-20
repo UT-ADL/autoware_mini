@@ -34,7 +34,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: Carla camera view
+    SyncSource: ""
   - Class: jsk_rviz_plugin/PublishTopic
     Name: Cancel route
     Topic: /planning/cancel_route
@@ -295,12 +295,7 @@ Visualization Manager:
           Marker Topic: /planning/lanelet2_map_markers
           Name: Lanelet2 map
           Namespaces:
-            Centerline: true
-            Crosswalk: true
-            Left boundary: true
-            Right boundary: true
-            Stop line: true
-            Traffic lights: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -445,17 +440,28 @@ Visualization Manager:
                 Stop line status: true
                 Value: true
               Final objects: true
+              Lidar:
+                Lidar detections: true
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
+              Radar:
+                Radar detections: true
+                Value: true
+              Tracked objects: true
+              Traffic lights:
+                Left ROI image: true
+                Right ROI image: true
+                Stop line status: true
+                Value: true
               Value: true
             Grid: true
             Map:
               "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -466,9 +472,7 @@ Visualization Manager:
               Radar raw: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -526,17 +530,28 @@ Visualization Manager:
                 Stop line status: true
                 Value: true
               Final objects: true
+              Lidar:
+                Lidar detections: true
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
+              Radar:
+                Radar detections: true
+                Value: true
+              Tracked objects: true
+              Traffic lights:
+                Left ROI image: true
+                Right ROI image: true
+                Stop line status: true
+                Value: true
               Value: true
             Grid: true
             Map:
               "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -547,9 +562,7 @@ Visualization Manager:
               Radar raw: true
               Value: true
             Simulation:
-              Bicycle markers: true
-              Carla camera view: true
-              Carla image view: true
+              "": true
               Value: true
             System:
               Lexus model: true
@@ -834,6 +847,14 @@ Visualization Manager:
           Queue Size: 100
           Value: false
         - Class: rviz/MarkerArray
+          Enabled: false
+          Marker Topic: /detection/predicted_objects_markers
+          Name: Predicted objects
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
+        - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /detection/final_objects_markers
           Name: Final objects
@@ -1020,13 +1041,32 @@ Visualization Manager:
                 Stop line status: true
                 Value: true
               Final objects: true
+              Lidar:
+                Lidar detections: true
+                Points clustered: true
+                Points ground: true
+                Points no ground: true
+                Value: true
+              Radar:
+                Radar detections: true
+                Value: true
+              Tracked objects: true
+              Traffic lights:
+                Left ROI image: true
+                Right ROI image: true
+                Stop line status: true
+                Value: true
               Value: true
             Grid: true
             Map:
-              "": true
+              Lanelet2 map: true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -1098,7 +1138,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.0010000000474974513
-      Scale: 17.5113582611084
+      Scale: 20
       Target Frame: base_link
       X: 0
       Y: 0
@@ -1182,7 +1222,7 @@ Window Geometry:
     collapsed: false
   Displays:
     collapsed: false
-  Height: 1403
+  Height: 1369
   Hide Left Dock: false
   Hide Right Dock: false
   Left ROI image:
@@ -1198,6 +1238,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 2560
-  X: 0
-  Y: 0
+  Width: 2488
+  X: 72
+  Y: 34
