@@ -14,6 +14,8 @@
     <arg name="lanelet2_map_name"       default="$(arg map_name).osm"   unless="$(eval 'tartu' in map_name.lower())" />
     <arg name="lanelet2_map_name"       default="tartu_demo.osm"        if="$(eval 'tartu' in map_name.lower())" />
     <arg name='use_lexus_model'         default='true'/>
+    <arg name='use_lidar_center'        default='true'/>
+    <arg name='use_lidar_front'         default='false'/>
     
     <!-- Scenario Runner args -->
     <arg name='use_scenario_runner'     default='false'/>
@@ -32,6 +34,8 @@
         <arg name="detector"            value="$(arg detector)" />
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+        <arg name='use_lidar_center'    value='$(arg use_lidar_center)'/>
+        <arg name='use_lidar_front'     value='$(arg use_lidar_front)'/>
     </include>
 
     <!-- Planning -->

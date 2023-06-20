@@ -48,7 +48,7 @@
   <remap from="/carla/ego_vehicle/base_link/rgb_view/camera_info" to="/carla/rgb_view/camera_info" />
   <remap from="/carla/ego_vehicle/base_link/rgb_view/image" to="/carla/rgb_view/image_raw" />
   <remap from="/carla/ego_vehicle/base_link/lidar_center" to="/lidar_center/points_raw" />
-  <remap from="/carla/ego_vehicle/base_link/lidar_center/lidar_front/os_sensor" to="/lidar_front/points_raw" />
+  <remap from="/carla/ego_vehicle/base_link/lidar_center/lidar_front/os_sensor" to="/lidar_front/points" />
   <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fl/camera_info" to="/camera_fl/camera_info" />
   <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fr/camera_info" to="/camera_fr/camera_info" />
   <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fl/image" to="/camera_fl/image_raw" />
@@ -77,6 +77,8 @@
         - {old: 'ego_vehicle/base_link/base_footprint', new: 'base_footprint'}
     </rosparam>
   </node>
+  <param name="/detection/lidar/front/crop_box/input_frame" type="string" value="ego_vehicle/base_link/lidar_center" />
+  <param name="/detection/lidar/front/crop_box/output_frame" type="string" value="ego_vehicle/base_link/lidar_center" />
 
   <!-- ====================================================================================================== -->
 
