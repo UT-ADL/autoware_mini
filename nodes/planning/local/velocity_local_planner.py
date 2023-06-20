@@ -261,6 +261,7 @@ class VelocityLocalPlanner:
                         wp.twist.twist.linear.x = 0.0
                         continue
 
+                    # obstacle distance from car front
                     obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - local_path_dists[i] - self.current_pose_to_car_front 
 
                     # calculate target velocity in case of obstacle close to path
@@ -269,8 +270,7 @@ class VelocityLocalPlanner:
                         target_velocity_close = np.sqrt(np.maximum(0, obstacles_ahead_map_speeds_scaled[lowest_target_velocity_idx]**2 + abs(2 * self.speed_deceleration_limit * obstacle_distance)))
 
                     # calculate target velocity in case of following the obstacle
-                    following_distance = obstacle_distance - self.braking_safety_distance \
-                                        - self.braking_reaction_time * obstacles_ahead_speeds[lowest_target_velocity_idx]
+                    following_distance = obstacle_distance - self.braking_safety_distance - self.braking_reaction_time * obstacles_ahead_speeds[lowest_target_velocity_idx]
                     target_velocity_follow = np.sqrt(np.maximum(0, obstacles_ahead_speeds[lowest_target_velocity_idx]**2 + 2 * self.speed_deceleration_limit * following_distance))
 
                     # record the closest object from the first waypoint and decide if the lane is blocked
@@ -278,9 +278,8 @@ class VelocityLocalPlanner:
                         # target_vel drops below the map velocity at current_pose (wp[0]) - object causing ego vehicle to slow down
                         if target_velocity_follow < wp.twist.twist.linear.x:
                             blocked = True
-                        if target_velocity_close > 0.0:
-                            # TODO no need to calc cost, could manually set it to 1.0. cost value not used. cost used in path viz to color the path
-                            # and to decide if stopping point is visualized. If close OBS then no stopping point and path from green to yellow.
+                        if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.car_safety_width:
+                            # cost calculated here is used only for visualization decisions
                             cost = (obstacles_ahead_lateral_dists[lowest_target_velocity_idx] - self.car_safety_width)  / (self.close_obstacle_limit - self.car_safety_width)
 
                         # closest object distance is calculated from the front of the car
