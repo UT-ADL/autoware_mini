@@ -77,20 +77,19 @@ class LocalPathVisualizer:
         marker.points = points
         marker_array.markers.append(marker)
 
-        # local path line_strip
-        marker_obs = Marker()
-        marker_obs.header.frame_id = lane.header.frame_id
-        marker_obs.header.stamp = stamp
-        marker_obs.ns = "Close obstacle limit"
-        marker_obs.type = marker.LINE_STRIP
-        marker_obs.action = marker.ADD
-        marker_obs.id = 1
-        marker_obs.pose.orientation.w = 1.0
-        marker_obs.scale.x = 2*self.close_obstacle_limit
-        marker_obs.color = color
-        for waypoint in lane.waypoints:
-            marker_obs.points.append(waypoint.pose.pose.position)
-        marker_array.markers.append(marker_obs)
+        # local path line_strip with close obstacle limit
+        marker = Marker()
+        marker.header.frame_id = lane.header.frame_id
+        marker.header.stamp = stamp
+        marker.ns = "Close obstacle limit"
+        marker.type = marker.LINE_STRIP
+        marker.action = marker.ADD
+        marker.id = 1
+        marker.pose.orientation.w = 1.0
+        marker.scale.x = 2*self.close_obstacle_limit
+        marker.color = color
+        marker.points = points
+        marker_array.markers.append(marker)
 
         # velocity labels
         for i, waypoint in enumerate(lane.waypoints):
