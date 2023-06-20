@@ -93,7 +93,8 @@ class VelocityLocalPlanner:
             ) for wp in msg.waypoints])
 
         # create global_wp_tree
-        global_path_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(global_path_array[:,:2])
+        global_path_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search)
+        global_path_tree.fit(global_path_array[:,:2])
 
         with self.lock:
             self.output_frame = msg.header.frame_id
@@ -137,6 +138,7 @@ class VelocityLocalPlanner:
             global_path_waypoints = self.global_path_waypoints
             global_path_tree = self.global_path_tree
 
+        # no need for lock, because assignment is atomic in Python
         stop_lines = self.stop_lines
         current_pose = self.current_pose
         current_velocity = self.current_velocity
@@ -157,9 +159,7 @@ class VelocityLocalPlanner:
         local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_backward:end_index])
 
         # project current_pose to path
-        current_pose_on_path = get_closest_point_on_line(Point(x = current_pose.x, y = current_pose.y, z = current_pose.z),
-                                                         Point(x = local_path_array[0,0], y = local_path_array[0,1], z = local_path_array[0,2]),
-                                                         Point(x = local_path_array[1,0], y = local_path_array[1,1], z = local_path_array[1,2]))
+        current_pose_on_path = get_closest_point_on_line(current_pose, local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position)
 
         # for all calculations consider the current pose as the first point of the local path
         local_path_array[0] = [current_pose_on_path.x, current_pose_on_path.y, current_pose_on_path.z, current_velocity]
@@ -200,7 +200,11 @@ class VelocityLocalPlanner:
             points_list.append([obj.pose.position.x, obj.pose.position.y, obj.pose.position.z, velocity.x])
             for point in obj.convex_hull.polygon.points:
                 points_list.append([point.x, point.y, point.z, velocity.x])
-
+            # add predicted path points to the points list, if they exist
+            #if len(obj.candidate_trajectories.lanes) > 0:
+            #    for wp in obj.candidate_trajectories.lanes[0].waypoints:
+            #        points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, velocity.x])
+ 
         # add stop line points to the points list
         for stop_line in stop_lines.values():
             for point in stop_line:
