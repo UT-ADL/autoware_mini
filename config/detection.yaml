@@ -42,7 +42,6 @@ lidar:
     sample_size: 10000
     cluster_epsilon: 0.9
     cluster_min_size: 5
-    dbscan_implementation: cuml     # cuml, sklearnx, sklearn
   cluster_detector:
     min_cluster_size: 5
     bounding_box_type: axis_aligned # axis_aligned, min_area

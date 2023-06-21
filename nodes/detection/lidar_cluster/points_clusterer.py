@@ -13,25 +13,20 @@ class PointsClusterer:
         self.sample_size = rospy.get_param('~sample_size')
         self.cluster_epsilon = rospy.get_param('~cluster_epsilon')
         self.cluster_min_size = rospy.get_param('~cluster_min_size')
-        self.dbscan_implementation = rospy.get_param('~dbscan_implementation')
 
-        if self.dbscan_implementation == 'cuml':
+        try:
             from cuml.cluster import DBSCAN
             self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size)
             rospy.loginfo("Using DBSCAN from cuML")
-
-        elif self.dbscan_implementation == 'sklearnx':
-            from sklearnex.cluster import DBSCAN
-            self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='auto')
-            rospy.loginfo("Using DBSCAN  from Intel® Extension for Scikit-learn")
-
-        elif self.dbscan_implementation == 'sklearn':
-            from sklearn.cluster import DBSCAN
-            self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='ball_tree')
-            rospy.loginfo("Using DBSCAN from Scikit-learn")
-
-        else:
-            raise Exception("{} is is an unrecognized value for 'dbscan_implementation' param. Chosse from: [cuml, sklearnx, sklearn]".format(self.dbscan_implementation))
+        except ImportError:
+            try:
+                from sklearnex.cluster import DBSCAN
+                self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='auto')
+                rospy.loginfo("Using DBSCAN from Intel® Extension for Scikit-learn")
+            except ImportError:
+                from sklearn.cluster import DBSCAN
+                self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='ball_tree')
+                rospy.loginfo("Using DBSCAN from Scikit-learn")
 
         self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=1)
         rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=1024*1024)

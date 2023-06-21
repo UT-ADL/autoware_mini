@@ -60,6 +60,8 @@ You should have ROS Noetic installed, follow the official instructions for [Ubun
 4. Install Python dependencies
    ```
    pip install -r autoware_mini/requirements.txt
+   # only when planning to use GPU based clustering
+   pip install -r autoware_mini/requirements_cuml.txt
    ```
 
 5. Build the workspace

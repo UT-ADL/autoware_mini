@@ -1,0 +1,2 @@
+-i https://pypi.nvidia.com/
+cuml_cu11 == 23.4.1
