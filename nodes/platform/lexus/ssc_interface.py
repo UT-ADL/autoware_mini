@@ -136,11 +136,11 @@ class SSCInterface:
             acceleration_limit = self.acceleration_limit
             deceleration_limit = self.deceleration_limit
         elif msg.ctrl_cmd.linear_acceleration > 0.0:
-            acceleration_limit = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
+            acceleration_limit = msg.ctrl_cmd.linear_acceleration
             deceleration_limit = self.deceleration_limit
         elif msg.ctrl_cmd.linear_acceleration < 0.0:
             acceleration_limit = self.acceleration_limit
-            deceleration_limit = min(-msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
+            deceleration_limit = -msg.ctrl_cmd.linear_acceleration
 
         # publish command messages
         header = Header()

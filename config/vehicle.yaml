@@ -1,6 +1,6 @@
 wheel_base: 2.789
 acceleration_limit: 1.0
-deceleration_limit: 5.0
+deceleration_limit: 1.0
 
 ssc_interface:
   use_adaptive_gear_ratio: True
