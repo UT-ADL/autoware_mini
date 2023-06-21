@@ -38,21 +38,7 @@ class VelocityLocalPlanner:
         self.dense_wp_interval = rospy.get_param("~dense_wp_interval")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
-
-        lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
-        coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
-        utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
-        utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
-
-        # Load the map using Lanelet2
-        if coordinate_transformer == "utm":
-            projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
-        else:
-            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
-            exit(1)
-
-        self.lanelet2_map = load(lanelet2_map_name, projector)
+        self.tfl_deceleration_limit = rospy.get_param("~tfl_deceleration_limit")
 
         # Internal variables
         self.lock = threading.Lock()
@@ -63,6 +49,7 @@ class VelocityLocalPlanner:
         self.current_pose = None
         self.current_velocity = 0.0
         self.stop_lines = {}
+        self.red_stop_lines = {}
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer)
 
@@ -93,8 +80,15 @@ class VelocityLocalPlanner:
                 wp.pose.pose.position.x,
                 wp.pose.pose.position.y,
                 wp.pose.pose.position.z,
-                wp.twist.twist.linear.x
+                wp.twist.twist.linear.x,
+                wp.stop_line_id
             ) for wp in msg.waypoints])
+
+        # create stop line dictionary
+        self.stop_lines = {}
+        stop_line_wp_idx = np.where(global_path_array[:,4] > 0)[0]
+        for idx in stop_line_wp_idx:
+            self.stop_lines[global_path_array[idx,4]] = {'global_path_index': idx, 'location': [global_path_array[idx,0], global_path_array[idx,1], global_path_array[idx,2], 0]}
 
         # create global_wp_tree
         global_path_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search)
@@ -118,19 +112,14 @@ class VelocityLocalPlanner:
 
 
     def traffic_light_status_callback(self, msg):
-        stop_lines = {}
+
+        red_stop_lines = {}
+
         for result in msg.results:
-            # check if we have already outputted the status of this stopline
-            if result.lane_id in stop_lines:
-                assert result.recognition_result == 0, "traffic light status callback - multiple stoplines with different status"
-                continue
+            if result.lane_id in self.stop_lines and result.recognition_result == 0:
+                red_stop_lines[result.lane_id] = self.stop_lines[result.lane_id]
 
-            # add stop line points to the list if the traffic light is red or yellow
-            if result.recognition_result == 0:
-                stop_line = self.lanelet2_map.lineStringLayer.get(result.lane_id)
-                stop_lines[result.lane_id] = stop_line
-
-        self.stop_lines = stop_lines
+        self.red_stop_lines = red_stop_lines
 
 
     def detected_objects_callback(self, msg):
@@ -142,8 +131,7 @@ class VelocityLocalPlanner:
             global_path_waypoints = self.global_path_waypoints
             global_path_tree = self.global_path_tree
 
-        # no need for lock, because assignment is atomic in Python
-        stop_lines = self.stop_lines
+        red_stop_lines = self.red_stop_lines
         current_pose = self.current_pose
         current_velocity = self.current_velocity
 
@@ -166,13 +154,15 @@ class VelocityLocalPlanner:
         current_pose_on_path = get_closest_point_on_line(current_pose, local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position)
 
         # for all calculations consider the current pose as the first point of the local path
-        local_path_array[0] = [current_pose_on_path.x, current_pose_on_path.y, current_pose_on_path.z, current_velocity]
+        local_path_array[0] = [current_pose_on_path.x, current_pose_on_path.y, current_pose_on_path.z, current_velocity, 0]
         local_path_waypoints[0].pose.pose.position = current_pose_on_path
 
         # if current position overlaps with the first waypoint, remove it
         if math.isclose(get_distance_between_two_points_2d(local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position), 0):
             local_path_array = local_path_array[1:]
             local_path_waypoints = local_path_waypoints[1:]
+            # update wp_backward to reflect the new first waypoint - used to extract tfl distances
+            wp_backward += 1
 
         # calculate distances up to each waypoint
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
@@ -215,9 +205,19 @@ class VelocityLocalPlanner:
             #        points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, velocity.x])
  
         # add stop line points to the points list
-        for stop_line in stop_lines.values():
-            for point in stop_line:
-                points_list.append([point.x, point.y, point.z, 0.0])
+        for stop_line in red_stop_lines.values():
+
+            tfl_local_path_index = stop_line['global_path_index'] - wp_backward
+            # if the stop line is not on the local path, ignore it
+            if tfl_local_path_index >= self.local_path_length or tfl_local_path_index <= 0:
+                continue
+
+            # calculate deceleration needed to stop for the traffic light
+            deceleration = -(current_velocity**2) / (2 * local_path_dists[tfl_local_path_index])
+            if deceleration < self.tfl_deceleration_limit:
+                rospy.logwarn_throttle(3, "%s - ignore RED tfl, deceleration: %f", rospy.get_name(), deceleration)
+            else:
+                points_list.append(stop_line['location'])
 
         if len(points_list) > 0:
             # convert the points list to a numpy array

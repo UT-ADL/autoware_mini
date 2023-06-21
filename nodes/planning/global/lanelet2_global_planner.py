@@ -60,6 +60,7 @@ class Lanelet2GlobalPlanner:
             exit(1)
 
         self.lanelet2_map = load(lanelet2_map_name, projector)
+        self.stopline_nodes = extract_stopline_nodes(self.lanelet2_map)
 
         # traffic rules
         traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
@@ -114,7 +115,7 @@ class Lanelet2GlobalPlanner:
             rospy.logwarn("%s - last lanelet in path (%d) is not goal lanelet (%d)", rospy.get_name(), path_no_lane_change[len(path_no_lane_change)-1].id, goal_lanelet.id)
             return
 
-        waypoints = self.convert_to_waypoints(path_no_lane_change)
+        waypoints = self.convert_to_waypoints(path_no_lane_change, self.stopline_nodes)
 
         # build KDTree for nearest neighbour search
         waypoints_xy = np.array([(w.pose.pose.position.x, w.pose.pose.position.y) for w in waypoints])
@@ -172,7 +173,7 @@ class Lanelet2GlobalPlanner:
         wp.pose.pose.position = point
         return wp
 
-    def convert_to_waypoints(self, lanelet_sequence):
+    def convert_to_waypoints(self, lanelet_sequence, stopline_nodes):
         waypoints = []
 
         last_lanelet = False
@@ -202,6 +203,8 @@ class Lanelet2GlobalPlanner:
                 waypoint.pose.pose.position.y = point.y
                 waypoint.pose.pose.position.z = point.z
                 waypoint.wpstate.steering_state = blinker
+                if point.id in stopline_nodes:
+                    waypoint.stop_line_id = stopline_nodes[point.id]
 
                 # calculate quaternion for orientation
                 if last_lanelet and idx == len(lanelet.centerline)-1:
@@ -264,6 +267,18 @@ class Lanelet2GlobalPlanner:
 
     def run(self):
         rospy.spin()
+
+def extract_stopline_nodes(map):
+
+    stopline_nodes = {}
+
+    for line in map.lineStringLayer:
+        if line.attributes:
+            if line.attributes["type"] == "stop_line":
+                # add all point id's into dictionary and add stopline id as value
+                stopline_nodes.update({point.id: line.id for point in line})
+
+    return stopline_nodes
 
 if __name__ == '__main__':
     rospy.init_node('lanelet2_global_planner')
