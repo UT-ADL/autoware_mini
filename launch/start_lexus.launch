@@ -6,8 +6,8 @@
     <arg name="use_lidar_front"         default="false"             doc="use ouster lidar"/>
     <arg name="detector"                default="lidar_cluster"     doc="lidar_cluster, sim, carla"/>
     <arg name="tfl_detector"            default="mqtt"              doc="mqtt, camera, mqtt_camera_fusion" />
-    <arg name="use_tracking"            default="true" />
-    <arg name="use_prediction"          default="false" />
+    <arg name="tracker"                 default="ema"               doc="none, ema" />
+    <arg name="predictor"               default="none"              doc="none, naive" />
     <arg name="follower"                default="pure_pursuit"      doc="pure_pursuit, stanley" />
     <arg name="global_planner"          default="lanelet2"          doc="waypoints, lanelet2" />
     <arg name="local_planner"           default="velocity"          doc="velocity, none"/>
@@ -28,8 +28,8 @@
         <arg name="detector"            value="$(arg detector)" />
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
-        <arg name="use_tracking"        value="$(arg use_tracking)" />
-        <arg name="use_prediction"      value="$(arg use_prediction)" />
+        <arg name="tracker"             value="$(arg tracker)" />
+        <arg name="predictor"           value="$(arg predictor)" />
     </include>
 
     <!-- Planning -->

@@ -5,8 +5,8 @@
     <arg name="use_lidar_front"     default="false"             doc="use ouster lidar"/>
     <arg name="tfl_detector"        default="none"              doc="carla, mqtt, camera, mqtt_camera_fusion" />
     <arg name="lanelet2_map_name"   default="tartu_demo.osm"    doc="for carla traffic light detector" />
-    <arg name="use_tracking"        default="true"              doc="use tracking" />
-    <arg name="use_prediction"      default="false"             doc="use prediction" />
+    <arg name="tracker"             default="ema"               doc="none, ema" />
+    <arg name="predictor"           default="none"              doc="none, naive" />
 
     <group ns="detection">
 
@@ -16,8 +16,8 @@
             <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
             <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
             <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
-            <arg name="use_tracking"        value="$(arg use_tracking)" />
-            <arg name="use_prediction"      value="$(arg use_prediction)" />
+            <arg name="tracker"             value="$(arg tracker)" />
+            <arg name="predictor"           value="$(arg predictor)" />
         </include>
 
         <!-- Traffic light detection -->
