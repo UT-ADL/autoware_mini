@@ -6,16 +6,11 @@ import math
 import threading
 from tf2_ros import Buffer, TransformListener, TransformException
 
-from lanelet2.io import Origin, load
-from lanelet2.projection import UtmProjector
-
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 from autoware_msgs.msg import Lane, DetectedObjectArray, TrafficLightResultArray
-from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3, Point
-from std_msgs.msg import ColorRGBA
-from visualization_msgs.msg import Marker
+from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3
 
 from helpers.geometry import get_closest_point_on_line, get_distance_between_two_points_2d
 from helpers.waypoints import get_two_nearest_waypoint_idx
@@ -32,13 +27,13 @@ class VelocityLocalPlanner:
         self.transform_timeout = rospy.get_param("~transform_timeout")
         self.braking_safety_distance = rospy.get_param("braking_safety_distance")
         self.braking_reaction_time = rospy.get_param("braking_reaction_time")
-        self.car_safety_width = rospy.get_param("car_safety_width")
-        self.close_obstacle_limit = rospy.get_param("close_obstacle_limit")
-        self.wp_safety_radius = rospy.get_param("wp_safety_radius")
-        self.dense_wp_interval = rospy.get_param("~dense_wp_interval")
+        self.stopping_lateral_distance = rospy.get_param("stopping_lateral_distance")
+        self.slowdown_lateral_distance = rospy.get_param("slowdown_lateral_distance")
+        self.waypoint_lookup_radius = rospy.get_param("waypoint_lookup_radius")
+        self.dense_waypoint_interval = rospy.get_param("~dense_waypoint_interval")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
-        self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
-        self.tfl_deceleration_limit = rospy.get_param("~tfl_deceleration_limit")
+        self.default_deceleration = rospy.get_param("default_deceleration")
+        self.tfl_maximum_deceleration = rospy.get_param("~tfl_maximum_deceleration")
 
         # Internal variables
         self.lock = threading.Lock()
@@ -169,7 +164,7 @@ class VelocityLocalPlanner:
         local_path_dists = np.insert(local_path_dists, 0, 0.0)
 
         # interpolate dense local path and us it to calculate the closest object distance and velocity
-        local_path_dense_dists = np.linspace(0, local_path_dists[-1], num=int(local_path_dists[-1] / self.dense_wp_interval))
+        local_path_dense_dists = np.linspace(0, local_path_dists[-1], num=int(local_path_dists[-1] / self.dense_waypoint_interval))
         local_path_dense = self.interpolate_dense_local_path(local_path_dense_dists, local_path_dists, local_path_array)
 
         # initialize closest object distance and velocity
@@ -214,7 +209,7 @@ class VelocityLocalPlanner:
 
             # calculate deceleration needed to stop for the traffic light
             deceleration = -(current_velocity**2) / (2 * local_path_dists[tfl_local_path_index])
-            if deceleration < self.tfl_deceleration_limit:
+            if deceleration < self.tfl_maximum_deceleration:
                 rospy.logwarn_throttle(3, "%s - ignore RED tfl, deceleration: %f", rospy.get_name(), deceleration)
             else:
                 points_list.append(stop_line['location'])
@@ -225,14 +220,14 @@ class VelocityLocalPlanner:
             # create spatial index over obstacles for quick search
             obstacle_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search).fit(obstacle_array[:,:2])
             # find closest local_path points to obstacles - lateral dist from path
-            obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors(local_path_dense[:,:2], self.wp_safety_radius, return_distance=True)
+            obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors(local_path_dense[:,:2], self.waypoint_lookup_radius, return_distance=True)
 
             # create indexes for obstacles with respect to local_path_dense
             index_array = np.repeat(np.arange(len(obstacle_idx)), [len(i) for i in obstacle_idx])
             obstacles_dense_path = np.vstack((index_array, np.concatenate(obstacle_idx), np.concatenate(obstacle_d))).T
             
-            # filter with self.close_obstacle_limit
-            obstacles_dense_path = obstacles_dense_path[obstacles_dense_path[:,2] < self.close_obstacle_limit]
+            # filter with self.slowdown_lateral_distance
+            obstacles_dense_path = obstacles_dense_path[obstacles_dense_path[:,2] < self.slowdown_lateral_distance]
 
             if len(obstacles_dense_path) > 0:
 
@@ -269,22 +264,22 @@ class VelocityLocalPlanner:
                     obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - local_path_dists[i] - self.current_pose_to_car_front 
 
                     # calculate target velocity in case of obstacle close to path
-                    if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.car_safety_width:
+                    if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.stopping_lateral_distance:
                         # abs is used to increase the target velocity once the car has passed, but the obstacle is still close
-                        target_velocity_close = np.sqrt(np.maximum(0, obstacles_ahead_map_speeds_scaled[lowest_target_velocity_idx]**2 + abs(2 * self.speed_deceleration_limit * obstacle_distance)))
+                        target_velocity_close = np.sqrt(np.maximum(0, obstacles_ahead_map_speeds_scaled[lowest_target_velocity_idx]**2 + abs(2 * self.default_deceleration * obstacle_distance)))
 
                     # calculate target velocity in case of following the obstacle
                     following_distance = obstacle_distance - self.braking_safety_distance - self.braking_reaction_time * obstacles_ahead_speeds[lowest_target_velocity_idx]
-                    target_velocity_follow = np.sqrt(np.maximum(0, obstacles_ahead_speeds[lowest_target_velocity_idx]**2 + 2 * self.speed_deceleration_limit * following_distance))
+                    target_velocity_follow = np.sqrt(np.maximum(0, obstacles_ahead_speeds[lowest_target_velocity_idx]**2 + 2 * self.default_deceleration * following_distance))
 
                     # record the closest object from the first waypoint and decide if the lane is blocked
                     if i == 0:
                         # target_vel drops below the map velocity at current_pose (wp[0]) - object causing ego vehicle to slow down
                         if target_velocity_follow < wp.twist.twist.linear.x:
                             blocked = True
-                        if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.car_safety_width:
+                        if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.stopping_lateral_distance:
                             # cost calculated here is used only for visualization decisions
-                            cost = (obstacles_ahead_lateral_dists[lowest_target_velocity_idx] - self.car_safety_width)  / (self.close_obstacle_limit - self.car_safety_width)
+                            cost = (obstacles_ahead_lateral_dists[lowest_target_velocity_idx] - self.stopping_lateral_distance)  / (self.slowdown_lateral_distance - self.stopping_lateral_distance)
 
                         # closest object distance is calculated from the front of the car
                         closest_object_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - self.current_pose_to_car_front
@@ -303,11 +298,11 @@ class VelocityLocalPlanner:
     def scale_speeds_using_lateral_distance(self, map_speed, lateral_dist):
 
         scale = np.zeros_like(map_speed)
-        # calculate scaling coefficient to transform lateral distance between 0 to 1  using self.car_safety_width and self.close_obstacle_limit
-        scale[(lateral_dist >= self.car_safety_width)] = (lateral_dist[(lateral_dist >= self.car_safety_width )] - self.car_safety_width ) \
-             / (self.close_obstacle_limit - self.car_safety_width)
+        # calculate scaling coefficient to transform lateral distance between 0 to 1  using self.stopping_lateral_distance and self.slowdown_lateral_distance
+        scale[(lateral_dist >= self.stopping_lateral_distance)] = (lateral_dist[(lateral_dist >= self.stopping_lateral_distance )] - self.stopping_lateral_distance ) \
+             / (self.slowdown_lateral_distance - self.stopping_lateral_distance)
         # these should be filtered out, but just in case
-        scale[lateral_dist > self.close_obstacle_limit] = 1
+        scale[lateral_dist > self.slowdown_lateral_distance] = 1
 
         return map_speed * scale
 
@@ -318,13 +313,13 @@ class VelocityLocalPlanner:
 
         # for all obstacles calculate target velocity based on obstacle speed and distance to obstacle - following
         following_distances = obstacle_distances - self.braking_safety_distance - self.braking_reaction_time * obstacles_ahead_speeds
-        target_velocities_follow = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.speed_deceleration_limit * following_distances))
+        target_velocities_follow = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.default_deceleration * following_distances))
 
         # TODO only obstacles_ahead_dists or add - self.current_pose_to_car_front - self.braking_safety_distance?
-        target_velocities_close = np.sqrt(np.maximum(0, obstacles_ahead_map_speeds_scaled**2 + 2 * self.speed_deceleration_limit * obstacle_distances))
+        target_velocities_close = np.sqrt(np.maximum(0, obstacles_ahead_map_speeds_scaled**2 + 2 * self.default_deceleration * obstacle_distances))
 
         # combine target velocities from following and close to the path obstacles
-        target_velocities = np.where(obstacles_ahead_lateral_dists <= self.car_safety_width, target_velocities_follow, np.maximum(target_velocities_close, target_velocities_follow))
+        target_velocities = np.where(obstacles_ahead_lateral_dists <= self.stopping_lateral_distance, target_velocities_follow, np.maximum(target_velocities_close, target_velocities_follow))
 
         return target_velocities
 

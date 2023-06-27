@@ -12,8 +12,8 @@ class LocalPathVisualizer:
     def __init__(self):
 
         # Parameters
-        self.car_safety_width = rospy.get_param("car_safety_width")
-        self.close_obstacle_limit = rospy.get_param("close_obstacle_limit")
+        self.stopping_lateral_distance = rospy.get_param("stopping_lateral_distance")
+        self.slowdown_lateral_distance = rospy.get_param("slowdown_lateral_distance")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.braking_safety_distance = rospy.get_param("braking_safety_distance")
 
@@ -58,7 +58,7 @@ class LocalPathVisualizer:
         marker.action = marker.ADD
         marker.id = 0
         marker.pose.orientation.w = 1.0
-        marker.scale.x = 2*self.car_safety_width
+        marker.scale.x = 2*self.stopping_lateral_distance
         marker.color = color
         marker.points = points
         marker_array.markers.append(marker)
@@ -72,7 +72,7 @@ class LocalPathVisualizer:
         marker.action = marker.ADD
         marker.id = 1
         marker.pose.orientation.w = 1.0
-        marker.scale.x = 2*self.close_obstacle_limit
+        marker.scale.x = 2*self.slowdown_lateral_distance
         marker.color = color
         marker.points = points
         marker_array.markers.append(marker)
