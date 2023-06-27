@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from math import sqrt
 import numpy as np
 import traceback
-import cv2
+from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cdist
 
 import rospy
 import message_filters
@@ -12,6 +12,8 @@ from autoware_msgs.msg import DetectedObjectArray
 from std_msgs.msg import ColorRGBA
 
 from helpers.geometry import get_distance_between_two_points_2d, get_vector_norm_3d
+from helpers.detection import calculate_iou, get_axis_oriented_bounding_box
+
 
 GREEN = ColorRGBA(0.0, 1.0, 0.0, 0.8)
 
@@ -19,19 +21,24 @@ class LidarRadarFusion:
     def __init__(self):
 
         # Parameters
-        self.matching_distance = rospy.get_param("~matching_distance") # radius threshold value around lidar centroid for a radar object to be considered matched
         self.radar_speed_threshold = rospy.get_param("~radar_speed_threshold")  # Threshold for filtering out stationary objects based on speed
+        self.association_method = rospy.get_param('~association_method',)
+        self.max_euclidean_distance = rospy.get_param('~max_euclidean_distance')
 
         # Publisher
-        self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
+        self.detected_object_array_pub = rospy.Publisher('/detection/detected_objects', DetectedObjectArray, queue_size=1)
 
         # Subscribers
-        radar_detections_sub = message_filters.Subscriber('radar/detected_objects', DetectedObjectArray, queue_size=1)
-        lidar_detections_sub = message_filters.Subscriber('lidar/detected_objects', DetectedObjectArray, queue_size=1)
+        radar_detections_sub = message_filters.Subscriber('/detection/radar/detected_objects', DetectedObjectArray, queue_size=1)
+        lidar_detections_sub = message_filters.Subscriber('/detection/lidar/detected_objects', DetectedObjectArray, queue_size=1)
 
         # Sync
         ts = message_filters.ApproximateTimeSynchronizer([lidar_detections_sub, radar_detections_sub], queue_size=20, slop=0.06)
         ts.registerCallback(self.lidar_radar_callback)
+        self.objects_array_dtype = [
+                ('centroid', np.float32, (2,)),
+                ('bbox', np.float32, (4,)),
+                ]
 
         rospy.loginfo("%s - initialized", rospy.get_name())
 
@@ -44,58 +51,71 @@ class LidarRadarFusion:
         try:
             final_detections = DetectedObjectArray()
             final_detections.header = lidar_detections.header
-            used_radar_detections = {}
             max_id = 0
 
-            for lidar_detection in lidar_detections.objects:
-                # Extracting lidar hull points
-                hull_points = [(hull_point.x, hull_point.y) for hull_point in lidar_detection.convex_hull.polygon.points]
-                lidar_hull = np.array(hull_points, dtype=np.float32)
+            lidar_detected_objects = lidar_detections.objects
+            radar_detected_objects = radar_detections.objects
+            lidar_objects_array = np.empty((len(lidar_detected_objects)), dtype=self.objects_array_dtype)
+            radar_objects_array = np.empty((len(radar_detected_objects)), dtype=self.objects_array_dtype)
 
-                min_radar_speed = np.inf
-                matched_radar_detection = None
-                # For each radar object check if its centroid lies within the convex hull of the lidar object
-                # or if the distance between the two centroids is smaller than the self.maching_distance param
-                for radar_detection in radar_detections.objects:
-                    # calculate norm of radar detection's speed
-                    radar_speed = get_vector_norm_3d(radar_detection.velocity.linear)
-                    # filter out all stationary radar objects
-                    if radar_speed <= self.radar_speed_threshold:
-                        continue
-                    # check if the radar object falls within(+1) or one the edge(0) of the lidar hull. Side note: outside of hull = -1
-                    radar_object_centroid = (radar_detection.pose.position.x, radar_detection.pose.position.y)
-                    is_within_hull = cv2.pointPolygonTest(lidar_hull, radar_object_centroid, measureDist=False) >= 0
-
-                    # calculate distance between lidar and radar objects
-                    distance = get_distance_between_two_points_2d(lidar_detection.pose.position, radar_detection.pose.position)
-
-                    # check if matched
-                    if is_within_hull or distance < self.matching_distance:
-                        # match the radar object with the lowest speed
-                        if radar_speed < min_radar_speed:
-                            min_radar_speed = radar_speed
-                            matched_radar_detection = radar_detection
-
-                if matched_radar_detection is not None:
-                    # if a match found, fuse detections and publish the fused one
-                    lidar_detection.velocity = matched_radar_detection.velocity
-                    lidar_detection.velocity_reliable = True
-                    lidar_detection.acceleration = matched_radar_detection.acceleration
-                    lidar_detection.acceleration_reliable = True
-                    lidar_detection.color = GREEN
-                    # record matched radar detections
-                    used_radar_detections[matched_radar_detection.id] = True
-
+            # Collect lidar and radar object centroids and bboxes in arrays
+            for i, lidar_object in enumerate(lidar_detected_objects):
+                lidar_objects_array[i]['centroid'] = (lidar_object.pose.position.x, lidar_object.pose.position.y)
+                lidar_objects_array[i]['bbox'] = get_axis_oriented_bounding_box(lidar_object)
                 # keep track of the largest id
-                if lidar_detection.id > max_id:
-                    max_id = lidar_detection.id
+                if lidar_object.id > max_id:
+                    max_id = lidar_object.id
+            assert len(lidar_detected_objects) == len(lidar_objects_array)
 
-                # lidar detections are always published
-                final_detections.objects.append(lidar_detection)
+            for i, radar_object in enumerate(radar_detected_objects):
+                radar_objects_array[i]['centroid'] = (radar_object.pose.position.x, radar_object.pose.position.y)
+                radar_objects_array[i]['bbox'] = get_axis_oriented_bounding_box(radar_object)
+            assert len(radar_detected_objects) == len(radar_objects_array)
 
+            if self.association_method == 'iou':
+                # Calculate the IOU between the tracked objects and the detected objects
+                iou = calculate_iou(lidar_objects_array['bbox'], radar_objects_array['bbox'])
+                assert iou.shape == (len(lidar_objects_array), len(radar_objects_array))
+
+                # Calculate the association between the tracked objects and the detected objects
+                matched_lidar_indices, matched_radar_indices = linear_sum_assignment(-iou)
+                assert len(matched_lidar_indices) == len(matched_radar_indices)
+
+                # Only keep those matches where the IOU is greater than 0.0
+                matches = iou[matched_lidar_indices, matched_radar_indices] > 0.0
+                matched_lidar_indices = matched_lidar_indices[matches]
+                matched_radar_indices = matched_radar_indices[matches]
+                assert len(matched_lidar_indices) == len(matched_radar_indices)
+
+            elif self.association_method == 'euclidean':
+                # Calculate euclidean distance between the tracked object and the detected object centroids
+                dists = cdist(lidar_objects_array['centroid'], radar_objects_array['centroid'])
+                assert dists.shape == (len(lidar_objects_array), len(radar_objects_array))
+
+                # Calculate the association between the tracked objects and the detected objects
+                matched_lidar_indices, matched_radar_indices = linear_sum_assignment(dists)
+
+                # Only keep those matches where the distance is less than threshold
+                matches = dists[matched_lidar_indices, matched_radar_indices] <= self.max_euclidean_distance
+                matched_lidar_indices = matched_lidar_indices[matches]
+                matched_radar_indices = matched_radar_indices[matches]
+                assert len(matched_lidar_indices) == len(matched_radar_indices)
+            else:
+                assert False, 'Unknown association method: ' + self.association_method
+
+            # fuse matched detections
+            for matched_lidar_index, matched_radar_index in zip(matched_lidar_indices, matched_radar_indices):
+                lidar_detected_objects[matched_lidar_index].velocity = radar_detected_objects[matched_radar_index].velocity
+                lidar_detected_objects[matched_lidar_index].velocity_reliable = True
+                lidar_detected_objects[matched_lidar_index].acceleration = radar_detected_objects[matched_radar_index].acceleration
+                lidar_detected_objects[matched_lidar_index].acceleration_reliable = True
+                lidar_detected_objects[matched_lidar_index].color = GREEN
+
+            # Add all lidar objects (fused and unfused) to final objects
+            final_detections.objects = lidar_detected_objects
             # add radar detections that are not matched to final detections
-            for radar_detection in radar_detections.objects:
-                if radar_detection.id not in used_radar_detections:
+            for i, radar_detection in enumerate(radar_detected_objects):
+                if i not in matched_radar_indices:
                     # calculate norm of radar detection's speed
                     radar_speed = get_vector_norm_3d(radar_detection.velocity.linear)
 
