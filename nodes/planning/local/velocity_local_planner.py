@@ -29,7 +29,6 @@ class VelocityLocalPlanner:
         self.braking_reaction_time = rospy.get_param("braking_reaction_time")
         self.stopping_lateral_distance = rospy.get_param("stopping_lateral_distance")
         self.slowdown_lateral_distance = rospy.get_param("slowdown_lateral_distance")
-        self.waypoint_lookup_radius = rospy.get_param("waypoint_lookup_radius")
         self.dense_waypoint_interval = rospy.get_param("~dense_waypoint_interval")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.default_deceleration = rospy.get_param("default_deceleration")
@@ -47,6 +46,7 @@ class VelocityLocalPlanner:
         self.red_stop_lines = {}
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer)
+        self.waypoint_lookup_radius = np.sqrt(self.slowdown_lateral_distance**2 + self.dense_waypoint_interval**2)
 
         # Publishers
         self.local_path_pub = rospy.Publisher('local_path', Lane, queue_size=1)
@@ -227,11 +227,11 @@ class VelocityLocalPlanner:
             obstacles_dense_path = np.vstack((index_array, np.concatenate(obstacle_idx), np.concatenate(obstacle_d))).T
             
             # filter with self.slowdown_lateral_distance
-            obstacles_dense_path = obstacles_dense_path[obstacles_dense_path[:,2] < self.slowdown_lateral_distance]
+            obstacles_dense_path = obstacles_dense_path[obstacles_dense_path[:,2] <= self.slowdown_lateral_distance]
 
             if len(obstacles_dense_path) > 0:
 
-                # sort and for all obstacle points keep only the one with min distance
+                # sort and for all obstacle points keep only the one with min lateral distance - closest to being perpendicular with path
                 obstacles_dense_path = obstacles_dense_path[obstacles_dense_path[:,2].argsort()]
                 _, unique_indices = np.unique(obstacles_dense_path[:, 1], return_index=True)
                 obstacles_dense_path = obstacles_dense_path[unique_indices]

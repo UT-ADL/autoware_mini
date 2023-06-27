@@ -3,7 +3,6 @@ braking_safety_distance: 4.0
 braking_reaction_time: 1.6
 stopping_lateral_distance: 1.5           # m
 slowdown_lateral_distance: 3.0       # m
-waypoint_lookup_radius: 1.9           # m
 waypoint_interval: 1.0          # m
 default_deceleration: 1.0
 
