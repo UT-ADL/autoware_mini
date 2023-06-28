@@ -26,11 +26,11 @@ class LidarRadarFusion:
         self.max_euclidean_distance = rospy.get_param('~max_euclidean_distance')
 
         # Publisher
-        self.detected_object_array_pub = rospy.Publisher('/detection/detected_objects', DetectedObjectArray, queue_size=1)
+        self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1)
 
         # Subscribers
-        radar_detections_sub = message_filters.Subscriber('/detection/radar/detected_objects', DetectedObjectArray, queue_size=1)
-        lidar_detections_sub = message_filters.Subscriber('/detection/lidar/detected_objects', DetectedObjectArray, queue_size=1)
+        radar_detections_sub = message_filters.Subscriber('radar/detected_objects', DetectedObjectArray, queue_size=1)
+        lidar_detections_sub = message_filters.Subscriber('lidar/detected_objects', DetectedObjectArray, queue_size=1)
 
         # Sync
         ts = message_filters.ApproximateTimeSynchronizer([lidar_detections_sub, radar_detections_sub], queue_size=20, slop=0.06)
