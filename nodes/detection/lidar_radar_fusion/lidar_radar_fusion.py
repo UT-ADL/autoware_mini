@@ -105,6 +105,11 @@ class LidarRadarFusion:
 
             # fuse matched detections
             for matched_lidar_index, matched_radar_index in zip(matched_lidar_indices, matched_radar_indices):
+                radar_speed = get_vector_norm_3d(radar_detected_objects[matched_radar_index].velocity.linear)
+                # filter out all stationary radar objects
+                if radar_speed <= self.radar_speed_threshold:
+                    continue
+
                 lidar_detected_objects[matched_lidar_index].velocity = radar_detected_objects[matched_radar_index].velocity
                 lidar_detected_objects[matched_lidar_index].velocity_reliable = True
                 lidar_detected_objects[matched_lidar_index].acceleration = radar_detected_objects[matched_radar_index].acceleration
