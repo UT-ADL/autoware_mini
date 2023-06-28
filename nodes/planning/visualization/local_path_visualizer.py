@@ -53,7 +53,7 @@ class LocalPathVisualizer:
         marker = Marker()
         marker.header.frame_id = lane.header.frame_id
         marker.header.stamp = stamp
-        marker.ns = "Car safety width"
+        marker.ns = "Stopping lateral distance"
         marker.type = marker.LINE_STRIP
         marker.action = marker.ADD
         marker.id = 0
@@ -67,7 +67,7 @@ class LocalPathVisualizer:
         marker = Marker()
         marker.header.frame_id = lane.header.frame_id
         marker.header.stamp = stamp
-        marker.ns = "Close obstacle limit"
+        marker.ns = "Slowdown lateral distance"
         marker.type = marker.LINE_STRIP
         marker.action = marker.ADD
         marker.id = 1
