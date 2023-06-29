@@ -2,10 +2,8 @@
 
 import numpy as np
 import traceback
-from scipy.optimize import linear_sum_assignment
-from lapsolver import solve_dense
 from scipy.spatial.distance import cdist
-
+from lapsolver import solve_dense
 import rospy
 import message_filters
 
@@ -59,7 +57,7 @@ class LidarRadarFusion:
             lidar_objects_array = np.empty((len(lidar_detected_objects)), dtype=self.objects_array_dtype)
             radar_objects_array = np.empty((len(radar_detected_objects)), dtype=self.objects_array_dtype)
 
-            # Collect lidar and radar object centroids and bboxes in arrays
+            # Collect lidar and radar object centroids and bboxes in structured arrays
             for i, lidar_object in enumerate(lidar_detected_objects):
                 lidar_objects_array[i]['centroid'] = (lidar_object.pose.position.x, lidar_object.pose.position.y)
                 lidar_objects_array[i]['bbox'] = get_axis_oriented_bounding_box(lidar_object)
@@ -79,7 +77,7 @@ class LidarRadarFusion:
                 assert iou.shape == (len(lidar_objects_array), len(radar_objects_array))
 
                 # Calculate the association between the tracked objects and the detected objects
-                matched_lidar_indices, matched_radar_indices = linear_sum_assignment(-iou)
+                matched_lidar_indices, matched_radar_indices = solve_dense(-iou)
                 assert len(matched_lidar_indices) == len(matched_radar_indices)
 
                 # Only keep those matches where the IOU is greater than 0.0
@@ -94,7 +92,7 @@ class LidarRadarFusion:
                 assert dists.shape == (len(lidar_objects_array), len(radar_objects_array))
 
                 # Calculate the association between the tracked objects and the detected objects but with the following constraint:
-                # don't allow pairing for elements with a distance value greater than self.max_euclidan_distance
+                # don't allow pairing for elements with a distance value greater than self.max_euclidean_distance
                 dists[dists > self.max_euclidean_distance] = np.nan
                 matched_lidar_indices, matched_radar_indices = solve_dense(dists)
                 assert len(matched_lidar_indices) == len(matched_radar_indices)

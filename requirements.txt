@@ -3,3 +3,4 @@ numpy >= 1.19, < 1.24
 simple-pid < 2.0
 scikit-learn-intelex
 onnxruntime_gpu
+lapsolver
