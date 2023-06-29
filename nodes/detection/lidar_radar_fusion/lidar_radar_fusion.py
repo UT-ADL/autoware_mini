@@ -3,6 +3,7 @@
 import numpy as np
 import traceback
 from scipy.optimize import linear_sum_assignment
+from lapsolver import solve_dense
 from scipy.spatial.distance import cdist
 
 import rospy
@@ -92,13 +93,10 @@ class LidarRadarFusion:
                 dists = cdist(lidar_objects_array['centroid'], radar_objects_array['centroid'])
                 assert dists.shape == (len(lidar_objects_array), len(radar_objects_array))
 
-                # Calculate the association between the tracked objects and the detected objects
-                matched_lidar_indices, matched_radar_indices = linear_sum_assignment(dists)
-
-                # Only keep those matches where the distance is less than threshold
-                matches = dists[matched_lidar_indices, matched_radar_indices] <= self.max_euclidean_distance
-                matched_lidar_indices = matched_lidar_indices[matches]
-                matched_radar_indices = matched_radar_indices[matches]
+                # Calculate the association between the tracked objects and the detected objects but with the following constraint:
+                # don't allow pairing for elements with a distance value greater than self.max_euclidan_distance
+                dists[dists > self.max_euclidean_distance] = np.nan
+                matched_lidar_indices, matched_radar_indices = solve_dense(dists)
                 assert len(matched_lidar_indices) == len(matched_radar_indices)
             else:
                 assert False, 'Unknown association method: ' + self.association_method
