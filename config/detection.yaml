@@ -40,7 +40,7 @@ lidar:
     min_range_front: 1.2  # radius value within which the points from ouster are discarded. Done after transforming to lidar_center frame
   points_clusterer:
     sample_size: 10000
-    cluster_epsilon: 0.9
+    cluster_epsilon: 1.0
     cluster_min_size: 5
   cluster_detector:
     min_cluster_size: 5
@@ -74,8 +74,9 @@ radar:
     transform_timeout: 0.06
 
 lidar_radar_fusion:
-  matching_distance: 1.6 # radius threshold value around lidar centroid for a radar object to be considered matched
   radar_speed_threshold: 0.6 # Threshold for filtering out stationary objects based on speed
+  association_method: euclidean   # iou, euclidean
+  max_euclidean_distance: 2.0
 
 obstacle_simulation:
   publish_rate: 10
