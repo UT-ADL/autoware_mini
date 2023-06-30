@@ -1,8 +1,8 @@
 current_pose_to_car_front: 4.0  # m
 braking_safety_distance: 4.0
 braking_reaction_time: 1.6
-stopping_lateral_distance: 1.5           # m
-slowdown_lateral_distance: 3.0       # m
+stopping_lateral_distance: 1.35           # m
+slowdown_lateral_distance: 2.0       # m
 waypoint_interval: 1.0          # m
 default_deceleration: 1.0
 
@@ -29,7 +29,7 @@ path_smoothing:
   speed_averaging_window: 21              # window size (will be applied only if > 1)
   adjust_endpoint_speed_to_zero: True
   radius_calc_neighbour_index: 4          # int
-  lateral_acceleration_limit: 1.0         # m/s2
+  lateral_acceleration_limit: 1.5         # m/s2
   output_debug_info: False
 
 velocity_local_planner:

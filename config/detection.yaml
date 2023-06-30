@@ -108,7 +108,7 @@ camera_fl:
     radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
     min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
     rectify_image: False  # the distortions of Mako cameras are so small they don't matter
-    output_roi_image: True
+    output_roi_image: False
     transform_timeout: 0.06
 
 camera_fr:
@@ -117,5 +117,5 @@ camera_fr:
     radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
     min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
     rectify_image: False  # the distortions of Mako cameras are so small they don't matter
-    output_roi_image: True
+    output_roi_image: False
     transform_timeout: 0.06
