@@ -142,6 +142,11 @@ To see the traffic light detections enable **Detections** > **Traffic lights** >
    ```
    **Note:** It will be convenient if the above variables are automatically exported whenever you open a terminal. Putting above exports in `~/.bashrc` will reduce the hassle of exporting everytime.
 
+8. Install system dependencies:
+   ```
+   sudo apt install libomp5
+   ```
+
 ### Launch instructions
 
 1. In a new terminal, (assuming enviornment variables are exported) run Carla simulator by entering the following command.
