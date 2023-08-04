@@ -307,10 +307,11 @@ class VelocityLocalPlanner:
 
         # for all obstacles calculate target velocity based on obstacle speed and distance to obstacle - following
         following_distances = obstacle_distances - self.braking_safety_distance - self.braking_reaction_time * obstacles_ahead_speeds
+        # no abs here, because we want to slow down even if the obstacle is behind us (negative distance, but max returns 0)
         target_velocities_follow = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.default_deceleration * following_distances))
 
-        # TODO only obstacles_ahead_dists or add - self.current_pose_to_car_front - self.braking_safety_distance?
-        target_velocities_close = np.sqrt(np.maximum(0, obstacles_ahead_map_speeds_scaled**2 + 2 * self.default_deceleration * obstacle_distances))
+        # abs is used to increase the target velocity once the car has passed, but the obstacle is still close (target velocity symmetric around "0 distance point" - car front)
+        target_velocities_close = np.sqrt(np.maximum(0, obstacles_ahead_map_speeds_scaled**2 + abs(2 * self.default_deceleration * obstacle_distances)))
 
         # combine target velocities from following and close to the path obstacles
         target_velocities = np.where(obstacles_ahead_lateral_dists <= self.stopping_lateral_distance, target_velocities_follow, np.maximum(target_velocities_close, target_velocities_follow))
