@@ -33,7 +33,7 @@ Here are couple of short videos introducing the Autoware Mini features.
 
 ## Installation
 
-You should have ROS Noetic installed, follow the official instructions for [Ubuntu 20.04](http://wiki.ros.org/noetic/Installation/Ubuntu) or [RoboStack](https://robostack.github.io/GettingStarted.html). Some of the nodes need NVIDIA GPU and CUDA, follow [the official instructions](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html). At this point we suggest CUDA 11.8. Notice that the default setup runs without GPU.
+You should have ROS Noetic installed, follow the official instructions for [Ubuntu 20.04](http://wiki.ros.org/noetic/Installation/Ubuntu) or [RoboStack](https://robostack.github.io/GettingStarted.html). Some of the nodes need NVIDIA GPU and CUDA, follow [the official instructions](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html). At this point we suggest installing both CUDA 11.8 _and_ CUDA 12. Notice that the default setup runs without GPU.
 
 1. Create workspace
    ```
