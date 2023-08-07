@@ -49,7 +49,7 @@ class LocalPathVisualizer:
             else:
                 color = ColorRGBA(1.0, 0.2, 0.2, 0.3)
 
-        # local path line_strip wth car safety width
+        # local path with stopping_lateral_distance
         marker = Marker()
         marker.header.frame_id = lane.header.frame_id
         marker.header.stamp = stamp
@@ -63,7 +63,7 @@ class LocalPathVisualizer:
         marker.points = points
         marker_array.markers.append(marker)
 
-        # local path line_strip with close obstacle limit
+        # local path with slowdown_lateral_distance
         marker = Marker()
         marker.header.frame_id = lane.header.frame_id
         marker.header.stamp = stamp
