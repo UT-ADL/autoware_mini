@@ -38,16 +38,11 @@ class LocalPathVisualizer:
         for waypoint in lane.waypoints:
             points.append(waypoint.pose.pose.position)
 
-        # no obstacles on path or close to path
-        if lane.closest_object_distance == 0.0 and lane.closest_object_velocity == 0.0 and lane.cost == 0.0:
-            color = ColorRGBA(0.0, 1.0, 0.0, 0.3)
-        else:
-            # obstacle close to path - cost is calculated
-            if lane.cost != 0.0:
-                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)
-            # obstacle on path
-            else:
-                color = ColorRGBA(1.0, 0.2, 0.2, 0.3)
+        color = ColorRGBA(0.0, 1.0, 0.0, 0.3)
+
+        # color RED if lane is blocked
+        if lane.is_blocked:
+            color = ColorRGBA(1.0, 0.0, 0.0, 0.3)
 
         # local path with stopping_lateral_distance
         marker = Marker()
@@ -62,6 +57,10 @@ class LocalPathVisualizer:
         marker.color = color
         marker.points = points
         marker_array.markers.append(marker)
+
+        # color yellow if lane is blocked or obs in slowdown area
+        if lane.is_blocked or lane.cost != 0.0:
+            color = ColorRGBA(1.0, 1.0, 0.0, 0.3)
 
         # local path with slowdown_lateral_distance
         marker = Marker()
@@ -93,7 +92,7 @@ class LocalPathVisualizer:
             marker_array.markers.append(marker)
 
         # stop position visualization
-        if len(lane.waypoints) > 1 and lane.closest_object_distance > 0 and lane.cost == 0.0:
+        if len(lane.waypoints) > 1 and (lane.is_blocked or lane.cost != 0.0):
 
             stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance)
 

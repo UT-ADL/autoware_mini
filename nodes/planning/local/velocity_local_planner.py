@@ -291,12 +291,10 @@ class VelocityLocalPlanner:
 
                     # record the closest object from the first waypoint and decide if the lane is blocked
                     if i == 0:
-                        # target_vel drops below the map velocity at current_pose (wp[0]) - object causing ego vehicle to slow down
-                        if target_velocity_follow < wp.twist.twist.linear.x:
+                        if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] <= self.stopping_lateral_distance:
                             blocked = True
-                        if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.stopping_lateral_distance:
-                            # cost calculated here is used only for visualization decisions
-                            cost = scale[lowest_target_velocity_idx]
+
+                        cost = scale[lowest_target_velocity_idx]
 
                         # closest object distance is calculated from the front of the car
                         closest_object_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - self.current_pose_to_car_front
