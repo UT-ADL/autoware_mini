@@ -247,6 +247,34 @@ class BicycleSimulation:
 
         marker_array.markers.append(marker)
 
+        marker = Marker()
+        marker.header.frame_id = "map"
+        marker.header.stamp = stamp
+        marker.type = marker.SPHERE_LIST
+        marker.action = marker.ADD
+        marker.id = 2
+        marker.scale.x = 0.3
+        marker.scale.y = 0.3
+        marker.scale.z = 0.3
+        marker.color = ColorRGBA(0.0, 1.0, 0.0, round((rospy.get_time() % 0.5) * 2))
+
+        # the location of the marker is current pose
+        marker.pose.position.x = self.x
+        marker.pose.position.y = self.y
+        marker.pose.position.z = 1.0 # raise a bit above map
+        marker.pose.orientation = self.orientation
+
+        # draw blinkers
+        if self.blinkers in [VehicleStatus.LAMP_LEFT, VehicleStatus.LAMP_HAZARD]:
+            marker.points.append(Point(self.wheel_base, 0.5, 0))
+            marker.points.append(Point(0, 0.5, 0))
+
+        if self.blinkers in [VehicleStatus.LAMP_RIGHT, VehicleStatus.LAMP_HAZARD]:
+            marker.points.append(Point(self.wheel_base, -0.5, 0))
+            marker.points.append(Point(0, -0.5, 0))
+
+        marker_array.markers.append(marker)
+
         self.bicycle_markers_pub.publish(marker_array)
 
 if __name__ == '__main__':
