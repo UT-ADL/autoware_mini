@@ -651,7 +651,7 @@ Visualization Manager:
                 Center:
                   Points center ground: true
                   Points center no ground: true
-                  Value: true
+                Value: true
                 Front:
                   Points front filtered: true
                   Points front ground: true
@@ -745,7 +745,7 @@ Visualization Manager:
                 Center:
                   Points center ground: true
                   Points center no ground: true
-                  Value: true
+                Value: true
                 Front:
                   Points front filtered: true
                   Points front ground: true
