@@ -19,7 +19,7 @@ def get_blinker_state(steering_state):
     else:
         return 0, 0
     
-def get_blinker_state_with_lookahead_time(waypoints, wp_idx, velocity, lookahead_time):
+def get_blinker_state_with_lookahead_time(waypoints, wp_idx, velocity, lookahead_time, lookahead_distance):
     """
     Get blinker state from current idx and look ahead using time.
     Blinker state at current location has priority (turn needs to be properly finished)
@@ -35,8 +35,8 @@ def get_blinker_state_with_lookahead_time(waypoints, wp_idx, velocity, lookahead
     if waypoints[wp_idx].wpstate.steering_state != WaypointState.STR_STRAIGHT:
         return get_blinker_state(waypoints[wp_idx].wpstate.steering_state)
     else:
-        # calc how many waypoints to look ahead (assumes waypoint spacing of roughly 1m)
-        wp_lookahead = int(velocity * lookahead_time)
+        # calc how many waypoints to look ahead (assumes waypoint spacing of 1m)
+        wp_lookahead = int(max(velocity * lookahead_time, lookahead_distance))
 
         # return first WaypointState that is not straight within the lookahead distance
         for i in range(wp_idx, min(wp_idx + wp_lookahead, len(waypoints))):
