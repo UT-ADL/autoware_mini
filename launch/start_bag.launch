@@ -41,6 +41,12 @@
         <remap from="/detection/radar/detected_objects_markers" to="/bag/detection/radar/detected_objects_markers" if="$(arg use_detection)"/>
         <remap from="/detection/detected_objects" to="/bag/detection/detected_objects" if="$(arg use_detection)"/>
         <remap from="/detection/detected_objects_markers" to="/bag/detection/detected_objects_markers" if="$(arg use_detection)"/>
+        <remap from="/detection/tracked_objects" to="/bag/detection/tracked_objects" if="$(arg use_detection)"/>
+        <remap from="/detection/tracked_objects_markers" to="/bag/detection/tracked_objects_markers" if="$(arg use_detection)"/>
+        <remap from="/detection/predicted_objects" to="/bag/detection/predicted_objects" if="$(arg use_detection)"/>
+        <remap from="/detection/predicted_objects_markers" to="/bag/detection/predicted_objects_markers" if="$(arg use_detection)"/>
+        <remap from="/detection/final_objects" to="/bag/detection/final_objects" if="$(arg use_detection)"/>
+        <remap from="/detection/final_objects_markers" to="/bag/detection/final_objects_markers" if="$(arg use_detection)"/>
         <remap from="/planning/lanelet2_map_markers" to="/bag/planning/lanelet2_map_markers" if="$(arg use_planning)"/>
         <remap from="/planning/global_path" to="/bag/planning/global_path" if="$(arg use_planning)"/>
         <remap from="/planning/global_path_markers" to="/bag/planning/global_path_markers" if="$(arg use_planning)"/>
