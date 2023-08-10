@@ -28,6 +28,7 @@ class PurePursuitFollower:
         self.heading_angle_limit = rospy.get_param("heading_angle_limit")
         self.lateral_error_limit = rospy.get_param("lateral_error_limit")
         self.blinker_lookahead_time = rospy.get_param("blinker_lookahead_time")
+        self.blinker_lookahead_distance = rospy.get_param("blinker_lookahead_distance")
         self.publish_debug_info = rospy.get_param("~publish_debug_info")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
@@ -154,7 +155,7 @@ class PurePursuitFollower:
                 acceleration = 0.0
 
             # blinkers
-            left_blinker, right_blinker = get_blinker_state_with_lookahead_time(waypoints, front_wp_idx, current_velocity, self.blinker_lookahead_time)
+            left_blinker, right_blinker = get_blinker_state_with_lookahead_time(waypoints, front_wp_idx, current_velocity, self.blinker_lookahead_time, self.blinker_lookahead_distance)
 
             # Publish
             self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker)
