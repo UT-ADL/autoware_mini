@@ -15,6 +15,7 @@
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo.osm" />
     <arg name="max_speed"               default="30" />
+    <arg name="more_visualizations"     default="false"             doc="By default visualize only the final detections" />
     
     <!-- Localization -->
     <include file="$(find autoware_mini)/launch/localization.launch">
@@ -30,6 +31,7 @@
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
         <arg name="tracker"             value="$(arg tracker)" />
         <arg name="predictor"           value="$(arg predictor)" />
+        <arg name="more_visualizations" value="$(arg more_visualizations)" />
     </include>
 
     <!-- Planning -->

@@ -7,6 +7,7 @@
     <arg name="lanelet2_map_name"   default="tartu_demo.osm"    doc="for carla traffic light detector" />
     <arg name="tracker"             default="ema"               doc="none, ema" />
     <arg name="predictor"           default="none"              doc="none, naive" />
+    <arg name="more_visualizations" default="false"             doc="By default only visualize final detections" />
 
     <group ns="detection">
 
@@ -18,6 +19,7 @@
             <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
             <arg name="tracker"             value="$(arg tracker)" />
             <arg name="predictor"           value="$(arg predictor)" />
+            <arg name="more_visualizations" value="$(arg more_visualizations)" />
         </include>
 
         <!-- Traffic light detection -->

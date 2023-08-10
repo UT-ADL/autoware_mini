@@ -6,6 +6,7 @@
     <arg name="use_lidar_front"     default="false"             doc="use velodyne lidar"/>
     <arg name="tracker"             default="ema"               doc="none, ema" />
     <arg name="predictor"           default="none"              doc="none, naive" />
+    <arg name="more_visualizations" default="false"             doc="By default only visualize final detections" />
 
     <group if="$(eval 'lidar' in detector)" ns="lidar">
         <remap unless="$(eval 'fusion' in detector)" from="detected_objects" to="/detection/detected_objects" />
@@ -53,15 +54,19 @@
             <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
         </group>
 
-        <!--visualizer for lidar detections-->
-        <node if="$(eval 'fusion' in detector)" type="detected_objects_visualizer.py" name="lidar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+        <group if="$(arg more_visualizations)">
+            <!--visualizer for lidar detections-->
+            <node if="$(eval 'fusion' in detector)" type="detected_objects_visualizer.py" name="lidar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+        </group>
     </group>
 
     <group if="$(eval 'radar' in detector)" ns="radar">
         <remap unless="$(eval 'fusion' in detector)" from="detected_objects" to="/detection/detected_objects" />
         <node pkg="autoware_mini" type="radar_detector.py" name="radar_detector" output="screen" required="true"/>
-        <!-- visualizer for radar detections-->
-        <node if="$(eval 'fusion' in detector)" type="detected_objects_visualizer.py" name="radar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+        <group if="$(arg more_visualizations)">
+            <!-- visualizer for radar detections-->
+            <node if="$(eval 'fusion' in detector)" type="detected_objects_visualizer.py" name="radar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+        </group>
     </group>
 
     <node if="$(eval 'radar_fusion' in detector)" pkg="autoware_mini" type="lidar_radar_fusion.py" name="lidar_radar_fusion" output="screen" required="true" />
@@ -73,12 +78,12 @@
     <node if="$(eval detector=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />
 
     <!-- Detected objects visualizer -->
-    <node type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+    <node if="$(arg more_visualizations)" type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
 
     <group if="$(eval tracker=='ema')">
         <remap if="$(eval predictor=='none')" from="tracked_objects" to="final_objects" />
         <node type="ema_tracker.py" name="ema_tracker" pkg="autoware_mini" output="screen" required="true" />
-        <node type="detected_objects_visualizer.py" name="tracked_objects_visualizer" pkg="autoware_mini" output="screen" required="true">
+        <node if="$(arg more_visualizations)" type="detected_objects_visualizer.py" name="tracked_objects_visualizer" pkg="autoware_mini" output="screen" required="true">
             <remap from="detected_objects" to="tracked_objects" />
             <remap from="detected_objects_markers" to="tracked_objects_markers" />
         </node>
@@ -88,7 +93,7 @@
     <group if="$(eval predictor=='naive')">
         <remap from="predicted_objects" to="final_objects" />
         <node type="naive_predictor.py" name="naive_predictor" pkg="autoware_mini" output="screen" required="true" />
-        <node type="detected_objects_visualizer.py" name="predicted_objects_visualizer" pkg="autoware_mini" output="screen" required="true">
+        <node if="$(arg more_visualizations)" type="detected_objects_visualizer.py" name="predicted_objects_visualizer" pkg="autoware_mini" output="screen" required="true">
             <remap from="detected_objects" to="predicted_objects" />
             <remap from="detected_objects_markers" to="predicted_objects_markers" />
         </node>

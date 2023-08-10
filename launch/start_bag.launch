@@ -19,6 +19,7 @@
     <arg name="use_detection"           default="true"          doc="replace object detection topics"/>
     <arg name="use_planning"            default="true"          doc="replace planning topics"/>
     <arg name="use_control"             default="true"          doc="replace control topics"/>
+    <arg name="more_visualizations"     default="true"          doc="When debugging a bag, visualize everything by default" />
 
     <!-- Use simulation time from bag -->
     <param name="/use_sim_time" value="true" />
@@ -83,6 +84,7 @@
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
         <arg name="tracker"             value="$(arg tracker)" />
         <arg name="predictor"           value="$(arg predictor)" />
+        <arg name="more_visualizations" value="$(arg more_visualizations)" />
     </include>
 
     <!-- Planning -->
