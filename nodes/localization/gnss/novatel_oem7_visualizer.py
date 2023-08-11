@@ -60,6 +60,15 @@ RED = ColorRGBA(1.0, 0.0, 0.0, 0.3)
 
 WHITE = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
+INS_SOLUTION_GOOD = 3
+INS_RTKFIXED = 56
+NUMBER_OF_SATELLITES_GOOD = 16
+NUMBER_OF_SATELLITES_BAD = 8
+LOCATION_ACCURACY_STDEV_GOOD = 0.15
+LOCATION_ACCURACY_STDEV_BAD = 0.5
+DIFFERENTIAL_AGE_GOOD = 2
+DIFFERENTIAL_AGE_BAD = 5
+
 class NovatelOem7Visualizer:
     def __init__(self):
 
@@ -75,18 +84,17 @@ class NovatelOem7Visualizer:
         rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback, queue_size=1)
 
         # Parameters
-        self.global_top = 370
+        self.global_top = 380
         self.global_left = 10
-        self.global_width = 150
-        self.global_height = 15
-        self.text_size = 8
-        self.line_width = 2
+        self.global_width = 200
+        self.global_height = 17
+        self.text_size = 11
 
 
     def inspva_callback(self, msg):
 
         bg_color = GREEN
-        if msg.status.status != 3:
+        if msg.status.status != INS_SOLUTION_GOOD:
             bg_color = YELLOW
 
         if msg.status.status not in INSPVA_STATUS:
@@ -100,8 +108,7 @@ class NovatelOem7Visualizer:
         inspva_status.left = self.global_left
         inspva_status.width = self.global_width
         inspva_status.height = self.global_height
-        inspva_status.text_size = self.text_size = 8
-        inspva_status.line_width = self.line_width
+        inspva_status.text_size = self.text_size
         inspva_status.fg_color = WHITE
         inspva_status.bg_color = bg_color
 
@@ -111,7 +118,7 @@ class NovatelOem7Visualizer:
         
         ################# bestpos_pos_type
         bg_color = GREEN
-        if msg.pos_type.type != 56:
+        if msg.pos_type.type != INS_RTKFIXED:
             bg_color = YELLOW
 
         if msg.pos_type.type not in BESTPOS_POS_TYPE:
@@ -126,7 +133,6 @@ class NovatelOem7Visualizer:
         bestpos_pos_type.width = self.global_width
         bestpos_pos_type.height = self.global_height
         bestpos_pos_type.text_size = self.text_size
-        bestpos_pos_type.line_width = self.line_width
         bestpos_pos_type.fg_color = WHITE
         bestpos_pos_type.bg_color = bg_color
 
@@ -134,9 +140,9 @@ class NovatelOem7Visualizer:
 
         ################# num_sol_svs
         bg_color = GREEN
-        if msg.num_sol_svs < 16:
+        if msg.num_sol_svs < NUMBER_OF_SATELLITES_GOOD:
             bg_color = YELLOW
-        if msg.num_sol_svs < 8:
+        if msg.num_sol_svs < NUMBER_OF_SATELLITES_BAD:
             bg_color = RED
 
         num_sol_svs = OverlayText()
@@ -146,7 +152,6 @@ class NovatelOem7Visualizer:
         num_sol_svs.width = self.global_width
         num_sol_svs.height = self.global_height
         num_sol_svs.text_size = self.text_size
-        num_sol_svs.line_width = self.line_width
         num_sol_svs.fg_color = WHITE
         num_sol_svs.bg_color = bg_color
 
@@ -156,9 +161,9 @@ class NovatelOem7Visualizer:
         location_stdev = math.sqrt(msg.lat_stdev**2 + msg.lon_stdev**2)
 
         bg_color = GREEN
-        if location_stdev > 0.15:
+        if location_stdev > LOCATION_ACCURACY_STDEV_GOOD:
             bg_color = YELLOW
-        if location_stdev > 0.5:
+        if location_stdev > LOCATION_ACCURACY_STDEV_BAD:
             bg_color = RED
 
         loc_stdev = OverlayText()
@@ -168,7 +173,6 @@ class NovatelOem7Visualizer:
         loc_stdev.width = self.global_width
         loc_stdev.height = self.global_height
         loc_stdev.text_size = self.text_size
-        loc_stdev.line_width = self.line_width
         loc_stdev.fg_color = WHITE
         loc_stdev.bg_color = bg_color
 
@@ -176,9 +180,9 @@ class NovatelOem7Visualizer:
 
         ################# diff_age
         bg_color = GREEN
-        if msg.diff_age > 2:
+        if msg.diff_age > DIFFERENTIAL_AGE_GOOD:
             bg_color = YELLOW
-        if msg.diff_age > 5:
+        if msg.diff_age > DIFFERENTIAL_AGE_BAD:
             bg_color = RED
 
         diff_age = OverlayText()
@@ -188,7 +192,6 @@ class NovatelOem7Visualizer:
         diff_age.width = self.global_width
         diff_age.height = self.global_height
         diff_age.text_size = self.text_size
-        diff_age.line_width = self.line_width
         diff_age.fg_color = WHITE
         diff_age.bg_color = bg_color
 
@@ -201,4 +204,3 @@ if __name__ == '__main__':
     rospy.init_node('novatel_oem7_visualizer', log_level=rospy.INFO)
     node = NovatelOem7Visualizer()
     node.run()
-

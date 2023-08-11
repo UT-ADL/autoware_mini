@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 <launch>
+
+    <arg name="start"       default="none"      doc="sim, lexus, carla, bag"/>
+    <arg name="localizer"   default="novatel"   doc="novatel, carla" />
+
     <group ns="dashboard">
         <!-- Current and target speed -->
         <node pkg="topic_tools" type="transform" name="current_speed_transform" args="--wait-for-start /localization/current_velocity current_speed std_msgs/Float32 'm.twist.linear.x * 3.6'" output="screen" required="true"/>
@@ -14,5 +18,13 @@
         <node pkg="topic_tools" type="transform" name="acceleration_transform" args="--wait-for-start /control/vehicle_cmd acceleration std_msgs/Float32 'm.ctrl_cmd.linear_acceleration'" output="screen" required="true"/>
         <node pkg="topic_tools" type="transform" name="acceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands acceleration_limit std_msgs/Float32 'm.acceleration_limit'" output="screen" required="true"/>
         <node pkg="topic_tools" type="transform" name="deceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands deceleration_limit std_msgs/Float32 'm.deceleration_limit'" output="screen" required="true"/>
+
+        <group if="$(eval start=='lexus' or start=='bag')">
+            <!-- Novatel viz -->
+            <node if="$(eval localizer=='novatel')" pkg="autoware_mini" type="novatel_oem7_visualizer.py" name="novatel_oem7_visualizer" output="screen" required="true"/>
+            <!-- SSC state -->
+            <node pkg="autoware_mini" type="pacmod_state_visualizer.py" name="pacmod_state_visualizer" output="screen" required="true"/>
+        </group>
+
     </group>
 </launch>

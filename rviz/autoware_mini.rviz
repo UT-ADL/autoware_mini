@@ -336,6 +336,27 @@ Visualization Manager:
           top: 168
           update interval: 0.03999999910593033
           width: 128
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 0.800000011920929
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
+          Name: Pacmod state
+          Overtake BG Color Properties: false
+          Overtake FG Color Properties: false
+          Overtake Position Properties: false
+          Topic: /dashboard/pacmod_state
+          Value: true
+          font: DejaVu Sans Mono
+          height: 128
+          left: 0
+          line width: 2
+          text size: 12
+          top: 0
+          width: 128
         - Class: rviz/Group
           Displays:
             - Align Bottom: false
@@ -726,7 +747,9 @@ Visualization Manager:
               Radar raw: true
               Value: true
             Simulation:
-              "": true
+              Bicycle markers: true
+              Carla camera view: true
+              Carla image view: true
               Value: true
             System:
               Lexus model: true
