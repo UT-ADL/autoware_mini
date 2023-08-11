@@ -63,7 +63,6 @@ WHITE = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 INS_SOLUTION_GOOD = 3
 INS_RTKFIXED = 56
 
-
 class NovatelOem7Visualizer:
     def __init__(self):
 
