@@ -26,5 +26,7 @@
             <node pkg="autoware_mini" type="pacmod_state_visualizer.py" name="pacmod_state_visualizer" output="screen" required="true"/>
         </group>
 
+        <rosparam command="load" file="$(find autoware_mini)/config/dashboard.yaml"/>
+
     </group>
 </launch>

@@ -36,7 +36,6 @@ class PacmodStateVisualizer:
         self.global_top = 340
         self.global_left = 10
         self.global_width = 250
-        self.text_size = 10
 
         self.ssc_states={}
 
@@ -84,7 +83,7 @@ class PacmodStateVisualizer:
         ssc_state.left = self.global_left
         ssc_state.width = self.global_width
         ssc_state.height = 50
-        ssc_state.text_size = 9
+        ssc_state.text_size = 10
         ssc_state.text = ssc_status_text
         ssc_state.fg_color = WHITE
         ssc_state.bg_color = BLACK
@@ -105,7 +104,7 @@ class PacmodStateVisualizer:
         pacmod_state.left = self.global_left
         pacmod_state.width = self.global_width
         pacmod_state.height = 60
-        pacmod_state.text_size = 9
+        pacmod_state.text_size = 10
         pacmod_state.text = "Accelerator:" + accelerator_state + "\nBrakes:" + brakes_state + "\nSteering:" + steering_state + "\nTurn signals:" + turn_signals_state
         pacmod_state.fg_color = WHITE
         pacmod_state.bg_color = BLACK
@@ -122,7 +121,7 @@ class PacmodStateVisualizer:
             state_string += " Disabled"
 
         if msg.overridden_status[module].value == "True":
-            state_string += " Overriden"
+            state_string += " Overridden"
         if msg.fault_status[module].value == "True":
             state_string += " Fault"
 
