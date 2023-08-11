@@ -344,6 +344,48 @@ Visualization Manager:
           Foreground Alpha: 0.800000011920929
           Foreground Color: 25; 255; 240
           Invert Shadow: false
+          Name: Autonomy
+          Overtake BG Color Properties: false
+          Overtake FG Color Properties: false
+          Overtake Position Properties: false
+          Topic: /dashboard/autonomy
+          Value: true
+          font: DejaVu Sans Mono
+          height: 128
+          left: 0
+          line width: 2
+          text size: 12
+          top: 0
+          width: 128
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 0.800000011920929
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
+          Name: SSC status
+          Overtake BG Color Properties: false
+          Overtake FG Color Properties: false
+          Overtake Position Properties: false
+          Topic: /dashboard/ssc_state
+          Value: true
+          font: DejaVu Sans Mono
+          height: 128
+          left: 0
+          line width: 2
+          text size: 12
+          top: 0
+          width: 128
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 0.800000011920929
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
           Name: Pacmod state
           Overtake BG Color Properties: false
           Overtake FG Color Properties: false
@@ -475,7 +517,12 @@ Visualization Manager:
           Marker Topic: /planning/lanelet2_map_markers
           Name: Lanelet2 map
           Namespaces:
-            {}
+            Centerline: true
+            Crosswalk: true
+            Left boundary: true
+            Right boundary: true
+            Stop line: true
+            Traffic lights: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -588,6 +635,7 @@ Visualization Manager:
             Dashboard:
               Accel limit: true
               Acceleration: true
+              Autonomy: true
               Closest obj dist: true
               Closest obj spd: true
               Current speed: true
@@ -603,7 +651,7 @@ Visualization Manager:
                 Center:
                   Points center ground: true
                   Points center no ground: true
-                Value: true
+                  Value: true
                 Front:
                   Points front filtered: true
                   Points front ground: true
@@ -681,6 +729,7 @@ Visualization Manager:
             Dashboard:
               Accel limit: true
               Acceleration: true
+              Autonomy: true
               Closest obj dist: true
               Closest obj spd: true
               Current speed: true
@@ -691,11 +740,12 @@ Visualization Manager:
               Value: true
             Detection:
               Detected objects: true
+              Final objects: true
               Lidar:
                 Center:
                   Points center ground: true
                   Points center no ground: true
-                Value: true
+                  Value: true
                 Front:
                   Points front filtered: true
                   Points front ground: true
