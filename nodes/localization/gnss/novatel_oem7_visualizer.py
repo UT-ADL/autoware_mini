@@ -62,15 +62,18 @@ WHITE = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
 INS_SOLUTION_GOOD = 3
 INS_RTKFIXED = 56
-NUMBER_OF_SATELLITES_GOOD = 16
-NUMBER_OF_SATELLITES_BAD = 8
-LOCATION_ACCURACY_STDEV_GOOD = 0.15
-LOCATION_ACCURACY_STDEV_BAD = 0.5
-DIFFERENTIAL_AGE_GOOD = 2
-DIFFERENTIAL_AGE_BAD = 5
+
 
 class NovatelOem7Visualizer:
     def __init__(self):
+
+        # Parameters
+        self.number_of_satellites_good = rospy.get_param("number_of_satellites_good")
+        self.number_of_satellites_bad = rospy.get_param("number_of_satellites_bad")
+        self.location_accuracy_stdev_good = rospy.get_param("location_accuracy_stdev_good")
+        self.location_accuracy_stdev_bad = rospy.get_param("location_accuracy_stdev_bad")
+        self.differential_age_good = rospy.get_param("differential_age_good")
+        self.differential_age_bad = rospy.get_param("differential_age_bad")
 
         # Publishers
         self.inspva_status_pub = rospy.Publisher('gnss_inspva_status', OverlayText, queue_size=1)
@@ -88,7 +91,7 @@ class NovatelOem7Visualizer:
         self.global_left = 10
         self.global_width = 250
         self.global_height = 17
-        self.text_size = 11
+        self.text_size = 10
 
 
     def inspva_callback(self, msg):
@@ -140,9 +143,9 @@ class NovatelOem7Visualizer:
 
         ################# num_sol_svs
         bg_color = GREEN
-        if msg.num_sol_svs < NUMBER_OF_SATELLITES_GOOD:
+        if msg.num_sol_svs < self.number_of_satellites_good:
             bg_color = YELLOW
-        if msg.num_sol_svs < NUMBER_OF_SATELLITES_BAD:
+        if msg.num_sol_svs < self.number_of_satellites_bad:
             bg_color = RED
 
         num_sol_svs = OverlayText()
@@ -161,9 +164,9 @@ class NovatelOem7Visualizer:
         location_stdev = math.sqrt(msg.lat_stdev**2 + msg.lon_stdev**2)
 
         bg_color = GREEN
-        if location_stdev > LOCATION_ACCURACY_STDEV_GOOD:
+        if location_stdev > self.location_accuracy_stdev_good:
             bg_color = YELLOW
-        if location_stdev > LOCATION_ACCURACY_STDEV_BAD:
+        if location_stdev > self.location_accuracy_stdev_bad:
             bg_color = RED
 
         loc_stdev = OverlayText()
@@ -180,9 +183,9 @@ class NovatelOem7Visualizer:
 
         ################# diff_age
         bg_color = GREEN
-        if msg.diff_age > DIFFERENTIAL_AGE_GOOD:
+        if msg.diff_age > self.differential_age_good:
             bg_color = YELLOW
-        if msg.diff_age > DIFFERENTIAL_AGE_BAD:
+        if msg.diff_age > self.differential_age_bad:
             bg_color = RED
 
         diff_age = OverlayText()
