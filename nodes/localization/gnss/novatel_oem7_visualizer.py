@@ -84,9 +84,9 @@ class NovatelOem7Visualizer:
         rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback, queue_size=1)
 
         # Parameters
-        self.global_top = 380
+        self.global_top = 500
         self.global_left = 10
-        self.global_width = 200
+        self.global_width = 250
         self.global_height = 17
         self.text_size = 11
 
