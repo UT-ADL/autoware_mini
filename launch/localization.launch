@@ -12,11 +12,5 @@
         <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" />
 
     </group>
-
-    <group ns="dashboard">
-
-        <node if="$(eval localizer=='novatel')" pkg="autoware_mini" type="novatel_oem7_visualizer.py" name="novatel_oem7_visualizer" output="screen" required="true"/>
-
-    </group>
-
+    
 </launch>

@@ -25,10 +25,9 @@ class PacmodStateVisualizer:
         # Parameters
         self.global_top = 340
         self.global_left = 10
-        self.global_width = 150
-        self.global_height = 25
-        self.text_size = 15
-        self.line_width = 2
+        self.global_width = 200
+        self.global_height = 30
+        self.text_size = 20
 
     def module_states_callback(self, msg):
 
@@ -53,7 +52,6 @@ class PacmodStateVisualizer:
         pacmod_state.width = self.global_width
         pacmod_state.height = self.global_height
         pacmod_state.text_size = self.text_size
-        pacmod_state.line_width = self.line_width
         pacmod_state.fg_color = WHITE
         pacmod_state.bg_color = bg_color
 
@@ -67,4 +65,3 @@ if __name__ == '__main__':
     rospy.init_node('pacmod_state_visualizer', log_level=rospy.INFO)
     node = PacmodStateVisualizer()
     node.run()
-
