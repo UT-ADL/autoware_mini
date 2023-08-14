@@ -6,7 +6,8 @@ from autoware_msgs.msg import Lane
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 from helpers.waypoints import get_point_and_orientation_on_path_within_distance
-from geometry_msgs.msg import Point
+from helpers.geometry import get_distance_between_two_points_2d, get_closest_point_on_line
+from geometry_msgs.msg import Point, PoseStamped
 
 class LocalPathVisualizer:
     def __init__(self):
@@ -22,6 +23,13 @@ class LocalPathVisualizer:
 
         # Subscribers
         rospy.Subscriber('local_path', Lane, self.local_path_callback, queue_size=1)
+        rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1)
+
+        self.current_pose = None
+
+    def current_pose_callback(self, pose):
+        self.current_pose = pose.pose
+
 
     def local_path_callback(self, lane):
         marker_array = MarkerArray()
@@ -37,6 +45,11 @@ class LocalPathVisualizer:
         points = []
         for waypoint in lane.waypoints:
             points.append(waypoint.pose.pose.position)
+        
+        distance_correction = 0.0
+        if self.current_pose is not None and len(lane.waypoints) > 1:
+            current_pose_on_path = get_closest_point_on_line(self.current_pose.position, points[0], points[1])
+            distance_correction = get_distance_between_two_points_2d(current_pose_on_path, points[0])
 
         color = ColorRGBA(0.0, 1.0, 0.0, 0.3)
 
@@ -94,7 +107,7 @@ class LocalPathVisualizer:
         # stop position visualization
         if len(lane.waypoints) > 1 and (lane.is_blocked or lane.cost != 0.0):
 
-            stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance)
+            stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance + distance_correction)
 
             color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
             if lane.is_blocked:
