@@ -101,9 +101,9 @@ class NovatelOem7Visualizer:
             bg_color = YELLOW
 
         if msg.status.status not in INSPVA_STATUS:
-            text = "Unknown INSPVA status: {}".format(msg.status.status)
+            text = "Unknown IMU status: {}".format(msg.status.status)
         else:
-            text = INSPVA_STATUS[msg.status.status]
+            text = "IMU status: " + INSPVA_STATUS[msg.status.status]
 
         inspva_status = OverlayText()
         inspva_status.text = text
@@ -127,7 +127,7 @@ class NovatelOem7Visualizer:
         if msg.pos_type.type not in BESTPOS_POS_TYPE:
             text = "Unknown BESTPOS pos_type: {}".format(msg.pos_type.type)
         else:
-            text = BESTPOS_POS_TYPE[msg.pos_type.type]
+            text = "GNSS position type: " + BESTPOS_POS_TYPE[msg.pos_type.type]
         
         bestpos_pos_type = OverlayText()
         bestpos_pos_type.text = text
@@ -149,7 +149,7 @@ class NovatelOem7Visualizer:
             bg_color = RED
 
         num_sol_svs = OverlayText()
-        num_sol_svs.text = "num_sol_svs: {}".format(msg.num_sol_svs)
+        num_sol_svs.text = "Num. satellites: {}".format(msg.num_sol_svs)
         num_sol_svs.top = self.global_top + 2 * self.global_height
         num_sol_svs.left = self.global_left
         num_sol_svs.width = self.global_width
@@ -170,7 +170,7 @@ class NovatelOem7Visualizer:
             bg_color = RED
 
         loc_stdev = OverlayText()
-        loc_stdev.text = "loc_stdev: {:.2f} m".format(location_stdev)
+        loc_stdev.text = "Location stdev: {:.2f} m".format(location_stdev)
         loc_stdev.top = self.global_top + 3 * self.global_height
         loc_stdev.left = self.global_left
         loc_stdev.width = self.global_width
@@ -189,7 +189,7 @@ class NovatelOem7Visualizer:
             bg_color = RED
 
         diff_age = OverlayText()
-        diff_age.text = "diff_age: {:.2f} s".format(msg.diff_age)
+        diff_age.text = "Differential age: {:.2f} s".format(msg.diff_age)
         diff_age.top = self.global_top + 4 * self.global_height
         diff_age.left = self.global_left
         diff_age.width = self.global_width
