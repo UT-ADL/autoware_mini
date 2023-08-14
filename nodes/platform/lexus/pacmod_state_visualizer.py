@@ -2,15 +2,15 @@
 
 import rospy
 import math
-from std_msgs.msg import ColorRGBA
+from std_msgs.msg import ColorRGBA, Bool
 from automotive_navigation_msgs.msg import ModuleState
 from pacmod3_msgs.msg import AllSystemStatuses
 from jsk_rviz_plugins.msg import OverlayText
 
-BLUE = ColorRGBA(0.1, 0.3, 1.0, 0.5)
-GREEN = ColorRGBA(0.2, 1.0, 0.2, 0.5)
-YELLOW = ColorRGBA(1.0, 1.0, 0.0, 0.5)
-RED = ColorRGBA(1.0, 0.0, 0.0, 0.4)
+BLUE = ColorRGBA(0.6, 0.4, 1.0, 0.9)
+GREEN = ColorRGBA(0.2, 1.0, 0.2, 0.9)
+YELLOW = ColorRGBA(1.0, 1.0, 0.0, 0.9)
+RED = ColorRGBA(1.0, 0.0, 0.0, 0.9)
 BLACK = ColorRGBA(0.0, 0.0, 0.0, 0.5)
 WHITE = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
@@ -31,13 +31,31 @@ class PacmodStateVisualizer:
         # Subscribers
         rospy.Subscriber('/ssc/module_states', ModuleState, self.ssc_module_states_callback, queue_size=1)
         rospy.Subscriber('/pacmod/all_system_statuses', AllSystemStatuses, self.pacmod_all_system_statuses, queue_size=1)
+        rospy.Subscriber('/pacmod/enabled', Bool, self.pacmod_enabled, queue_size=1)
 
         # Parameters
-        self.global_top = 340
+        self.global_top = 200
         self.global_left = 10
         self.global_width = 250
 
         self.ssc_states={}
+
+    def pacmod_enabled(self, msg):
+
+        enabled = OverlayText()
+        enabled.top = self.global_top
+        enabled.left = self.global_left
+        enabled.width = self.global_width
+        enabled.height = 40
+        enabled.text_size = 20
+        if msg.data:
+            enabled.text = "AUTONOMOUS"
+            enabled.fg_color = BLUE
+        else:
+            enabled.text = "MANUAL"
+            enabled.fg_color = GREEN
+
+        self.autonomy_pub.publish(enabled)
 
 
     def ssc_module_states_callback(self, msg):
@@ -48,35 +66,6 @@ class PacmodStateVisualizer:
         ssc_status_text = ""
         for key in self.ssc_states:
             ssc_status_text += key + ": " + self.ssc_states[key] + "\n"
-
-        # TODO - this is a hack to get the autonomy state
-        # does not work properly and needs rethinking
-
-        bg_color = GREEN
-        text = "Ready"
-        if "/ssc/veh_controller" in self.ssc_states:
-            if self.ssc_states["/ssc/veh_controller"] == "active" or self.ssc_states["/ssc/veh_controller"] == "engaged":
-                bg_color = BLUE
-                text = "Autonomous"
-            elif self.ssc_states["/ssc/veh_controller"] == "failure":
-                bg_color = RED
-                text = "Failure"
-            elif self.ssc_states["/ssc/veh_controller"] == "ready":
-                bg_color = GREEN
-                text = "Manual"
-
-        autonomy = OverlayText()
-        autonomy.text = text
-        autonomy.top = self.global_top
-        autonomy.left = self.global_left
-        autonomy.width = self.global_width
-        autonomy.height = 40
-        autonomy.text_size = 20
-        autonomy.fg_color = WHITE
-        autonomy.bg_color = bg_color
-
-        self.autonomy_pub.publish(autonomy)
-
 
         ssc_state = OverlayText()
         ssc_state.top = self.global_top + 50
