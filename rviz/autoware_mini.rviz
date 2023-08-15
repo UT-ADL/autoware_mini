@@ -213,6 +213,56 @@ Visualization Manager:
           width: 128
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
+          Enabled: true
+          Name: Steering status
+          Show Value: false
+          Topic: /dashboard/steering_angle_status
+          Value: true
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 237; 212; 0
+          height: 128
+          left: 10
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 3
+          min value: -3
+          show caption: false
+          text size: 10
+          top: 168
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: true
+          Name: Steering cmd
+          Show Value: true
+          Topic: /dashboard/steering_angle_cmd
+          Value: true
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 10
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 5
+          min value: -5
+          show caption: true
+          text size: 10
+          top: 168
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
           Enabled: false
           Name: Acceleration
           Show Value: true
@@ -412,10 +462,13 @@ Visualization Manager:
               Closest obj spd: true
               Current speed: true
               Decel limit: true
+              Steering cmd: true
+              Steering status: true
               Target speed: true
               Value: true
             Detection:
               Detected objects: true
+              Final objects: true
               Lidar:
                 Center:
                   Points center ground: true
@@ -502,6 +555,8 @@ Visualization Manager:
               Closest obj spd: true
               Current speed: true
               Decel limit: true
+              Steering cmd: true
+              Steering status: true
               Target speed: true
               Value: true
             Detection:
@@ -1012,6 +1067,8 @@ Visualization Manager:
               Closest obj spd: true
               Current speed: true
               Decel limit: true
+              Steering cmd: true
+              Steering status: true
               Target speed: true
               Value: true
             Detection:
@@ -1020,7 +1077,7 @@ Visualization Manager:
                 Center:
                   Points center ground: true
                   Points center no ground: true
-                  Value: true
+                Value: true
                 Front:
                   Points front filtered: true
                   Points front ground: true
