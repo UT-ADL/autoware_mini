@@ -9,7 +9,7 @@ import traceback
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error
+from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error, get_distance_between_two_points_2d
 from helpers.waypoints import get_blinker_state_with_lookahead_time, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
 
 from visualization_msgs.msg import MarkerArray, Marker
@@ -136,7 +136,7 @@ class PurePursuitFollower:
                 return
         
             # calculate steering angle
-            curvature = 2 * math.sin(heading_error) / lookahead_distance
+            curvature = 2 * math.sin(heading_error) / get_distance_between_two_points_2d(current_pose.position, lookahead_point)
             steering_angle = math.atan(self.wheel_base * curvature)
 
             # target_velocity from map and based on closest object
