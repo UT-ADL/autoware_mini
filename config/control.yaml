@@ -4,7 +4,7 @@ blinker_lookahead_time: 3.0
 blinker_lookahead_distance: 14.0
 
 pure_pursuit_follower:
-  planning_time: 1.7
+  planning_time: 1.2
   min_lookahead_distance: 6.0
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   publish_debug_info: False
