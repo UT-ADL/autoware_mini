@@ -50,12 +50,6 @@ lidar:
     transform_timeout: 0.06         # needed for Carla
 
   sfa_detector:
-    min_front_x: 0
-    max_front_x: 50
-    min_back_x: -50
-    max_back_x: 0
-    min_y: -25
-    max_y: 25
     min_z: -2.73
     max_z: 1.27
     score_thresh: 0.2
