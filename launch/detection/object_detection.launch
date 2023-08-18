@@ -42,7 +42,7 @@
         </group>
 
         <node if="$(eval 'lidar_sfa' in detector)" pkg="autoware_mini" type="sfa_detector.py" name="sfa_detector" output="screen" required="true">
-            <param name="onnx_path"  value="$(find autoware_mini)/config/sfa/kilynuaron_model.onnx"/>
+            <param name="onnx_path"  value="$(find autoware_mini)/config/sfa/nulyaronar2_02_30.onnx"/>
             <remap if="$(eval use_lidar_center and not use_lidar_front)" from="points_raw" to="/lidar_center/points_raw" />
             <remap if="$(eval use_lidar_front and not use_lidar_center)" from="points_raw" to="/lidar_front/points" />
         </node>
