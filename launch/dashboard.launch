@@ -23,7 +23,9 @@
             <!-- Novatel viz -->
             <node if="$(eval localizer=='novatel')" pkg="autoware_mini" type="novatel_oem7_visualizer.py" name="novatel_oem7_visualizer" output="screen" required="true"/>
             <!-- SSC state -->
-            <node pkg="autoware_mini" type="pacmod_state_visualizer.py" name="pacmod_state_visualizer" output="screen" required="true"/>
+            <node pkg="autoware_mini" type="pacmod_state_visualizer.py" name="pacmod_state_visualizer" output="screen" required="true" >
+                <param name="image_path"  value="$(find autoware_mini)/images/dashboard/"/>
+            </node>
         </group>
 
         <rosparam command="load" file="$(find autoware_mini)/config/dashboard.yaml"/>
