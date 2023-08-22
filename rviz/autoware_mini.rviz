@@ -111,56 +111,85 @@ Visualization Manager:
       Name: System
     - Class: rviz/Group
       Displays:
-        - Buffer length: 100
-          Class: jsk_rviz_plugin/Plotter2D
+        - Class: rviz/Group
+          Displays:
+            - Buffer length: 100
+              Class: jsk_rviz_plugin/Plotter2D
+              Enabled: true
+              Name: Current speed
+              Show Value: true
+              Topic: /dashboard/current_speed
+              Value: true
+              auto color change: false
+              auto scale: false
+              background color: 0; 0; 0
+              backround alpha: 0
+              border: true
+              foreground alpha: 0.800000011920929
+              foreground color: 25; 255; 240
+              height: 128
+              left: 10
+              linewidth: 2
+              max color: 255; 0; 0
+              max value: 40
+              min value: 16
+              show caption: true
+              text size: 10
+              top: 10
+              update interval: 0.03999999910593033
+              width: 128
+            - Buffer length: 100
+              Class: jsk_rviz_plugin/Plotter2D
+              Enabled: true
+              Name: Target speed
+              Show Value: false
+              Topic: /dashboard/target_speed
+              Value: true
+              auto color change: false
+              auto scale: false
+              background color: 0; 0; 0
+              backround alpha: 0
+              border: false
+              foreground alpha: 0.800000011920929
+              foreground color: 252; 175; 62
+              height: 128
+              left: 10
+              linewidth: 1
+              max color: 255; 0; 0
+              max value: 40
+              min value: 16
+              show caption: false
+              text size: 12
+              top: 10
+              update interval: 0.03999999910593033
+              width: 128
+            - Buffer length: 100
+              Class: jsk_rviz_plugin/Plotter2D
+              Enabled: true
+              Name: Closest obj spd
+              Show Value: false
+              Topic: /dashboard/closest_object_speed
+              Value: true
+              auto color change: false
+              auto scale: false
+              background color: 0; 0; 0
+              backround alpha: 0
+              border: false
+              foreground alpha: 0.699999988079071
+              foreground color: 150; 150; 255
+              height: 128
+              left: 10
+              linewidth: 1
+              max color: 255; 0; 0
+              max value: 40
+              min value: 16
+              show caption: false
+              text size: 10
+              top: 10
+              update interval: 0.03999999910593033
+              width: 128
           Enabled: true
-          Name: Target speed
-          Show Value: false
-          Topic: /dashboard/target_speed
-          Value: true
-          auto color change: false
-          auto scale: false
-          background color: 0; 0; 0
-          backround alpha: 0
-          border: true
-          foreground alpha: 0.699999988079071
-          foreground color: 252; 175; 62
-          height: 128
-          left: 10
-          linewidth: 1
-          max color: 255; 0; 0
-          max value: 40
-          min value: 16
-          show caption: false
-          text size: 12
-          top: 10
-          update interval: 0.03999999910593033
-          width: 128
-        - Buffer length: 100
-          Class: jsk_rviz_plugin/Plotter2D
-          Enabled: true
-          Name: Current speed
-          Show Value: true
-          Topic: /dashboard/current_speed
-          Value: true
-          auto color change: false
-          auto scale: false
-          background color: 0; 0; 0
-          backround alpha: 0
-          border: true
-          foreground alpha: 0.699999988079071
-          foreground color: 25; 255; 240
-          height: 128
-          left: 10
-          linewidth: 1
-          max color: 255; 0; 0
-          max value: 40
-          min value: 16
-          show caption: true
-          text size: 10
-          top: 10
-          update interval: 0.03999999910593033
-          width: 128
+          Name: Speed
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
           Enabled: true
@@ -173,154 +202,73 @@ Visualization Manager:
           background color: 0; 0; 0
           backround alpha: 0
           border: true
-          foreground alpha: 0.699999988079071
+          foreground alpha: 0.800000011920929
           foreground color: 25; 255; 240
           height: 128
           left: 148
-          linewidth: 1
+          linewidth: 2
           max color: 255; 0; 0
           max value: 75
-          min value: 22
+          min value: 25
           show caption: true
           text size: 10
           top: 10
           update interval: 0.03999999910593033
           width: 128
-        - Buffer length: 100
-          Class: jsk_rviz_plugin/Plotter2D
+        - Class: rviz/Group
+          Displays:
+            - Buffer length: 100
+              Class: jsk_rviz_plugin/Plotter2D
+              Enabled: true
+              Name: Steering status
+              Show Value: false
+              Topic: /dashboard/steering_angle_status
+              Value: true
+              auto color change: false
+              auto scale: false
+              background color: 0; 0; 0
+              backround alpha: 0
+              border: true
+              foreground alpha: 0.800000011920929
+              foreground color: 25; 255; 240
+              height: 128
+              left: 286
+              linewidth: 2
+              max color: 255; 0; 0
+              max value: 5
+              min value: -5
+              show caption: true
+              text size: 10
+              top: 10
+              update interval: 0.03999999910593033
+              width: 128
+            - Buffer length: 100
+              Class: jsk_rviz_plugin/Plotter2D
+              Enabled: true
+              Name: Steering cmd
+              Show Value: false
+              Topic: /dashboard/steering_angle_cmd
+              Value: true
+              auto color change: false
+              auto scale: false
+              background color: 0; 0; 0
+              backround alpha: 0
+              border: false
+              foreground alpha: 0.800000011920929
+              foreground color: 252; 175; 62
+              height: 128
+              left: 286
+              linewidth: 1
+              max color: 255; 0; 0
+              max value: 5
+              min value: -5
+              show caption: false
+              text size: 10
+              top: 10
+              update interval: 0.03999999910593033
+              width: 128
           Enabled: true
-          Name: Closest obj spd
-          Show Value: true
-          Topic: /dashboard/closest_object_speed
-          Value: true
-          auto color change: false
-          auto scale: false
-          background color: 0; 0; 0
-          backround alpha: 0
-          border: true
-          foreground alpha: 0.699999988079071
-          foreground color: 25; 255; 240
-          height: 128
-          left: 286
-          linewidth: 1
-          max color: 255; 0; 0
-          max value: 30
-          min value: 10
-          show caption: true
-          text size: 10
-          top: 10
-          update interval: 0.03999999910593033
-          width: 128
-        - Buffer length: 100
-          Class: jsk_rviz_plugin/Plotter2D
-          Enabled: true
-          Name: Steering status
-          Show Value: false
-          Topic: /dashboard/steering_angle_status
-          Value: true
-          auto color change: false
-          auto scale: false
-          background color: 0; 0; 0
-          backround alpha: 0
-          border: true
-          foreground alpha: 0.699999988079071
-          foreground color: 237; 212; 0
-          height: 128
-          left: 10
-          linewidth: 1
-          max color: 255; 0; 0
-          max value: 3
-          min value: -3
-          show caption: false
-          text size: 10
-          top: 168
-          update interval: 0.03999999910593033
-          width: 128
-        - Buffer length: 100
-          Class: jsk_rviz_plugin/Plotter2D
-          Enabled: true
-          Name: Steering cmd
-          Show Value: true
-          Topic: /dashboard/steering_angle_cmd
-          Value: true
-          auto color change: false
-          auto scale: false
-          background color: 0; 0; 0
-          backround alpha: 0
-          border: true
-          foreground alpha: 0.699999988079071
-          foreground color: 25; 255; 240
-          height: 128
-          left: 10
-          linewidth: 1
-          max color: 255; 0; 0
-          max value: 5
-          min value: -5
-          show caption: true
-          text size: 10
-          top: 168
-          update interval: 0.03999999910593033
-          width: 128
-        - Align Bottom: false
-          Background Alpha: 0.800000011920929
-          Background Color: 0; 0; 0
-          Class: jsk_rviz_plugin/OverlayText
-          Enabled: true
-          Foreground Alpha: 0.800000011920929
-          Foreground Color: 25; 255; 240
-          Invert Shadow: false
-          Name: Autonomy
-          Overtake BG Color Properties: false
-          Overtake FG Color Properties: false
-          Overtake Position Properties: false
-          Topic: /dashboard/autonomy
-          Value: true
-          font: DejaVu Sans Mono
-          height: 128
-          left: 0
-          line width: 2
-          text size: 12
-          top: 0
-          width: 128
-        - Class: jsk_rviz_plugin/OverlayImage
-          Enabled: true
-          Name: Wheel
-          Topic: /dashboard/steering_wheel
-          Value: true
-          alpha: 0.800000011920929
-          height: 80
-          keep aspect ratio: false
-          left: 95
-          overwrite alpha value: false
-          top: 365
-          transport hint: raw
-          width: 80
-        - Class: jsk_rviz_plugin/OverlayImage
-          Enabled: true
-          Name: Right blinker
-          Topic: /dashboard/right_blinker
-          Value: true
-          alpha: 0.800000011920929
-          height: 80
-          keep aspect ratio: false
-          left: 175
-          overwrite alpha value: false
-          top: 365
-          transport hint: raw
-          width: 85
-        - Class: jsk_rviz_plugin/OverlayImage
-          Enabled: true
-          Name: Left blinker
-          Topic: /dashboard/left_blinker
-          Value: true
-          alpha: 0.800000011920929
-          height: 80
-          keep aspect ratio: false
-          left: 10
-          overwrite alpha value: false
-          top: 365
-          transport hint: raw
-          width: 85
+          Name: Steering
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
           Enabled: false
@@ -336,14 +284,14 @@ Visualization Manager:
           foreground alpha: 0.699999988079071
           foreground color: 25; 255; 240
           height: 128
-          left: 10
+          left: 424
           linewidth: 1
           max color: 255; 0; 0
           max value: 2
           min value: -2
           show caption: true
           text size: 10
-          top: 168
+          top: 10
           update interval: 0.03999999910593033
           width: 128
         - Buffer length: 100
@@ -361,14 +309,14 @@ Visualization Manager:
           foreground alpha: 0.699999988079071
           foreground color: 25; 255; 240
           height: 128
-          left: 148
+          left: 562
           linewidth: 1
           max color: 255; 0; 0
           max value: 2
           min value: -2
           show caption: true
           text size: 10
-          top: 168
+          top: 10
           update interval: 0.03999999910593033
           width: 128
         - Buffer length: 100
@@ -386,16 +334,72 @@ Visualization Manager:
           foreground alpha: 0.699999988079071
           foreground color: 25; 255; 240
           height: 128
-          left: 286
+          left: 700
           linewidth: 1
           max color: 255; 0; 0
           max value: 2
           min value: -2
           show caption: true
           text size: 10
-          top: 168
+          top: 10
           update interval: 0.03999999910593033
           width: 128
+        - Class: jsk_rviz_plugin/OverlayImage
+          Enabled: true
+          Name: Autonomous Manual
+          Topic: /dashboard/autonomy
+          Value: true
+          alpha: 0.800000011920929
+          height: 35
+          keep aspect ratio: false
+          left: 10
+          overwrite alpha value: false
+          top: 160
+          transport hint: raw
+          width: 266
+        - Class: rviz/Group
+          Displays:
+            - Class: jsk_rviz_plugin/OverlayImage
+              Enabled: true
+              Name: Wheel
+              Topic: /dashboard/steering_wheel
+              Value: true
+              alpha: 0.800000011920929
+              height: 80
+              keep aspect ratio: false
+              left: 103
+              overwrite alpha value: false
+              top: 195
+              transport hint: raw
+              width: 80
+            - Class: jsk_rviz_plugin/OverlayImage
+              Enabled: true
+              Name: Right blinker
+              Topic: /dashboard/right_blinker
+              Value: true
+              alpha: 0.800000011920929
+              height: 80
+              keep aspect ratio: false
+              left: 183
+              overwrite alpha value: false
+              top: 195
+              transport hint: raw
+              width: 93
+            - Class: jsk_rviz_plugin/OverlayImage
+              Enabled: true
+              Name: Left blinker
+              Topic: /dashboard/left_blinker
+              Value: true
+              alpha: 0.800000011920929
+              height: 80
+              keep aspect ratio: false
+              left: 10
+              overwrite alpha value: false
+              top: 195
+              transport hint: raw
+              width: 93
+          Enabled: true
+          Name: Wheel nad blinkers
         - Align Bottom: false
           Background Alpha: 0.800000011920929
           Background Color: 0; 0; 0
@@ -404,11 +408,11 @@ Visualization Manager:
           Foreground Alpha: 0.800000011920929
           Foreground Color: 25; 255; 240
           Invert Shadow: false
-          Name: SSC status
+          Name: SSC general
           Overtake BG Color Properties: false
           Overtake FG Color Properties: false
           Overtake Position Properties: false
-          Topic: /dashboard/ssc_state
+          Topic: /dashboard/ssc_general
           Value: true
           font: DejaVu Sans Mono
           height: 128
@@ -425,11 +429,53 @@ Visualization Manager:
           Foreground Alpha: 0.800000011920929
           Foreground Color: 25; 255; 240
           Invert Shadow: false
-          Name: Pacmod state
+          Name: Pacmod general
           Overtake BG Color Properties: false
           Overtake FG Color Properties: false
           Overtake Position Properties: false
-          Topic: /dashboard/pacmod_state
+          Topic: /dashboard/pacmod_general
+          Value: true
+          font: DejaVu Sans Mono
+          height: 128
+          left: 0
+          line width: 2
+          text size: 12
+          top: 0
+          width: 128
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 0.800000011920929
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
+          Name: SSC detailed
+          Overtake BG Color Properties: false
+          Overtake FG Color Properties: false
+          Overtake Position Properties: false
+          Topic: /dashboard/ssc_detailed
+          Value: true
+          font: DejaVu Sans Mono
+          height: 128
+          left: 0
+          line width: 2
+          text size: 12
+          top: 0
+          width: 128
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 0.800000011920929
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
+          Name: Pacmod dtailed
+          Overtake BG Color Properties: false
+          Overtake FG Color Properties: false
+          Overtake Position Properties: false
+          Topic: /dashboard/pacmod_detailed
           Value: true
           font: DejaVu Sans Mono
           height: 128
@@ -683,7 +729,11 @@ Visualization Manager:
               Steering status: true
               Target speed: true
               Value: true
-              Wheel: true
+              Wheel nad blinkers:
+                Left blinker: true
+                Right blinker: true
+                Value: true
+                Wheel: true
             Detection:
               Detected objects: true
               Final objects: true
@@ -691,7 +741,7 @@ Visualization Manager:
                 Center:
                   Points center ground: true
                   Points center no ground: true
-                  Value: true
+                Value: true
                 Front:
                   Points front filtered: true
                   Points front ground: true
@@ -766,7 +816,11 @@ Visualization Manager:
               Steering status: true
               Target speed: true
               Value: true
-              Wheel: true
+              Wheel nad blinkers:
+                Left blinker: true
+                Right blinker: true
+                Value: true
+                Wheel: true
             Detection:
               Detected objects: true
               Final objects: true
@@ -774,7 +828,7 @@ Visualization Manager:
                 Center:
                   Points center ground: true
                   Points center no ground: true
-                  Value: true
+                Value: true
                 Front:
                   Points front filtered: true
                   Points front ground: true
@@ -1258,16 +1312,18 @@ Visualization Manager:
             Dashboard:
               Accel limit: true
               Acceleration: true
-              Autonomy: true
+              Autonomous Manual: true
               Closest obj dist: true
-              Closest obj spd: true
-              Current speed: true
               Decel limit: true
               Steering cmd: true
               Steering status: true
               Target speed: true
               Value: true
-              Wheel: true
+              Wheel nad blinkers:
+                Left blinker: true
+                Right blinker: true
+                Value: true
+                Wheel: true
             Detection:
               "":
                 "": true
@@ -1278,10 +1334,20 @@ Visualization Manager:
               "": true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
-              "": true
+              Camera Image Left: true
+              Camera Image Right: true
+              Camera View Left: true
+              Camera View Right: true
+              Points raw center: true
+              Points raw front: true
+              Radar raw: true
               Value: true
             Simulation:
               Bicycle markers: true
@@ -1344,10 +1410,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.0010000000474974513
-      Scale: 6.077696323394775
+      Scale: 9.635662078857422
       Target Frame: base_link
-      X: 6.680443286895752
-      Y: -12.12864875793457
+      X: 1.007275104522705
+      Y: 12.930980682373047
     Saved:
       - Angle: 0
         Class: rviz/TopDownOrtho
@@ -1445,5 +1511,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1866
-  X: 442
-  Y: 171
+  X: 549
+  Y: 27

@@ -86,9 +86,9 @@ class NovatelOem7Visualizer:
         rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback, queue_size=1)
 
         # Internal parameters
-        self.global_top = 595
+        self.global_top = 315
         self.global_left = 10
-        self.global_width = 250
+        self.global_width = 266
         self.global_height = 17
         self.text_size = 10
 
@@ -100,9 +100,9 @@ class NovatelOem7Visualizer:
             fg_color = YELLOW
 
         if msg.status.status not in INSPVA_STATUS:
-            text = "Unknown IMU status: {}".format(msg.status.status)
+            text = "Unknown INS status: {}".format(msg.status.status)
         else:
-            text = "IMU status: " + INSPVA_STATUS[msg.status.status]
+            text = "INS status: " + INSPVA_STATUS[msg.status.status]
 
         inspva_status = OverlayText()
         inspva_status.text = text
@@ -124,9 +124,9 @@ class NovatelOem7Visualizer:
             fg_color = YELLOW
 
         if msg.pos_type.type not in BESTPOS_POS_TYPE:
-            text = "Unknown BESTPOS pos_type: {}".format(msg.pos_type.type)
+            text = "Unknown position type: {}".format(msg.pos_type.type)
         else:
-            text = "GNSS position type: " + BESTPOS_POS_TYPE[msg.pos_type.type]
+            text = "Position type: " + BESTPOS_POS_TYPE[msg.pos_type.type]
         
         bestpos_pos_type = OverlayText()
         bestpos_pos_type.text = text
@@ -153,7 +153,7 @@ class NovatelOem7Visualizer:
         num_sol_svs.left = self.global_left
         num_sol_svs.width = self.global_width
         num_sol_svs.height = self.global_height
-        num_sol_svs.text_size = self.text_size
+        num_sol_svs.text_size = 9
         num_sol_svs.fg_color = fg_color
         num_sol_svs.bg_color = BLACK
 
@@ -174,7 +174,7 @@ class NovatelOem7Visualizer:
         loc_stdev.left = self.global_left
         loc_stdev.width = self.global_width
         loc_stdev.height = self.global_height
-        loc_stdev.text_size = self.text_size
+        loc_stdev.text_size = 9
         loc_stdev.fg_color = fg_color
         loc_stdev.bg_color = BLACK
 
@@ -192,8 +192,8 @@ class NovatelOem7Visualizer:
         diff_age.top = self.global_top + 4 * self.global_height
         diff_age.left = self.global_left
         diff_age.width = self.global_width
-        diff_age.height = self.global_height
-        diff_age.text_size = self.text_size
+        diff_age.height = 28
+        diff_age.text_size = 9
         diff_age.fg_color = fg_color
         diff_age.bg_color = BLACK
 

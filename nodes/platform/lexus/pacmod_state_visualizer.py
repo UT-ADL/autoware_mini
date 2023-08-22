@@ -4,10 +4,9 @@ import rospy
 import math
 from std_msgs.msg import ColorRGBA, Bool
 from automotive_navigation_msgs.msg import ModuleState
-from pacmod3_msgs.msg import AllSystemStatuses
+from pacmod3_msgs.msg import AllSystemStatuses, SystemRptFloat, SystemRptInt
 from jsk_rviz_plugins.msg import OverlayText
 from sensor_msgs.msg import Image
-from autoware_msgs.msg import VehicleCmd
 import cv2
 from cv_bridge import CvBridge
 
@@ -25,6 +24,11 @@ BRAKES = 1
 STEERING = 6
 TURN_SIGNALS = 7
 
+# /pacmod/turn_rpt values
+TURN_RIGHT = 0
+TURN_LEFT = 2
+STRAIGHT = 1
+
 class PacmodStateVisualizer:
     def __init__(self):
 
@@ -32,9 +36,11 @@ class PacmodStateVisualizer:
         self.image_path = rospy.get_param('~image_path')
 
         # Publishers
-        self.pacmod_state_pub = rospy.Publisher('pacmod_state', OverlayText, queue_size=1)
-        self.ssc_state_pub = rospy.Publisher('ssc_state', OverlayText, queue_size=1)
-        self.autonomy_pub = rospy.Publisher('autonomy', OverlayText, queue_size=1)
+        self.pacmod_detailed_pub = rospy.Publisher('pacmod_detailed', OverlayText, queue_size=1)
+        self.pacmod_general_pub = rospy.Publisher('pacmod_general', OverlayText, queue_size=1)
+        self.ssc_general_pub = rospy.Publisher('ssc_general', OverlayText, queue_size=1)
+        self.ssc_detailed_pub = rospy.Publisher('ssc_detailed', OverlayText, queue_size=1)
+        self.autonomy_pub = rospy.Publisher('autonomy', Image, queue_size=1)
         self.steering_wheel_pub = rospy.Publisher('steering_wheel', Image, queue_size=1)
         self.right_blinker_pub = rospy.Publisher('right_blinker', Image, queue_size=1)
         self.left_blinker_pub =  rospy.Publisher('left_blinker', Image, queue_size=1)
@@ -43,83 +49,137 @@ class PacmodStateVisualizer:
         rospy.Subscriber('/ssc/module_states', ModuleState, self.ssc_module_states_callback, queue_size=1)
         rospy.Subscriber('/pacmod/all_system_statuses', AllSystemStatuses, self.pacmod_all_system_statuses, queue_size=1)
         rospy.Subscriber('/pacmod/enabled', Bool, self.pacmod_enabled, queue_size=1)
-        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
+        rospy.Subscriber('/pacmod/steering_rpt', SystemRptFloat, self.steering_rpt_callback, queue_size=1)
+        rospy.Subscriber('/pacmod/turn_rpt', SystemRptInt, self.turn_rpt_callback, queue_size=1)
 
         # Internal parameters
-        self.global_top = 330
+        self.global_top = 160
         self.global_left = 10
-        self.global_width = 250
+        self.global_width = 266
 
         self.ssc_states={}
         self.bridge = CvBridge()
         self.is_autonomous = False
-        
+
+        self.autonomous_img = cv2.imread(self.image_path + "autonomous.png")
+        self.manual_img = cv2.imread(self.image_path + "manual.png")
+
 
     def pacmod_enabled(self, msg):
+        
+        # Display AUTONOMOUS / MANUAL status
 
         self.is_autonomous = msg.data
         autonomous = self.is_autonomous
 
-        enabled = OverlayText()
-        enabled.top = self.global_top
-        enabled.left = self.global_left
-        enabled.width = self.global_width
-        enabled.height = 35
-        enabled.text_size = 22
-        enabled.bg_color = BLACK
         if autonomous:
-            enabled.text = "AUTONOMOUS"
-            enabled.fg_color = BLUE
+            if self.autonomous_img is not None:
+                try:
+                    autonomous_msg = self.bridge.cv2_to_imgmsg(self.autonomous_img, encoding="bgr8")
+                    self.autonomy_pub.publish(autonomous_msg)
+                except Exception as e:
+                    rospy.logerr("Dashboard: Error publishing autonomous image: {}".format(str(e)))
+            else:
+                rospy.logerr("Dashboard: Autonomous image not found or couldn't be loaded")
         else:
-            enabled.text = "MANUAL"
-            enabled.fg_color = GREEN
+            if self.manual_img is not None:
+                try:
+                    manual_msg = self.bridge.cv2_to_imgmsg(self.manual_img, encoding="bgr8")
+                    self.autonomy_pub.publish(manual_msg)
+                except Exception as e:
+                    rospy.logerr("Dashboard: Error publishing manual image: {}".format(str(e)))
+            else:
+                rospy.logerr("Dashboard: Manual image not found or couldn't be loaded")
 
-        self.autonomy_pub.publish(enabled)
 
+    def steering_rpt_callback(self, msg):
 
-    def vehicle_cmd_callback(self, msg):
+        # Animate steering wheel in autonomous and manual mode
 
         autonomous = self.is_autonomous
 
-        # Wheel animation
-        wheel_img = cv2.imread(self.image_path + "wheel_s.png")
-        if wheel_img is not None:
-
-            height, width = wheel_img.shape[:2]
-            # TODO: covert correctly to steering wheel angle
-            angle = math.degrees(msg.ctrl_cmd.steering_angle) * 10
-            rotation_matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
-            rotated_wheel_img = cv2.warpAffine(wheel_img, rotation_matrix, (width, height))
-
-            try:
-                if autonomous:
-                    # make Blue channel 255, convert to blueish color
-                    rotated_wheel_img[:, :, 0] *= 255
-                    rotated_wheel_img[:, :, 1] *= 150
-                    rotated_wheel_img[:, :, 2] *= 100
-                else:
-                    # make green channel 255
-                    rotated_wheel_img[:, :, 1] *= 255
-
-                wheel_msg = self.bridge.cv2_to_imgmsg(rotated_wheel_img, encoding="bgr8")
-                self.steering_wheel_pub.publish(wheel_msg)
-            except Exception as e:
-                rospy.logerr("Dashboard: Error publishing wheel image: {}".format(str(e)))
+        if autonomous:
+            wheel_autonomous_img = cv2.imread(self.image_path + "wheel_s.png")
+            if wheel_autonomous_img is not None:
+                wheel_img = wheel_autonomous_img
+                # make Blue channel 255, convert to blueish color
+                wheel_img[:, :, 0] *= 255
+                wheel_img[:, :, 1] *= 150
+                wheel_img[:, :, 2] *= 100
+            else:
+                rospy.logerr("Dashboard: Steering wheel autonomous image not found or couldn't be loaded")
         else:
-            rospy.logerr("Dashboard: Wheel image not found or couldn't be loaded")
+            wheel_manual_img = cv2.imread(self.image_path + "wheel_s_hands.png")
+            if wheel_manual_img is not None:
+                wheel_img = wheel_manual_img
+                # make green channel 255
+                wheel_img[:, :, 1] *= 255
+            else:
+                rospy.logerr("Dashboard: Steering wheel manual image not found or couldn't be loaded")
 
 
-        # Blinkers
-        right_img = cv2.imread(self.image_path + "right.png")
+        height, width = wheel_img.shape[:2]
+        # TODO: covert correctly to steering wheel angle
+        angle = math.degrees(msg.output)
+        rotation_matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+        rotated_wheel_img = cv2.warpAffine(wheel_img, rotation_matrix, (width, height))
 
-        if right_img is not None:
+        try:
+            wheel_msg = self.bridge.cv2_to_imgmsg(rotated_wheel_img, encoding="bgr8")
+            self.steering_wheel_pub.publish(wheel_msg)
+        except Exception as e:
+            rospy.logerr("Dashboard: Error publishing steering wheel image: {}".format(str(e)))
+
+
+    def turn_rpt_callback(self, msg):
+
+        # Visualize blinkers:
+        # CMD - command (sent by autonomy stack)
+        # Arrow - actual blinker state, includes manually switched blinkers
+
+        blinker_left_img = cv2.imread(self.image_path + "left_cmd.png")
+        blinker_right_img = cv2.imread(self.image_path + "right_cmd.png")
+
+        if blinker_left_img is not None:
             try:
-                if msg.lamp_cmd.r == 1:
-                    # make Yellow
-                    right_img[:, :, 1] *= 255
-                    right_img[:, :, 2] *= 255
+                if msg.command == TURN_LEFT:
+                    # make CMD Yellow
+                    pixels_with_value_80 = blinker_left_img[:, :, 0] == 80
+                    blinker_left_img[pixels_with_value_80, 0] = 0
+                    blinker_left_img[pixels_with_value_80, 1] = 255
+                    blinker_left_img[pixels_with_value_80, 2] = 255
 
-                right_msg = self.bridge.cv2_to_imgmsg(right_img, encoding="bgr8")
+                if msg.output == TURN_LEFT:
+                    # make arrow Yellow
+                    pixels_with_value_70 = blinker_left_img[:, :, 0] == 70
+                    blinker_left_img[pixels_with_value_70, 0] = 0
+                    blinker_left_img[pixels_with_value_70, 1] = 255
+                    blinker_left_img[pixels_with_value_70, 2] = 255
+
+                left_msg = self.bridge.cv2_to_imgmsg(blinker_left_img, encoding="bgr8")
+                self.left_blinker_pub.publish(left_msg)
+            except Exception as e:
+                rospy.logerr("Dashboard: Error publishing left blinker image: {}".format(str(e)))
+        else:
+            rospy.logerr("Dashboard: Left blinker image not found or couldn't be loaded")
+
+        if blinker_right_img is not None:
+            try:
+                if msg.command == TURN_RIGHT:
+                    # make CMD Yellow
+                    pixels_with_value_80 = blinker_right_img[:, :, 1] == 80
+                    blinker_right_img[pixels_with_value_80, 0] = 0
+                    blinker_right_img[pixels_with_value_80, 1] = 255
+                    blinker_right_img[pixels_with_value_80, 2] = 255
+
+                if msg.output == TURN_RIGHT:
+                    # make arrow Yellow
+                    pixels_with_value_70 = blinker_right_img[:, :, 1] == 70
+                    blinker_right_img[pixels_with_value_70, 0] = 0
+                    blinker_right_img[pixels_with_value_70, 1] = 255
+                    blinker_right_img[pixels_with_value_70, 2] = 255
+
+                right_msg = self.bridge.cv2_to_imgmsg(blinker_right_img, encoding="bgr8")
                 self.right_blinker_pub.publish(right_msg)
             except Exception as e:
                 rospy.logerr("Dashboard: Error publishing right blinker image: {}".format(str(e)))
@@ -127,52 +187,61 @@ class PacmodStateVisualizer:
             rospy.logerr("Dashboard: Right blinker image not found or couldn't be loaded")
 
 
-        left_img = cv2.imread(self.image_path + "left.png")
-
-        if left_img is not None:
-            try:
-                if msg.lamp_cmd.l == 1:
-                    # make Yellow
-                    left_img[:, :, 1] *= 255
-                    left_img[:, :, 2] *= 255
-
-                left_msg = self.bridge.cv2_to_imgmsg(left_img, encoding="bgr8")
-                self.left_blinker_pub.publish(left_msg)
-            except Exception as e:
-                rospy.logerr("Dashboard: Error publishing left blinker image: {}".format(str(e)))
-        else:
-            rospy.logerr("Dashboard: Left blinker image not found or couldn't be loaded")
-
-
     def ssc_module_states_callback(self, msg):
+
+        # Display SSC status - publish general and detailed status separately
 
         # collect all the latest states of individual modules
         self.ssc_states[msg.name] = msg.state + " " + msg.info
 
-        ssc_status_text = ""
+        ssc_status_text = "SSC:\n"
         for key in self.ssc_states:
             ssc_status_text += key + ": " + self.ssc_states[key] + "\n"
 
         fg_color = WHITE
+        ssc_general_status = ""
+        if 'ready' in ssc_status_text:
+            ssc_general_status = "Ready"
+        if 'active' in ssc_status_text:
+            ssc_general_status = "Active"
+        if 'not_ready' in ssc_status_text:
+            ssc_general_status = "Not Ready"
+            fg_color = YELLOW
         if 'failure' in ssc_status_text:
+            ssc_general_status = "Failure"
             fg_color = YELLOW
         if 'fatal' in ssc_status_text:
+            ssc_general_status = "Fatal"
             fg_color = RED
 
-        ssc_state = OverlayText()
-        ssc_state.top = self.global_top + 115
-        ssc_state.left = self.global_left
-        ssc_state.width = self.global_width
-        ssc_state.height = 70
-        ssc_state.text_size = 10
-        ssc_state.text = ssc_status_text
-        ssc_state.fg_color = fg_color
-        ssc_state.bg_color = BLACK
+        ssc_general = OverlayText()
+        ssc_general.top = self.global_top + 115
+        ssc_general.left = self.global_left
+        ssc_general.width = self.global_width
+        ssc_general.height = 20
+        ssc_general.text_size = 11
+        ssc_general.text = "SSC: " + ssc_general_status
+        ssc_general.fg_color = fg_color
+        ssc_general.bg_color = BLACK
 
-        self.ssc_state_pub.publish(ssc_state)
+        self.ssc_general_pub.publish(ssc_general)
+
+        ssc_detailed = OverlayText()
+        ssc_detailed.top = 410
+        ssc_detailed.left = self.global_left
+        ssc_detailed.width = self.global_width
+        ssc_detailed.height = 70
+        ssc_detailed.text_size = 9
+        ssc_detailed.text = ssc_status_text
+        ssc_detailed.fg_color = fg_color
+        ssc_detailed.bg_color = BLACK
+
+        self.ssc_detailed_pub.publish(ssc_detailed)
 
 
     def pacmod_all_system_statuses (self, msg):
+
+        # Publish Pacmod general and detailed status separately
 
         # create a string for each module to print out
         accelerator_state = self.get_state_string(ACCELERATOR, msg)
@@ -180,23 +249,44 @@ class PacmodStateVisualizer:
         steering_state = self.get_state_string(STEERING, msg)
         turn_signals_state = self.get_state_string(TURN_SIGNALS, msg)
 
+        pacmod_status_text = "Pacmod:\nAccelerator:" + accelerator_state + "\nBrakes:" + brakes_state + "\nSteering:" + steering_state + "\nTurn signals:" + turn_signals_state
+
         fg_color = WHITE
-        if 'Overridden' in accelerator_state:
+        pacmod_general_status = "Enabled"
+        if 'Disabled' in pacmod_status_text:
+            pacmod_general_status = "Disabled"
+            fg_color = WHITE
+        if 'Overridden' in pacmod_status_text:
+            pacmod_general_status = "Overridden"
             fg_color = YELLOW
-        if 'Fault' in accelerator_state:
+        if 'Fault' in pacmod_status_text:
+            pacmod_general_status = "Fault"
             fg_color = RED
 
-        pacmod_state = OverlayText()
-        pacmod_state.top = self.global_top + 185
-        pacmod_state.left = self.global_left
-        pacmod_state.width = self.global_width
-        pacmod_state.height = 80
-        pacmod_state.text_size = 10
-        pacmod_state.text = "Accelerator:" + accelerator_state + "\nBrakes:" + brakes_state + "\nSteering:" + steering_state + "\nTurn signals:" + turn_signals_state
-        pacmod_state.fg_color = fg_color
-        pacmod_state.bg_color = BLACK
+        pacmod_general = OverlayText()
+        pacmod_general.top = self.global_top + 135
+        pacmod_general.left = self.global_left
+        pacmod_general.width = self.global_width
+        pacmod_general.height = 20
+        pacmod_general.text_size = 11
+        pacmod_general.text = "Pacmod: " + pacmod_general_status
+        pacmod_general.fg_color = fg_color
+        pacmod_general.bg_color = BLACK
 
-        self.pacmod_state_pub.publish(pacmod_state)
+        self.pacmod_general_pub.publish(pacmod_general)
+
+
+        pacmod_detailed = OverlayText()
+        pacmod_detailed.top = 480
+        pacmod_detailed.left = self.global_left
+        pacmod_detailed.width = self.global_width
+        pacmod_detailed.height = 80
+        pacmod_detailed.text_size = 9
+        pacmod_detailed.text = pacmod_status_text
+        pacmod_detailed.fg_color = fg_color
+        pacmod_detailed.bg_color = BLACK
+
+        self.pacmod_detailed_pub.publish(pacmod_detailed)
 
 
     def get_state_string(self, module, msg):
