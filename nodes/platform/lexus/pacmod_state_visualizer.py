@@ -227,7 +227,7 @@ class PacmodStateVisualizer:
         self.ssc_general_pub.publish(ssc_general)
 
         ssc_detailed = OverlayText()
-        ssc_detailed.top = 410
+        ssc_detailed.top = 430
         ssc_detailed.left = self.global_left
         ssc_detailed.width = self.global_width
         ssc_detailed.height = 70
@@ -277,7 +277,7 @@ class PacmodStateVisualizer:
 
 
         pacmod_detailed = OverlayText()
-        pacmod_detailed.top = 480
+        pacmod_detailed.top = 500
         pacmod_detailed.left = self.global_left
         pacmod_detailed.width = self.global_width
         pacmod_detailed.height = 80

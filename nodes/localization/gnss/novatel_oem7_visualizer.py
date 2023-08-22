@@ -76,6 +76,7 @@ class NovatelOem7Visualizer:
         self.differential_age_bad = rospy.get_param("differential_age_bad")
 
         # Publishers
+        self.gnss_general_pub = rospy.Publisher('gnss_general', OverlayText, queue_size=1)
         self.inspva_status_pub = rospy.Publisher('gnss_inspva_status', OverlayText, queue_size=1)
         self.bestpos_pos_type_pub = rospy.Publisher('gnss_bestpos_pos_type', OverlayText, queue_size=1)
         self.bestpos_num_sol_svs_pub = rospy.Publisher('gnss_bestpos_num_sol_svs', OverlayText, queue_size=1)
@@ -107,7 +108,7 @@ class NovatelOem7Visualizer:
 
         inspva_status = OverlayText()
         inspva_status.text = text
-        inspva_status.top = self.global_top 
+        inspva_status.top = self.global_top + 20
         inspva_status.left = self.global_left
         inspva_status.width = self.global_width
         inspva_status.height = self.global_height
@@ -125,13 +126,13 @@ class NovatelOem7Visualizer:
             fg_color = YELLOW
 
         if msg.pos_type.type not in BESTPOS_POS_TYPE:
-            text = "Unknown position type: {}".format(msg.pos_type.type)
+            post_type_string = "Unknown position type: {}".format(msg.pos_type.type)
         else:
-            text = "Position type: " + BESTPOS_POS_TYPE[msg.pos_type.type]
+            post_type_string = "Position type: " + BESTPOS_POS_TYPE[msg.pos_type.type]
         
         bestpos_pos_type = OverlayText()
-        bestpos_pos_type.text = text
-        bestpos_pos_type.top = self.global_top + 1 * self.global_height
+        bestpos_pos_type.text = post_type_string
+        bestpos_pos_type.top = self.global_top + 20 + 1 * self.global_height
         bestpos_pos_type.left = self.global_left
         bestpos_pos_type.width = self.global_width
         bestpos_pos_type.height = self.global_height
@@ -150,7 +151,7 @@ class NovatelOem7Visualizer:
 
         num_sol_svs = OverlayText()
         num_sol_svs.text = "Num. satellites: {}".format(msg.num_sol_svs)
-        num_sol_svs.top = self.global_top + 2 * self.global_height
+        num_sol_svs.top = self.global_top + 20 + 2 * self.global_height
         num_sol_svs.left = self.global_left
         num_sol_svs.width = self.global_width
         num_sol_svs.height = self.global_height
@@ -171,7 +172,7 @@ class NovatelOem7Visualizer:
 
         loc_stdev = OverlayText()
         loc_stdev.text = "Location stdev: {:.2f} m".format(location_stdev)
-        loc_stdev.top = self.global_top + 3 * self.global_height
+        loc_stdev.top = self.global_top + 20 + 3 * self.global_height
         loc_stdev.left = self.global_left
         loc_stdev.width = self.global_width
         loc_stdev.height = self.global_height
@@ -190,7 +191,7 @@ class NovatelOem7Visualizer:
 
         diff_age = OverlayText()
         diff_age.text = "Differential age: {:.2f} s".format(msg.diff_age)
-        diff_age.top = self.global_top + 4 * self.global_height
+        diff_age.top = self.global_top + 20 + 4 * self.global_height
         diff_age.left = self.global_left
         diff_age.width = self.global_width
         diff_age.height = 28
@@ -199,6 +200,27 @@ class NovatelOem7Visualizer:
         diff_age.bg_color = BLACK
 
         self.bestpos_diff_age_pub.publish(diff_age)
+
+
+        if msg.pos_type.type == INS_RTKFIXED and location_stdev < self.location_accuracy_stdev_good and msg.diff_age < self.differential_age_bad and msg.num_sol_svs > self.number_of_satellites_bad:
+            gnss_general_text = "GNSS: OK"
+            fg_color = WHITE
+        else:
+            gnss_general_text = "GNSS: Localization warning"
+            fg_color = YELLOW
+
+        gnss_general = OverlayText()
+        gnss_general.text = gnss_general_text
+        gnss_general.top = self.global_top
+        gnss_general.left = self.global_left
+        gnss_general.width = self.global_width
+        gnss_general.height = 20
+        gnss_general.text_size = 11
+        gnss_general.fg_color = fg_color
+        gnss_general.bg_color = BLACK
+
+        self.gnss_general_pub.publish(gnss_general)
+
 
     def run(self):
         rospy.spin()
