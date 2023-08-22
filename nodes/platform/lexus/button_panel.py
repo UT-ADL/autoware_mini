@@ -14,11 +14,11 @@ class ButtonPanelNode:
 
         self.cooldown = rospy.get_param("~cooldown")
 
-        self.engage_pub = rospy.Publisher("engage", Bool, queue_size=10)
-        self.marker_pub = rospy.Publisher("/log/markers", Marker, queue_size=10)
+        self.engage_pub = rospy.Publisher("engage", Bool, queue_size=10, tcp_nodelay=True)
+        self.marker_pub = rospy.Publisher("/log/markers", Marker, queue_size=10, tcp_nodelay=True)
 
-        rospy.Subscriber("/localization/current_pose", PoseStamped, self.pose_callback)
-        rospy.Subscriber("joy", Joy, self.joy_callback)
+        rospy.Subscriber("/localization/current_pose", PoseStamped, self.pose_callback, queue_size=1, tcp_nodelay=True)
+        rospy.Subscriber("joy", Joy, self.joy_callback, queue_size=None, tcp_nodelay=True)
 
         rospy.loginfo("%s - node started", rospy.get_name())
 

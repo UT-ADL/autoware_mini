@@ -33,7 +33,7 @@ class RadarDetector:
         self.uuid_map = {} # dictionary containing uuid-integer id pairs
 
         # Publishers
-        self.detected_objs_pub = rospy.Publisher("detected_objects", DetectedObjectArray, queue_size=1)
+        self.detected_objs_pub = rospy.Publisher("detected_objects", DetectedObjectArray, queue_size=1, tcp_nodelay=True)
 
         # Dynamic transform listener
         self.tf_buffer = Buffer()
@@ -45,8 +45,8 @@ class RadarDetector:
         self.base_link_to_radar_tf = self.tf_buffer.lookup_transform('radar_fc', 'base_link', rospy.Time(0))
 
         # Subscribers
-        tracks_sub = message_filters.Subscriber('/radar_fc/radar_tracks', RadarTracks, queue_size=1)
-        ego_speed_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1)
+        tracks_sub = message_filters.Subscriber('/radar_fc/radar_tracks', RadarTracks, queue_size=1, buff_size=2**20, tcp_nodelay=True)
+        ego_speed_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
 
         # Strict Time Sync
         ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, ego_speed_sub], queue_size=5, slop=0.02)

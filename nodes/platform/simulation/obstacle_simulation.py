@@ -17,10 +17,10 @@ class ObstacleSimulation:
         self.id = 0
 
         # detected objects publisher
-        self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=10)
+        self.objects_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1, tcp_nodelay=True)
 
         # initial position and vehicle command from outside
-        rospy.Subscriber('/clicked_point', PointStamped, self.point_callback)
+        rospy.Subscriber('/clicked_point', PointStamped, self.point_callback, queue_size=None, tcp_nodelay=True)
 
         rospy.loginfo("%s - initialized", rospy.get_name())
 

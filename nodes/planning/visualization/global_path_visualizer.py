@@ -9,10 +9,10 @@ class GlobalPathVisualizer:
     def __init__(self):
 
         # Publishers
-        self.global_path_markers_pub = rospy.Publisher('global_path_markers', MarkerArray, queue_size=1, latch=True)
+        self.global_path_markers_pub = rospy.Publisher('global_path_markers', MarkerArray, queue_size=10, latch=True, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=1)
+        rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=None, tcp_nodelay=True)
 
     def global_path_callback(self, lane):
         marker_array = MarkerArray()

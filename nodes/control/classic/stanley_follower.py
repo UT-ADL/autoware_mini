@@ -41,15 +41,15 @@ class StanleyFollower:
         self.lock = threading.Lock()
 
         # Publishers
-        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1)
+        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1, tcp_nodelay=True)
         if self.publish_debug_info:
-            self.stanley_markers_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1)
-            self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1)
+            self.stanley_markers_pub = rospy.Publisher('follower_markers', MarkerArray, queue_size=1, tcp_nodelay=True)
+            self.follower_debug_pub = rospy.Publisher('follower_debug', Float32MultiArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('/planning/local_path', Lane, self.path_callback)
-        current_pose_sub = message_filters.Subscriber('/localization/current_pose', PoseStamped)
-        current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped)
+        rospy.Subscriber('/planning/local_path', Lane, self.path_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
+        current_pose_sub = message_filters.Subscriber('/localization/current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
+        current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
         ts = message_filters.ApproximateTimeSynchronizer([current_pose_sub, current_velocity_sub], queue_size=2, slop=0.02)
         ts.registerCallback(self.current_status_callback)
 

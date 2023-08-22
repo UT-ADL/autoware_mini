@@ -15,11 +15,11 @@ class PointsConcatenator:
     def __init__(self):
 
         # Publisher
-        self.points_concatenated_pub = rospy.Publisher("points_concatenated", PointCloud2, queue_size=1)
+        self.points_concatenated_pub = rospy.Publisher("points_concatenated", PointCloud2, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
-        points1_sub = message_filters.Subscriber('points1', PointCloud2, queue_size=1, buff_size=2*1024*1024)
-        points2_sub = message_filters.Subscriber('points2', PointCloud2, queue_size=1, buff_size=2*1024*1024)
+        points1_sub = message_filters.Subscriber('points1', PointCloud2, queue_size=1, buff_size=2**24, tcp_nodelay=True)
+        points2_sub = message_filters.Subscriber('points2', PointCloud2, queue_size=1, buff_size=2**24, tcp_nodelay=True)
 
         # Strict Time Sync
         ts = message_filters.ApproximateTimeSynchronizer([points1_sub, points2_sub], queue_size=15, slop=0.15)

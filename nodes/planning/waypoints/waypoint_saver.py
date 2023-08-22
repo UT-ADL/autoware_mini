@@ -40,12 +40,12 @@ class WaypointSaver:
         self.writer.writerow(['x', 'y', 'z', 'yaw', 'velocity', 'change_flag', 'steering_flag', 'accel_flag', 'stop_flag', 'event_flag'])
 
         # Publishers
-        self.waypoint_marker_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1)
+        self.waypoint_marker_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=10, latch=True, tcp_nodelay=True)
 
         # Subscribers
-        self.current_pose_sub = message_filters.Subscriber('/localization/current_pose', PoseStamped, queue_size=1)
-        self.current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1)
-        self.turn_rpt_sub = rospy.Subscriber('/vehicle/vehicle_status', VehicleStatus, self.vehicle_status_callback, queue_size=1)
+        self.current_pose_sub = message_filters.Subscriber('/localization/current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
+        self.current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
+        self.turn_rpt_sub = rospy.Subscriber('/vehicle/vehicle_status', VehicleStatus, self.vehicle_status_callback, queue_size=1, tcp_nodelay=True)
 
         # Sync 2 source topics in callback
         ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=2, slop=0.02)

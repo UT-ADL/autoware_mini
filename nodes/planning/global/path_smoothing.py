@@ -22,10 +22,10 @@ class PathSmoothing:
         self.output_debug_info = rospy.get_param("~output_debug_info")
 
         # Publishers
-        self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1, latch=True)
+        self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=10, latch=True, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=1)
+        rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=None, tcp_nodelay=True)
 
 
     def global_path_callback(self, msg):

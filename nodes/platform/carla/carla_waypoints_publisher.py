@@ -18,10 +18,10 @@ class CarlaWaypointsPublisher():
 
     def __init__(self):
         # Publishers
-        self.waypoints_pub = rospy.Publisher('global_path', LaneArray, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('global_path', LaneArray, queue_size=10, latch=True, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('/carla/ego_vehicle/waypoints', Path, self.path_callback, queue_size=1)
+        rospy.Subscriber('/carla/ego_vehicle/waypoints', Path, self.path_callback, queue_size=None, tcp_nodelay=True)
 
     def path_callback(self, data):
         """

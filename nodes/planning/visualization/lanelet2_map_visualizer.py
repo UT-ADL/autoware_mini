@@ -60,12 +60,12 @@ class Lanelet2MapVisualizer:
         marker_array = visualize_lanelet2_map(self.lanelet2_map)
 
         # create MarkerArray publisher
-        markers_pub = rospy.Publisher('lanelet2_map_markers', MarkerArray, queue_size=1, latch=True)
+        markers_pub = rospy.Publisher('lanelet2_map_markers', MarkerArray, queue_size=10, latch=True, tcp_nodelay=True)
         markers_pub.publish(marker_array)
 
         # Special publisher for stop line markers
-        self.stop_line_markers_pub = rospy.Publisher('stop_line_markers', MarkerArray, queue_size=1, latch=True)
-        rospy.Subscriber("/detection/traffic_light_status", TrafficLightResultArray, self.traffic_light_status_callback)
+        self.stop_line_markers_pub = rospy.Publisher('stop_line_markers', MarkerArray, queue_size=10, latch=True, tcp_nodelay=True)
+        rospy.Subscriber("/detection/traffic_light_status", TrafficLightResultArray, self.traffic_light_status_callback, queue_size=1, tcp_nodelay=True)
 
         rospy.loginfo("%s - map loaded with %i lanelets and %i regulatory elements from file: %s", rospy.get_name(),
                       len(self.lanelet2_map.laneletLayer), len(self.lanelet2_map.regulatoryElementLayer), lanelet2_map_name)

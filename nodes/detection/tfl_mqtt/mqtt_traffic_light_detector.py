@@ -72,7 +72,7 @@ class MqttTrafficLightDetector:
         self.mqtt_status = {}
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
 
         client = paho.Client()
         client.on_message = self.on_message

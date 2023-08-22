@@ -46,30 +46,30 @@ class SSCInterface:
         self.turn_signals = SystemRptInt.TURN_NONE
         
         # initialize SSC command publishers
-        self.speed_mode_pub = rospy.Publisher('/ssc/arbitrated_speed_commands', SpeedMode, queue_size=1)
-        self.steer_mode_pub = rospy.Publisher('/ssc/arbitrated_steering_commands', SteerMode, queue_size=1)
-        self.turn_signal_pub = rospy.Publisher('/ssc/turn_signal_command', TurnSignalCommand, queue_size=1)
-        self.gear_pub = rospy.Publisher('/ssc/gear_select', GearCommand, queue_size=1)
+        self.speed_mode_pub = rospy.Publisher('/ssc/arbitrated_speed_commands', SpeedMode, queue_size=1, tcp_nodelay=True)
+        self.steer_mode_pub = rospy.Publisher('/ssc/arbitrated_steering_commands', SteerMode, queue_size=1, tcp_nodelay=True)
+        self.turn_signal_pub = rospy.Publisher('/ssc/turn_signal_command', TurnSignalCommand, queue_size=1, tcp_nodelay=True)
+        self.gear_pub = rospy.Publisher('/ssc/gear_select', GearCommand, queue_size=1, tcp_nodelay=True)
 
         # initialize vehicle status publisher
-        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1)
+        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1, tcp_nodelay=True)
 
         # initialize command subscribers
-        rospy.Subscriber('engage', Bool, self.engage_callback, queue_size=1)
-        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
+        rospy.Subscriber('engage', Bool, self.engage_callback, queue_size=None, tcp_nodelay=True)
+        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1, tcp_nodelay=True)
 
         # initialize SSC feedback subscribers
-        rospy.Subscriber('/ssc/module_states', ModuleState, self.module_states_callback, queue_size=1)
+        rospy.Subscriber('/ssc/module_states', ModuleState, self.module_states_callback, queue_size=1, tcp_nodelay=True)
         message_filters.ApproximateTimeSynchronizer([
-                message_filters.Subscriber('/ssc/curvature_feedback', CurvatureFeedback), 
-                message_filters.Subscriber('/ssc/throttle_feedback', ThrottleFeedback),
-                message_filters.Subscriber('/ssc/brake_feedback', BrakeFeedback),
-                message_filters.Subscriber('/ssc/gear_feedback', GearFeedback),
-                message_filters.Subscriber('/ssc/steering_feedback', SteeringFeedback),
-                message_filters.Subscriber('/ssc/velocity_accel_cov', VelocityAccelCov)
+                message_filters.Subscriber('/ssc/curvature_feedback', CurvatureFeedback, queue_size=1, tcp_nodelay=True), 
+                message_filters.Subscriber('/ssc/throttle_feedback', ThrottleFeedback, queue_size=1, tcp_nodelay=True),
+                message_filters.Subscriber('/ssc/brake_feedback', BrakeFeedback, queue_size=1, tcp_nodelay=True),
+                message_filters.Subscriber('/ssc/gear_feedback', GearFeedback, queue_size=1, tcp_nodelay=True),
+                message_filters.Subscriber('/ssc/steering_feedback', SteeringFeedback, queue_size=1, tcp_nodelay=True),
+                message_filters.Subscriber('/ssc/velocity_accel_cov', VelocityAccelCov, queue_size=1, tcp_nodelay=True)
             ], queue_size=2, slop=1.0/30.0).registerCallback(self.ssc_feedbacks_callback)
         # take turn signal info from Pacmod, because it is not available from SSC
-        rospy.Subscriber('/pacmod/turn_rpt', SystemRptInt, self.turn_rpt_callback, queue_size=1)
+        rospy.Subscriber('/pacmod/turn_rpt', SystemRptInt, self.turn_rpt_callback, queue_size=1, tcp_nodelay=True)
 
         # initialize timeout timer
         self.alive = False

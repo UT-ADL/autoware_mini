@@ -14,8 +14,8 @@ class DetectedObjectsVisualizer:
     def __init__(self):
         self.published_ids = set()
 
-        self.markers_pub = rospy.Publisher('detected_objects_markers', MarkerArray, queue_size=5)
-        rospy.Subscriber('detected_objects', DetectedObjectArray, self.objects_callback, queue_size=1)
+        self.markers_pub = rospy.Publisher('detected_objects_markers', MarkerArray, queue_size=1, tcp_nodelay=True)
+        rospy.Subscriber('detected_objects', DetectedObjectArray, self.objects_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
 
         rospy.loginfo("%s - initialized", rospy.get_name())
 

@@ -15,10 +15,10 @@ class LocalPathVisualizer:
         self.braking_safety_distance = rospy.get_param("braking_safety_distance")
 
         # Publishers
-        self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, latch=True)
+        self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('local_path', Lane, self.local_path_callback, queue_size=1)
+        rospy.Subscriber('local_path', Lane, self.local_path_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
 
     def local_path_callback(self, lane):
         marker_array = MarkerArray()

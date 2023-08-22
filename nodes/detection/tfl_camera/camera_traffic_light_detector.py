@@ -86,13 +86,13 @@ class CameraTrafficLightDetector:
         self.model = onnxruntime.InferenceSession(onnx_path, providers=['CUDAExecutionProvider'])
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
         if self.output_roi_image:
-            self.tfl_roi_pub = rospy.Publisher('traffic_light_roi', Image, queue_size=1)
+            self.tfl_roi_pub = rospy.Publisher('traffic_light_roi', Image, queue_size=1, tcp_nodelay=True)
 
         # Camera model
         self.camera_model = None
-        rospy.Subscriber('camera_info', CameraInfo, self.camera_info_callback, queue_size=1)
+        rospy.Subscriber('camera_info', CameraInfo, self.camera_info_callback, queue_size=1, tcp_nodelay=True)
 
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
@@ -100,8 +100,8 @@ class CameraTrafficLightDetector:
         # Subscribers
         self.stoplines_on_path = None
         self.lock = threading.Lock()
-        rospy.Subscriber('/planning/local_path', Lane, self.local_path_callback, queue_size=1)
-        rospy.Subscriber('image_raw', Image, self.camera_image_callback, queue_size=1)
+        rospy.Subscriber('/planning/local_path', Lane, self.local_path_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
+        rospy.Subscriber('image_raw', Image, self.camera_image_callback, queue_size=1, buff_size=2**26, tcp_nodelay=True)
 
     def camera_info_callback(self, camera_info_msg):
         if self.camera_model is None:

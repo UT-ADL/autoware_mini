@@ -13,10 +13,10 @@ class NaivePredictor:
         self.prediction_interval = rospy.get_param('~prediction_interval')
 
         # Publishers
-        self.predicted_objects_pub = rospy.Publisher('predicted_objects', DetectedObjectArray, queue_size=1)
+        self.predicted_objects_pub = rospy.Publisher('predicted_objects', DetectedObjectArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('tracked_objects', DetectedObjectArray, self.tracked_objects_callback, queue_size=1)
+        rospy.Subscriber('tracked_objects', DetectedObjectArray, self.tracked_objects_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
 
     def tracked_objects_callback(self, msg):
         # Convert tracked objects to numpy array

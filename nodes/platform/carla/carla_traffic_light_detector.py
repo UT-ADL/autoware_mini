@@ -62,13 +62,13 @@ class CarlaTrafficLightDetector:
         self.tlf_id_to_coords_map = {}
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
         rospy.Subscriber('/carla/traffic_lights/info',
-                         CarlaTrafficLightInfoList, self.tfl_info_callback, queue_size=1)
+                         CarlaTrafficLightInfoList, self.tfl_info_callback, queue_size=1, tcp_nodelay=True)
         rospy.Subscriber('/carla/traffic_lights/status',
-                    CarlaTrafficLightStatusList, self.tfl_status_callback, queue_size=1)
+                    CarlaTrafficLightStatusList, self.tfl_status_callback, queue_size=1, tcp_nodelay=True)
 
     def extractTrafficLights(self, lanelet2_map):
         tfl_coords = []

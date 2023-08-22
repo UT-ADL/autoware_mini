@@ -35,17 +35,17 @@ class BicycleSimulation:
         self.blinkers = 0
 
         # localization publishers
-        self.current_pose_pub = rospy.Publisher('/localization/current_pose', PoseStamped, queue_size=1)
-        self.current_velocity_pub = rospy.Publisher('/localization/current_velocity', TwistStamped, queue_size=1)
-        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1)
+        self.current_pose_pub = rospy.Publisher('/localization/current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
+        self.current_velocity_pub = rospy.Publisher('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
+        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1, tcp_nodelay=True)
         self.br = TransformBroadcaster()
 
         # visualization of the bicycle model
-        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=1)
+        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=1, tcp_nodelay=True)
 
         # initial position and vehicle command from outside
-        rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
-        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
+        rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback, queue_size=None, tcp_nodelay=True)
+        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1, tcp_nodelay=True)
 
         rospy.loginfo("%s - initialized", rospy.get_name())
 
@@ -67,12 +67,12 @@ class BicycleSimulation:
         # calculate acceleration based on limits
         if self.target_velocity > self.velocity:
             if msg.ctrl_cmd.linear_acceleration > 0.0:
-                self.acceleration = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
+                self.acceleration = msg.ctrl_cmd.linear_acceleration
             else:
                 self.acceleration = self.acceleration_limit
         elif self.target_velocity < self.velocity:
             if msg.ctrl_cmd.linear_acceleration < 0.0:
-                self.acceleration = -min(-msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
+                self.acceleration = msg.ctrl_cmd.linear_acceleration
             else:
                 self.acceleration = -self.deceleration_limit
         else:

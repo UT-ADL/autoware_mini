@@ -41,16 +41,16 @@ class NovatelOem7Localizer:
             exit(1)
 
         # Publishers
-        self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1)
-        self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1)
-        self.odometry_pub = rospy.Publisher('odometry', Odometry, queue_size=1)
+        self.current_pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
+        self.current_velocity_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
+        self.odometry_pub = rospy.Publisher('odometry', Odometry, queue_size=1, tcp_nodelay=True)
         
         # Subscribers
         if self.use_msl_height:
-            self.bestpos_sub = rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback)
+            self.bestpos_sub = rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback, queue_size=1, tcp_nodelay=True)
 
-        inspva_sub = message_filters.Subscriber('/novatel/oem7/inspva', INSPVA, queue_size=1)
-        imu_sub = message_filters.Subscriber('/gps/imu', Imu, queue_size=1)
+        inspva_sub = message_filters.Subscriber('/novatel/oem7/inspva', INSPVA, queue_size=1, tcp_nodelay=True)
+        imu_sub = message_filters.Subscriber('/gps/imu', Imu, queue_size=1, tcp_nodelay=True)
 
         ts = message_filters.ApproximateTimeSynchronizer([inspva_sub, imu_sub], queue_size=5, slop=0.03)
         ts.registerCallback(self.synchronized_callback)

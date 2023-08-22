@@ -14,11 +14,11 @@ class TrafficLightPriorityMerger:
         self.topic_2_tfl_results = {}
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
-        topic_1_tfl_status = message_filters.Subscriber('tfl_status_topic_1', TrafficLightResultArray)
-        topic_2_tfl_status = message_filters.Subscriber('tfl_status_topic_2', TrafficLightResultArray)
+        topic_1_tfl_status = message_filters.Subscriber('tfl_status_topic_1', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
+        topic_2_tfl_status = message_filters.Subscriber('tfl_status_topic_2', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
         ts = message_filters.ApproximateTimeSynchronizer([topic_1_tfl_status, topic_2_tfl_status], queue_size=5, slop=0.1)
         ts.registerCallback(self.tfl_status_callback)
 

@@ -52,11 +52,11 @@ class CarlaDetector:
 
         # Publishers
         self.detected_objects_pub = rospy.Publisher(
-            'detected_objects', DetectedObjectArray, queue_size=1)
+            'detected_objects', DetectedObjectArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
         rospy.Subscriber('/carla/ground_truth_objects',
-                         ObjectArray, self.carla_objects_callback, queue_size=1)
+                         ObjectArray, self.carla_objects_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
 
     def carla_objects_callback(self, data):
         """

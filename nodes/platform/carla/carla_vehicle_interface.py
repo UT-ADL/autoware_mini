@@ -30,19 +30,19 @@ class CarlaVehicleInterface:
 
         # Publishers
         self.ackerman_cmd_pub = rospy.Publisher(
-            '/carla/ego_vehicle/ackermann_cmd', AckermannDrive, queue_size=1)
+            '/carla/ego_vehicle/ackermann_cmd', AckermannDrive, queue_size=1, tcp_nodelay=True)
         self.target_speed_pub = rospy.Publisher(
-            '/carla/ego_vehicle/target_speed', Float64, queue_size=1)
+            '/carla/ego_vehicle/target_speed', Float64, queue_size=1, tcp_nodelay=True)
         self.vehicle_status_pub = rospy.Publisher(
-            '/vehicle/vehicle_status', VehicleStatus, queue_size=1)
+            '/vehicle/vehicle_status', VehicleStatus, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
         rospy.Subscriber('/control/vehicle_cmd', VehicleCmd,
-                         self.vehicle_cmd_callback, queue_size=1)
+                         self.vehicle_cmd_callback, queue_size=1, tcp_nodelay=True)
         rospy.Subscriber('/carla/ego_vehicle/vehicle_info', CarlaEgoVehicleInfo,
-                         self.vehicle_info_callback, queue_size=1)
+                         self.vehicle_info_callback, queue_size=1, tcp_nodelay=True)
         rospy.Subscriber('/carla/ego_vehicle/vehicle_status', CarlaEgoVehicleStatus,
-                         self.vehicle_status_callback, queue_size=1)
+                         self.vehicle_status_callback, queue_size=1, tcp_nodelay=True)
         
 
     def vehicle_cmd_callback(self, data):

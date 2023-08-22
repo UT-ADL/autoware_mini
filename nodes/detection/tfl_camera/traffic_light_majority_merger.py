@@ -20,11 +20,11 @@ class TrafficLightMajorityMerger:
         self.id_string = rospy.get_param('~id_string')
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
-        camera_fl_tfl_status = message_filters.Subscriber('camera_fl/traffic_light_status', TrafficLightResultArray)
-        camera_fr_tfl_status = message_filters.Subscriber('camera_fr/traffic_light_status', TrafficLightResultArray)
+        camera_fl_tfl_status = message_filters.Subscriber('camera_fl/traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
+        camera_fr_tfl_status = message_filters.Subscriber('camera_fr/traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
         ts = message_filters.ApproximateTimeSynchronizer([camera_fl_tfl_status, camera_fr_tfl_status], queue_size=2, slop=0.1)
         ts.registerCallback(self.camera_tfl_status_callback)
 
