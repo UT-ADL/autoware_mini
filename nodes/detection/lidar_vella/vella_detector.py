@@ -33,7 +33,7 @@ class VellaDetector:
         self.detected_object_array_pub = rospy.Publisher('detected_objects', DetectedObjectArray, queue_size=1, tcp_nodelay=True)
         
         # vella tracks subscriber
-        rospy.Subscriber('/vdk/tracks', Track3DArray, self.vella_tracks_callback, queue_size=1, buff_size=2**24, tcp_nodelay=True)
+        rospy.Subscriber('/vdk/tracks', Track3DArray, self.vella_tracks_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
 
         rospy.loginfo("%s - initialized", rospy.get_name())
 
