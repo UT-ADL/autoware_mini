@@ -52,7 +52,6 @@ class CameraTrafficLightDetector:
         # Node parameters
         onnx_path = rospy.get_param("~onnx_path")
 
-        self.output_roi_image = rospy.get_param("~output_roi_image")
         self.rectify_image = rospy.get_param('~rectify_image')
         self.traffic_light_bulb_radius = rospy.get_param("~traffic_light_bulb_radius")
         self.radius_to_roi_multiplier = rospy.get_param("~radius_to_roi_multiplier")
@@ -87,8 +86,7 @@ class CameraTrafficLightDetector:
 
         # Publishers
         self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
-        if self.output_roi_image:
-            self.tfl_roi_pub = rospy.Publisher('traffic_light_roi', Image, queue_size=1, tcp_nodelay=True)
+        self.tfl_roi_pub = rospy.Publisher('traffic_light_roi', Image, queue_size=1, tcp_nodelay=True)
 
         # Camera model
         self.camera_model = None
@@ -190,7 +188,7 @@ class CameraTrafficLightDetector:
 
         self.tfl_status_pub.publish(tfl_status)
 
-        if self.output_roi_image:
+        if self.tfl_roi_pub.get_num_connections() > 0:
             self.publish_roi_images(image, rois, classes, scores, image_time_stamp)
     
     def get_stoplines_signals(self, lanelet2_map):
@@ -303,6 +301,7 @@ class CameraTrafficLightDetector:
                     color=CLASSIFIER_RESULT_TO_COLOR[cl], 
                     thickness=2)
 
+        image = cv2.resize(image, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
         img_msg = self.bridge.cv2_to_imgmsg(image, encoding='rgb8')
         
         img_msg.header.stamp = image_time_stamp
