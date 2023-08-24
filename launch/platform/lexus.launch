@@ -40,10 +40,4 @@
 
     </group>
 
-    <group ns="dashboard">
-
-        <node pkg="autoware_mini" type="pacmod_state_visualizer.py" name="pacmod_state_visualizer" output="screen" required="true"/>
-
-    </group>
-
 </launch>
