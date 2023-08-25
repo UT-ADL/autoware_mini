@@ -29,6 +29,12 @@ TURN_RIGHT = 0
 TURN_LEFT = 2
 STRAIGHT = 1
 
+SSC_MODULE_NAMES = {
+    '/ssc/veh_controller': 'Vehicle Controller',
+    '/ssc/speed_model': 'Speed Model',
+    '/ssc/steering_model': 'Steering Model',
+}
+
 class PacmodStateVisualizer:
     def __init__(self):
 
@@ -53,7 +59,7 @@ class PacmodStateVisualizer:
         rospy.Subscriber('/pacmod/turn_rpt', SystemRptInt, self.turn_rpt_callback, queue_size=1)
 
         # Internal parameters
-        self.global_top = 160
+        self.global_top = 170
         self.global_left = 10
         self.global_width = 266
 
@@ -192,25 +198,25 @@ class PacmodStateVisualizer:
         # Display SSC status - publish general and detailed status separately
 
         # collect all the latest states of individual modules
-        self.ssc_states[msg.name] = msg.state + " " + msg.info
+        self.ssc_states[SSC_MODULE_NAMES[msg.name]] = msg.state + " " + msg.info
 
-        ssc_status_text = "SSC:\n"
+        ssc_status_text = "<span style=\"font-style: bold; color: white;\">SSC</span>:\n"
         for key in self.ssc_states:
-            ssc_status_text += key + ": " + self.ssc_states[key] + "\n"
+            ssc_status_text += key + ": " + self.ssc_states[key].capitalize() + "\n"
 
         fg_color = WHITE
         ssc_general_status = ""
-        if 'ready' in ssc_status_text:
+        if 'Ready' in ssc_status_text:
             ssc_general_status = "Ready"
-        if 'active' in ssc_status_text:
+        if 'Active' in ssc_status_text:
             ssc_general_status = "Active"
-        if 'not_ready' in ssc_status_text:
+        if 'Not_ready' in ssc_status_text:
             ssc_general_status = "Not Ready"
             fg_color = YELLOW
-        if 'failure' in ssc_status_text:
+        if 'Failure' in ssc_status_text:
             ssc_general_status = "Failure"
             fg_color = YELLOW
-        if 'fatal' in ssc_status_text:
+        if 'Fatal' in ssc_status_text:
             ssc_general_status = "Fatal"
             fg_color = RED
 
@@ -220,14 +226,14 @@ class PacmodStateVisualizer:
         ssc_general.width = self.global_width
         ssc_general.height = 20
         ssc_general.text_size = 11
-        ssc_general.text = "SSC: " + ssc_general_status
+        ssc_general.text = "<span style=\"color: white;\">SSC</span>: " + ssc_general_status
         ssc_general.fg_color = fg_color
         ssc_general.bg_color = BLACK
 
         self.ssc_general_pub.publish(ssc_general)
 
         ssc_detailed = OverlayText()
-        ssc_detailed.top = 430
+        ssc_detailed.top = 465
         ssc_detailed.left = self.global_left
         ssc_detailed.width = self.global_width
         ssc_detailed.height = 70
@@ -249,7 +255,11 @@ class PacmodStateVisualizer:
         steering_state = self.get_state_string(STEERING, msg)
         turn_signals_state = self.get_state_string(TURN_SIGNALS, msg)
 
-        pacmod_status_text = "Pacmod:\nAccelerator:" + accelerator_state + "\nBrakes:" + brakes_state + "\nSteering:" + steering_state + "\nTurn signals:" + turn_signals_state
+        pacmod_status_text = "<span style=\"font-style: bold; color: white;\">PACMOD</span>:\n \
+                                Accelerator:" + accelerator_state + "\n \
+                                Brakes:" + brakes_state + "\n \
+                                Steering:" + steering_state + "\n \
+                                Turn signals:" + turn_signals_state
 
         fg_color = WHITE
         pacmod_general_status = "Enabled"
@@ -269,7 +279,7 @@ class PacmodStateVisualizer:
         pacmod_general.width = self.global_width
         pacmod_general.height = 20
         pacmod_general.text_size = 11
-        pacmod_general.text = "Pacmod: " + pacmod_general_status
+        pacmod_general.text = "<span style=\"color: white;\">PACMOD</span>: " + pacmod_general_status
         pacmod_general.fg_color = fg_color
         pacmod_general.bg_color = BLACK
 
@@ -277,7 +287,7 @@ class PacmodStateVisualizer:
 
 
         pacmod_detailed = OverlayText()
-        pacmod_detailed.top = 500
+        pacmod_detailed.top = 535
         pacmod_detailed.left = self.global_left
         pacmod_detailed.width = self.global_width
         pacmod_detailed.height = 80
