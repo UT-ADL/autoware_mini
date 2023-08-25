@@ -16,7 +16,7 @@ Panels:
         - /Planning1/Local path1/Namespaces1
         - /Simulation1
       Splitter Ratio: 0.5161904692649841
-    Tree Height: 410
+    Tree Height: 478
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -163,33 +163,33 @@ Visualization Manager:
               top: 10
               update interval: 0.03999999910593033
               width: 128
-            - Buffer length: 100
-              Class: jsk_rviz_plugin/Plotter2D
-              Enabled: true
-              Name: Closest obj spd
-              Show Value: false
-              Topic: /dashboard/closest_object_speed
-              Value: true
-              auto color change: false
-              auto scale: false
-              background color: 0; 0; 0
-              backround alpha: 0
-              border: false
-              foreground alpha: 0.699999988079071
-              foreground color: 150; 150; 255
-              height: 128
-              left: 10
-              linewidth: 1
-              max color: 255; 0; 0
-              max value: 40
-              min value: 16
-              show caption: false
-              text size: 10
-              top: 10
-              update interval: 0.03999999910593033
-              width: 128
           Enabled: true
           Name: Speed
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: true
+          Name: Closest obj speed
+          Show Value: true
+          Topic: /dashboard/closest_object_speed
+          Value: true
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.800000011920929
+          foreground color: 25; 255; 240
+          height: 128
+          left: 148
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 75
+          min value: 25
+          show caption: true
+          text size: 10
+          top: 10
+          update interval: 0.03999999910593033
+          width: 128
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
           Enabled: true
@@ -205,8 +205,8 @@ Visualization Manager:
           foreground alpha: 0.800000011920929
           foreground color: 25; 255; 240
           height: 128
-          left: 148
-          linewidth: 2
+          left: 286
+          linewidth: 1
           max color: 255; 0; 0
           max value: 75
           min value: 25
@@ -215,60 +215,6 @@ Visualization Manager:
           top: 10
           update interval: 0.03999999910593033
           width: 128
-        - Class: rviz/Group
-          Displays:
-            - Buffer length: 100
-              Class: jsk_rviz_plugin/Plotter2D
-              Enabled: true
-              Name: Steering status
-              Show Value: false
-              Topic: /dashboard/steering_angle_status
-              Value: true
-              auto color change: false
-              auto scale: false
-              background color: 0; 0; 0
-              backround alpha: 0
-              border: true
-              foreground alpha: 0.800000011920929
-              foreground color: 25; 255; 240
-              height: 128
-              left: 286
-              linewidth: 2
-              max color: 255; 0; 0
-              max value: 5
-              min value: -5
-              show caption: true
-              text size: 10
-              top: 10
-              update interval: 0.03999999910593033
-              width: 128
-            - Buffer length: 100
-              Class: jsk_rviz_plugin/Plotter2D
-              Enabled: true
-              Name: Steering cmd
-              Show Value: false
-              Topic: /dashboard/steering_angle_cmd
-              Value: true
-              auto color change: false
-              auto scale: false
-              background color: 0; 0; 0
-              backround alpha: 0
-              border: false
-              foreground alpha: 0.800000011920929
-              foreground color: 252; 175; 62
-              height: 128
-              left: 286
-              linewidth: 1
-              max color: 255; 0; 0
-              max value: 5
-              min value: -5
-              show caption: false
-              text size: 10
-              top: 10
-              update interval: 0.03999999910593033
-              width: 128
-          Enabled: false
-          Name: Steering
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
           Enabled: false
@@ -344,6 +290,60 @@ Visualization Manager:
           top: 10
           update interval: 0.03999999910593033
           width: 128
+        - Class: rviz/Group
+          Displays:
+            - Buffer length: 100
+              Class: jsk_rviz_plugin/Plotter2D
+              Enabled: true
+              Name: Steering status
+              Show Value: false
+              Topic: /dashboard/steering_angle_status
+              Value: true
+              auto color change: false
+              auto scale: false
+              background color: 0; 0; 0
+              backround alpha: 0
+              border: true
+              foreground alpha: 0.800000011920929
+              foreground color: 25; 255; 240
+              height: 128
+              left: 838
+              linewidth: 2
+              max color: 255; 0; 0
+              max value: 5
+              min value: -5
+              show caption: true
+              text size: 10
+              top: 10
+              update interval: 0.03999999910593033
+              width: 128
+            - Buffer length: 100
+              Class: jsk_rviz_plugin/Plotter2D
+              Enabled: true
+              Name: Steering cmd
+              Show Value: false
+              Topic: /dashboard/steering_angle_cmd
+              Value: true
+              auto color change: false
+              auto scale: false
+              background color: 0; 0; 0
+              backround alpha: 0
+              border: false
+              foreground alpha: 0.800000011920929
+              foreground color: 252; 175; 62
+              height: 128
+              left: 838
+              linewidth: 1
+              max color: 255; 0; 0
+              max value: 5
+              min value: -5
+              show caption: false
+              text size: 10
+              top: 10
+              update interval: 0.03999999910593033
+              width: 128
+          Enabled: false
+          Name: Steering
         - Class: jsk_rviz_plugin/OverlayImage
           Enabled: true
           Name: Autonomous Manual
@@ -354,7 +354,7 @@ Visualization Manager:
           keep aspect ratio: false
           left: 10
           overwrite alpha value: false
-          top: 160
+          top: 170
           transport hint: raw
           width: 266
         - Class: rviz/Group
@@ -369,7 +369,7 @@ Visualization Manager:
               keep aspect ratio: false
               left: 103
               overwrite alpha value: false
-              top: 195
+              top: 205
               transport hint: raw
               width: 80
             - Class: jsk_rviz_plugin/OverlayImage
@@ -382,7 +382,7 @@ Visualization Manager:
               keep aspect ratio: false
               left: 183
               overwrite alpha value: false
-              top: 195
+              top: 205
               transport hint: raw
               width: 93
             - Class: jsk_rviz_plugin/OverlayImage
@@ -395,11 +395,11 @@ Visualization Manager:
               keep aspect ratio: false
               left: 10
               overwrite alpha value: false
-              top: 195
+              top: 205
               transport hint: raw
               width: 93
           Enabled: true
-          Name: Wheel nad blinkers
+          Name: Wheel and blinkers
         - Align Bottom: false
           Background Alpha: 0.800000011920929
           Background Color: 0; 0; 0
@@ -571,7 +571,7 @@ Visualization Manager:
               top: 0
               width: 128
           Enabled: false
-          Name: GNSS status
+          Name: GNSS detailed
         - Align Bottom: false
           Background Alpha: 0.800000011920929
           Background Color: 0; 0; 0
@@ -601,7 +601,7 @@ Visualization Manager:
           Foreground Alpha: 0.800000011920929
           Foreground Color: 25; 255; 240
           Invert Shadow: false
-          Name: Pacmod dtailed
+          Name: Pacmod detailed
           Overtake BG Color Properties: false
           Overtake FG Color Properties: false
           Overtake Position Properties: false
@@ -743,6 +743,7 @@ Visualization Manager:
               Acceleration: true
               Autonomous Manual: true
               Closest obj dist: true
+              Closest obj speed: true
               Decel limit: true
               Steering cmd: true
               Steering status: true
@@ -787,7 +788,11 @@ Visualization Manager:
               Lanelet2 map: true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -828,6 +833,7 @@ Visualization Manager:
               Acceleration: true
               Autonomous Manual: true
               Closest obj dist: true
+              Closest obj speed: true
               Decel limit: true
               Steering cmd: true
               Steering status: true
@@ -1332,6 +1338,7 @@ Visualization Manager:
               Acceleration: true
               Autonomous Manual: true
               Closest obj dist: true
+              Closest obj speed: true
               Decel limit: true
               Steering cmd: true
               Steering status: true
@@ -1349,8 +1356,8 @@ Visualization Manager:
                 Center:
                   Points center ground: true
                   Points center no ground: true
-                  Value: true
-                Front:
+                Value: true
+Front:
                   Points front filtered: true
                   Points front ground: true
                   Points front no ground: true
