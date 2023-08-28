@@ -55,10 +55,8 @@ BESTPOS_POS_TYPE = {
     }
 
 BLACK = ColorRGBA(0.0, 0.0, 0.0, 0.8)
-GREEN = ColorRGBA(0.0, 1.0, 0.0, 1.0)
-YELLOW = ColorRGBA(1.0, 1.0, 0.0, 1.0)
-RED = ColorRGBA(1.0, 0.0, 0.0, 1.0)
 WHITE = ColorRGBA(1.0, 1.0, 1.0, 1.0)
+GRAY = ColorRGBA(0.5, 0.5, 0.5, 1.0)
 
 INS_SOLUTION_GOOD = 3
 INS_RTKFIXED = 56
@@ -76,151 +74,119 @@ class NovatelOem7Visualizer:
 
         # Publishers
         self.gnss_general_pub = rospy.Publisher('gnss_general', OverlayText, queue_size=1)
-        self.inspva_status_pub = rospy.Publisher('gnss_inspva_status', OverlayText, queue_size=1)
-        self.bestpos_pos_type_pub = rospy.Publisher('gnss_bestpos_pos_type', OverlayText, queue_size=1)
-        self.bestpos_num_sol_svs_pub = rospy.Publisher('gnss_bestpos_num_sol_svs', OverlayText, queue_size=1)
-        self.bestpos_loc_stdev_pub = rospy.Publisher('gnss_bestpos_loc_stdev', OverlayText, queue_size=1)
-        self.bestpos_diff_age_pub = rospy.Publisher('gnss_bestpos_diff_age', OverlayText, queue_size=1)
+        self.gnss_detailed_pub = rospy.Publisher('gnss_detailed', OverlayText, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('/novatel/oem7/inspva', INSPVA, self.inspva_callback, queue_size=1)
         rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback, queue_size=1)
 
         # Internal parameters
-        self.global_top = 325
         self.global_left = 10
         self.global_width = 266
-        self.global_height = 17
-        self.text_size = 9
 
+        self.inspva_status_text = ""
 
     def inspva_callback(self, msg):
 
-        fg_color = WHITE
-        if msg.status.status != INS_SOLUTION_GOOD:
-            fg_color = YELLOW
-
-        if msg.status.status not in INSPVA_STATUS:
-            text = "<span style=\"font-style: bold; color: white;\">GNSS</span>\n \
-                    Unknown INS status: {}".format(msg.status.status)
+        if msg.status.status == INS_SOLUTION_GOOD:
+            inspva_status_text = "{}\n".format(INSPVA_STATUS[msg.status.status])
         else:
-            text = "<span style=\"font-style: bold; color: white;\">GNSS</span>\n \
-                    INS status: " + INSPVA_STATUS[msg.status.status]
+            if msg.status.status not in INSPVA_STATUS:
+                inspva_status_text = "<span style=\"color: {};\">{}</span>\n".format("red", "Unkown status")
+            else:
+                inspva_status_text = "<span style=\"color: {};\">{}</span>\n".format("yellow", INSPVA_STATUS[msg.status.status])
 
-        inspva_status = OverlayText()
-        inspva_status.text = text
-        inspva_status.top = self.global_top + 30
-        inspva_status.left = self.global_left
-        inspva_status.width = self.global_width
-        inspva_status.height = 30
-        inspva_status.text_size = self.text_size
-        inspva_status.fg_color = fg_color
-        inspva_status.bg_color = BLACK
+        self.inspva_status_text = inspva_status_text
 
-        self.inspva_status_pub.publish(inspva_status)
 
     def bestpos_callback(self, msg):
+
+        gnss_detailed_group_title_text = "<span style=\"font-style: bold; color: white;\">GNSS</span>\n"
+
+        ################# inspva_status
+
+        inspva_status_text = "INS Status: "
+        if self.inspva_status_text == "":
+            inspva_status_text += "<span style=\"color: {};\">{}</span>\n".format("red", "No INS status received")
+        else:
+            inspva_status_text += self.inspva_status_text
         
         ################# bestpos_pos_type
-        fg_color = WHITE
-        if msg.pos_type.type != INS_RTKFIXED:
-            fg_color = YELLOW
 
-        if msg.pos_type.type not in BESTPOS_POS_TYPE:
-            post_type_string = "Unknown position type: {}".format(msg.pos_type.type)
+        bestpos_pos_type_text = "Position type: "
+        if msg.pos_type.type == INS_RTKFIXED:
+            bestpos_pos_type_text += "{}\n".format(BESTPOS_POS_TYPE[msg.pos_type.type])
         else:
-            post_type_string = "Position type: " + BESTPOS_POS_TYPE[msg.pos_type.type]
-        
-        bestpos_pos_type = OverlayText()
-        bestpos_pos_type.text = post_type_string
-        bestpos_pos_type.top = self.global_top + 60
-        bestpos_pos_type.left = self.global_left
-        bestpos_pos_type.width = self.global_width
-        bestpos_pos_type.height = self.global_height
-        bestpos_pos_type.text_size = self.text_size
-        bestpos_pos_type.fg_color = fg_color
-        bestpos_pos_type.bg_color = BLACK
-
-        self.bestpos_pos_type_pub.publish(bestpos_pos_type)
+            if msg.pos_type.type not in BESTPOS_POS_TYPE:
+                bestpos_pos_type_text += "<span style=\"color: {};\">{}</span>\n".format("red", "Unkown position type")
+            else:
+                bestpos_pos_type_text += "<span style=\"color: {};\">{}</span>\n".format("yellow", BESTPOS_POS_TYPE[msg.pos_type.type])
 
         ################# num_sol_svs
-        fg_color = WHITE
-        if msg.num_sol_svs < self.number_of_satellites_good:
-            fg_color = YELLOW
-        if msg.num_sol_svs < self.number_of_satellites_bad:
-            fg_color = RED
-
-        num_sol_svs = OverlayText()
-        num_sol_svs.text = "Num. satellites: {}".format(msg.num_sol_svs)
-        num_sol_svs.top = self.global_top + 60 + 1 * self.global_height
-        num_sol_svs.left = self.global_left
-        num_sol_svs.width = self.global_width
-        num_sol_svs.height = self.global_height
-        num_sol_svs.text_size = self.text_size
-        num_sol_svs.fg_color = fg_color
-        num_sol_svs.bg_color = BLACK
-
-        self.bestpos_num_sol_svs_pub.publish(num_sol_svs)
+        num_sol_svs_text = "Num. satellites: "
+        if msg.num_sol_svs >= self.number_of_satellites_good:
+            num_sol_svs_text += "{}\n".format(msg.num_sol_svs)
+        elif msg.num_sol_svs < self.number_of_satellites_bad:
+            num_sol_svs_text += "<span style=\"color: {};\">{}</span>\n".format("red", msg.num_sol_svs)
+        else:
+            num_sol_svs_text += "<span style=\"color: {};\">{}</span>\n".format("yellow", msg.num_sol_svs)
 
         ################# loc_stdev
+        location_stdev_text = "Location stdev: "
         location_stdev = math.sqrt(msg.lat_stdev**2 + msg.lon_stdev**2)
 
-        fg_color = WHITE
-        if location_stdev > self.location_accuracy_stdev_good:
-            fg_color = YELLOW
-        if location_stdev > self.location_accuracy_stdev_bad:
-            fg_color = RED
-
-        loc_stdev = OverlayText()
-        loc_stdev.text = "Location stdev: {:.2f} m".format(location_stdev)
-        loc_stdev.top = self.global_top + 60 + 2 * self.global_height
-        loc_stdev.left = self.global_left
-        loc_stdev.width = self.global_width
-        loc_stdev.height = self.global_height
-        loc_stdev.text_size = self.text_size
-        loc_stdev.fg_color = fg_color
-        loc_stdev.bg_color = BLACK
-
-        self.bestpos_loc_stdev_pub.publish(loc_stdev)
+        if location_stdev <= self.location_accuracy_stdev_good:
+            location_stdev_text += "{:.2f}\n".format(location_stdev)
+        elif location_stdev > self.location_accuracy_stdev_bad:
+            location_stdev_text += "<span style=\"color: {};\">{:.2f} m</span>\n".format("red", location_stdev)
+        else:
+            location_stdev_text += "<span style=\"color: {};\">{:.2f} m</span>\n".format("yellow", location_stdev)
 
         ################# diff_age
-        fg_color = WHITE
-        if msg.diff_age > self.differential_age_good:
-            fg_color = YELLOW
-        if msg.diff_age > self.differential_age_bad:
-            fg_color = RED
+        diff_age_text = "Differential age: "
 
-        diff_age = OverlayText()
-        diff_age.text = "Differential age: {:.2f} s".format(msg.diff_age)
-        diff_age.top = self.global_top + 60 + 3 * self.global_height
-        diff_age.left = self.global_left
-        diff_age.width = self.global_width
-        diff_age.height = 29
-        diff_age.text_size = self.text_size
-        diff_age.fg_color = fg_color
-        diff_age.bg_color = BLACK
+        if msg.diff_age <= self.differential_age_good:
+            diff_age_text += "{:.2f}\n".format(msg.diff_age)
+        elif msg.diff_age > self.differential_age_bad:
+            diff_age_text += "<span style=\"color: {};\">{:.2f} s</span>\n".format("red", msg.diff_age)
+        else:
+            diff_age_text += "<span style=\"color: {};\">{:.2f} s</span>\n".format("yellow", msg.diff_age)
 
-        self.bestpos_diff_age_pub.publish(diff_age)
 
+        ## PUBLISH
+
+        # gnss_general
+        gnss_general_text = "GNSS: "
 
         if msg.pos_type.type == INS_RTKFIXED and location_stdev < self.location_accuracy_stdev_good and msg.diff_age < self.differential_age_bad and msg.num_sol_svs > self.number_of_satellites_bad:
-            gnss_general_text = "<span style=\"color: white;\">GNSS</span>: OK"
-            fg_color = WHITE
+            gnss_general_text += "OK"
         else:
-            gnss_general_text = "<span style=\"color: white;\">GNSS</span>: Localization warning"
-            fg_color = YELLOW
+            gnss_general_text += "<span style=\"color: yellow;\">Localization warning</span>"
 
         gnss_general = OverlayText()
         gnss_general.text = gnss_general_text
-        gnss_general.top = self.global_top
+        gnss_general.top = 325
         gnss_general.left = self.global_left
         gnss_general.width = self.global_width
         gnss_general.height = 30
         gnss_general.text_size = 11
-        gnss_general.fg_color = fg_color
+        gnss_general.fg_color = WHITE
         gnss_general.bg_color = BLACK
 
         self.gnss_general_pub.publish(gnss_general)
+
+        # gnss_detailed
+        diff_age = OverlayText()
+        diff_age.text = gnss_detailed_group_title_text + inspva_status_text + bestpos_pos_type_text + num_sol_svs_text + location_stdev_text + diff_age_text
+        diff_age.top = 355
+        diff_age.left = self.global_left
+        diff_age.width = self.global_width
+        diff_age.height = 100
+        diff_age.text_size = 9
+        diff_age.fg_color = GRAY
+        diff_age.bg_color = BLACK
+
+        self.gnss_detailed_pub.publish(diff_age)
 
 
     def run(self):
