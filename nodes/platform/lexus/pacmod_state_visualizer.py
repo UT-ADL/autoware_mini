@@ -46,10 +46,10 @@ class PacmodStateVisualizer:
         self.pacmod_general_pub = rospy.Publisher('pacmod_general', OverlayText, queue_size=1)
         self.ssc_general_pub = rospy.Publisher('ssc_general', OverlayText, queue_size=1)
         self.ssc_detailed_pub = rospy.Publisher('ssc_detailed', OverlayText, queue_size=1)
-        self.autonomy_pub = rospy.Publisher('autonomy', Image, queue_size=1)
         self.steering_wheel_pub = rospy.Publisher('steering_wheel', Image, queue_size=1)
         self.right_blinker_pub = rospy.Publisher('right_blinker', Image, queue_size=1)
         self.left_blinker_pub =  rospy.Publisher('left_blinker', Image, queue_size=1)
+        self.autonomy_text_pub = rospy.Publisher('autonomy_text', OverlayText, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('/ssc/module_states', ModuleState, self.ssc_module_states_callback, queue_size=1)
@@ -67,9 +67,6 @@ class PacmodStateVisualizer:
         self.bridge = CvBridge()
         self.is_autonomous = False
 
-        self.autonomous_img = cv2.imread(self.image_path + "autonomous.png")
-        self.manual_img = cv2.imread(self.image_path + "manual.png")
-
 
     def pacmod_enabled(self, msg):
         
@@ -79,23 +76,21 @@ class PacmodStateVisualizer:
         autonomous = self.is_autonomous
 
         if autonomous:
-            if self.autonomous_img is not None:
-                try:
-                    autonomous_msg = self.bridge.cv2_to_imgmsg(self.autonomous_img, encoding="bgr8")
-                    self.autonomy_pub.publish(autonomous_msg)
-                except Exception as e:
-                    rospy.logerr("Dashboard: Error publishing autonomous image: {}".format(str(e)))
-            else:
-                rospy.logerr("Dashboard: Autonomous image not found or couldn't be loaded")
+            pacmod_enabled_text = "<div style=\"text-align: center; color: blue;\">AUTONOMOUS</div>"
         else:
-            if self.manual_img is not None:
-                try:
-                    manual_msg = self.bridge.cv2_to_imgmsg(self.manual_img, encoding="bgr8")
-                    self.autonomy_pub.publish(manual_msg)
-                except Exception as e:
-                    rospy.logerr("Dashboard: Error publishing manual image: {}".format(str(e)))
-            else:
-                rospy.logerr("Dashboard: Manual image not found or couldn't be loaded")
+            pacmod_enabled_text = "<div style=\"text-align: center; color: green;\">MANUAL</div>"
+
+        text = OverlayText()
+        text.top = self.global_top
+        text.left = self.global_left
+        text.width = self.global_width
+        text.height = 35
+        text.text_size = 20
+        text.text = pacmod_enabled_text
+        text.fg_color = WHITE
+        text.bg_color = BLACK
+
+        self.autonomy_text_pub.publish(text)
 
 
     def steering_rpt_callback(self, msg):
@@ -108,10 +103,10 @@ class PacmodStateVisualizer:
             wheel_autonomous_img = cv2.imread(self.image_path + "wheel_s.png")
             if wheel_autonomous_img is not None:
                 wheel_img = wheel_autonomous_img
-                # make Blue channel 255, convert to blueish color
+                # convert to blueish color
                 wheel_img[:, :, 0] *= 255
-                wheel_img[:, :, 1] *= 150
-                wheel_img[:, :, 2] *= 100
+                wheel_img[:, :, 1] *= 0
+                wheel_img[:, :, 2] *= 0
             else:
                 rospy.logerr("Dashboard: Steering wheel autonomous image not found or couldn't be loaded")
         else:
@@ -119,13 +114,14 @@ class PacmodStateVisualizer:
             if wheel_manual_img is not None:
                 wheel_img = wheel_manual_img
                 # make green channel 255
+                wheel_img[:, :, 0] *= 0
                 wheel_img[:, :, 1] *= 255
+                wheel_img[:, :, 2] *= 0
             else:
                 rospy.logerr("Dashboard: Steering wheel manual image not found or couldn't be loaded")
 
 
         height, width = wheel_img.shape[:2]
-        # TODO: covert correctly to steering wheel angle
         angle = math.degrees(msg.output)
         rotation_matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
         rotated_wheel_img = cv2.warpAffine(wheel_img, rotation_matrix, (width, height))
