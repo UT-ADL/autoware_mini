@@ -16,7 +16,7 @@ Panels:
         - /Planning1/Local path1/Namespaces1
         - /Simulation1
       Splitter Ratio: 0.5161904692649841
-    Tree Height: 478
+    Tree Height: 557
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -168,7 +168,7 @@ Visualization Manager:
         - Buffer length: 100
           Class: jsk_rviz_plugin/Plotter2D
           Enabled: true
-          Name: Closest obj speed
+          Name: Closest obj spd
           Show Value: true
           Topic: /dashboard/closest_object_speed
           Value: true
@@ -177,14 +177,14 @@ Visualization Manager:
           background color: 0; 0; 0
           backround alpha: 0
           border: true
-          foreground alpha: 0.800000011920929
+          foreground alpha: 0.699999988079071
           foreground color: 25; 255; 240
           height: 128
           left: 148
-          linewidth: 1
+          linewidth: 2
           max color: 255; 0; 0
-          max value: 75
-          min value: 25
+          max value: 40
+          min value: 16
           show caption: true
           text size: 10
           top: 10
@@ -206,7 +206,7 @@ Visualization Manager:
           foreground color: 25; 255; 240
           height: 128
           left: 286
-          linewidth: 1
+          linewidth: 2
           max color: 255; 0; 0
           max value: 75
           min value: 25
@@ -344,19 +344,27 @@ Visualization Manager:
               width: 128
           Enabled: false
           Name: Steering
-        - Class: jsk_rviz_plugin/OverlayImage
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
           Enabled: true
+          Foreground Alpha: 0.800000011920929
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
           Name: Autonomous Manual
-          Topic: /dashboard/autonomy
+          Overtake BG Color Properties: false
+          Overtake FG Color Properties: false
+          Overtake Position Properties: false
+          Topic: /dashboard/autonomy_text
           Value: true
-          alpha: 0.800000011920929
-          height: 35
-          keep aspect ratio: false
-          left: 10
-          overwrite alpha value: false
-          top: 170
-          transport hint: raw
-          width: 266
+          font: DejaVu Sans Mono
+          height: 128
+          left: 0
+          line width: 2
+          text size: 12
+          top: 0
+          width: 128
         - Class: rviz/Group
           Displays:
             - Class: jsk_rviz_plugin/OverlayImage
@@ -399,7 +407,7 @@ Visualization Manager:
               transport hint: raw
               width: 93
           Enabled: true
-          Name: Wheel and blinkers
+          Name: Wheel nad blinkers
         - Align Bottom: false
           Background Alpha: 0.800000011920929
           Background Color: 0; 0; 0
@@ -463,115 +471,27 @@ Visualization Manager:
           text size: 12
           top: 0
           width: 128
-        - Class: rviz/Group
-          Displays:
-            - Align Bottom: false
-              Background Alpha: 0.800000011920929
-              Background Color: 0; 0; 0
-              Class: jsk_rviz_plugin/OverlayText
-              Enabled: true
-              Foreground Alpha: 0.800000011920929
-              Foreground Color: 25; 255; 240
-              Invert Shadow: false
-              Name: INSPVA status
-              Overtake BG Color Properties: false
-              Overtake FG Color Properties: false
-              Overtake Position Properties: false
-              Topic: /dashboard/gnss_inspva_status
-              Value: true
-              font: DejaVu Sans Mono
-              height: 128
-              left: 0
-              line width: 2
-              text size: 12
-              top: 0
-              width: 128
-            - Align Bottom: false
-              Background Alpha: 0.800000011920929
-              Background Color: 0; 0; 0
-              Class: jsk_rviz_plugin/OverlayText
-              Enabled: true
-              Foreground Alpha: 0.800000011920929
-              Foreground Color: 25; 255; 240
-              Invert Shadow: false
-              Name: BESTPOS position ype
-              Overtake BG Color Properties: false
-              Overtake FG Color Properties: false
-              Overtake Position Properties: false
-              Topic: /dashboard/gnss_bestpos_pos_type
-              Value: true
-              font: DejaVu Sans Mono
-              height: 128
-              left: 0
-              line width: 2
-              text size: 12
-              top: 0
-              width: 128
-            - Align Bottom: false
-              Background Alpha: 0.800000011920929
-              Background Color: 0; 0; 0
-              Class: jsk_rviz_plugin/OverlayText
-              Enabled: true
-              Foreground Alpha: 0.800000011920929
-              Foreground Color: 25; 255; 240
-              Invert Shadow: false
-              Name: Number of Satellites in soution
-              Overtake BG Color Properties: false
-              Overtake FG Color Properties: false
-              Overtake Position Properties: false
-              Topic: /dashboard/gnss_bestpos_num_sol_svs
-              Value: true
-              font: DejaVu Sans Mono
-              height: 128
-              left: 0
-              line width: 2
-              text size: 12
-              top: 0
-              width: 128
-            - Align Bottom: false
-              Background Alpha: 0.800000011920929
-              Background Color: 0; 0; 0
-              Class: jsk_rviz_plugin/OverlayText
-              Enabled: true
-              Foreground Alpha: 0.800000011920929
-              Foreground Color: 25; 255; 240
-              Invert Shadow: false
-              Name: Location error
-              Overtake BG Color Properties: false
-              Overtake FG Color Properties: false
-              Overtake Position Properties: false
-              Topic: /dashboard/gnss_bestpos_loc_stdev
-              Value: true
-              font: DejaVu Sans Mono
-              height: 128
-              left: 0
-              line width: 2
-              text size: 12
-              top: 0
-              width: 128
-            - Align Bottom: false
-              Background Alpha: 0.800000011920929
-              Background Color: 0; 0; 0
-              Class: jsk_rviz_plugin/OverlayText
-              Enabled: true
-              Foreground Alpha: 0.800000011920929
-              Foreground Color: 25; 255; 240
-              Invert Shadow: false
-              Name: Differential age
-              Overtake BG Color Properties: false
-              Overtake FG Color Properties: false
-              Overtake Position Properties: false
-              Topic: /dashboard/gnss_bestpos_diff_age
-              Value: true
-              font: DejaVu Sans Mono
-              height: 128
-              left: 0
-              line width: 2
-              text size: 12
-              top: 0
-              width: 128
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
           Enabled: false
+          Foreground Alpha: 0.800000011920929
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
           Name: GNSS detailed
+          Overtake BG Color Properties: false
+          Overtake FG Color Properties: false
+          Overtake Position Properties: false
+          Topic: /dashboard/gnss_detailed
+          Value: false
+          font: DejaVu Sans Mono
+          height: 128
+          left: 0
+          line width: 2
+          text size: 12
+          top: 0
+          width: 128
         - Align Bottom: false
           Background Alpha: 0.800000011920929
           Background Color: 0; 0; 0
@@ -601,7 +521,7 @@ Visualization Manager:
           Foreground Alpha: 0.800000011920929
           Foreground Color: 25; 255; 240
           Invert Shadow: false
-          Name: Pacmod detailed
+          Name: Pacmod dtailed
           Overtake BG Color Properties: false
           Overtake FG Color Properties: false
           Overtake Position Properties: false
@@ -743,16 +663,10 @@ Visualization Manager:
               Acceleration: true
               Autonomous Manual: true
               Closest obj dist: true
-              Closest obj speed: true
+              Closest obj spd: true
               Decel limit: true
+              GNSS detailed: true
               GNSS general: true
-              GNSS status:
-                BESTPOS position ype: true
-                Differential age: true
-                INSPVA status: true
-                Location error: true
-                Number of Satellites in soution: true
-                Value: true
               Pacmod dtailed: true
               Pacmod general: true
               SSC detailed: true
@@ -772,37 +686,13 @@ Visualization Manager:
                 Value: true
                 Wheel: true
             Detection:
-              Detected objects: true
-              Final objects: true
-              Lidar:
-                Center:
-                  Points center ground: true
-                  Points center no ground: true
-                  Value: true
-                Front:
-                  Points front filtered: true
-                  Points front ground: true
-                  Points front no ground: true
-                  Value: true
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Predicted objects: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Tracked objects: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               Global path: true
@@ -850,16 +740,10 @@ Visualization Manager:
               Acceleration: true
               Autonomous Manual: true
               Closest obj dist: true
-              Closest obj speed: true
+              Closest obj spd: true
               Decel limit: true
+              GNSS detailed: true
               GNSS general: true
-              GNSS status:
-                BESTPOS position ype: true
-                Differential age: true
-                INSPVA status: true
-                Location error: true
-                Number of Satellites in soution: true
-                Value: true
               Pacmod dtailed: true
               Pacmod general: true
               SSC detailed: true
@@ -879,40 +763,20 @@ Visualization Manager:
                 Value: true
                 Wheel: true
             Detection:
-              Detected objects: true
-              Final objects: true
-              Lidar:
-                Center:
-                  Points center ground: true
-                  Points center no ground: true
-                  Value: true
-                Front:
-                  Points front filtered: true
-                  Points front ground: true
-                  Points front no ground: true
-                  Value: true
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Predicted objects: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Tracked objects: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
-              "": true
+              Global path: true
+              Local path: true
+              Smoothed path: true
+              Start and Goal lanelet markers: true
+              Stop point: true
               Value: true
             Sensing:
               Camera Image Left: true
@@ -1292,7 +1156,6 @@ Visualization Manager:
           Marker Topic: /planning/local_path_markers
           Name: Local path
           Namespaces:
-            Stopping point: true
             Velocity label: true
             Waypoints: true
           Queue Size: 100
@@ -1372,16 +1235,10 @@ Visualization Manager:
               Acceleration: true
               Autonomous Manual: true
               Closest obj dist: true
-              Closest obj speed: true
+              Closest obj spd: true
               Decel limit: true
+              GNSS detailed: true
               GNSS general: true
-              GNSS status:
-                BESTPOS position ype: true
-                Differential age: true
-                INSPVA status: true
-                Location error: true
-                Number of Satellites in soution: true
-                Value: true
               Pacmod dtailed: true
               Pacmod general: true
               SSC detailed: true
@@ -1401,53 +1258,19 @@ Visualization Manager:
                 Value: true
                 Wheel: true
             Detection:
-              Detected objects: true
-              Final objects: true
-              Lidar:
-                Center:
-                  Points center ground: true
-                  Points center no ground: true
-                Value: true
-Front:
-                  Points front filtered: true
-                  Points front ground: true
-                  Points front no ground: true
-                  Value: true
-                Lidar detections: true
-                Points clustered: true
-                Points ground: true
-                Points no ground: true
-                Value: true
-              Predicted objects: true
-              Radar:
-                Radar detections: true
-                Value: true
-              Tracked objects: true
-              Traffic lights:
-                Left ROI image: true
-                Right ROI image: true
-                Stop line status: true
+              "":
+                "": true
                 Value: true
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
-              Global path: true
-              Local path: true
-              Smoothed path: true
-              Start and Goal lanelet markers: true
-              Stop point: true
+              "": true
               Value: true
             Sensing:
-              Camera Image Left: true
-              Camera Image Right: true
-              Camera View Left: true
-              Camera View Right: true
-              Points raw center: true
-              Points raw front: true
-              Radar raw: true
+              "": true
               Value: true
             Simulation:
               Bicycle markers: true
@@ -1594,12 +1417,12 @@ Window Geometry:
     collapsed: false
   Displays:
     collapsed: false
-  Height: 1022
+  Height: 1306
   Hide Left Dock: false
   Hide Right Dock: false
   Left ROI image:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000020f000003a4fc0200000016fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000003d000001d7000000c900fffffffa000000020100000003fb0000000a0049006d0061006700650000000000ffffffff0000000000000000fb0000000c00430061006d0065007200610000000000ffffffff0000000000000000fb000000100044006900730070006c0061007900730100000000000001360000015600fffffffb0000000a00560069006500770073010000021a00000161000000a400fffffffb0000000a0049006d006100670065010000028e000000d20000000000000000fb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000120049006d006100670065005f0072006100770000000000ffffffff0000000000000000fb0000000c00430061006d006500720061000000024e000001710000000000000000fb000000120049006d00610067006500200052006100770100000421000000160000000000000000fb0000000a0049006d00610067006501000002f4000000cb0000000000000000fb0000000a0049006d006100670065010000056c0000026c0000000000000000fb00000024004400650063006900730069006f006e004d0061006b0065007200500061006e0065006c00000002110000018f0000000000000000fb0000000c00430061006d006500720061010000040a000000d60000000000000000fb0000000a0049006d006100670065010000040a000000d60000000000000000fb0000000c00430061006d0065007200610100000117000001f10000000000000000fb0000000c00430061006d006500720061010000030e000002350000000000000000fb0000000c00430061006d006500720061010000046b000000d80000000000000000fb0000001800430061006e00630065006c00200072006f0075007400650100000381000000600000006000ffffff000000010000033100000521fc0200000007fc00000047000002cf0000000000fffffffaffffffff0100000003fb0000002000430061006d006500720061002000560069006500770020004c0065006600740000000000ffffffff000000ad00fffffffb0000002200430061006d00650072006100200049006d0061006700650020004c0065006600740000000000ffffffff000000b500fffffffb0000001c004c00650066007400200052004f004900200069006d0061006700650000000687000003310000009a00fffffffc00000047000004f10000000000fffffffaffffffff0100000003fb0000002200430061006d006500720061002000560069006500770020005200690067006800740000000000ffffffff000000b500fffffffb0000002400430061006d00650072006100200049006d0061006700650020005200690067006800740000000000ffffffff000000be00fffffffb0000001e0052006900670068007400200052004f004900200069006d006100670065000000068700000331000000a200fffffffc0000003d000005210000000000fffffffaffffffff0100000002fb00000022004300610072006c0061002000630061006d0065007200610020007600690065007700000006cf00000331000000af00fffffffb00000020004300610072006c006100200069006d006100670065002000760069006500770000000000ffffffff000000a700fffffffb0000000c00430061006d00650072006100000002360000030d0000000000000000fb0000000c00430061006d0065007200610100000268000002db0000000000000000fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000073f000000a8fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000052700000167fc0100000005fb00000012005200610077005f0069006d0061006700650000000000000005270000000000000000fb000000140072006f0069005f007300690067006e0061006c0000000241000002e60000000000000000fb0000002400560065006800690063006c00650045006e006700610067006500500061006e0065006c0000000000000005740000000000000000fb0000000800540069006d006500000000c4000004b00000041800fffffffb0000000800540069006d0065010000000000000450000000000000000000000535000003a400000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001a7000004c0fc0200000016fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000003d0000026a000000c900fffffffa000000020100000003fb0000000a0049006d0061006700650000000000ffffffff0000000000000000fb0000000c00430061006d0065007200610000000000ffffffff0000000000000000fb000000100044006900730070006c0061007900730100000000000001360000015600fffffffb0000000a0056006900650077007301000002ad000001cb000000a400fffffffb0000000a0049006d006100670065010000028e000000d20000000000000000fb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000120049006d006100670065005f0072006100770000000000ffffffff0000000000000000fb0000000c00430061006d006500720061000000024e000001710000000000000000fb000000120049006d00610067006500200052006100770100000421000000160000000000000000fb0000000a0049006d00610067006501000002f4000000cb0000000000000000fb0000000a0049006d006100670065010000056c0000026c0000000000000000fb00000024004400650063006900730069006f006e004d0061006b0065007200500061006e0065006c00000002110000018f0000000000000000fb0000000c00430061006d006500720061010000040a000000d60000000000000000fb0000000a0049006d006100670065010000040a000000d60000000000000000fb0000000c00430061006d0065007200610100000117000001f10000000000000000fb0000000c00430061006d006500720061010000030e000002350000000000000000fb0000000c00430061006d006500720061010000046b000000d80000000000000000fb0000001800430061006e00630065006c00200072006f007500740065010000047e0000007f0000006000ffffff000000010000033100000521fc0200000007fc00000047000002cf0000000000fffffffaffffffff0100000003fb0000002000430061006d006500720061002000560069006500770020004c0065006600740000000000ffffffff000000ad00fffffffb0000002200430061006d00650072006100200049006d0061006700650020004c0065006600740000000000ffffffff000000b500fffffffb0000001c004c00650066007400200052004f004900200069006d0061006700650000000687000003310000009a00fffffffc00000047000004f10000000000fffffffaffffffff0100000003fb0000002200430061006d006500720061002000560069006500770020005200690067006800740000000000ffffffff000000b500fffffffb0000002400430061006d00650072006100200049006d0061006700650020005200690067006800740000000000ffffffff000000be00fffffffb0000001e0052006900670068007400200052004f004900200069006d006100670065000000068700000331000000a200fffffffc0000003d000005210000000000fffffffaffffffff0100000002fb00000022004300610072006c0061002000630061006d0065007200610020007600690065007700000006cf00000331000000af00fffffffb00000020004300610072006c006100200069006d006100670065002000760069006500770000000000ffffffff000000a700fffffffb0000000c00430061006d00650072006100000002360000030d0000000000000000fb0000000c00430061006d0065007200610100000268000002db0000000000000000fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000073f000000a8fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000052700000167fc0100000005fb00000012005200610077005f0069006d0061006700650000000000000005270000000000000000fb000000140072006f0069005f007300690067006e0061006c0000000241000002e60000000000000000fb0000002400560065006800690063006c00650045006e006700610067006500500061006e0065006c0000000000000005740000000000000000fb0000000800540069006d006500000000c4000004b00000041800fffffffb0000000800540069006d006501000000000000045000000000000000000000059d000004c000000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Right ROI image:
     collapsed: false
   Selection:
@@ -1611,5 +1434,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1866
-  X: 549
+  X: 107
   Y: 27
