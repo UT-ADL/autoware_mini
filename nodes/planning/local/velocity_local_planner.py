@@ -42,8 +42,7 @@ class VelocityLocalPlanner:
         self.global_path_tree = None
         self.current_position = None
         self.current_speed = 0.0
-        self.stop_lines = {}
-        self.red_stop_lines = {}
+        self.red_stop_lines = []
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer)
         self.waypoint_lookup_radius = np.sqrt(self.slowdown_lateral_distance**2 + self.dense_waypoint_interval**2)
@@ -79,12 +78,6 @@ class VelocityLocalPlanner:
                 wp.stop_line_id
             ) for wp in msg.waypoints])
 
-        # create stop line dictionary
-        self.stop_lines = {}
-        stop_line_wp_idx = np.where(global_path_array[:,4] > 0)[0]
-        for idx in stop_line_wp_idx:
-            self.stop_lines[global_path_array[idx,4]] = {'global_path_index': idx, 'location': [global_path_array[idx,0], global_path_array[idx,1], global_path_array[idx,2], 0]}
-
         # create global_wp_tree
         global_path_tree = NearestNeighbors(n_neighbors=1, algorithm=self.nearest_neighbor_search)
         global_path_tree.fit(global_path_array[:,:2])
@@ -109,10 +102,9 @@ class VelocityLocalPlanner:
     def traffic_light_status_callback(self, msg):
 
         red_stop_lines = {}
-
         for result in msg.results:
-            if result.lane_id in self.stop_lines and result.recognition_result == 0:
-                red_stop_lines[result.lane_id] = self.stop_lines[result.lane_id]
+            if result.recognition_result == 0:
+                red_stop_lines[result.lane_id] = result.recognition_result
 
         self.red_stop_lines = red_stop_lines
 
@@ -193,21 +185,20 @@ class VelocityLocalPlanner:
             #if len(obj.candidate_trajectories.lanes) > 0:
             #    for wp in obj.candidate_trajectories.lanes[0].waypoints:
             #        points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, velocity.x])
- 
-        # add stop line points to the points list
-        for stop_line in red_stop_lines.values():
 
-            tfl_local_path_index = stop_line['global_path_index'] - wp_backward
-            # if the stop line is not on the local path, ignore it
-            if tfl_local_path_index >= self.local_path_length or tfl_local_path_index <= 0:
-                continue
+        # add wp with stop line id's where the traffic light is red to obstacle list
+        for wp in local_path_waypoints:
 
-            # calculate deceleration needed to stop for the traffic light
-            deceleration = (current_speed**2) / (2 * local_path_dists[tfl_local_path_index])
-            if deceleration > self.tfl_maximum_deceleration:
-                rospy.logwarn_throttle(3, "%s - ignore RED tfl, deceleration: %f", rospy.get_name(), deceleration)
-            else:
-                points_list.append(stop_line['location'])
+            if wp.stop_line_id > 0 and wp.stop_line_id in red_stop_lines:
+                # calculate distance between current location and stop line
+                stop_line_distance = get_distance_between_two_points_2d(current_position, wp.pose.pose.position) - self.current_pose_to_car_front
+                # calculate deceleration needed to stop for the traffic light
+                deceleration = (current_speed**2) / (2 * stop_line_distance)
+
+                if deceleration > self.tfl_maximum_deceleration:
+                    rospy.logwarn_throttle(3, "%s - ignore RED tfl, deceleration: %f", rospy.get_name(), deceleration)
+                else:
+                    points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, 0.0])
 
         if len(points_list) > 0:
             # convert the points list to a numpy array
