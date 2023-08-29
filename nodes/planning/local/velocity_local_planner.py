@@ -40,8 +40,8 @@ class VelocityLocalPlanner:
         self.global_path_array = None
         self.global_path_waypoints = None
         self.global_path_tree = None
-        self.current_pose = None
-        self.current_velocity = 0.0
+        self.current_position = None
+        self.current_speed = 0.0
         self.stop_lines = {}
         self.red_stop_lines = {}
         self.tf_buffer = Buffer()
@@ -98,12 +98,12 @@ class VelocityLocalPlanner:
 
     def current_velocity_callback(self, msg):
         # save current velocity
-        self.current_velocity = msg.twist.linear.x
+        self.current_speed = msg.twist.linear.x
 
 
     def current_pose_callback(self, msg):
         # save current pose
-        self.current_pose = msg.pose.position
+        self.current_position = msg.pose.position
 
 
     def traffic_light_status_callback(self, msg):
@@ -127,16 +127,16 @@ class VelocityLocalPlanner:
             global_path_tree = self.global_path_tree
 
         red_stop_lines = self.red_stop_lines
-        current_pose = self.current_pose
-        current_velocity = self.current_velocity
+        current_position = self.current_position
+        current_speed = self.current_speed
 
         # if global path or current pose is empty, publish empty local path, which stops the vehicle
-        if global_path_array is None or current_pose is None:
+        if global_path_array is None or current_position is None:
             self.publish_local_path_wp([], msg.header.stamp, output_frame)
             return
 
         # extract local path points from global path
-        wp_backward, _ = get_two_nearest_waypoint_idx(global_path_tree, current_pose.x, current_pose.y)
+        wp_backward, _ = get_two_nearest_waypoint_idx(global_path_tree, current_position.x, current_position.y)
         end_index = wp_backward + self.local_path_length
         if end_index > len(global_path_array):
             end_index = len(global_path_array)
@@ -145,11 +145,11 @@ class VelocityLocalPlanner:
         local_path_array = global_path_array[wp_backward:end_index, :].copy()
         local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_backward:end_index])
 
-        # project current_pose to path
-        current_pose_on_path = get_closest_point_on_line(current_pose, local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position)
+        # project current_position to path
+        current_position_on_path = get_closest_point_on_line(current_position, local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position)
 
         # for all calculations consider the current pose as the first point of the local path
-        local_path_array[0] = [current_pose_on_path.x, current_pose_on_path.y, current_pose_on_path.z, current_velocity, 0]
+        local_path_array[0] = [current_position_on_path.x, current_position_on_path.y, current_position_on_path.z, current_speed, 0]
 
         # calculate distances up to each waypoint
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
@@ -200,8 +200,8 @@ class VelocityLocalPlanner:
                 continue
 
             # calculate deceleration needed to stop for the traffic light
-            deceleration = -(current_velocity**2) / (2 * local_path_dists[tfl_local_path_index])
-            if deceleration < self.tfl_maximum_deceleration:
+            deceleration = (current_speed**2) / (2 * local_path_dists[tfl_local_path_index])
+            if deceleration > self.tfl_maximum_deceleration:
                 rospy.logwarn_throttle(3, "%s - ignore RED tfl, deceleration: %f", rospy.get_name(), deceleration)
             else:
                 points_list.append(stop_line['location'])

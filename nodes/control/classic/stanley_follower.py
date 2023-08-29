@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error, get_point_using_heading_and_distance
-from helpers.waypoints import get_blinker_state_with_lookahead_time, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
+from helpers.waypoints import get_blinker_state_with_lookahead, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
@@ -32,6 +32,7 @@ class StanleyFollower:
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
         self.default_deceleration = rospy.get_param("/planning/default_deceleration")
+        self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
 
         # Variables - init
         self.waypoint_tree = None
@@ -148,7 +149,7 @@ class StanleyFollower:
                 acceleration = 0.0
 
             # blinkers
-            left_blinker, right_blinker = get_blinker_state_with_lookahead_time(waypoints, bl_front_wp_idx, current_velocity, self.blinker_lookahead_time, self.blinker_lookahead_distance)
+            left_blinker, right_blinker = get_blinker_state_with_lookahead(waypoints, self.waypoint_interval, bl_front_wp_idx, current_velocity, self.blinker_lookahead_time, self.blinker_lookahead_distance)
 
             # Publish
             self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker)
