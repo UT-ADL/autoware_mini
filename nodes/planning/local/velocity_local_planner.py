@@ -29,6 +29,7 @@ class VelocityLocalPlanner:
         self.braking_reaction_time = rospy.get_param("braking_reaction_time")
         self.stopping_lateral_distance = rospy.get_param("stopping_lateral_distance")
         self.slowdown_lateral_distance = rospy.get_param("slowdown_lateral_distance")
+        self.waypoint_interval = rospy.get_param("waypoint_interval")
         self.dense_waypoint_interval = rospy.get_param("~dense_waypoint_interval")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
         self.default_deceleration = rospy.get_param("default_deceleration")
@@ -129,16 +130,9 @@ class VelocityLocalPlanner:
 
         # extract local path points from global path
         wp_backward, _ = get_two_nearest_waypoint_idx(global_path_tree, current_position.x, current_position.y)
-
-        # calculate cumsum of distances between waypoints starting from wp_backward
-        distances = np.cumsum(np.sqrt(np.sum(np.diff(global_path_array[wp_backward:,:2], axis=0)**2, axis=1)))
-        distances = np.insert(distances, 0, 0.0)
-        # return index of the waypoint equal or smaller with local_path_length
-        ind = len(distances) - np.argmax((distances <= self.local_path_length)[::-1])
-        # extract distances only for local path
-        local_path_dists = distances[:ind]
-        # calculate end_index in global_path context
-        end_index = wp_backward + ind
+        end_index = wp_backward + int(self.local_path_length / self.waypoint_interval)
+        if end_index > len(global_path_array):
+            end_index = len(global_path_array)
 
         # create local_path_array and extract waypoints
         local_path_array = global_path_array[wp_backward:end_index, :].copy()
@@ -149,6 +143,10 @@ class VelocityLocalPlanner:
 
         # for all calculations consider the current pose as the first point of the local path
         local_path_array[0] = [current_position_on_path.x, current_position_on_path.y, current_position_on_path.z, current_speed, 0]
+
+        # calculate distances up to each waypoint
+        local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
+        local_path_dists = np.insert(local_path_dists, 0, 0.0)
 
         # interpolate dense local path and us it to calculate the closest object distance and velocity
         local_path_dense_dists = np.linspace(0, local_path_dists[-1], num=int(local_path_dists[-1] / self.dense_waypoint_interval))
