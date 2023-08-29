@@ -90,7 +90,7 @@ class NovatelOem7Visualizer:
     def inspva_callback(self, msg):
 
         if msg.status.status == INS_SOLUTION_GOOD:
-            inspva_status_text = "<span style=\"color: {};\">{}</span>\n".format("lightgreen", INSPVA_STATUS[msg.status.status])
+            inspva_status_text = "<span style=\"color: {};\">{}</span>\n".format("white", INSPVA_STATUS[msg.status.status])
         else:
             if msg.status.status not in INSPVA_STATUS:
                 inspva_status_text = "<span style=\"color: {};\">{}</span>\n".format("red", "Unkown status")
@@ -101,8 +101,6 @@ class NovatelOem7Visualizer:
 
 
     def bestpos_callback(self, msg):
-
-        gnss_detailed_group_title_text = "<span style=\"font-style: bold; color: white;\">GNSS</span>\n"
 
         ################# inspva_status
 
@@ -116,7 +114,7 @@ class NovatelOem7Visualizer:
 
         bestpos_pos_type_text = "Position type: "
         if msg.pos_type.type == INS_RTKFIXED:
-            bestpos_pos_type_text += "<span style=\"color: {};\">{}</span>\n".format("lightgreen", BESTPOS_POS_TYPE[msg.pos_type.type])
+            bestpos_pos_type_text += "<span style=\"color: {};\">{}</span>\n".format("white", BESTPOS_POS_TYPE[msg.pos_type.type])
         else:
             if msg.pos_type.type not in BESTPOS_POS_TYPE:
                 bestpos_pos_type_text += "<span style=\"color: {};\">{}</span>\n".format("red", "Unkown position type")
@@ -126,7 +124,7 @@ class NovatelOem7Visualizer:
         ################# num_sol_svs
         num_sol_svs_text = "Num. satellites: "
         if msg.num_sol_svs >= self.number_of_satellites_good:
-            num_sol_svs_text += "<span style=\"color: {};\">{}</span>\n".format("lightgreen", msg.num_sol_svs)
+            num_sol_svs_text += "<span style=\"color: {};\">{}</span>\n".format("white", msg.num_sol_svs)
         elif msg.num_sol_svs < self.number_of_satellites_bad:
             num_sol_svs_text += "<span style=\"color: {};\">{}</span>\n".format("red", msg.num_sol_svs)
         else:
@@ -137,7 +135,7 @@ class NovatelOem7Visualizer:
         location_stdev = math.sqrt(msg.lat_stdev**2 + msg.lon_stdev**2)
 
         if location_stdev <= self.location_accuracy_stdev_good:
-            location_stdev_text += "<span style=\"color: {};\">{:.2f} m</span>\n".format("lightgreen", location_stdev)
+            location_stdev_text += "<span style=\"color: {};\">{:.2f} m</span>\n".format("white", location_stdev)
         elif location_stdev > self.location_accuracy_stdev_bad:
             location_stdev_text += "<span style=\"color: {};\">{:.2f} m</span>\n".format("red", location_stdev)
         else:
@@ -147,25 +145,28 @@ class NovatelOem7Visualizer:
         diff_age_text = "Differential age: "
 
         if msg.diff_age <= self.differential_age_good:
-            diff_age_text += "<span style=\"color: {};\">{:.2f} s</span>\n".format("lightgreen", msg.diff_age)
+            diff_age_text += "<span style=\"color: {};\">{:.2f} s</span>\n".format("white", msg.diff_age)
         elif msg.diff_age > self.differential_age_bad:
             diff_age_text += "<span style=\"color: {};\">{:.2f} s</span>\n".format("red", msg.diff_age)
         else:
             diff_age_text += "<span style=\"color: {};\">{:.2f} s</span>\n".format("yellow", msg.diff_age)
 
 
-        ## PUBLISH
-
-        # gnss_general
-        gnss_general_text = "<span style=\"color: white;\">GNSS: </span>"
-
+        ################# gnss_general status
         if msg.pos_type.type == INS_RTKFIXED and location_stdev < self.location_accuracy_stdev_good and msg.diff_age < self.differential_age_bad and msg.num_sol_svs > self.number_of_satellites_bad:
-            gnss_general_text += "<span style=\"color: {};\">OK</span>".format("lightgreen")
+            gnss_general_text = "<span style=\"color: {};\">OK</span>".format("white")
         else:
-            gnss_general_text += "<span style=\"color: {};\">Localization warning</span>".format("yellow")
+            gnss_general_text = "<span style=\"color: {};\">Localization warning</span>".format("yellow")
+        
+
+        self.publish_gnss_general(gnss_general_text)
+        self.publish_gnss_detailed(inspva_status_text + bestpos_pos_type_text + num_sol_svs_text + location_stdev_text + diff_age_text)
+
+
+    def publish_gnss_general(self, gnss_general_text):
 
         gnss_general = OverlayText()
-        gnss_general.text = gnss_general_text
+        gnss_general.text = "<span style=\"color: gray;\">GNSS: </span>" + gnss_general_text
         gnss_general.top = 325
         gnss_general.left = self.global_left
         gnss_general.width = self.global_width
@@ -176,18 +177,21 @@ class NovatelOem7Visualizer:
 
         self.gnss_general_pub.publish(gnss_general)
 
-        # gnss_detailed
-        diff_age = OverlayText()
-        diff_age.text = gnss_detailed_group_title_text + inspva_status_text + bestpos_pos_type_text + num_sol_svs_text + location_stdev_text + diff_age_text
-        diff_age.top = 355
-        diff_age.left = self.global_left
-        diff_age.width = self.global_width
-        diff_age.height = 100
-        diff_age.text_size = 9
-        diff_age.fg_color = GRAY
-        diff_age.bg_color = BLACK
 
-        self.gnss_detailed_pub.publish(diff_age)
+    def publish_gnss_detailed(self, gnss_detailed_text):
+
+        # gnss_detailed
+        gnss_detailed = OverlayText()
+        gnss_detailed.text = "<span style=\"font-style: bold; color: white;\">GNSS</span>\n" + gnss_detailed_text
+        gnss_detailed.top = 355
+        gnss_detailed.left = self.global_left
+        gnss_detailed.width = self.global_width
+        gnss_detailed.height = 100
+        gnss_detailed.text_size = 9
+        gnss_detailed.fg_color = GRAY
+        gnss_detailed.bg_color = BLACK
+
+        self.gnss_detailed_pub.publish(gnss_detailed)
 
 
     def run(self):
