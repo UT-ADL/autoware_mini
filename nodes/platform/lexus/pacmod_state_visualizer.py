@@ -10,10 +10,14 @@ from sensor_msgs.msg import Image
 import cv2
 from cv_bridge import CvBridge
 
-
+# Overlaytext colors
 BLACK = ColorRGBA(0.0, 0.0, 0.0, 0.8)
 WHITE = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 GRAY = ColorRGBA(0.5, 0.5, 0.5, 1.0)
+
+# SSC and Pacmod states colors inside span tags
+AUTONOMY_BLUE = "rgb(100, 150, 255)"
+MANUAL_GREEN = "rgb(100, 255, 100)"
 
 # Ket values in /pacmod/all_system_statuses
 ACCELERATOR = 0
@@ -73,9 +77,9 @@ class PacmodStateVisualizer:
         autonomous = self.is_autonomous
 
         if autonomous:
-            pacmod_enabled_text = "<div style=\"text-align: center; color: blue;\">AUTONOMOUS</div>"
+            pacmod_enabled_text = "<div style=\"text-align: center; color: " + AUTONOMY_BLUE + ";\">AUTONOMOUS</div>"
         else:
-            pacmod_enabled_text = "<div style=\"text-align: center; color: green;\">MANUAL</div>"
+            pacmod_enabled_text = "<div style=\"text-align: center; color: " + MANUAL_GREEN + ";\">MANUAL</div>"
 
         text = OverlayText()
         text.top = self.global_top
@@ -102,8 +106,8 @@ class PacmodStateVisualizer:
                 wheel_img = wheel_autonomous_img
                 # convert to blueish color
                 wheel_img[:, :, 0] *= 255
-                wheel_img[:, :, 1] *= 0
-                wheel_img[:, :, 2] *= 0
+                wheel_img[:, :, 1] *= 150
+                wheel_img[:, :, 2] *= 100
             else:
                 rospy.logerr("Dashboard: Steering wheel autonomous image not found or couldn't be loaded")
         else:
@@ -111,9 +115,9 @@ class PacmodStateVisualizer:
             if wheel_manual_img is not None:
                 wheel_img = wheel_manual_img
                 # make green channel 255
-                wheel_img[:, :, 0] *= 0
+                wheel_img[:, :, 0] *= 100
                 wheel_img[:, :, 1] *= 255
-                wheel_img[:, :, 2] *= 0
+                wheel_img[:, :, 2] *= 100
             else:
                 rospy.logerr("Dashboard: Steering wheel manual image not found or couldn't be loaded")
 
@@ -190,6 +194,15 @@ class PacmodStateVisualizer:
 
         # Display SSC status - publish general and detailed status separately
 
+        ssc_general_statuses = {
+            "Ready": "gray",
+            "Engaged": "white",
+            "Active": "white",
+            "Not_ready": "yellow",
+            "Failure": "yellow",
+            "Fatal": "red"
+            }
+
         # collect all the latest states of individual modules
         self.ssc_states[SSC_MODULE_NAMES[msg.name]] = msg.state + " " + msg.info
 
@@ -200,18 +213,10 @@ class PacmodStateVisualizer:
 
         ssc_detailed_status_text = ssc_detailed_group_title_text + vehicle_controller_status_text + speed_model_status_text + steering_model_status_text
 
-        if "Ready" in ssc_detailed_status_text:
-            ssc_general_status = "<span style=\"color: {};\">Ready</span>".format("lightgreen")
-        if "Engaged" in ssc_detailed_status_text:
-            ssc_general_status = "<span style=\"color: {};\">Engaged</span>".format("lightblue")
-        if "Active" in ssc_detailed_status_text:
-            ssc_general_status = "<span style=\"color: {};\">Active</span>".format("lightblue")
-        if "Not_ready" in ssc_detailed_status_text:
-            ssc_general_status = "<span style=\"color: {};\">Not Ready</span>".format("yellow")
-        if "Failure" in ssc_detailed_status_text:
-            ssc_general_status = "<span style=\"color: {};\">Failure</span>".format("yellow")
-        if "Fatal" in ssc_detailed_status_text:
-            ssc_general_status = "<span style=\"color: {};\">Fatal</span>".format("red")
+        ssc_general_status_text = next(
+            (f'<span style="color: {color};">{status}</span>'
+            for status, color in ssc_general_statuses.items()
+            if status in ssc_detailed_status_text), "")
 
         ssc_general = OverlayText()
         ssc_general.top = self.global_top + 115
@@ -219,7 +224,7 @@ class PacmodStateVisualizer:
         ssc_general.width = self.global_width
         ssc_general.height = 20
         ssc_general.text_size = 11
-        ssc_general.text = "<span style=\"color: white;\">SSC</span>: " + ssc_general_status
+        ssc_general.text = "<span style=\"color: gray;\">SSC</span>: " + ssc_general_status_text
         ssc_general.fg_color = GRAY
         ssc_general.bg_color = BLACK
 
@@ -242,6 +247,13 @@ class PacmodStateVisualizer:
 
         # Publish Pacmod general and detailed status separately
 
+        pacmod_general_statuses = {
+            "Enabled": "white",
+            "Disabled": "gray",
+            "Overridden": "yellow",
+            "Fault": "red"
+            }
+        
         # create a string for each module to print out
         accelerator_state = create_pacmod_status_string(ACCELERATOR, msg)
         brakes_state = create_pacmod_status_string(BRAKES, msg)
@@ -254,15 +266,8 @@ class PacmodStateVisualizer:
                                 "Steering: " + steering_state + "\n" + \
                                 "Turn signals: " + turn_signals_state
 
-        
-        if "Enabled" in pacmod_status_text:
-            pacmod_general_status = "<span style=\"color: {};\">{}</span>\n".format("lightblue","Enabled ")
-        if "Disabled" in pacmod_status_text:
-            pacmod_general_status = "<span style=\"color: {};\">{}</span>\n".format("lightgreen","Disabled ")
-        if "Overridden" in pacmod_status_text:
-            pacmod_general_status = "<span style=\"color: {};\">{}</span>\n".format("yellow","Overridden ")
-        if "Fault" in pacmod_status_text:
-            pacmod_general_status = "<span style=\"color: {};\">{}</span>\n".format("red","Fault ")
+        status = next((status for status in pacmod_general_statuses if status in pacmod_status_text), "")
+        pacmod_general_status_text = f'<span style="color: {pacmod_general_statuses[status]};">{status}</span>\n'
 
         pacmod_general = OverlayText()
         pacmod_general.top = self.global_top + 135
@@ -270,12 +275,11 @@ class PacmodStateVisualizer:
         pacmod_general.width = self.global_width
         pacmod_general.height = 20
         pacmod_general.text_size = 11
-        pacmod_general.text = "<span style=\"color: white;\">PACMOD</span>: " + pacmod_general_status
+        pacmod_general.text = "<span style=\"color: gray;\">PACMOD</span>: " + pacmod_general_status_text
         pacmod_general.fg_color = GRAY
         pacmod_general.bg_color = BLACK
 
         self.pacmod_general_pub.publish(pacmod_general)
-
 
         pacmod_detailed = OverlayText()
         pacmod_detailed.top = self.global_top + 355
@@ -298,9 +302,9 @@ def create_pacmod_status_string(module, msg):
 
     state_string =""
     if msg.enabled_status[module].value == "True":
-        state_string += "<span style=\"color: {};\">{}</span>".format("lightblue", "Enabled ")
+        state_string += "<span style=\"color: {};\">{}</span>".format(AUTONOMY_BLUE, "Enabled ")
     else:
-        state_string += "<span style=\"color: {};\">{}</span>".format("lightgreen", "Disabled ")
+        state_string += "<span style=\"color: {};\">{}</span>".format(MANUAL_GREEN, "Disabled ")
 
     if msg.overridden_status[module].value == "True":
         state_string += "<span style=\"color: {};\">{}</span>".format("yellow", "Overridden ")
@@ -318,9 +322,9 @@ def create_ssc_status_string(module_name, ssc_states):
     if module_name in ssc_states:
         # check if ssc_states[module_name] starts with Ready or Active
         if ssc_states[module_name].startswith("ready"):
-            status_string += "<span style=\"color: {};\">{}</span>\n".format("lightgreen", ssc_states[module_name].capitalize())
+            status_string += "<span style=\"color: {};\">{}</span>\n".format(MANUAL_GREEN, ssc_states[module_name].capitalize())
         elif ssc_states[module_name].startswith("active") or ssc_states[module_name].startswith("engaged"):
-            status_string += "<span style=\"color: {};\">{}</span>\n".format("lightblue", ssc_states[module_name].capitalize())
+            status_string += "<span style=\"color: {};\">{}</span>\n".format(AUTONOMY_BLUE, ssc_states[module_name].capitalize())
         elif ssc_states[module_name].startswith("not_ready") or ssc_states[module_name].startswith("failure"):
             status_string += "<span style=\"color: {};\">{}</span>\n".format("yellow", ssc_states[module_name].capitalize())
         else:
@@ -329,7 +333,6 @@ def create_ssc_status_string(module_name, ssc_states):
         status_string += "<span style=\"color: {};\">{}</span>\n".format("red", "Not Available")
     
     return status_string
-
 
 
 if __name__ == '__main__':
