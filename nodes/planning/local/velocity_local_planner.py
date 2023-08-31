@@ -130,9 +130,7 @@ class VelocityLocalPlanner:
 
         # extract local path points from global path
         wp_backward, _ = get_two_nearest_waypoint_idx(global_path_tree, current_position.x, current_position.y)
-        end_index = wp_backward + int(self.local_path_length / self.waypoint_interval)
-        if end_index > len(global_path_array):
-            end_index = len(global_path_array)
+        end_index = min(wp_backward + int(self.local_path_length / self.waypoint_interval), len(global_path_array))
 
         # create local_path_array and extract waypoints
         local_path_array = global_path_array[wp_backward:end_index, :].copy()
@@ -184,14 +182,13 @@ class VelocityLocalPlanner:
             #    for wp in obj.candidate_trajectories.lanes[0].waypoints:
             #        points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, velocity.x])
 
-        # add wp with stop line id's where the traffic light is red to obstacle list
-        for wp in local_path_waypoints:
+        # add wp with stop line id's where the traffic light status is red to obstacle list
+
+        for i, wp in enumerate(local_path_waypoints):
 
             if wp.stop_line_id > 0 and wp.stop_line_id in red_stop_lines:
-                # calculate distance between current location and stop line
-                stop_line_distance = get_distance_between_two_points_2d(current_position, wp.pose.pose.position) - self.current_pose_to_car_front
-                # calculate deceleration needed to stop for the traffic light
-                deceleration = (current_speed**2) / (2 * stop_line_distance)
+                # use wp distance and caclulate necessary deceleration for stopping
+                deceleration = (current_speed**2) / (2 * (local_path_dists[i] - self.current_pose_to_car_front))
 
                 if deceleration > self.tfl_maximum_deceleration:
                     rospy.logwarn_throttle(3, "%s - ignore RED tfl, deceleration: %f", rospy.get_name(), deceleration)
@@ -298,8 +295,6 @@ class VelocityLocalPlanner:
                     # from stop point onwards all speeds are set to zero
                     if math.isclose(wp.twist.twist.linear.x, 0.0):
                         zero_speeds_onwards = True
-
-        self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked, cost)
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked, cost)
 
