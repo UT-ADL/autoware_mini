@@ -60,7 +60,6 @@
 
     <!-- Rviz -->
     <include file="$(find autoware_mini)/launch/dashboard.launch" >
-        <arg name="start"       value="lexus" />
         <arg name="localizer"   value="$(arg localizer)" />
     </include>
 
