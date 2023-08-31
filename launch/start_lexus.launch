@@ -59,9 +59,7 @@
     </include>
 
     <!-- Rviz -->
-    <include file="$(find autoware_mini)/launch/dashboard.launch" >
-        <arg name="localizer"   value="$(arg localizer)" />
-    </include>
+    <include file="$(find autoware_mini)/launch/dashboard.launch" />
 
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
 
