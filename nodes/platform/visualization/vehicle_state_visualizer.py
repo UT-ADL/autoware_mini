@@ -21,6 +21,7 @@ class VehicleStateVisualizer:
 
         # Parameters
         self.image_path = rospy.get_param('~image_path')
+        self.steer_ratio = rospy.get_param('/vehicle/steer_ratio')
 
         # Publishers
         self.vehicle_drivemode_pub = rospy.Publisher('vehicle_drivemode', OverlayText, queue_size=1)
@@ -88,8 +89,7 @@ class VehicleStateVisualizer:
 
 
         # Steering angle - animate wheel
-        # TODO convert it correctly to steering wheel angle in degrees
-        steering_wheel_angle = msg.angle * 180 / 3.14
+        steering_wheel_angle = msg.angle * self.steer_ratio * 180 / 3.14
 
         # if one of the images is missing, don't publish anything
         if self.wheel_autonomous_img is not None and self.wheel_manual_img is not None:
