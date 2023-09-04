@@ -42,8 +42,8 @@ class VelocityLocalPlanner:
         self.global_path_waypoints = None
         self.global_path_tree = None
         self.current_position = None
-        self.current_speed = 0.0
-        self.red_stop_lines = []
+        self.current_speed = None
+        self.red_stop_lines = {}
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer)
         self.waypoint_lookup_radius = np.sqrt(self.slowdown_lateral_distance**2 + self.dense_waypoint_interval**2)
@@ -124,7 +124,7 @@ class VelocityLocalPlanner:
         current_speed = self.current_speed
 
         # if global path or current pose is empty, publish empty local path, which stops the vehicle
-        if global_path_array is None or current_position is None:
+        if global_path_array is None or current_position is None or current_speed is None:
             self.publish_local_path_wp([], msg.header.stamp, output_frame)
             return
 
@@ -182,8 +182,7 @@ class VelocityLocalPlanner:
             #    for wp in obj.candidate_trajectories.lanes[0].waypoints:
             #        points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, velocity.x])
 
-        # add wp with stop line id's where the traffic light status is red to obstacle list
-
+        # Red traffic lights: add wp with stop line id's where the traffic light status is red to obstacle list
         for i, wp in enumerate(local_path_waypoints):
 
             if wp.stop_line_id > 0 and wp.stop_line_id in red_stop_lines:
