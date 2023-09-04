@@ -30,7 +30,7 @@ class SSCInterface:
         self.enable_reverse_motion = rospy.get_param('~enable_reverse_motion')
         self.command_timeout = rospy.get_param('~command_timeout')
         self.wheel_base = rospy.get_param('wheel_base')
-        self.ssc_gear_ratio = rospy.get_param('~ssc_gear_ratio')
+        self.ssc_gear_ratio = rospy.get_param('steer_ratio')
         self.acceleration_limit = rospy.get_param('acceleration_limit')
         self.deceleration_limit = rospy.get_param('deceleration_limit')
         self.max_curvature_rate = rospy.get_param('~max_curvature_rate')

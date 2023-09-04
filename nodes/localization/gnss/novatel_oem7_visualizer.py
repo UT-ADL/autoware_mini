@@ -66,12 +66,12 @@ class NovatelOem7Visualizer:
     def __init__(self):
 
         # Parameters
-        self.number_of_satellites_good = rospy.get_param("number_of_satellites_good")
-        self.number_of_satellites_bad = rospy.get_param("number_of_satellites_bad")
-        self.location_accuracy_stdev_good = rospy.get_param("location_accuracy_stdev_good")
-        self.location_accuracy_stdev_bad = rospy.get_param("location_accuracy_stdev_bad")
-        self.differential_age_good = rospy.get_param("differential_age_good")
-        self.differential_age_bad = rospy.get_param("differential_age_bad")
+        self.number_of_satellites_good = rospy.get_param("~number_of_satellites_good")
+        self.number_of_satellites_bad = rospy.get_param("~number_of_satellites_bad")
+        self.location_accuracy_stdev_good = rospy.get_param("~location_accuracy_stdev_good")
+        self.location_accuracy_stdev_bad = rospy.get_param("~location_accuracy_stdev_bad")
+        self.differential_age_good = rospy.get_param("~differential_age_good")
+        self.differential_age_bad = rospy.get_param("~differential_age_bad")
 
         # Publishers
         self.gnss_general_pub = rospy.Publisher('gnss_general', OverlayText, queue_size=1)
@@ -93,7 +93,7 @@ class NovatelOem7Visualizer:
             inspva_status_text = "<span style='color: white;'>{}</span>\n".format(INSPVA_STATUS[msg.status.status])
         else:
             if msg.status.status not in INSPVA_STATUS:
-                inspva_status_text = "<span style='color: red;'>{}</span>\n".format("Unkown status" + str(msg.status.status))
+                inspva_status_text = "<span style='color: red;'>{}</span>\n".format("Unknown: " + str(msg.status.status))
             else:
                 inspva_status_text = "<span style='color: yellow;'>{}</span>\n".format(INSPVA_STATUS[msg.status.status])
 
@@ -117,7 +117,7 @@ class NovatelOem7Visualizer:
             bestpos_pos_type_text += "<span style='color: white;'>{}</span>\n".format(BESTPOS_POS_TYPE[msg.pos_type.type])
         else:
             if msg.pos_type.type not in BESTPOS_POS_TYPE:
-                bestpos_pos_type_text += "<span style='color: red;'>{}</span>\n".format("Unkown position type " + str(msg.pos_type.type))
+                bestpos_pos_type_text += "<span style='color: red;'>{}</span>\n".format("Unknown: " + str(msg.pos_type.type))
             else:
                 bestpos_pos_type_text += "<span style='color: yellow;'>{}</span>\n".format(BESTPOS_POS_TYPE[msg.pos_type.type])
 
