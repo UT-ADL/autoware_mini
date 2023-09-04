@@ -148,7 +148,11 @@ class VelocityLocalPlanner:
 
         # interpolate dense local path and us it to calculate the closest object distance and velocity
         local_path_dense_dists = np.linspace(0, local_path_dists[-1], num=int(local_path_dists[-1] / self.dense_waypoint_interval))
-        local_path_dense = self.interpolate_dense_local_path(local_path_dense_dists, local_path_dists, local_path_array)
+        x_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,0])
+        y_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,1])
+        z_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,2])
+        v_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,3])
+        local_path_dense = np.stack((x_new, y_new, z_new, v_new), axis=1)
 
         # initialize closest object distance and velocity
         closest_object_distance = 0.0 
@@ -296,17 +300,6 @@ class VelocityLocalPlanner:
                         zero_speeds_onwards = True
 
         self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, blocked, cost)
-
-
-    def interpolate_dense_local_path(self, local_path_dense_dists, local_path_dists, local_path_array):
-
-        # interpolate x_new, y_new, z_new and v_new from local_path_array
-        x_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,0])
-        y_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,1])
-        z_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,2])
-        v_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,3])
-
-        return np.stack((x_new, y_new, z_new, v_new), axis=1)
 
 
     def publish_local_path_wp(self, local_path_waypoints, stamp, output_frame, closest_object_distance=0, closest_object_velocity=0, blocked=False, cost=0.0):
