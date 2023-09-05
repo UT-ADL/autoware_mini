@@ -72,7 +72,7 @@ class LocalPathVisualizer:
         marker_array.markers.append(marker)
 
         # color yellow if lane is blocked or obs in slowdown area
-        if lane.is_blocked or lane.cost != 0.0:
+        if lane.is_blocked or lane.increment > 0:
             color = ColorRGBA(1.0, 1.0, 0.0, 0.3)
 
         # local path with slowdown_lateral_distance
@@ -105,14 +105,16 @@ class LocalPathVisualizer:
             marker_array.markers.append(marker)
 
         # stop position visualization
-        if len(lane.waypoints) > 1 and (lane.is_blocked or lane.cost != 0.0):
+        if len(lane.waypoints) > 1 and lane.increment > 0:
 
             stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance + distance_correction)
 
-            color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
-            if lane.is_blocked:
+            color = ColorRGBA(0.9, 0.9, 0.9, 0.2)
+            if lane.increment == 2:
+                color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
+            if lane.increment == 3:
                 color = ColorRGBA(1.0, 1.0, 0.0, 0.5)
-                if lane.closest_object_velocity < 1.0:
+            if lane.increment == 4:
                     color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
 
             marker = Marker()
