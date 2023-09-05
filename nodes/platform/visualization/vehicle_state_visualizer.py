@@ -11,10 +11,6 @@ from cv_bridge import CvBridge
 BLACK = ColorRGBA(0.0, 0.0, 0.0, 0.8)
 WHITE = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
-# VehicleStatus.lamp constants
-LAMP_LEFT = 1
-LAMP_RIGHT = 2
-LAMP_HAZARD = 3
 
 class VehicleStateVisualizer:
     def __init__(self):
@@ -22,6 +18,70 @@ class VehicleStateVisualizer:
         # Parameters
         self.image_path = rospy.get_param('~image_path')
         self.steer_ratio = rospy.get_param('/vehicle/steer_ratio')
+
+        # Internal parameters
+        self.global_top = 170
+        self.global_left = 10
+        self.global_width = 266
+
+        self.left_blinker_cmd = None
+        self.right_blinker_cmd = None
+
+        self.bridge = CvBridge()
+
+        # load images for steering wheel
+        self.wheel_autonomous_img = cv2.imread(self.image_path + "wheel_auto.png")
+        if self.wheel_autonomous_img is None:
+            rospy.logfatal("%s - Error loading autonomous mode wheel image: %s", rospy.get_name(), self.image_path + "wheel_auto.png")
+            rospy.signal_shutdown("Error loading autonomous mode wheel image")
+        self.wheel_manual_img = cv2.imread(self.image_path + "wheel_hands.png")
+        if self.wheel_manual_img is None:
+            rospy.logfatal("%s - Error loading manual mode wheel image: %s", rospy.get_name(), self.image_path + "wheel_hands.png")
+            rospy.signal_shutdown("Error loading manual mode wheel image")
+
+        # load images for blinkers
+        blinker_left_cmd_on_img = cv2.imread(self.image_path + "left_cmd_on.png")
+        if blinker_left_cmd_on_img is None:
+            rospy.logfatal("%s - Error loading left blinker cmd on image: %s", rospy.get_name(), self.image_path + "left_cmd_on.png")
+            rospy.signal_shutdown("Error loading left blinker cmd on image")
+        blinnker_left_cmd_off_img = cv2.imread(self.image_path + "left_cmd_off.png")
+        if blinnker_left_cmd_off_img is None:
+            rospy.logfatal("%s - Error loading left blinker cmd off image: %s", rospy.get_name(), self.image_path + "left_cmd_off.png")
+            rospy.signal_shutdown("Error loading left blinker cmd off image")
+        blinker_left_arrow_on_img = cv2.imread(self.image_path + "left_arrow_on.png")
+        if blinker_left_arrow_on_img is None:
+            rospy.logfatal("%s - Error loading left blinker arrow on image: %s", rospy.get_name(), self.image_path + "left_arrow_on.png")
+            rospy.signal_shutdown("Error loading left blinker arrow on image")
+        blinker_left_arrow_off_img = cv2.imread(self.image_path + "left_arrow_off.png")
+        if blinker_left_arrow_off_img is None:
+            rospy.logfatal("%s - Error loading left blinker arrow off image: %s", rospy.get_name(), self.image_path + "left_arrow_off.png")
+            rospy.signal_shutdown("Error loading left blinker arrow off image")
+        blinker_right_cmd_on_img = cv2.imread(self.image_path + "right_cmd_on.png")
+        if blinker_right_cmd_on_img is None:
+            rospy.logfatal("%s - Error loading right blinker cmd on image: %s", rospy.get_name(), self.image_path + "right_cmd_on.png")
+            rospy.signal_shutdown("Error loading right blinker cmd on image")
+        blinker_right_cmd_off_img = cv2.imread(self.image_path + "right_cmd_off.png")
+        if blinker_right_cmd_off_img is None:
+            rospy.logfatal("%s - Error loading right blinker cmd off image: %s", rospy.get_name(), self.image_path + "right_cmd_off.png")
+            rospy.signal_shutdown("Error loading right blinker cmd off image")
+        blinker_right_arrow_on_img = cv2.imread(self.image_path + "right_arrow_on.png")
+        if blinker_right_arrow_on_img is None:
+            rospy.logfatal("%s - Error loading right blinker arrow on image: %s", rospy.get_name(), self.image_path + "right_arrow_on.png")
+            rospy.signal_shutdown("Error loading right blinker arrow on image")
+        blinker_right_arrow_off_img = cv2.imread(self.image_path + "right_arrow_off.png")
+        if blinker_right_arrow_off_img is None:
+            rospy.logfatal("%s - Error loading right blinker arrow off image: %s", rospy.get_name(), self.image_path + "right_arrow_off.png")
+            rospy.signal_shutdown("Error loading right blinker arrow off image")
+
+        # convert images to ros messages
+        self.blinker_left_cmd_on_msg = self.bridge.cv2_to_imgmsg(blinker_left_cmd_on_img, encoding="bgr8")
+        self.blinker_left_cmd_off_msg = self.bridge.cv2_to_imgmsg(blinnker_left_cmd_off_img, encoding="bgr8")
+        self.blinker_left_arrow_on_msg = self.bridge.cv2_to_imgmsg(blinker_left_arrow_on_img, encoding="bgr8")
+        self.blinker_left_arrow_off_msg = self.bridge.cv2_to_imgmsg(blinker_left_arrow_off_img, encoding="bgr8")
+        self.blinker_right_cmd_on_msg = self.bridge.cv2_to_imgmsg(blinker_right_cmd_on_img, encoding="bgr8")
+        self.blinker_right_cmd_off_msg = self.bridge.cv2_to_imgmsg(blinker_right_cmd_off_img, encoding="bgr8")
+        self.blinker_right_arrow_on_msg = self.bridge.cv2_to_imgmsg(blinker_right_arrow_on_img, encoding="bgr8")
+        self.blinker_right_arrow_off_msg = self.bridge.cv2_to_imgmsg(blinker_right_arrow_off_img, encoding="bgr8")
 
         # Publishers
         self.vehicle_drivemode_pub = rospy.Publisher('vehicle_drivemode', OverlayText, queue_size=1)
@@ -34,76 +94,6 @@ class VehicleStateVisualizer:
         # Subscribers
         rospy.Subscriber('/vehicle/vehicle_status', VehicleStatus, self.vehicle_status_callback, queue_size=1)
         rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
-
-
-        # Internal parameters
-        self.global_top = 170
-        self.global_left = 10
-        self.global_width = 266
-        self.bridge = CvBridge()
-
-        self.left_blinker_cmd = None
-        self.right_blinker_cmd = None
-
-        # load images for steering wheel and blinkers
-        self.wheel_autonomous_img = cv2.imread(self.image_path + "wheel_auto.png")
-        self.wheel_manual_img = cv2.imread(self.image_path + "wheel_hands.png")
-
-        # report errors on missing wheel images
-        if self.wheel_autonomous_img is None:
-            rospy.logerr("%s - Error loading autonomous mode wheel image: %s", rospy.get_name(), self.image_path + "wheel_auto.png")
-        if self.wheel_manual_img is None:
-            rospy.logerr("%s - Error loading manual mode wheel image: %s", rospy.get_name(), self.image_path + "wheel_hands.png")
-
-
-        # load images for blinkers
-        blinker_left_cmd_on_img = cv2.imread(self.image_path + "left_cmd_on.png")
-        if blinker_left_cmd_on_img is not None:
-            self.blinker_left_cmd_on_msg = self.bridge.cv2_to_imgmsg(blinker_left_cmd_on_img, encoding="bgr8")
-        else:
-            rospy.logerr("%s - Error loading left blinker cmd on image: %s", rospy.get_name(), self.image_path + "left_cmd_on.png")
-
-        blinker_left_cmd_off_img = cv2.imread(self.image_path + "left_cmd_off.png")
-        if blinker_left_cmd_off_img is not None:
-            self.blinker_left_cmd_off_msg = self.bridge.cv2_to_imgmsg(blinker_left_cmd_off_img, encoding="bgr8")
-        else:
-            rospy.logerr("%s - Error loading left blinker cmd off image: %s", rospy.get_name(), self.image_path + "left_cmd_off.png")
-
-        blinker_left_arrow_on_img = cv2.imread(self.image_path + "left_arrow_on.png")
-        if blinker_left_arrow_on_img is not None:
-            self.blinker_left_arrow_on_msg = self.bridge.cv2_to_imgmsg(blinker_left_arrow_on_img, encoding="bgr8")
-        else:
-            rospy.logerr("%s - Error loading left blinker arrow on image: %s", rospy.get_name(), self.image_path + "left_arrow_on.png")
-
-        blinker_left_arrow_off_img = cv2.imread(self.image_path + "left_arrow_off.png")
-        if blinker_left_arrow_off_img is not None:
-            self.blinker_left_arrow_off_msg = self.bridge.cv2_to_imgmsg(blinker_left_arrow_off_img, encoding="bgr8")
-        else:
-            rospy.logerr("%s - Error loading left blinker arrow off image: %s", rospy.get_name(), self.image_path + "left_arrow_off.png")
-
-        blinker_right_cmd_on_img = cv2.imread(self.image_path + "right_cmd_on.png")
-        if blinker_right_cmd_on_img is not None:
-            self.blinker_right_cmd_on_msg = self.bridge.cv2_to_imgmsg(blinker_right_cmd_on_img, encoding="bgr8")
-        else:
-            rospy.logerr("%s - Error loading right blinker cmd on image: %s", rospy.get_name(), self.image_path + "right_cmd_on.png")
-
-        blinker_right_cmd_off_img = cv2.imread(self.image_path + "right_cmd_off.png")
-        if blinker_right_cmd_off_img is not None:
-            self.blinker_right_cmd_off_msg = self.bridge.cv2_to_imgmsg(blinker_right_cmd_off_img, encoding="bgr8")
-        else:
-            rospy.logerr("%s - Error loading right blinker cmd off image: %s", rospy.get_name(), self.image_path + "right_cmd_off.png")
-
-        blinker_right_arrow_on_img = cv2.imread(self.image_path + "right_arrow_on.png")
-        if blinker_right_arrow_on_img is not None:
-            self.blinker_right_arrow_on_msg = self.bridge.cv2_to_imgmsg(blinker_right_arrow_on_img, encoding="bgr8")
-        else:
-            rospy.logerr("%s - Error loading right blinker arrow on image: %s", rospy.get_name(), self.image_path + "right_arrow_on.png")
-
-        blinker_right_arrow_off_img = cv2.imread(self.image_path + "right_arrow_off.png")
-        if blinker_right_arrow_off_img is not None:
-            self.blinker_right_arrow_off_msg = self.bridge.cv2_to_imgmsg(blinker_right_arrow_off_img, encoding="bgr8")
-        else:
-            rospy.logerr("%s - Error loading right blinker arrow off image: %s", rospy.get_name(), self.image_path + "right_arrow_off.png")
 
 
     def vehicle_cmd_callback(self, msg):
@@ -137,20 +127,18 @@ class VehicleStateVisualizer:
         # Steering angle - animate wheel
         steering_wheel_angle = msg.angle * self.steer_ratio * 180 / 3.14
 
-        # if one of the images is missing, don't publish anything
-        if self.wheel_autonomous_img is not None and self.wheel_manual_img is not None:
-            if is_autonomous:
-                    wheel_img = self.wheel_autonomous_img
-            else:
-                    wheel_img = self.wheel_manual_img
+        if is_autonomous:
+            wheel_img = self.wheel_autonomous_img
+        else:
+            wheel_img = self.wheel_manual_img
 
-            # rotate image
-            height, width = wheel_img.shape[:2]
-            rotation_matrix = cv2.getRotationMatrix2D((width / 2, height / 2), steering_wheel_angle, 1)
-            rotated_wheel_img = cv2.warpAffine(wheel_img, rotation_matrix, (width, height))
+        # rotate image
+        height, width = wheel_img.shape[:2]
+        rotation_matrix = cv2.getRotationMatrix2D((width / 2, height / 2), steering_wheel_angle, 1)
+        rotated_wheel_img = cv2.warpAffine(wheel_img, rotation_matrix, (width, height))
 
-            wheel_msg = self.bridge.cv2_to_imgmsg(rotated_wheel_img, encoding="bgr8")
-            self.steering_wheel_pub.publish(wheel_msg)
+        wheel_msg = self.bridge.cv2_to_imgmsg(rotated_wheel_img, encoding="bgr8")
+        self.steering_wheel_pub.publish(wheel_msg)
 
 
         # Blinkers
@@ -159,7 +147,7 @@ class VehicleStateVisualizer:
         else:
             self.left_blinker_cmd_pub.publish(self.blinker_left_cmd_off_msg)
 
-        if msg.lamp == LAMP_LEFT or msg.lamp == LAMP_HAZARD:
+        if msg.lamp == VehicleStatus.LAMP_LEFT or msg.lamp == VehicleStatus.LAMP_HAZARD:
             self.left_blinker_arrow_pub.publish(self.blinker_left_arrow_on_msg)
         else:
             self.left_blinker_arrow_pub.publish(self.blinker_left_arrow_off_msg)
@@ -169,7 +157,7 @@ class VehicleStateVisualizer:
         else:
             self.right_blinker_cmd_pub.publish(self.blinker_right_cmd_off_msg)
 
-        if msg.lamp == LAMP_RIGHT or msg.lamp == LAMP_HAZARD:
+        if msg.lamp == VehicleStatus.LAMP_RIGHT or msg.lamp == VehicleStatus.LAMP_HAZARD:
             self.right_blinker_arrow_pub.publish(self.blinker_right_arrow_on_msg)
         else:
             self.right_blinker_arrow_pub.publish(self.blinker_right_arrow_off_msg)
