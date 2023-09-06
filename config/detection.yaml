@@ -37,10 +37,9 @@ lidar:
       filter_size: 3
   points_concatenator:
     transform_timeout: 0.06
-    min_range_front: 1.2  # radius value within which the points from ouster are discarded. Done after transforming to lidar_center frame
   points_clusterer:
     sample_size: 10000
-    cluster_epsilon: 1.0
+    cluster_epsilon: 0.9
     cluster_min_size: 5
   cluster_detector:
     min_cluster_size: 5

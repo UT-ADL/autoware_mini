@@ -156,7 +156,7 @@ class NovatelOem7Visualizer:
         if msg.pos_type.type == INS_RTKFIXED and location_stdev < self.location_accuracy_stdev_good and msg.diff_age < self.differential_age_bad and msg.num_sol_svs > self.number_of_satellites_bad:
             gnss_general_text = "<span style='color: white;'>OK</span>"
         else:
-            gnss_general_text = "<span style='color: yellow;'>Localization warning</span>"
+            gnss_general_text = "<span style='color: yellow;'>Warning</span>"
         
 
         self.publish_gnss_general(gnss_general_text)
@@ -182,7 +182,7 @@ class NovatelOem7Visualizer:
 
         # gnss_detailed
         gnss_detailed = OverlayText()
-        gnss_detailed.text = "<span style='font-style: bold; color: white;'>GNSS</span>\n" + gnss_detailed_text
+        gnss_detailed.text = "<span style='font-style: bold; color: white;'>GNSS:</span>\n" + gnss_detailed_text
         gnss_detailed.top = 355
         gnss_detailed.left = self.global_left
         gnss_detailed.width = self.global_width

@@ -43,7 +43,7 @@ class PacmodStateVisualizer:
         # Display SSC status - publish general and detailed status separately
 
         ssc_general_statuses = {
-            "Ready": "gray",
+            "Ready": "white",
             "Engaged": "white",
             "Active": "white",
             "Not_ready": "yellow",
@@ -54,7 +54,7 @@ class PacmodStateVisualizer:
         # collect all the latest states of individual modules
         self.ssc_states[SSC_MODULE_NAMES[msg.name]] = msg.state + " " + msg.info
 
-        ssc_detailed_group_title_text = "<span style='font-style: bold; color: white;'>SSC</span>:\n"
+        ssc_detailed_group_title_text = "<span style='font-style: bold; color: white;'>SSC:</span>\n"
         vehicle_controller_status_text = create_ssc_status_string("Vehicle Controller", self.ssc_states)
         speed_model_status_text = create_ssc_status_string("Speed Model", self.ssc_states)
         steering_model_status_text = create_ssc_status_string("Steering Model", self.ssc_states)
@@ -63,7 +63,7 @@ class PacmodStateVisualizer:
 
         ssc_general_status_text = ""
 
-        for status, color in ssc_general_statuses.items():
+        for status, color in reversed(ssc_general_statuses.items()):
             if status in ssc_detailed_status_text:
                 ssc_general_status_text = f'<span style="color: {color};">{status}</span>'
                 break
@@ -74,7 +74,7 @@ class PacmodStateVisualizer:
         ssc_general.width = self.global_width
         ssc_general.height = 20
         ssc_general.text_size = 11
-        ssc_general.text = "<span style='color: gray;'>SSC</span>: " + ssc_general_status_text
+        ssc_general.text = "<span style='color: gray;'>SSC:</span> " + ssc_general_status_text
         ssc_general.fg_color = GRAY
         ssc_general.bg_color = BLACK
 
@@ -107,10 +107,10 @@ class PacmodStateVisualizer:
         elif msg.override_active:
             pacmod_general_status_text = "<span style='color: yellow;'>Disabled, Overridden</span>"
         else:
-            pacmod_general_status_text = "Ready"
+            pacmod_general_status_text = "<span style='color: white;'>Ready</span>"
 
         # Pacmod detailed status text
-        pacmod_detailed_group_title_text = "<span style='font-style: bold; color: white;'>PACMOD</span>:\n"
+        pacmod_detailed_group_title_text = "<span style='font-style: bold; color: white;'>PACMOD:</span>\n"
         pacmod_detailed_status_text = ""
         if msg.pacmod_sys_fault_active:
             pacmod_detailed_status_text += "System Fault: <span style='color: red;'>True</span>\n"
@@ -148,7 +148,7 @@ class PacmodStateVisualizer:
         pacmod_general.width = self.global_width
         pacmod_general.height = 20
         pacmod_general.text_size = 11
-        pacmod_general.text = "<span style='color: gray;'>PACMOD</span>: " + "<span style='white-space:nowrap;'>" + pacmod_general_status_text + "</span>"
+        pacmod_general.text = "<span style='color: gray;'>PACMOD:</span> " + "<span style='white-space:nowrap;'>" + pacmod_general_status_text + "</span>"
         pacmod_general.fg_color = GRAY
         pacmod_general.bg_color = BLACK
 
@@ -178,7 +178,7 @@ def create_ssc_status_string(module_name, ssc_states):
     if module_name in ssc_states:
         # check if ssc_states[module_name] starts with Ready or Active
         if ssc_states[module_name].startswith("ready"):
-            status_string += "<span style='color: gray;'>{}</span>\n".format(ssc_states[module_name].capitalize())
+            status_string += "<span style='color: white;'>{}</span>\n".format(ssc_states[module_name].capitalize())
         elif ssc_states[module_name].startswith("active") or ssc_states[module_name].startswith("engaged"):
             status_string += "<span style='color: white;'>{}</span>\n".format(ssc_states[module_name].capitalize())
         elif ssc_states[module_name].startswith("not_ready") or ssc_states[module_name].startswith("failure"):
