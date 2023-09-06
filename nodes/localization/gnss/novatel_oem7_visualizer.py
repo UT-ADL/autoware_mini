@@ -54,10 +54,6 @@ BESTPOS_POS_TYPE = {
     80: "INS_PPP_BASIC"
     }
 
-BLACK = ColorRGBA(0.0, 0.0, 0.0, 0.8)
-WHITE = ColorRGBA(1.0, 1.0, 1.0, 1.0)
-GRAY = ColorRGBA(0.5, 0.5, 0.5, 1.0)
-
 INS_SOLUTION_GOOD = 3
 INS_RTKFIXED = 56
 
@@ -81,9 +77,6 @@ class NovatelOem7Visualizer:
         rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback, queue_size=1)
 
         # Internal parameters
-        self.global_left = 10
-        self.global_width = 266
-
         self.inspva_status_text = ""
 
     def inspva_callback(self, msg):
@@ -165,14 +158,7 @@ class NovatelOem7Visualizer:
     def publish_gnss_general(self, gnss_general_text):
 
         gnss_general = OverlayText()
-        gnss_general.text = "<span style='color: gray;'>GNSS: </span>" + gnss_general_text
-        gnss_general.top = 325
-        gnss_general.left = self.global_left
-        gnss_general.width = self.global_width
-        gnss_general.height = 30
-        gnss_general.text_size = 11
-        gnss_general.fg_color = GRAY
-        gnss_general.bg_color = BLACK
+        gnss_general.text = "GNSS: " + gnss_general_text
 
         self.gnss_general_pub.publish(gnss_general)
 
@@ -182,13 +168,6 @@ class NovatelOem7Visualizer:
         # gnss_detailed
         gnss_detailed = OverlayText()
         gnss_detailed.text = "<span style='font-style: bold; color: white;'>GNSS:</span>\n" + gnss_detailed_text
-        gnss_detailed.top = 355
-        gnss_detailed.left = self.global_left
-        gnss_detailed.width = self.global_width
-        gnss_detailed.height = 100
-        gnss_detailed.text_size = 9
-        gnss_detailed.fg_color = GRAY
-        gnss_detailed.bg_color = BLACK
 
         self.gnss_detailed_pub.publish(gnss_detailed)
 

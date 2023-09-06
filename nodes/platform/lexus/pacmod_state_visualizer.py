@@ -6,11 +6,6 @@ from automotive_navigation_msgs.msg import ModuleState
 from pacmod3_msgs.msg import GlobalRpt
 from jsk_rviz_plugins.msg import OverlayText
 
-# Overlaytext colors
-BLACK = ColorRGBA(0.0, 0.0, 0.0, 0.8)
-WHITE = ColorRGBA(1.0, 1.0, 1.0, 1.0)
-GRAY = ColorRGBA(0.5, 0.5, 0.5, 1.0)
-
 
 SSC_MODULE_NAMES = {
     '/ssc/veh_controller': 'Vehicle Controller',
@@ -32,11 +27,7 @@ class PacmodStateVisualizer:
         rospy.Subscriber('/pacmod/global_rpt', GlobalRpt, self.pacmod_global_report_callback, queue_size=1)
 
         # Internal parameters
-        self.global_top = 285
-        self.global_left = 10
-        self.global_width = 266
-
-        self.ssc_states={}
+        self.ssc_states = {}
 
     def ssc_module_states_callback(self, msg):
 
@@ -49,7 +40,7 @@ class PacmodStateVisualizer:
             "Not_ready": "yellow",
             "Failure": "yellow",
             "Fatal": "red"
-            }
+        }
 
         # collect all the latest states of individual modules
         self.ssc_states[SSC_MODULE_NAMES[msg.name]] = msg.state + " " + msg.info
@@ -69,26 +60,12 @@ class PacmodStateVisualizer:
                 break
 
         ssc_general = OverlayText()
-        ssc_general.top = self.global_top
-        ssc_general.left = self.global_left
-        ssc_general.width = self.global_width
-        ssc_general.height = 20
-        ssc_general.text_size = 11
-        ssc_general.text = "<span style='color: gray;'>SSC:</span> " + ssc_general_status_text
-        ssc_general.fg_color = GRAY
-        ssc_general.bg_color = BLACK
+        ssc_general.text = "SSC: " + ssc_general_status_text
 
         self.ssc_general_pub.publish(ssc_general)
 
         ssc_detailed = OverlayText()
-        ssc_detailed.top = self.global_top + 170
-        ssc_detailed.left = self.global_left
-        ssc_detailed.width = self.global_width
-        ssc_detailed.height = 70
-        ssc_detailed.text_size = 9
         ssc_detailed.text = "<span style='white-space:nowrap;'>" + ssc_detailed_status_text + "</span>"
-        ssc_detailed.fg_color = GRAY
-        ssc_detailed.bg_color = BLACK
 
         self.ssc_detailed_pub.publish(ssc_detailed)
 
@@ -143,26 +120,12 @@ class PacmodStateVisualizer:
 
 
         pacmod_general = OverlayText()
-        pacmod_general.top = self.global_top + 20
-        pacmod_general.left = self.global_left
-        pacmod_general.width = self.global_width
-        pacmod_general.height = 20
-        pacmod_general.text_size = 11
-        pacmod_general.text = "<span style='color: gray;'>PACMOD:</span> " + "<span style='white-space:nowrap;'>" + pacmod_general_status_text + "</span>"
-        pacmod_general.fg_color = GRAY
-        pacmod_general.bg_color = BLACK
+        pacmod_general.text = "PACMOD: " + "<span style='white-space:nowrap;'>" + pacmod_general_status_text + "</span>"
 
         self.pacmod_general_pub.publish(pacmod_general)
 
         pacmod_detailed = OverlayText()
-        pacmod_detailed.top = self.global_top + 240
-        pacmod_detailed.left = self.global_left
-        pacmod_detailed.width = self.global_width
-        pacmod_detailed.height = 130
-        pacmod_detailed.text_size = 9
         pacmod_detailed.text = pacmod_detailed_group_title_text + "<span style='white-space:nowrap;'>" + pacmod_detailed_status_text + "</span>"
-        pacmod_detailed.fg_color = GRAY
-        pacmod_detailed.bg_color = BLACK
 
         self.pacmod_detailed_pub.publish(pacmod_detailed)
 
