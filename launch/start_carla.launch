@@ -81,4 +81,8 @@
     <include file="$(find autoware_mini)/launch/dashboard.launch" />
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
 
+    <!-- Patch controller params because simulation does not have delay -->
+    <rosparam param="simulate_cmd_delay" ns="control/pure_pursuit_follower">0.0</rosparam>
+    <rosparam param="simulate_cmd_delay" ns="control/stanley_follower">0.0</rosparam>
+
 </launch>
