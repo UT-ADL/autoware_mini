@@ -32,6 +32,7 @@ class StanleyFollower:
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
         self.speed_deceleration_limit = rospy.get_param("/planning/speed_deceleration_limit")
+        self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
 
         # Variables - init
         self.waypoint_tree = None
@@ -96,6 +97,20 @@ class StanleyFollower:
             current_pose = current_pose_msg.pose
             current_velocity = current_velocity_msg.twist.linear.x
             current_heading = get_heading_from_orientation(current_pose.orientation)
+
+            # simulate delay in vehicle command. Project car into future location and use it to calculate current steering command
+            if self.simulate_cmd_delay > 0.0:
+
+                # extract heading angle from orientation
+                heading_angle = get_heading_from_orientation(current_pose.orientation)
+                x_dot = current_velocity * math.cos(heading_angle)
+                y_dot = current_velocity * math.sin(heading_angle)
+
+                x_new = current_pose.position.x + x_dot * self.simulate_cmd_delay
+                y_new = current_pose.position.y + y_dot * self.simulate_cmd_delay
+
+                current_pose.position.x = x_new
+                current_pose.position.y = y_new
 
             if waypoint_tree is None:
                 # if no waypoints received yet or global_path cancelled, stop the vehicle

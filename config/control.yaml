@@ -6,10 +6,12 @@ blinker_lookahead_distance: 14.0
 pure_pursuit_follower:
   planning_time: 1.2
   min_lookahead_distance: 6.0
+  simulate_cmd_delay: 0.3           # sec
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   publish_debug_info: False
 
 stanley_follower:
   cte_gain: 0.4     # gain for cross track error
+  simulate_cmd_delay: 0.3           # sec
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   publish_debug_info: False
