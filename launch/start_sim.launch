@@ -45,4 +45,8 @@
     <!-- Localization params -->
     <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" ns="localization" />
 
+    <!-- Patch controller params because simulation does not have delay -->
+    <rosparam param="simulate_cmd_delay" ns="control/pure_pursuit_follower">0.0</rosparam>
+    <rosparam param="simulate_cmd_delay" ns="control/stanley_follower">0.0</rosparam>
+
 </launch>
