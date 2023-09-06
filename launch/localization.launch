@@ -12,5 +12,5 @@
         <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" />
 
     </group>
-    
+
 </launch>
