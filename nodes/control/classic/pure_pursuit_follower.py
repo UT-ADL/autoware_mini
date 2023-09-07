@@ -33,7 +33,7 @@ class PurePursuitFollower:
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
         self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
-        self.speed_deceleration_limit = rospy.get_param("/planning/speed_deceleration_limit")
+        self.default_deceleration = rospy.get_param("/planning/default_deceleration")
         self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
 
         # Variables - init
