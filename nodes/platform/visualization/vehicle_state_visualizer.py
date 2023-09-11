@@ -39,57 +39,13 @@ class VehicleStateVisualizer:
             rospy.logfatal("%s - Error loading manual mode wheel image: %s", rospy.get_name(), self.image_path + "wheel_hands.png")
             rospy.signal_shutdown("Error loading manual mode wheel image")
 
-        # load images for blinkers
-        blinker_left_cmd_on_img = cv2.imread(self.image_path + "left_cmd_on.png")
-        if blinker_left_cmd_on_img is None:
-            rospy.logfatal("%s - Error loading left blinker cmd on image: %s", rospy.get_name(), self.image_path + "left_cmd_on.png")
-            rospy.signal_shutdown("Error loading left blinker cmd on image")
-        blinnker_left_cmd_off_img = cv2.imread(self.image_path + "left_cmd_off.png")
-        if blinnker_left_cmd_off_img is None:
-            rospy.logfatal("%s - Error loading left blinker cmd off image: %s", rospy.get_name(), self.image_path + "left_cmd_off.png")
-            rospy.signal_shutdown("Error loading left blinker cmd off image")
-        blinker_left_arrow_on_img = cv2.imread(self.image_path + "left_arrow_on.png")
-        if blinker_left_arrow_on_img is None:
-            rospy.logfatal("%s - Error loading left blinker arrow on image: %s", rospy.get_name(), self.image_path + "left_arrow_on.png")
-            rospy.signal_shutdown("Error loading left blinker arrow on image")
-        blinker_left_arrow_off_img = cv2.imread(self.image_path + "left_arrow_off.png")
-        if blinker_left_arrow_off_img is None:
-            rospy.logfatal("%s - Error loading left blinker arrow off image: %s", rospy.get_name(), self.image_path + "left_arrow_off.png")
-            rospy.signal_shutdown("Error loading left blinker arrow off image")
-        blinker_right_cmd_on_img = cv2.imread(self.image_path + "right_cmd_on.png")
-        if blinker_right_cmd_on_img is None:
-            rospy.logfatal("%s - Error loading right blinker cmd on image: %s", rospy.get_name(), self.image_path + "right_cmd_on.png")
-            rospy.signal_shutdown("Error loading right blinker cmd on image")
-        blinker_right_cmd_off_img = cv2.imread(self.image_path + "right_cmd_off.png")
-        if blinker_right_cmd_off_img is None:
-            rospy.logfatal("%s - Error loading right blinker cmd off image: %s", rospy.get_name(), self.image_path + "right_cmd_off.png")
-            rospy.signal_shutdown("Error loading right blinker cmd off image")
-        blinker_right_arrow_on_img = cv2.imread(self.image_path + "right_arrow_on.png")
-        if blinker_right_arrow_on_img is None:
-            rospy.logfatal("%s - Error loading right blinker arrow on image: %s", rospy.get_name(), self.image_path + "right_arrow_on.png")
-            rospy.signal_shutdown("Error loading right blinker arrow on image")
-        blinker_right_arrow_off_img = cv2.imread(self.image_path + "right_arrow_off.png")
-        if blinker_right_arrow_off_img is None:
-            rospy.logfatal("%s - Error loading right blinker arrow off image: %s", rospy.get_name(), self.image_path + "right_arrow_off.png")
-            rospy.signal_shutdown("Error loading right blinker arrow off image")
-
-        # convert images to ros messages
-        self.blinker_left_cmd_on_msg = self.bridge.cv2_to_imgmsg(blinker_left_cmd_on_img, encoding="bgr8")
-        self.blinker_left_cmd_off_msg = self.bridge.cv2_to_imgmsg(blinnker_left_cmd_off_img, encoding="bgr8")
-        self.blinker_left_arrow_on_msg = self.bridge.cv2_to_imgmsg(blinker_left_arrow_on_img, encoding="bgr8")
-        self.blinker_left_arrow_off_msg = self.bridge.cv2_to_imgmsg(blinker_left_arrow_off_img, encoding="bgr8")
-        self.blinker_right_cmd_on_msg = self.bridge.cv2_to_imgmsg(blinker_right_cmd_on_img, encoding="bgr8")
-        self.blinker_right_cmd_off_msg = self.bridge.cv2_to_imgmsg(blinker_right_cmd_off_img, encoding="bgr8")
-        self.blinker_right_arrow_on_msg = self.bridge.cv2_to_imgmsg(blinker_right_arrow_on_img, encoding="bgr8")
-        self.blinker_right_arrow_off_msg = self.bridge.cv2_to_imgmsg(blinker_right_arrow_off_img, encoding="bgr8")
-
         # Publishers
         self.vehicle_drivemode_pub = rospy.Publisher('vehicle_drivemode', OverlayText, queue_size=1)
         self.steering_wheel_pub = rospy.Publisher('steering_wheel', Image, queue_size=1)
-        self.right_blinker_cmd_pub = rospy.Publisher('right_blinker_cmd', Image, queue_size=1)
-        self.right_blinker_arrow_pub = rospy.Publisher('right_blinker_arrow', Image, queue_size=1)
-        self.left_blinker_cmd_pub =  rospy.Publisher('left_blinker_cmd', Image, queue_size=1)
-        self.left_blinker_arrow_pub = rospy.Publisher('left_blinker_arrow', Image, queue_size=1)
+        self.right_blinker_cmd_pub = rospy.Publisher('right_blinker_cmd', OverlayText, queue_size=1)
+        self.right_blinker_arrow_pub = rospy.Publisher('right_blinker_arrow', OverlayText, queue_size=1)
+        self.left_blinker_cmd_pub =  rospy.Publisher('left_blinker_cmd', OverlayText, queue_size=1)
+        self.left_blinker_arrow_pub = rospy.Publisher('left_blinker_arrow', OverlayText, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('/vehicle/vehicle_status', VehicleStatus, self.vehicle_status_callback, queue_size=1)
@@ -142,25 +98,29 @@ class VehicleStateVisualizer:
 
 
         # Blinkers
+        left_blinker_cmd_msg = OverlayText()
+        left_blinker_cmd_msg.text = "<div style='text-align: right; color: gray;'>CMD</div>"
         if self.left_blinker_cmd == 1:
-            self.left_blinker_cmd_pub.publish(self.blinker_left_cmd_on_msg)
-        else:
-            self.left_blinker_cmd_pub.publish(self.blinker_left_cmd_off_msg)
+            left_blinker_cmd_msg.text = "<div style='text-align: right; color: yellow;'>CMD</div>"
+        self.left_blinker_cmd_pub.publish(left_blinker_cmd_msg)
 
+        left_blinker_arrow_msg = OverlayText()
+        left_blinker_arrow_msg.text = "<div style='text-align: right; color: gray;'>&#11013;</div>"
         if msg.lamp == VehicleStatus.LAMP_LEFT or msg.lamp == VehicleStatus.LAMP_HAZARD:
-            self.left_blinker_arrow_pub.publish(self.blinker_left_arrow_on_msg)
-        else:
-            self.left_blinker_arrow_pub.publish(self.blinker_left_arrow_off_msg)
+            left_blinker_arrow_msg.text = "<div style='text-align: right; color: yellow;'>&#11013;</div>"
+        self.left_blinker_arrow_pub.publish(left_blinker_arrow_msg)
 
+        right_blinker_cmd_msg = OverlayText()
+        right_blinker_cmd_msg.text = "<div style='text-align: left; color: gray;'>CMD</div>"
         if self.right_blinker_cmd == 1:
-            self.right_blinker_cmd_pub.publish(self.blinker_right_cmd_on_msg)
-        else:
-            self.right_blinker_cmd_pub.publish(self.blinker_right_cmd_off_msg)
+            right_blinker_cmd_msg.text = "<div style='text-align: left; color: yellow;'>CMD</div>"
+        self.right_blinker_cmd_pub.publish(right_blinker_cmd_msg)
 
+        right_blinker_arrow_msg = OverlayText()
+        right_blinker_arrow_msg.text = "<div style='text-align: left; color: gray;'>&#10145;</div>"
         if msg.lamp == VehicleStatus.LAMP_RIGHT or msg.lamp == VehicleStatus.LAMP_HAZARD:
-            self.right_blinker_arrow_pub.publish(self.blinker_right_arrow_on_msg)
-        else:
-            self.right_blinker_arrow_pub.publish(self.blinker_right_arrow_off_msg)
+            right_blinker_arrow_msg.text = "<div style='text-align: left; color: yellow;'>&#10145;</div>"
+        self.right_blinker_arrow_pub.publish(right_blinker_arrow_msg)
 
 
     def run(self):
