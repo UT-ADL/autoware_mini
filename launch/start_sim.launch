@@ -49,4 +49,10 @@
     <rosparam param="simulate_cmd_delay" ns="control/pure_pursuit_follower">0.0</rosparam>
     <rosparam param="simulate_cmd_delay" ns="control/stanley_follower">0.0</rosparam>
 
+    <!-- Make it possible to use Carla town maps in bicycle simulation -->
+    <group if="$(eval 'town' in lanelet2_map_name.lower())">
+        <param name="/localization/utm_origin_lat" type="double" value="0.0" />
+        <param name="/localization/utm_origin_lon" type="double" value="0.0" />
+    </group>
+
 </launch>
