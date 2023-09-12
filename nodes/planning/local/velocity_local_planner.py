@@ -73,10 +73,7 @@ class VelocityLocalPlanner:
         global_path_waypoints = msg.waypoints
         global_path_array = np.array([(
                 wp.pose.pose.position.x,
-                wp.pose.pose.position.y,
-                wp.pose.pose.position.z,
-                wp.twist.twist.linear.x,
-                wp.stop_line_id
+                wp.pose.pose.position.y
             ) for wp in msg.waypoints])
 
         # create global_wp_tree
@@ -140,7 +137,7 @@ class VelocityLocalPlanner:
         current_position_on_path = get_closest_point_on_line(current_position, local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position)
 
         # for all calculations consider the current pose as the first point of the local path
-        local_path_array[0] = [current_position_on_path.x, current_position_on_path.y, current_position_on_path.z, current_speed, 0]
+        local_path_array[0] = [current_position_on_path.x, current_position_on_path.y]
 
         # calculate distances up to each waypoint
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
@@ -150,9 +147,7 @@ class VelocityLocalPlanner:
         local_path_dense_dists = np.linspace(0, local_path_dists[-1], num=int(local_path_dists[-1] / self.dense_waypoint_interval))
         x_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,0])
         y_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,1])
-        z_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,2])
-        v_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,3])
-        local_path_dense = np.stack((x_new, y_new, z_new, v_new), axis=1)
+        local_path_dense = np.stack((x_new, y_new), axis=1)
 
         # initialize closest object distance and velocity
         closest_object_distance = 0.0 
@@ -224,42 +219,34 @@ class VelocityLocalPlanner:
                 obstacles_ahead_speeds = obstacle_array[obstacles_dense_path[:,1].astype(int)][:,3]
                 obstacles_ahead_dists = local_path_dense_dists[obstacles_dense_path[:,0].astype(int)]
                 obstacles_ahead_lateral_dists = obstacles_dense_path[:,2]
-                obstacles_ahead_map_speeds = local_path_dense[obstacles_dense_path[:,0].astype(int)][:,3]
 
-                # -----------------------------------------------------------------------------------------------
-                ### Calculate target velocity for ALL OBSTACLES - as if they were within stopping_lateral_distance and we are following them
-                # -----------------------------------------------------------------------------------------------
+                # ALL OBSTACLES: Calculate target velocity as if they were within stopping_lateral_distance
                 obstacle_distances = obstacles_ahead_dists - self.current_pose_to_car_front
                 # subtract braking_safety_distance and additionally reaction_time and obstacle_speed based distance for larger longitudinal distance when driving faster
                 following_distances = obstacle_distances - self.braking_safety_distance - self.braking_reaction_time * obstacles_ahead_speeds
-                # use following_distance and if sqr is negative use 0 - we do not want to drive!
-                target_velocities_follow = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.default_deceleration * following_distances))
+                # use following_distance and if sqrt is negative use 0 - we do not want to drive!
+                target_velocities = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.default_deceleration * following_distances))
 
-                # -----------------------------------------------------------------------------------------------
-                ### Calculate target velocity only for obstacles within slowdown_lateral_distance using the map speed
-                # -----------------------------------------------------------------------------------------------
-                scale = np.zeros_like(obstacles_ahead_map_speeds)
-                target_velocities_close = np.zeros_like(obstacles_ahead_map_speeds)
+                # OBS IN SLOWDOWN area: Calculate target velocity only for obstacles within slowdown_lateral_distance
+                scale = np.zeros_like(target_velocities)
+                target_velocities_slowdown = np.zeros_like(target_velocities)
                 # create mask to select only obstacles in slowdown_lateral_distance and outside stopping_lateral_distance
                 mask = obstacles_ahead_lateral_dists > self.stopping_lateral_distance
 
                 # calculate scaling coefficient to transform lateral distance between 0 to 1
                 scale[mask] = (obstacles_ahead_lateral_dists[mask] - self.stopping_lateral_distance ) / (self.slowdown_lateral_distance - self.stopping_lateral_distance)
-                # abs is used to increase the target velocity once the car has passed, but the obstacle is still close (target velocity symmetric around "0 distance point" - car front)
-                target_velocities_close[mask] = np.sqrt(np.maximum(0, (obstacles_ahead_map_speeds[mask] * scale[mask])**2 + abs(2 * self.default_deceleration * obstacle_distances[mask])))
+                # calculate target velocity: scale possible max and min velocity  difference and add to min velocity
+                target_velocities_slowdown[mask] = scale[mask] * np.maximum((local_path_waypoints[0].twist.twist.linear.x - target_velocities[mask]), 0) + target_velocities[mask]
 
-                # -----------------------------------------------------------------------------------------------
-                ### Final target velocities for all obstacles at ego car location
-                # -----------------------------------------------------------------------------------------------
-                target_velocities = np.maximum(target_velocities_close, target_velocities_follow)
+                # Update target_velocities with obstacles within slowdown_lateral_distance
+                target_velocities[mask] = target_velocities_slowdown[mask]
 
                 # Find obstacle causing smallest target velocity at ego car location
                 lowest_target_velocity_idx = np.argmin(target_velocities)
 
                 # If any calculated target_vel drops close to 0 then use this boolean to set all following wp speeds to 0
                 zero_speeds_onwards = False
-                target_velocity_close = 0.0
-                
+
                 # calculate target velocity for each waypoint - only one obstacle (causing lowest target velocity) is considered inside for loop 
                 # TODO: problem - distances using array (first point changed) and here we are using waypoints!!!
                 for i, wp in enumerate(local_path_waypoints):
@@ -272,17 +259,16 @@ class VelocityLocalPlanner:
                     # obstacle distance from car front
                     obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - local_path_dists[i] - self.current_pose_to_car_front 
 
-                    # calculate target velocity in case of obstacle in slowdown_lateral_distance
-                    if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.stopping_lateral_distance:
-                        # abs is used to increase the target velocity once the car has passed, but the obstacle is still close
-                        target_velocity_close = np.sqrt(np.maximum(0, (obstacles_ahead_map_speeds[lowest_target_velocity_idx]*scale[lowest_target_velocity_idx])**2 + abs(2 * self.default_deceleration * obstacle_distance)))
-
                     # calculate target velocity as if it is blocking the lane (inisde stopping_lateral_distance)
                     following_distance = obstacle_distance - self.braking_safety_distance - self.braking_reaction_time * obstacles_ahead_speeds[lowest_target_velocity_idx]
-                    target_velocity_follow = np.sqrt(np.maximum(0, obstacles_ahead_speeds[lowest_target_velocity_idx]**2 + 2 * self.default_deceleration * following_distance))
+                    target_velocity = np.sqrt(np.maximum(0, obstacles_ahead_speeds[lowest_target_velocity_idx]**2 + 2 * self.default_deceleration * following_distance))
 
-                    # calculate final target velocity
-                    target_velocity = min(max(target_velocity_follow, target_velocity_close), wp.twist.twist.linear.x)
+                    # calculate target velocity in case of obstacle in slowdown_lateral_distance
+                    if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.stopping_lateral_distance:
+                        target_velocity = scale[lowest_target_velocity_idx] * np.maximum((local_path_waypoints[0].twist.twist.linear.x - target_velocity), 0) + target_velocity
+
+                    # target velocity cannot be higher than the map based speed
+                    target_velocity = min(target_velocity, wp.twist.twist.linear.x)
 
                     # record the closest object from the first waypoint and decide if the lane is blocked
                     if i == 0:
