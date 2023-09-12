@@ -100,9 +100,9 @@ class VehicleStateVisualizer:
         # Blinkers
         left_blinker_cmd_msg = OverlayText()
         if self.left_blinker_cmd == 1:
-            left_blinker_cmd_msg.text = "<div style='text-align: right; color: yellow;'>CMD</div>"
+            left_blinker_cmd_msg.text = "<div style='text-align: right; color: rgb(100, 150, 255);'>&#11013;</div>"
         else:
-            left_blinker_cmd_msg.text = "<div style='text-align: right; color: gray;'>CMD</div>"
+            left_blinker_cmd_msg.text = "<div style='text-align: right; color: gray;'>&#11013;</div>"
         self.left_blinker_cmd_pub.publish(left_blinker_cmd_msg)
 
         left_blinker_arrow_msg = OverlayText()
@@ -114,9 +114,9 @@ class VehicleStateVisualizer:
 
         right_blinker_cmd_msg = OverlayText()
         if self.right_blinker_cmd == 1:
-            right_blinker_cmd_msg.text = "<div style='text-align: left; color: yellow;'>CMD</div>"
+            right_blinker_cmd_msg.text = "<div style='text-align: left; color: rgb(100, 150, 255);'>&#10145;</div>"
         else:
-            right_blinker_cmd_msg.text = "<div style='text-align: left; color: gray;'>CMD</div>"
+            right_blinker_cmd_msg.text = "<div style='text-align: left; color: gray;'>&#10145;</div>"
         self.right_blinker_cmd_pub.publish(right_blinker_cmd_msg)
 
         right_blinker_arrow_msg = OverlayText()
