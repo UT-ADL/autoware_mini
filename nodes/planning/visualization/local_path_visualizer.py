@@ -52,23 +52,25 @@ class LocalPathVisualizer:
                 for waypoint in lane.waypoints:
                     points.append(waypoint.pose.pose.position)
             else:
-                distance_from_local_path_start = lane.closest_object_distance + self.current_pose_to_car_front + distance_correction
-                stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, distance_from_local_path_start)
+                obstacle_distance_from_local_path_start = lane.closest_object_distance + self.current_pose_to_car_front + distance_correction
+                obstacle_position, _ = get_point_and_orientation_on_path_within_distance(lane.waypoints, 1, lane.waypoints[0].pose.pose.position, obstacle_distance_from_local_path_start)
 
                 d = 0.0
-                for i in range(0, len(lane.waypoints)-2):
+                for i in range(0, len(lane.waypoints)-1):
                     d += get_distance_between_two_points_2d(lane.waypoints[i].pose.pose.position, lane.waypoints[i+1].pose.pose.position)
-                    if d < distance_from_local_path_start:
+                    if d < obstacle_distance_from_local_path_start:
                         points.append(lane.waypoints[i].pose.pose.position)
                     else:
-                        points.append(stop_position)
                         break
-
-            color = ColorRGBA(0.2, 1.0, 0.2, 0.3)
+                # add obstacle position as final point
+                points.append(obstacle_position)
+            
+            # use increment to color the path
+            color = ColorRGBA(0.2, 1.0, 0.2, 0.3)      # green - no obstacle within stopping_lateral_distance or it is not affecting map based target velocity
             if lane.increment == 3:
-                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)
+                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)  # yellow, obstacle is blocking and causes the lowering of the target velocity compared to map velocity
             if lane.increment == 4:
-                color = ColorRGBA(1.0, 0.2, 0.2, 0.3)
+                color = ColorRGBA(1.0, 0.2, 0.2, 0.3)  # red, obstacle is blocking and causing stopping ( < 1m/s)
 
             # local path with stopping_lateral_distance
             marker = Marker()
@@ -85,9 +87,9 @@ class LocalPathVisualizer:
             marker_array.markers.append(marker)
 
 
-            color = ColorRGBA(0.2, 1.0, 0.2, 0.3)
+            color = ColorRGBA(0.2, 1.0, 0.2, 0.3)       # green - no obstacle within slowdown_lateral_distance or stopping_lateral_distance
             if lane.increment > 0:
-                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)
+                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)   # yellow - obstacle within slowdown_lateral_distance or stopping_lateral_distance
 
             # local path with slowdown_lateral_distance
             marker = Marker()
