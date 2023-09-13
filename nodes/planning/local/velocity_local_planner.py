@@ -265,7 +265,7 @@ class VelocityLocalPlanner:
 
                     # calculate target velocity in case of obstacle in slowdown_lateral_distance
                     if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.stopping_lateral_distance:
-                        target_velocity = scale[lowest_target_velocity_idx] * np.maximum((local_path_waypoints[0].twist.twist.linear.x - target_velocity), 0) + target_velocity
+                        target_velocity = scale[lowest_target_velocity_idx] * np.maximum((wp.twist.twist.linear.x - target_velocity), 0) + target_velocity
 
                     # target velocity cannot be higher than the map based speed
                     target_velocity = min(target_velocity, wp.twist.twist.linear.x)
