@@ -55,7 +55,6 @@ class LocalPathVisualizer:
                 distance_from_local_path_start = lane.closest_object_distance + self.current_pose_to_car_front + distance_correction
                 stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, distance_from_local_path_start)
 
-                
                 d = 0.0
                 for i in range(0, len(lane.waypoints)-2):
                     d += get_distance_between_two_points_2d(lane.waypoints[i].pose.pose.position, lane.waypoints[i+1].pose.pose.position)
@@ -65,11 +64,11 @@ class LocalPathVisualizer:
                         points.append(stop_position)
                         break
 
-            color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
+            color = ColorRGBA(0.2, 1.0, 0.2, 0.3)
             if lane.increment == 3:
-                color = ColorRGBA(1.0, 1.0, 0.0, 0.5)
+                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)
             if lane.increment == 4:
-                color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
+                color = ColorRGBA(1.0, 0.2, 0.2, 0.3)
 
             # local path with stopping_lateral_distance
             marker = Marker()
@@ -86,9 +85,9 @@ class LocalPathVisualizer:
             marker_array.markers.append(marker)
 
 
-            color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
+            color = ColorRGBA(0.2, 1.0, 0.2, 0.3)
             if lane.increment > 0:
-                color = ColorRGBA(1.0, 1.0, 0.0, 0.5)
+                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)
 
             # local path with slowdown_lateral_distance
             marker = Marker()
@@ -118,6 +117,9 @@ class LocalPathVisualizer:
                 marker.color = ColorRGBA(1.0, 1.0, 1.0, 1.0)
                 marker.text = str(round(waypoint.twist.twist.linear.x * 3.6, 1))
                 marker_array.markers.append(marker)
+                # add only up to a first 0.0 velocity label
+                if math.isclose(waypoint.twist.twist.linear.x, 0.0):
+                    break
 
         self.local_path_markers_pub.publish(marker_array)
 
