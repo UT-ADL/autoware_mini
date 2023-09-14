@@ -7,7 +7,7 @@ import numpy as np
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 from lanelet2.core import BasicPoint2d
-from lanelet2.geometry import to2D, findNearest
+from lanelet2.geometry import to2D, findNearest, distance
 
 from sklearn.neighbors import NearestNeighbors
 
@@ -212,8 +212,8 @@ class Lanelet2GlobalPlanner:
                 waypoint.pose.pose.orientation = get_orientation_from_heading(heading)
 
                 waypoint.twist.twist.linear.x = speed
-                waypoint.dtlane.lw = self.wp_left_width
-                waypoint.dtlane.rw = self.wp_right_width
+                waypoint.dtlane.lw = distance(point, lanelet.leftBound)
+                waypoint.dtlane.rw = distance(point, lanelet.rightBound)
 
                 waypoints.append(waypoint)
 
