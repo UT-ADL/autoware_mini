@@ -7,8 +7,6 @@ import threading
 import tf2_ros
 import onnxruntime
 
-from sklearn.neighbors import RadiusNeighborsClassifier
-import warnings
 from image_geometry import PinholeCameraModel
 
 from lanelet2.io import Origin, load
@@ -57,8 +55,7 @@ class CameraTrafficLightDetector:
         self.radius_to_roi_multiplier = rospy.get_param("~radius_to_roi_multiplier")
         self.min_roi_width = rospy.get_param("~min_roi_width")
         self.transform_timeout = rospy.get_param("~transform_timeout")
-        self.waypoint_interval = rospy.get_param("/planning/path_smoothing/waypoint_interval")
-
+        self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
         use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
@@ -74,12 +71,7 @@ class CameraTrafficLightDetector:
         lanelet2_map = load(lanelet2_map_name, projector)
 
         # Extract all stop lines and signals from the map
-        stoplines, self.signals = self.get_stoplines_signals(lanelet2_map)
-
-        # Disable the warnings from sklearn
-        warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
-        # Create the classifier
-        self.classifier = RadiusNeighborsClassifier(radius=self.waypoint_interval / 2, outlier_label=0).fit(stoplines[:,1:], stoplines[:,0])
+        self.signals = self.get_signals_from_map(lanelet2_map)
 
         self.bridge = CvBridge()
         self.model = onnxruntime.InferenceSession(onnx_path, providers=['CUDAExecutionProvider'])
@@ -109,15 +101,14 @@ class CameraTrafficLightDetector:
             self.camera_model = camera_model
 
     def local_path_callback(self, local_path_msg):
+
+        stopline_idx = []
+
+        # If there is a local path collect allt the stop line id's on the path
         if len(local_path_msg.waypoints) > 0:
-            # extract waypoints and create array - xy coordinates only
-            waypoints_xy = np.array([(wp.pose.pose.position.x, wp.pose.pose.position.y) for wp in local_path_msg.waypoints])
-            # predict which stoplines are on the path
-            stopline_idx = np.unique(self.classifier.predict(waypoints_xy))
-            # remove zeros
-            stopline_idx = stopline_idx[stopline_idx != 0]
-        else:
-            stopline_idx = []
+            for wp in local_path_msg.waypoints:
+                if wp.stop_line_id > 0:
+                    stopline_idx.append(wp.stop_line_id)
 
         with self.lock:
             self.stoplines_on_path = stopline_idx
@@ -191,17 +182,14 @@ class CameraTrafficLightDetector:
         if self.tfl_roi_pub.get_num_connections() > 0:
             self.publish_roi_images(image, rois, classes, scores, image_time_stamp)
     
-    def get_stoplines_signals(self, lanelet2_map):
-        
-        stoplines = []
+    def get_signals_from_map(self, lanelet2_map):
+
         signals = {}
 
         for reg_el in lanelet2_map.regulatoryElementLayer:
             if reg_el.attributes["subtype"] == "traffic_light":
                 # ref_line is the stop line and there is only 1 stopline per traffic light reg_el
                 linkId = reg_el.parameters["ref_line"][0].id
-                # add all stopline points to the list
-                stoplines.extend([[linkId, point.x, point.y] for point in reg_el.parameters["ref_line"][0]])
 
                 for bulbs in reg_el.parameters["light_bulbs"]:
                     # plId represents the traffic light (pole), one stop line can be associated with multiple traffic lights
@@ -212,9 +200,7 @@ class CameraTrafficLightDetector:
                     # which in turn contains a list of bulbs
                     signals.setdefault(linkId, {}).setdefault(plId, []).extend(bulb_data)
 
-        stoplines = np.array(stoplines)
-
-        return stoplines, signals
+        return signals
 
     def calculate_roi_coordinates(self, stoplines_on_path, transform):
 

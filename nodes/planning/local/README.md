@@ -16,7 +16,7 @@ The `velocity_local_planner` node is responsible for generating a local path tha
 |`braking_reaction_time` | double | `1.6` | The time it takes the vehicle to react to an object in front of it  (s) |
 |`car_safety_radius` | double | `1.3` | The safety radius of the vehicle - obstacles are detected within these circles around waypoints (m) |
 |`current_pose_to_car_front` | double | `4.0` | The distance from the current pose of the vehicle to the front of the car (m) |
-|`speed_deceleration_limit` | double | `1.0` | The maximum rate at which the vehicle can decelerate (m/s2) |
+|`default_deceleration` | double | `1.0` | The maximum rate at which the vehicle can decelerate (m/s2) |
 
 
 #### Subscribed Topics

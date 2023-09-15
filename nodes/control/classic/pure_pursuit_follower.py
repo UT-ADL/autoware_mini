@@ -9,8 +9,8 @@ import traceback
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error
-from helpers.waypoints import get_blinker_state_with_lookahead_time, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
+from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error, get_distance_between_two_points_2d
+from helpers.waypoints import get_blinker_state_with_lookahead, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
@@ -22,7 +22,7 @@ class PurePursuitFollower:
     def __init__(self):
 
         # Parameters
-        self.planning_time = rospy.get_param("~planning_time")
+        self.lookahead_time = rospy.get_param("~lookahead_time")
         self.min_lookahead_distance = rospy.get_param("~min_lookahead_distance")
         self.wheel_base = rospy.get_param("/vehicle/wheel_base")
         self.heading_angle_limit = rospy.get_param("heading_angle_limit")
@@ -32,7 +32,8 @@ class PurePursuitFollower:
         self.publish_debug_info = rospy.get_param("~publish_debug_info")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
-        self.speed_deceleration_limit = rospy.get_param("/planning/speed_deceleration_limit")
+        self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
+        self.default_deceleration = rospy.get_param("/planning/default_deceleration")
         self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
 
         # Variables - init
@@ -127,8 +128,8 @@ class PurePursuitFollower:
             # get nearest point on path from base_link
             nearest_point = get_closest_point_on_line(current_pose.position, waypoints[back_wp_idx].pose.pose.position, waypoints[front_wp_idx].pose.pose.position)
 
-            # calc lookahead distance (velocity * planning_time)
-            lookahead_distance = current_velocity * self.planning_time
+            # calc lookahead distance (velocity * lookahead_time)
+            lookahead_distance = current_velocity * self.lookahead_time
             if lookahead_distance < self.min_lookahead_distance:
                 lookahead_distance = self.min_lookahead_distance
 
@@ -151,7 +152,7 @@ class PurePursuitFollower:
                 return
         
             # calculate steering angle
-            curvature = 2 * math.sin(heading_error) / lookahead_distance
+            curvature = 2 * math.sin(heading_error) / get_distance_between_two_points_2d(current_pose.position, lookahead_point)
             steering_angle = math.atan(self.wheel_base * curvature)
 
             # target_velocity from map and based on closest object
@@ -160,7 +161,7 @@ class PurePursuitFollower:
             # if decelerating because of obstacle then calculate necessary deceleration to stop at safety distance
             if closest_object_distance - self.braking_safety_distance > 0:
                 # always allow minimum deceleration, to be able to adapt to map speeds
-                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), -self.speed_deceleration_limit)
+                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), -self.default_deceleration)
             # otherwise use vehicle default deceleration limit
             else:
                 acceleration = 0.0
@@ -170,7 +171,7 @@ class PurePursuitFollower:
                 acceleration = 0.0
 
             # blinkers
-            left_blinker, right_blinker = get_blinker_state_with_lookahead_time(waypoints, front_wp_idx, current_velocity, self.blinker_lookahead_time, self.blinker_lookahead_distance)
+            left_blinker, right_blinker = get_blinker_state_with_lookahead(waypoints, self.waypoint_interval, front_wp_idx, current_velocity, self.blinker_lookahead_time, self.blinker_lookahead_distance)
 
             # Publish
             self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker)

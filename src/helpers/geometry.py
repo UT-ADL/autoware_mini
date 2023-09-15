@@ -95,7 +95,7 @@ def clamp(value, minimum, maximum):
 
     return max(minimum, min(value, maximum))
 
-def get_closest_point_on_line(ego_point, point1, point2):
+def get_closest_point_on_line(ego_point, point1, point2, clamp_output=True):
     """
     Calculates closest point on path. Constructs one line that is given by two points and
     the other line is given by a point and is known to be perpendicular to the first line.
@@ -132,8 +132,9 @@ def get_closest_point_on_line(ego_point, point1, point2):
         y = m * (x - x1) + y1
 
     # clip output to be within the line segment
-    x = clamp(x, min(x1, x2), max(x1, x2))
-    y = clamp(y, min(y1, y2), max(y1, y2))
+    if clamp_output:
+        x = clamp(x, min(x1, x2), max(x1, x2))
+        y = clamp(y, min(y1, y2), max(y1, y2))
 
     return Point(x=x, y=y, z=z)
 

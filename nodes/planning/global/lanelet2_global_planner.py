@@ -58,6 +58,7 @@ class Lanelet2GlobalPlanner:
             exit(1)
 
         self.lanelet2_map = load(lanelet2_map_name, projector)
+        self.stopline_nodes = extract_stopline_nodes(self.lanelet2_map)
 
         # traffic rules
         traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
@@ -200,6 +201,8 @@ class Lanelet2GlobalPlanner:
                 waypoint.pose.pose.position.y = point.y
                 waypoint.pose.pose.position.z = point.z
                 waypoint.wpstate.steering_state = blinker
+                if point.id in self.stopline_nodes:
+                    waypoint.stop_line_id = self.stopline_nodes[point.id]
 
                 # calculate quaternion for orientation
                 if last_lanelet and idx == len(lanelet.centerline)-1:
@@ -262,6 +265,18 @@ class Lanelet2GlobalPlanner:
 
     def run(self):
         rospy.spin()
+
+def extract_stopline_nodes(map):
+
+    stopline_nodes = {}
+
+    for line in map.lineStringLayer:
+        if line.attributes:
+            if line.attributes["type"] == "stop_line":
+                # add all point id's into dictionary and add stopline id as value
+                stopline_nodes.update({point.id: line.id for point in line})
+
+    return stopline_nodes
 
 if __name__ == '__main__':
     rospy.init_node('lanelet2_global_planner')

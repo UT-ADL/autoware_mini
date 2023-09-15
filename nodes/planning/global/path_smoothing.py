@@ -11,11 +11,11 @@ class PathSmoothing:
     def __init__(self):
 
         # Parameters
-        self.waypoint_interval = rospy.get_param("~waypoint_interval")
+        self.waypoint_interval = rospy.get_param("waypoint_interval")
         self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves")
         self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration")
         self.adjust_endpoint_speed_to_zero = rospy.get_param("~adjust_endpoint_speed_to_zero")
-        self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
+        self.default_deceleration = rospy.get_param("default_deceleration")
         self.speed_averaging_window = rospy.get_param("~speed_averaging_window")
         self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index")
         self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit")
@@ -42,7 +42,8 @@ class PathSmoothing:
                 wp.wpstate.steering_state,
                 wp.twist.twist.linear.x,
                 wp.dtlane.lw,
-                wp.dtlane.rw
+                wp.dtlane.rw,
+                wp.stop_line_id
             ) for wp in msg.waypoints])
 
         smoothed_path_array = self.smooth_global_path(waypoints_array)
@@ -61,6 +62,7 @@ class PathSmoothing:
         speed = waypoints_array[:,4]
         lw = waypoints_array[:,5]
         rw = waypoints_array[:,6]
+        stop_line_id = waypoints_array[:,7]
 
         # distance differeneces between points
         distances = np.cumsum(np.sqrt(np.sum(np.diff(xy_path, axis=0)**2, axis=1)))
@@ -91,6 +93,18 @@ class PathSmoothing:
         lw_new = np.interp(new_distances, distances, lw)
         rw_new = np.interp(new_distances, distances, rw)
 
+        # Stop lines
+        # create empty array for new stopline id's
+        stop_line_id_new = np.zeros(len(new_distances))
+
+        # Extract stop line id's from old array and get the index
+        stop_line_index_old = np.where(stop_line_id > 0)[0]
+        for i in stop_line_index_old:
+            # find the index of the closest distance in the new distances array
+            closest_index = np.argmin(np.abs(new_distances - distances[i]))
+            # set the stop line id of the closest index to the stop line id of the old array
+            stop_line_id_new[closest_index] = stop_line_id[i]
+
         # Speed
         speed_interpolated = np.interp(new_distances, distances, speed)
         speed_new = speed_interpolated
@@ -103,7 +117,7 @@ class PathSmoothing:
 
         # loop over array backwards and forwards to adjust speeds using the deceleration limit
         if self.adjust_speeds_using_deceleration:
-            accel_constant = 2 * self.speed_deceleration_limit * self.waypoint_interval
+            accel_constant = 2 * self.default_deceleration * self.waypoint_interval
             # backward loop
             for i in range(len(speed_new) - 2, 0, -1):
                 speed_new[i] = min(speed_new[i], np.sqrt(speed_new[i + 1]**2 + accel_constant))
@@ -123,7 +137,7 @@ class PathSmoothing:
             speed_new[-1] = 0
 
             # adjust speed graphs using deceleartion limit and waypoint interval
-            accel_constant = 2 * self.speed_deceleration_limit * self.waypoint_interval
+            accel_constant = 2 * self.default_deceleration * self.waypoint_interval
             # backward loop - end point
             for i in range(len(speed_new) - 2, 0, -1):
                 adjusted_speed = np.sqrt(speed_new[i + 1]**2 + accel_constant)
@@ -135,7 +149,7 @@ class PathSmoothing:
             debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
 
         # Stack
-        smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, lw_new, rw_new, yaw), axis=1)
+        smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, lw_new, rw_new, yaw, stop_line_id_new), axis=1)
 
         return smoothed_path_array
 
@@ -148,7 +162,7 @@ class PathSmoothing:
 
         self.smoothed_path_pub.publish(lane)
 
-    def create_waypoint(self, x, y, z, blinker, speed, lw, rw, yaw):
+    def create_waypoint(self, x, y, z, blinker, speed, lw, rw, yaw, stop_line_id):
         # create waypoint
         waypoint = Waypoint()
         waypoint.pose.pose.position.x = x
@@ -159,6 +173,7 @@ class PathSmoothing:
         waypoint.pose.pose.orientation = get_orientation_from_heading(yaw)
         waypoint.dtlane.lw = lw
         waypoint.dtlane.rw = rw
+        waypoint.stop_line_id = int(stop_line_id)
 
         return waypoint
 

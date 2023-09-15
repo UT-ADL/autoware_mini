@@ -1,8 +1,10 @@
 current_pose_to_car_front: 4.0  # m
 braking_safety_distance: 4.0
 braking_reaction_time: 1.6
-car_safety_radius: 1.2
-speed_deceleration_limit: 1.0
+stopping_lateral_distance: 1.35           # m
+slowdown_lateral_distance: 1.60       # m
+waypoint_interval: 1.0          # m
+default_deceleration: 1.0
 
 lanelet2_global_planner:
   output_frame: map
@@ -20,7 +22,6 @@ waypoint_saver:
   interval: 1.0
 
 path_smoothing:
-  waypoint_interval: 1.0                  # m
   adjust_speeds_in_curves: True
   adjust_speeds_using_deceleration: True
   speed_averaging_window: 21              # window size (will be applied only if > 1)
@@ -33,3 +34,6 @@ velocity_local_planner:
   local_path_length: 100
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   transform_timeout: 0.06
+  dense_waypoint_interval: 0.1
+  tfl_maximum_deceleration: 2.7
+  blocking_speed_limit: 1.0
