@@ -25,7 +25,9 @@ class VelocityLocalPlanner:
         self.local_path_length = rospy.get_param("~local_path_length")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.transform_timeout = rospy.get_param("~transform_timeout")
-        self.braking_safety_distance = rospy.get_param("braking_safety_distance")
+        self.braking_safety_distance_obstacle = rospy.get_param("~braking_safety_distance_obstacle")
+        self.braking_safety_distance_stopline = rospy.get_param("~braking_safety_distance_stopline")
+        self.braking_safety_distance_goal = rospy.get_param("~braking_safety_distance_goal")
         self.braking_reaction_time = rospy.get_param("braking_reaction_time")
         self.stopping_lateral_distance = rospy.get_param("stopping_lateral_distance")
         self.slowdown_lateral_distance = rospy.get_param("slowdown_lateral_distance")
@@ -175,13 +177,13 @@ class VelocityLocalPlanner:
             else:
                 velocity = Vector3()
             # add object center point and convex hull points to the points list
-            points_list.append([obj.pose.position.x, obj.pose.position.y, obj.pose.position.z, velocity.x])
+            points_list.append([obj.pose.position.x, obj.pose.position.y, obj.pose.position.z, velocity.x, self.braking_safety_distance_obstacle])
             for point in obj.convex_hull.polygon.points:
-                points_list.append([point.x, point.y, point.z, velocity.x])
+                points_list.append([point.x, point.y, point.z, velocity.x, self.braking_safety_distance_obstacle])
             # add predicted path points to the points list, if they exist
             if len(obj.candidate_trajectories.lanes) > 0:
                 for wp in obj.candidate_trajectories.lanes[0].waypoints:
-                    points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, velocity.x])
+                    points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, velocity.x, self.braking_safety_distance_obstacle])
 
         # red traffic lights: add wp with stop line id's where the traffic light status is red to obstacle list
         for i, wp in enumerate(local_path_waypoints):
@@ -193,7 +195,10 @@ class VelocityLocalPlanner:
                 if deceleration > self.tfl_maximum_deceleration:
                     rospy.logwarn_throttle(3, "%s - ignore red traffic light, deceleration: %f", rospy.get_name(), deceleration)
                 else:
-                    points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, 0.0])
+                    points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, 0.0, self.braking_safety_distance_stopline])
+
+        # Add last wp as goal point to stop the car before it
+        points_list.append([local_path_waypoints[-1].pose.pose.position.x, local_path_waypoints[-1].pose.pose.position.y, local_path_waypoints[-1].pose.pose.position.z, 0.0, self.braking_safety_distance_goal])
 
         if len(points_list) > 0:
             # convert the points list to a numpy array
@@ -221,11 +226,12 @@ class VelocityLocalPlanner:
                 obstacles_ahead_speeds = obstacle_array[obstacles_dense_path[:,1].astype(int)][:,3]
                 obstacles_ahead_dists = local_path_dense_dists[obstacles_dense_path[:,0].astype(int)]
                 obstacles_ahead_lateral_dists = obstacles_dense_path[:,2]
+                braking_safety_distances = obstacle_array[obstacles_dense_path[:,1].astype(int)][:,4]
 
                 # ALL OBSTACLES: Calculate target velocity as if they were within stopping_lateral_distance
                 obstacle_distances = obstacles_ahead_dists - self.current_pose_to_car_front
                 # subtract braking_safety_distance and additionally reaction_time and obstacle_speed based distance for larger longitudinal distance when driving faster
-                following_distances = obstacle_distances - self.braking_safety_distance - self.braking_reaction_time * obstacles_ahead_speeds
+                following_distances = obstacle_distances - braking_safety_distances - self.braking_reaction_time * obstacles_ahead_speeds
                 # use following_distance and if sqrt is negative use 0 - we do not want to drive!
                 target_velocities = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.default_deceleration * following_distances))
 
@@ -272,7 +278,7 @@ class VelocityLocalPlanner:
                     obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - local_path_dists[i] - self.current_pose_to_car_front 
 
                     # calculate target velocity as if it is blocking the lane (inside stopping_lateral_distance)
-                    following_distance = obstacle_distance - self.braking_safety_distance - self.braking_reaction_time * obstacles_ahead_speeds[lowest_target_velocity_idx]
+                    following_distance = obstacle_distance - braking_safety_distances[lowest_target_velocity_idx] - self.braking_reaction_time * obstacles_ahead_speeds[lowest_target_velocity_idx]
                     target_velocity = np.sqrt(np.maximum(0, obstacles_ahead_speeds[lowest_target_velocity_idx]**2 + 2 * self.default_deceleration * following_distance))
 
                     # calculate target velocity in case of obstacle in slowdown_lateral_distance
