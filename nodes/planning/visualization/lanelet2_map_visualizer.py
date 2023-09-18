@@ -21,6 +21,7 @@ GREY = ColorRGBA(0.4, 0.4, 0.4, 0.6)
 ORANGE = ColorRGBA(1.0, 0.5, 0.0, 0.6)
 WHITE = ColorRGBA(1.0, 1.0, 1.0, 0.6)
 CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.3)
+BLUE = ColorRGBA(0.3, 0.3, 1.0, 0.3)
 WHITE100 = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
 TRAFFIC_LIGHT_STATE_TO_MARKER_COLOR = {
@@ -164,6 +165,10 @@ def visualize_laneltLayer(map):
 
             crosswalk_marker = linestring_to_marker(points, "Crosswalk", lanelet.id, ORANGE, 0.3, stamp)
             marker_array.markers.append(crosswalk_marker)
+
+        elif lanelet.attributes["subtype"] == "bus_lane":
+            centerline_marker = linestring_to_marker(lanelet.centerline, "Centerline", lanelet.id, BLUE, 1.5, stamp)
+            marker_array.markers.append(centerline_marker)
 
     return marker_array
 

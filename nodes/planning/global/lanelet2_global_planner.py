@@ -62,7 +62,7 @@ class Lanelet2GlobalPlanner:
 
         # traffic rules
         traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
-                                                  lanelet2.traffic_rules.Participants.Vehicle)
+                                                  lanelet2.traffic_rules.Participants.VehicleTaxi)
 
         # routing graph
         self.graph = lanelet2.routing.RoutingGraph(self.lanelet2_map, traffic_rules)
