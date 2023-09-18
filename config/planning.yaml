@@ -37,3 +37,6 @@ velocity_local_planner:
   dense_waypoint_interval: 0.1
   tfl_maximum_deceleration: 2.7
   blocking_speed_limit: 1.0
+  braking_safety_distance_obstacle: 4.0
+  braking_safety_distance_stopline: 2.0
+  braking_safety_distance_goal: 0.0
