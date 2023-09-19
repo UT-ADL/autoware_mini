@@ -11,7 +11,7 @@ from lanelet2.geometry import to2D, findNearest, distance
 
 from sklearn.neighbors import NearestNeighbors
 
-from geometry_msgs.msg import PoseStamped, Point
+from geometry_msgs.msg import PoseStamped, TwistStamped, Point
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
 from std_msgs.msg import Empty, ColorRGBA
 from visualization_msgs.msg import MarkerArray, Marker
@@ -47,6 +47,7 @@ class Lanelet2GlobalPlanner:
 
         # Internal variables
         self.current_location = None
+        self.current_velocity = None
         self.goal_point = None
         self.waypoints = []
 
@@ -74,6 +75,7 @@ class Lanelet2GlobalPlanner:
         # Subscribers
         rospy.Subscriber('/move_base_simple/goal', PoseStamped, self.goal_callback, queue_size=None, tcp_nodelay=True)
         rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1, tcp_nodelay=True)
+        rospy.Subscriber('/localization/current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1, tcp_nodelay=True)
         rospy.Subscriber('cancel_route', Empty, self.cancel_route_callback, queue_size=None, tcp_nodelay=True)
 
     def goal_callback(self, msg):
@@ -85,6 +87,10 @@ class Lanelet2GlobalPlanner:
         if self.current_location == None:
             # TODO handle if current_pose gets lost at later stage - see current_pose_callback
             rospy.logwarn("%s - current_pose not available", rospy.get_name())
+            return
+        
+        if self.current_velocity == None:
+            rospy.logwarn("%s - current_velocity not available", rospy.get_name())
             return
 
         if self.lanelet2_map == None:
@@ -152,11 +158,14 @@ class Lanelet2GlobalPlanner:
 
         if self.goal_point != None:
             d = get_distance_between_two_points_2d(self.current_location, self.goal_point)
-            if d < self.distance_to_goal_limit:
+            if d < self.distance_to_goal_limit and self.current_velocity < 0.05:
                 self.waypoints = []
                 self.goal_point = None
                 self.publish_waypoints(self.waypoints)
                 rospy.logwarn("%s - goal reached, clearing path!", rospy.get_name())
+
+    def current_velocity_callback(self, msg):
+        self.current_velocity = msg.twist.linear.x
 
     def cancel_route_callback(self, msg):
         self.waypoints = []

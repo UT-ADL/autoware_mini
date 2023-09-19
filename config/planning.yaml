@@ -8,7 +8,7 @@ default_deceleration: 1.0
 
 lanelet2_global_planner:
   output_frame: map
-  distance_to_goal_limit: 1.5
+  distance_to_goal_limit: 5.0
   distance_to_centerline_limit: 5.0
   speed_limit: 40.0                   # max velocity for route (km/h), will be replaced by speed taken from map
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
