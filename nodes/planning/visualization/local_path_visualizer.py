@@ -16,7 +16,6 @@ class LocalPathVisualizer:
         self.stopping_lateral_distance = rospy.get_param("stopping_lateral_distance")
         self.slowdown_lateral_distance = rospy.get_param("slowdown_lateral_distance")
         self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
-        self.braking_safety_distance = rospy.get_param("braking_safety_distance")
 
         # Publishers
         self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, tcp_nodelay=True)
@@ -46,34 +45,19 @@ class LocalPathVisualizer:
             current_pose_on_path = get_closest_point_on_line(self.current_pose.position, lane.waypoints[0].pose.pose.position, lane.waypoints[1].pose.pose.position)
             distance_correction = get_distance_between_two_points_2d(current_pose_on_path, lane.waypoints[0].pose.pose.position)
 
+            obstacle_distance_from_local_path_start = lane.closest_object_distance + self.current_pose_to_car_front + distance_correction
+            stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 1, lane.waypoints[0].pose.pose.position, obstacle_distance_from_local_path_start)
+
             points = []
+            for waypoint in lane.waypoints:
+                points.append(waypoint.pose.pose.position)
 
-            if math.isclose(lane.closest_object_distance, 0.0):
-                for waypoint in lane.waypoints:
-                    points.append(waypoint.pose.pose.position)
-            else:
-                obstacle_distance_from_local_path_start = lane.closest_object_distance + self.current_pose_to_car_front + distance_correction
-                obstacle_position, _ = get_point_and_orientation_on_path_within_distance(lane.waypoints, 1, lane.waypoints[0].pose.pose.position, obstacle_distance_from_local_path_start)
-
-                d = 0.0
-                prev_waypoint = None
-                for waypoint in lane.waypoints:
-                    if prev_waypoint is not None:
-                        d += get_distance_between_two_points_2d(prev_waypoint.pose.pose.position, waypoint.pose.pose.position)
-                        if d < obstacle_distance_from_local_path_start:
-                            points.append(waypoint.pose.pose.position)
-                        else:
-                            break
-                    prev_waypoint = waypoint
-                # add obstacle position as final point
-                points.append(obstacle_position)
-            
-            # use increment to color the path
-            color = ColorRGBA(0.2, 1.0, 0.2, 0.3)      # green - no obstacle within stopping_lateral_distance or it is not affecting map based target velocity
-            if lane.increment == 3:
-                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)  # yellow, obstacle is blocking and causes the lowering of the target velocity compared to map velocity
-            if lane.increment == 4:
-                color = ColorRGBA(1.0, 0.2, 0.2, 0.3)  # red, obstacle is blocking and causing stopping ( < 1m/s)
+            # Color of the local path
+            color = ColorRGBA(0.2, 1.0, 0.2, 0.3)      # green - no obstacle within slowdown_lateral_distance or stopping_lateral_distance
+            if lane.increment == 1 and lane.cost > 0.0:
+                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)  # yellow - obstacles within slowdown_lateral_distance
+            if lane.increment > 1 and lane.cost > 0.0:
+                color = ColorRGBA(1.0, 0.2, 0.2, 0.3)  # red - obstacles within stopping_lateral_distance
 
             # local path with stopping_lateral_distance
             marker = Marker()
@@ -88,11 +72,6 @@ class LocalPathVisualizer:
             marker.color = color
             marker.points = points
             marker_array.markers.append(marker)
-
-
-            color = ColorRGBA(0.2, 1.0, 0.2, 0.3)       # green - no obstacle within slowdown_lateral_distance or stopping_lateral_distance
-            if lane.increment > 0:
-                color = ColorRGBA(1.0, 1.0, 0.2, 0.3)   # yellow - obstacle within slowdown_lateral_distance or stopping_lateral_distance
 
             # local path with slowdown_lateral_distance
             marker = Marker()
@@ -125,6 +104,34 @@ class LocalPathVisualizer:
                 # add only up to a first 0.0 velocity label
                 if math.isclose(waypoint.twist.twist.linear.x, 0.0):
                     break
+
+            if lane.increment > 0 and lane.cost > 0.0:
+                # coloring of "stopping point" visualizes the min target velocity obstacle
+                color = ColorRGBA(0.9, 0.9, 0.9, 0.2)           # white - obstcle affecting ego speed in slowdown area
+                if lane.is_blocked:
+                    color = ColorRGBA(0.0, 1.0, 0.0, 0.5)       # green - in stopping area, but not affecting target velocity
+                if lane.increment == 3:
+                    color = ColorRGBA(1.0, 1.0, 0.0, 0.5)       # yellow - need to slow down map based target velocity
+                if lane.increment == 4:
+                        color = ColorRGBA(1.0, 0.0, 0.0, 0.5)   # red - obstacle in front very slow
+
+                # "Stopping point" - obstacle that currently causes the smallest target velocity
+                marker = Marker()
+                marker.header.frame_id = lane.header.frame_id
+                marker.header.stamp = stamp
+                marker.ns = "Stopping point"
+                marker.id = 0
+                marker.type = marker.CUBE
+                marker.action = marker.ADD
+                marker.pose.position.x = stop_position.x
+                marker.pose.position.y = stop_position.y
+                marker.pose.position.z = stop_position.z + 1.0
+                marker.pose.orientation = stop_orientation
+                marker.scale.x = 0.3
+                marker.scale.y = 5.0
+                marker.scale.z = 2.5
+                marker.color = color
+                marker_array.markers.append(marker)
 
         self.local_path_markers_pub.publish(marker_array)
 
