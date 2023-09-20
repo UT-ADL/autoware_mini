@@ -113,7 +113,7 @@ class LocalPathVisualizer:
                 if lane.increment == 3:
                     color = ColorRGBA(1.0, 1.0, 0.0, 0.5)       # yellow - need to slow down map based target velocity
                 if lane.increment == 4:
-                        color = ColorRGBA(1.0, 0.0, 0.0, 0.5)   # red - obstacle in front very slow
+                    color = ColorRGBA(1.0, 0.0, 0.0, 0.5)   # red - obstacle in front very slow
 
                 # "Stopping point" - obstacle that currently causes the smallest target velocity
                 marker = Marker()
