@@ -124,7 +124,7 @@ class VelocityLocalPlanner:
         current_position = self.current_position
         current_speed = self.current_speed
 
-        # if global path or current pose is empty, publish empty local path, which stops the vehicle
+        # if global path, current pose or current_speed is None, publish empty local path, which stops the vehicle
         if global_path_array is None or current_position is None or current_speed is None:
             self.publish_local_path_wp([], msg.header.stamp, output_frame)
             return
@@ -236,7 +236,7 @@ class VelocityLocalPlanner:
                 target_velocities = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.default_deceleration * following_distances))
 
                 # OBSTACLES ONLY WITHIN SLOWDOWN LATERAL DISTANCE
-                # create mask to select only obstacles in slowdown_lateral_distance and outside stopping_lateral_distance
+                # create mask to select obstacles within slowdown_lateral_distance and outside stopping_lateral_distance
                 obstacles_in_slowdown_area_mask = obstacles_ahead_lateral_dists > self.stopping_lateral_distance
                 target_velocities_slowdown = target_velocities[obstacles_in_slowdown_area_mask]
                 # calculate scaling coefficient to transform lateral distance between 0 to 1
@@ -245,19 +245,20 @@ class VelocityLocalPlanner:
                 # calculate target velocity: scale possible max and min velocity difference and add to min velocity
                 target_velocities_slowdown = scale[obstacles_in_slowdown_area_mask] * np.maximum((local_path_waypoints[0].twist.twist.linear.x - target_velocities_slowdown), 0) + target_velocities_slowdown
 
-                # Update target_velocities with obstacles within slowdown_lateral_distance
+                # Update target_velocities with obstacles only within slowdown_lateral_distance
                 target_velocities[obstacles_in_slowdown_area_mask] = target_velocities_slowdown
 
                 # Find obstacle causing smallest target velocity at ego car location
                 lowest_target_velocity_idx = np.argmin(target_velocities)
 
-                # TODO: currently if obs in slowdown area and active - then cost is 4.0
-                # if oath end (obs with cost 0) is within local_path then will result in increment 2 - local path will be red!
-                # the condition cost > 0 won't help. 
                 # For local path visualization find if there are obstacles within slowdown_lateral_distance and stopping_lateral_distance
                 if np.sum(obstacles_in_slowdown_area_mask) > 0:
                     increment = 1
-                if np.sum(np.logical_not(obstacles_in_slowdown_area_mask)) > 0:
+                # if there is only one obstacle inside stopping_lateral_distance check if it is not goal point (braking_safety_distance_goal = 0.0)
+                if np.sum(np.logical_not(obstacles_in_slowdown_area_mask)) == 1:
+                    if braking_safety_distances[np.logical_not(obstacles_in_slowdown_area_mask)] > 0.0:
+                        increment = 2
+                elif np.sum(np.logical_not(obstacles_in_slowdown_area_mask)) > 1:
                     increment = 2
 
                 # If any calculated target_vel drops close to 0 then use this boolean to set all following wp speeds to 0
@@ -271,7 +272,7 @@ class VelocityLocalPlanner:
                         wp.twist.twist.linear.x = 0.0
                         continue
 
-                    # obstacle distance from current_pose to stopping_point TODO: possible add - self.current_pose_to_car_front
+                    # obstacle distance from car front to stopping_point
                     obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - local_path_dists[i] - self.current_pose_to_car_front - braking_safety_distances[lowest_target_velocity_idx]
 
                     # calculate target velocity as if it is blocking the lane (inside stopping_lateral_distance)
@@ -287,10 +288,10 @@ class VelocityLocalPlanner:
 
                     # Use fist waypoint to determine the increment value. This is used to determine the coloring of the local path and has no other purpose
                     if i == 0:
-                        # assign closest_object_distance if it is not goal point (braking_safety_distance_goal = 0.0)
+                        # assign closest_object_distance and speed only if it is not goal point (braking_safety_distance_goal = 0.0)
                         if braking_safety_distances[lowest_target_velocity_idx] > 0.0:
                             closest_object_distance = obstacle_distance
-                        closest_object_velocity = obstacles_ahead_speeds[lowest_target_velocity_idx]
+                            closest_object_velocity = obstacles_ahead_speeds[lowest_target_velocity_idx]
                         cost = braking_safety_distances[lowest_target_velocity_idx]
 
                         # lowest target velocity obstacle within stopping_lateral_distance - blocking; ignore goal point with 0.0 braking distance
@@ -300,7 +301,7 @@ class VelocityLocalPlanner:
                             if target_velocity < wp.twist.twist.linear.x:
                                 increment = 3
                                 # lowest target velocity obstacle almost stopped - need to stop
-                                if closest_object_velocity < 1.0:
+                                if closest_object_velocity < self.blocking_speed_limit:
                                     increment = 4
 
                     # overwrite target velocity of wp
