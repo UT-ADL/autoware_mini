@@ -147,7 +147,7 @@ class VelocityLocalPlanner:
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
         local_path_dists = np.insert(local_path_dists, 0, 0.0)
 
-        # interpolate dense local path and us it to calculate the closest object distance and velocity
+        # interpolate dense local path and use it to calculate the closest object distance and velocity
         local_path_dense_dists = np.linspace(0, local_path_dists[-1], num=int(local_path_dists[-1] / self.dense_waypoint_interval))
         x_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,0])
         y_new = np.interp(local_path_dense_dists, local_path_dists, local_path_array[:,1])
@@ -182,6 +182,7 @@ class VelocityLocalPlanner:
             for point in obj.convex_hull.polygon.points:
                 points_list.append([point.x, point.y, point.z, velocity.x, self.braking_safety_distance_obstacle])
             # add predicted path points to the points list, if they exist
+            # TODO: move convex hull points to the predicted position and add them to the points list
             if len(obj.candidate_trajectories.lanes) > 0:
                 for wp in obj.candidate_trajectories.lanes[0].waypoints:
                     points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, velocity.x, self.braking_safety_distance_obstacle])
@@ -224,10 +225,10 @@ class VelocityLocalPlanner:
                 obstacles_dense_path = obstacles_dense_path[unique_indices]
 
                 # Extract necessary arrays
-                obstacles_ahead_speeds = obstacle_array[obstacles_dense_path[:,1].astype(int)][:,3]
+                obstacles_ahead_speeds = obstacle_array[obstacles_dense_path[:,1].astype(int),3]
                 obstacles_ahead_dists = local_path_dense_dists[obstacles_dense_path[:,0].astype(int)]
                 obstacles_ahead_lateral_dists = obstacles_dense_path[:,2]
-                braking_safety_distances = obstacle_array[obstacles_dense_path[:,1].astype(int)][:,4]
+                braking_safety_distances = obstacle_array[obstacles_dense_path[:,1].astype(int),4]
 
                 # ALL OBSTACLES
                 # subtract braking_safety_distance and additionally reaction_time and obstacle_speed based distance for larger longitudinal distance when driving faster
