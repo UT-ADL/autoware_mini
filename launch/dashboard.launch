@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="driver_status" default="false"/>   
 
     <group ns="dashboard">
         <!-- Current and target speed -->
@@ -21,9 +22,9 @@
             <param name="image_path"  value="$(find autoware_mini)/images/dashboard/"/>
         </node>
         <!-- Novatel visualizer -->
-        <node pkg="autoware_mini" type="novatel_oem7_visualizer.py" name="novatel_oem7_visualizer" output="screen" required="true"/>
+        <node if="$(arg driver_status)" pkg="autoware_mini" type="novatel_oem7_visualizer.py" name="novatel_oem7_visualizer" output="screen" required="true"/>
         <!-- SSC and Pacmod state visualizer -->
-        <node pkg="autoware_mini" type="pacmod_state_visualizer.py" name="pacmod_state_visualizer" output="screen" required="true" >
+        <node if="$(arg driver_status)" pkg="autoware_mini" type="pacmod_state_visualizer.py" name="pacmod_state_visualizer" output="screen" required="true" >
             <param name="image_path"  value="$(find autoware_mini)/images/dashboard/"/>
         </node>
 
