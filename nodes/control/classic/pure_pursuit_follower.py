@@ -31,7 +31,6 @@ class PurePursuitFollower:
         self.blinker_lookahead_distance = rospy.get_param("blinker_lookahead_distance")
         self.publish_debug_info = rospy.get_param("~publish_debug_info")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
-        self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
         self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
         self.default_deceleration = rospy.get_param("/planning/default_deceleration")
         self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
@@ -158,10 +157,10 @@ class PurePursuitFollower:
             # target_velocity from map and based on closest object
             target_velocity = interpolate_velocity_between_waypoints(nearest_point, waypoints[back_wp_idx], waypoints[front_wp_idx])
 
-            # if decelerating because of obstacle then calculate necessary deceleration to stop at safety distance
-            if closest_object_distance - self.braking_safety_distance > 0:
+            # if decelerating because of obstacle then calculate necessary deceleration
+            if closest_object_distance > 0:
                 # always allow minimum deceleration, to be able to adapt to map speeds
-                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), -self.default_deceleration)
+                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / closest_object_distance, -self.default_deceleration)
             # otherwise use vehicle default deceleration limit
             else:
                 acceleration = 0.0
