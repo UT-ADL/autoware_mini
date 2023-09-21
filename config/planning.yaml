@@ -36,7 +36,9 @@ velocity_local_planner:
   transform_timeout: 0.06
   dense_waypoint_interval: 0.1
   tfl_maximum_deceleration: 2.7
-  stopping_speed_limit: 1.0
   braking_safety_distance_obstacle: 4.0
   braking_safety_distance_stopline: 2.0
   braking_safety_distance_goal: 0.0
+
+local_path_visualizer:
+  stopping_speed_limit: 1.0
