@@ -23,7 +23,6 @@ The `velocity_local_planner` node is responsible for generating a local path tha
 |`current_pose_to_car_front` | double | `4.0` | The distance from the current pose of the vehicle to the front of the car (m) |
 |`default_deceleration` | double | `1.0` | The maximum rate at which the vehicle can decelerate (m/s2) |
 |`tfl_maximum_deceleration` | double | `2.7` | If deceleration needed to stop behind the stop line exceeds this value then traffic light is ignored (m/s2) |
-|`stopping_speed_limit` | double | `1.0` | Speed limit (m/s) for other vehicles to consider them as stopped |
 
 
 #### Subscribed Topics
