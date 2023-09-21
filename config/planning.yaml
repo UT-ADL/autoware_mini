@@ -11,6 +11,7 @@ lanelet2_global_planner:
   distance_to_centerline_limit: 5.0
   speed_limit: 40.0                   # max velocity for route (km/h), will be replaced by speed taken from map
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
+  ego_vehicle_stopped_speed_limit: 0.1
 
 waypoint_loader:
   output_frame: map
@@ -35,7 +36,7 @@ velocity_local_planner:
   transform_timeout: 0.06
   dense_waypoint_interval: 0.1
   tfl_maximum_deceleration: 2.7
-  blocking_speed_limit: 1.0
+  stopping_speed_limit: 1.0
   braking_safety_distance_obstacle: 4.0
   braking_safety_distance_stopline: 2.0
   braking_safety_distance_goal: 0.0
