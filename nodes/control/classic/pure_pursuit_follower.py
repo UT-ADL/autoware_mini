@@ -33,6 +33,7 @@ class PurePursuitFollower:
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
         self.default_deceleration = rospy.get_param("/planning/default_deceleration")
+        self.current_pose_to_car_front = rospy.get_param("/planning/current_pose_to_car_front")
         self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
 
         # Variables - init
@@ -40,6 +41,7 @@ class PurePursuitFollower:
         self.waypoints = None
         self.closest_object_distance = 0.0
         self.closest_object_velocity = 0.0
+        self.stopping_point_distance = 0.0
         self.lock = threading.Lock()
 
         # Publishers
@@ -68,6 +70,7 @@ class PurePursuitFollower:
                 self.waypoints = None
                 self.closest_object_distance = 0.0
                 self.closest_object_velocity = 0.0
+                self.stopping_point_distance = 0.0
             return
 
         # prepare waypoints for nearest neighbor search
@@ -78,6 +81,7 @@ class PurePursuitFollower:
             self.waypoints = path_msg.waypoints
             self.closest_object_distance = path_msg.closest_object_distance
             self.closest_object_velocity = path_msg.closest_object_velocity
+            self.stopping_point_distance = path_msg.cost
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
@@ -126,6 +130,7 @@ class PurePursuitFollower:
 
             # get nearest point on path from base_link
             nearest_point = get_closest_point_on_line(current_pose.position, waypoints[back_wp_idx].pose.pose.position, waypoints[front_wp_idx].pose.pose.position)
+            ego_distance_from_path_start = get_distance_between_two_points_2d(waypoints[0].pose.pose.position, nearest_point)
 
             # calc lookahead distance (velocity * lookahead_time)
             lookahead_distance = current_velocity * self.lookahead_time
@@ -160,7 +165,7 @@ class PurePursuitFollower:
             # if decelerating because of obstacle then calculate necessary deceleration
             if closest_object_distance > 0:
                 # always allow minimum deceleration, to be able to adapt to map speeds
-                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / closest_object_distance, -self.default_deceleration)
+                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (self.stopping_point_distance - ego_distance_from_path_start - self.current_pose_to_car_front), -self.default_deceleration)
             # otherwise use vehicle default deceleration limit
             else:
                 acceleration = 0.0

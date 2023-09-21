@@ -32,6 +32,7 @@ class StanleyFollower:
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
         self.default_deceleration = rospy.get_param("/planning/default_deceleration")
+        self.current_pose_to_car_front = rospy.get_param("/planning/current_pose_to_car_front")
         self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
 
         # Variables - init
@@ -39,6 +40,7 @@ class StanleyFollower:
         self.waypoints = None
         self.closest_object_distance = 0.0
         self.closest_object_velocity = 0.0
+        self.stopping_point_distance = 0.0
         self.lock = threading.Lock()
 
         # Publishers
@@ -68,6 +70,7 @@ class StanleyFollower:
                 self.waypoints = None
                 self.closest_object_distance = 0.0
                 self.closest_object_velocity = 0.0
+                self.stopping_point_distance = 0.0
             return
 
         # prepare waypoints for nearest neighbor search
@@ -78,6 +81,7 @@ class StanleyFollower:
             self.waypoints = path_msg.waypoints
             self.closest_object_distance = path_msg.closest_object_distance
             self.closest_object_velocity = path_msg.closest_object_velocity
+            self.stopping_point_distance = path_msg.cost
 
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
@@ -132,6 +136,7 @@ class StanleyFollower:
                 return
         
             bl_nearest_point = get_closest_point_on_line(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
+            ego_distance_from_path_start = get_distance_between_two_points_2d(waypoints[0].pose.pose.position, bl_nearest_point)
             lookahead_point, _ = get_point_and_orientation_on_path_within_distance(waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
 
             track_heading = get_heading_between_two_points(bl_nearest_point, lookahead_point)
@@ -153,7 +158,7 @@ class StanleyFollower:
             # if decelerating because of obstacle then calculate necessary deceleration
             if closest_object_distance > 0:
                 # always allow minimum deceleration, to be able to adapt to map speeds
-                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / closest_object_distance, -self.default_deceleration)
+                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (self.stopping_point_distance - ego_distance_from_path_start - self.current_pose_to_car_front), -self.default_deceleration)
             # otherwise use vehicle default deceleration limit
             else:
                 acceleration = 0.0
