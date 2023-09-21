@@ -138,9 +138,7 @@ class VelocityLocalPlanner:
 
         # project current_position to path
         current_position_on_path = get_closest_point_on_line(current_position, local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position)
-
-        # for all calculations consider the current pose as the first point of the local path
-        local_path_array[0] = [current_position_on_path.x, current_position_on_path.y]
+        ego_distance_from_path_start = get_distance_between_two_points_2d(current_position_on_path, local_path_waypoints[0].pose.pose.position)
 
         # calculate distances up to each waypoint
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
@@ -156,7 +154,7 @@ class VelocityLocalPlanner:
         closest_object_distance = 0.0
         closest_object_velocity = 0.0 
         local_path_blocked = False
-        braking_safety_distance = 0.0
+        stopping_point_distance = 0.0
 
         points_list = []
         # fetch the transform from the object frame to the base_link frame to align the speed with ego vehicle
@@ -230,7 +228,7 @@ class VelocityLocalPlanner:
 
                 # ALL OBSTACLES
                 # subtract braking_safety_distance and additionally reaction_time and obstacle_speed based distance for larger longitudinal distance when driving faster
-                following_distances = obstacles_ahead_dists - self.current_pose_to_car_front - braking_safety_distances - self.braking_reaction_time * obstacles_ahead_speeds
+                following_distances = obstacles_ahead_dists - ego_distance_from_path_start - self.current_pose_to_car_front - braking_safety_distances - self.braking_reaction_time * obstacles_ahead_speeds
                 # use following_distance and if sqrt is negative use 0 - we do not want to drive!
                 target_velocities = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.default_deceleration * following_distances))
 
@@ -262,7 +260,7 @@ class VelocityLocalPlanner:
                         continue
 
                     # obstacle distance from car front
-                    obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - local_path_dists[i] - self.current_pose_to_car_front
+                    obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - ego_distance_from_path_start - local_path_dists[i] - self.current_pose_to_car_front
 
                     # calculate target velocity as if it is blocking the lane (inside stopping_lateral_distance)
                     following_distance = obstacle_distance - braking_safety_distances[lowest_target_velocity_idx]- self.braking_reaction_time * obstacles_ahead_speeds[lowest_target_velocity_idx]
@@ -279,10 +277,10 @@ class VelocityLocalPlanner:
                     if i == 0:
                         closest_object_distance = obstacle_distance
                         closest_object_velocity = obstacles_ahead_speeds[lowest_target_velocity_idx]
-                        braking_safety_distance = braking_safety_distances[lowest_target_velocity_idx]
+                        stopping_point_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - braking_safety_distances[lowest_target_velocity_idx]
 
                         # lowest target velocity obstacle within stopping_lateral_distance - blocking; ignore goal point with braking_safety_distance_goal = 0.0
-                        if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] <= self.stopping_lateral_distance and braking_safety_distance > 0.0:
+                        if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] <= self.stopping_lateral_distance and braking_safety_distances[lowest_target_velocity_idx] > 0.0:
                             local_path_blocked = True
 
                     # overwrite target velocity of wp
@@ -292,9 +290,9 @@ class VelocityLocalPlanner:
                     if math.isclose(wp.twist.twist.linear.x, 0.0):
                         zero_speeds_onwards = True
 
-        self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, local_path_blocked, braking_safety_distance)
+        self.publish_local_path_wp(local_path_waypoints, msg.header.stamp, output_frame, closest_object_distance, closest_object_velocity, local_path_blocked, stopping_point_distance)
 
-    def publish_local_path_wp(self, local_path_waypoints, stamp, output_frame, closest_object_distance=0.0, closest_object_velocity=0.0, local_path_blocked=False, braking_safety_distance=0.0):
+    def publish_local_path_wp(self, local_path_waypoints, stamp, output_frame, closest_object_distance=0.0, closest_object_velocity=0.0, local_path_blocked=False, stopping_point_distance=0.0):
         # create lane message
         lane = Lane()
         lane.header.frame_id = output_frame
@@ -303,7 +301,7 @@ class VelocityLocalPlanner:
         lane.closest_object_distance = closest_object_distance
         lane.closest_object_velocity = closest_object_velocity
         lane.is_blocked = local_path_blocked
-        lane.cost = braking_safety_distance
+        lane.cost = stopping_point_distance
         self.local_path_pub.publish(lane)
 
     def run(self):

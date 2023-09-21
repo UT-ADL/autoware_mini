@@ -33,7 +33,8 @@ class LocalPathVisualizer:
 
     def local_path_callback(self, lane):
 
-        braking_safety_distance = lane.cost
+        # lane.cost is used to determine the stopping point distance from path start
+        stopping_point_distance = lane.cost
 
         marker_array = MarkerArray()
 
@@ -46,11 +47,8 @@ class LocalPathVisualizer:
         stamp = rospy.Time.now()
 
         if self.current_pose is not None and len(lane.waypoints) > 1:
-            current_pose_on_path = get_closest_point_on_line(self.current_pose.position, lane.waypoints[0].pose.pose.position, lane.waypoints[1].pose.pose.position)
-            distance_correction = get_distance_between_two_points_2d(current_pose_on_path, lane.waypoints[0].pose.pose.position)
 
-            stopping_point_distance_from_local_path_start = lane.closest_object_distance + self.current_pose_to_car_front + distance_correction - braking_safety_distance
-            stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 1, lane.waypoints[0].pose.pose.position, stopping_point_distance_from_local_path_start)
+            stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 1, lane.waypoints[0].pose.pose.position, stopping_point_distance)
 
             points = []
             for waypoint in lane.waypoints:
