@@ -188,9 +188,10 @@ class VelocityLocalPlanner:
 
             if wp.stop_line_id > 0 and wp.stop_line_id in red_stop_lines:
                 # use wp distance and caclulate necessary deceleration for stopping
-                deceleration = (current_speed**2) / (2 * (local_path_dists[i] - self.current_pose_to_car_front - self.braking_safety_distance_stopline))
+                deceleration = (current_speed**2) / (2 * (local_path_dists[i] - ego_distance_from_path_start - self.current_pose_to_car_front - self.braking_safety_distance_stopline))
 
-                if deceleration > self.tfl_maximum_deceleration:
+                # ignore red traffic light if deceleration is too high or stop line behind us
+                if deceleration > self.tfl_maximum_deceleration or deceleration < 0.0:
                     rospy.logwarn_throttle(3, "%s - ignore red traffic light, deceleration: %f", rospy.get_name(), deceleration)
                 else:
                     points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, 0.0, self.braking_safety_distance_stopline])
@@ -207,8 +208,8 @@ class VelocityLocalPlanner:
             obstacle_d, obstacle_idx = obstacle_tree.radius_neighbors(local_path_dense[:,:2], self.waypoint_lookup_radius, return_distance=True)
 
             # create indexes for obstacles with respect to local_path_dense
-            index_array = np.repeat(np.arange(len(obstacle_idx)), [len(i) for i in obstacle_idx])
-            obstacles_dense_path = np.column_stack((index_array, np.concatenate(obstacle_idx), np.concatenate(obstacle_d)))
+            wp_idx = np.repeat(np.arange(len(obstacle_idx)), [len(i) for i in obstacle_idx])
+            obstacles_dense_path = np.column_stack((wp_idx, np.concatenate(obstacle_idx), np.concatenate(obstacle_d)))
 
             # filter with self.slowdown_lateral_distance (since nearest neighbor search is a "circle" some points might be slightly over the limit)
             obstacles_dense_path = obstacles_dense_path[obstacles_dense_path[:,2] <= self.slowdown_lateral_distance]
@@ -228,7 +229,7 @@ class VelocityLocalPlanner:
 
                 # ALL OBSTACLES
                 # subtract braking_safety_distance and additionally reaction_time and obstacle_speed based distance for larger longitudinal distance when driving faster
-                following_distances = obstacles_ahead_dists - ego_distance_from_path_start - self.current_pose_to_car_front - braking_safety_distances - self.braking_reaction_time * obstacles_ahead_speeds
+                following_distances = obstacles_ahead_dists - self.current_pose_to_car_front - braking_safety_distances - self.braking_reaction_time * obstacles_ahead_speeds
                 # use following_distance and if sqrt is negative use 0 - we do not want to drive!
                 target_velocities = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.default_deceleration * following_distances))
 
@@ -260,7 +261,7 @@ class VelocityLocalPlanner:
                         continue
 
                     # obstacle distance from car front
-                    obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - ego_distance_from_path_start - local_path_dists[i] - self.current_pose_to_car_front
+                    obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - local_path_dists[i] - self.current_pose_to_car_front
 
                     # calculate target velocity as if it is blocking the lane (inside stopping_lateral_distance)
                     following_distance = obstacle_distance - braking_safety_distances[lowest_target_velocity_idx]- self.braking_reaction_time * obstacles_ahead_speeds[lowest_target_velocity_idx]
@@ -275,7 +276,7 @@ class VelocityLocalPlanner:
 
                     #  Assign variables with respect to first waypoint (ego vehicle location)
                     if i == 0:
-                        closest_object_distance = obstacle_distance
+                        closest_object_distance = obstacle_distance - ego_distance_from_path_start
                         closest_object_velocity = obstacles_ahead_speeds[lowest_target_velocity_idx]
                         stopping_point_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - braking_safety_distances[lowest_target_velocity_idx]
 

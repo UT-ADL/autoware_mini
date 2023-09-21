@@ -33,6 +33,7 @@ class PurePursuitFollower:
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
         self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
         self.default_deceleration = rospy.get_param("/planning/default_deceleration")
+        self.stopping_speed_limit = rospy.get_param("/planning/stopping_speed_limit")
         self.current_pose_to_car_front = rospy.get_param("/planning/current_pose_to_car_front")
         self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
 
@@ -95,8 +96,14 @@ class PurePursuitFollower:
                 waypoint_tree = self.waypoint_tree
                 closest_object_distance = self.closest_object_distance
                 closest_object_velocity = self.closest_object_velocity
+                stopping_point_distance = self.stopping_point_distance
 
             stamp = current_pose_msg.header.stamp
+            if waypoint_tree is None:
+                # if no waypoints received yet or global_path cancelled, stop the vehicle
+                self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
+                return
+
             current_pose = current_pose_msg.pose
             current_velocity = current_velocity_msg.twist.linear.x
 
@@ -113,11 +120,6 @@ class PurePursuitFollower:
 
                 current_pose.position.x = x_new
                 current_pose.position.y = y_new
-
-            if waypoint_tree is None:
-                # if no waypoints received yet or global_path cancelled, stop the vehicle
-                self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
-                return
 
             # Find 2 nearest waypoint idx's on path (from base_link)
             back_wp_idx, front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
@@ -161,11 +163,14 @@ class PurePursuitFollower:
 
             # target_velocity from map and based on closest object
             target_velocity = interpolate_velocity_between_waypoints(nearest_point, waypoints[back_wp_idx], waypoints[front_wp_idx])
+            # if target velocity too low, consider it 0
+            if target_velocity < self.stopping_speed_limit:
+                target_velocity = 0.0
 
             # if decelerating because of obstacle then calculate necessary deceleration
-            if closest_object_distance > 0:
+            if stopping_point_distance > 0:
                 # always allow minimum deceleration, to be able to adapt to map speeds
-                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (self.stopping_point_distance - ego_distance_from_path_start - self.current_pose_to_car_front), -self.default_deceleration)
+                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (stopping_point_distance - ego_distance_from_path_start - self.current_pose_to_car_front), -self.default_deceleration)
             # otherwise use vehicle default deceleration limit
             else:
                 acceleration = 0.0

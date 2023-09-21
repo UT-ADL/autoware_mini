@@ -109,7 +109,7 @@ class VehicleStateVisualizer:
         if msg.lamp == VehicleStatus.LAMP_LEFT or msg.lamp == VehicleStatus.LAMP_HAZARD:
             left_blinker_arrow_msg.text = "<div style='text-align: right; color: yellow;'>&#11013;</div>"
         else:
-            left_blinker_arrow_msg.text = "<div style='text-align: right; color: gray;'>&#11013;</div>"
+            left_blinker_arrow_msg.text = "<div style='text-align: right; color: transparent;'>&#11013;</div>"
         self.left_blinker_arrow_pub.publish(left_blinker_arrow_msg)
 
         right_blinker_cmd_msg = OverlayText()
@@ -123,7 +123,7 @@ class VehicleStateVisualizer:
         if msg.lamp == VehicleStatus.LAMP_RIGHT or msg.lamp == VehicleStatus.LAMP_HAZARD:
             right_blinker_arrow_msg.text = "<div style='text-align: left; color: yellow;'>&#10145;</div>"
         else:
-            right_blinker_arrow_msg.text = "<div style='text-align: left; color: gray;'>&#10145;</div>"
+            right_blinker_arrow_msg.text = "<div style='text-align: left; color: transparent;'>&#10145;</div>"
         self.right_blinker_arrow_pub.publish(right_blinker_arrow_msg)
 
 

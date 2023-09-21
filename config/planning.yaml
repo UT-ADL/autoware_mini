@@ -4,6 +4,7 @@ stopping_lateral_distance: 1.35           # m
 slowdown_lateral_distance: 1.60       # m
 waypoint_interval: 1.0          # m
 default_deceleration: 1.0
+stopping_speed_limit: 1.0
 
 lanelet2_global_planner:
   output_frame: map
@@ -39,6 +40,3 @@ velocity_local_planner:
   braking_safety_distance_obstacle: 4.0
   braking_safety_distance_stopline: 2.0
   braking_safety_distance_goal: 0.0
-
-local_path_visualizer:
-  stopping_speed_limit: 1.0

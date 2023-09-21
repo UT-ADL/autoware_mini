@@ -28,8 +28,7 @@ Panels:
     Name: Tool Properties
     Splitter Ratio: 0.5886790156364441
   - Class: rviz/Views
-    Expanded:
-      - /Current View1
+    Expanded: ~
     Name: Views
     Splitter Ratio: 0.5
   - Class: rviz/Time
@@ -93,6 +92,15 @@ Visualization Manager:
             Expand Link Details: false
             Expand Tree: false
             Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            lexus_model:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
           Name: Lexus model
           Robot Description: robot_description
           TF Prefix: ""
@@ -762,7 +770,7 @@ Visualization Manager:
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               Global path: true
@@ -863,7 +871,7 @@ Visualization Manager:
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               Global path: true
@@ -1180,7 +1188,11 @@ Visualization Manager:
           Marker Topic: /detection/final_objects_markers
           Name: Final objects
           Namespaces:
-            {}
+            bounding_box: false
+            centroid: true
+            convex_hull: true
+            speed: true
+            text: true
           Queue Size: 100
           Value: true
         - Class: rviz/Group
@@ -1249,6 +1261,7 @@ Visualization Manager:
           Namespaces:
             Slowdown lateral distance: true
             Stopping lateral distance: true
+            Stopping point: true
             Velocity label: true
           Queue Size: 100
           Value: true
@@ -1305,7 +1318,7 @@ Visualization Manager:
           Marker Topic: /vehicle/bicycle_markers
           Name: Bicycle markers
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Camera
@@ -1381,7 +1394,7 @@ Visualization Manager:
               Value: true
             Grid: true
             Map:
-              Lanelet2 map: true
+              "": true
               Value: true
             Planning:
               "": true
