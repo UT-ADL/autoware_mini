@@ -12,11 +12,18 @@ The `velocity_local_planner` node is responsible for generating a local path tha
 |------|------|---------|-------------|
 |`~local_path_length` | double | `100` | The maximum length of the local path in meters (m) |
 |`~nearest_neighbor_search` | string | `"kd_tree"` | The algorithm used for nearest neighbor search, alternative options: kd_tree, ball_tree, brute, auto|
-|`braking_safety_distance` | double | `2.0` | The minimum distance from an object where the vehicle should stop (m) |
+|`braking_safety_distance_obstacle` | double | `4.0` | Determines the stopping point (m) of the ego vehicle before the obstacle |
+|`braking_safety_distance_stopline` | double | `2.0` | Determines the stopping point (m) of the ego vehicle before the stop line |
+|`braking_safety_distance_goal` | double | `0.0` | Determines the stopping point (m) of the ego vehicle before the goal point |
 |`braking_reaction_time` | double | `1.6` | The time it takes the vehicle to react to an object in front of it  (s) |
-|`car_safety_radius` | double | `1.3` | The safety radius of the vehicle - obstacles are detected within these circles around waypoints (m) |
+|`stopping_lateral_distance` | double | `1.35` | Obstacles within this with (m) are considered on the path and blocking |
+|`slowdown_lateral_distance` | double | `1.60` | Obstacles outside `stopping_laterl_distance`, but inside this width (m) are affecting ego vehicle speed by causing slowing down the target speed depending how close they are to the path |
+|`waypoint_interval` | double | `1.0` | Default interval of the waypoints (m) |
+|`dense_waypoint_interval` | double | `0.1` | Interval for the dense local path points (m) |
 |`current_pose_to_car_front` | double | `4.0` | The distance from the current pose of the vehicle to the front of the car (m) |
 |`default_deceleration` | double | `1.0` | The maximum rate at which the vehicle can decelerate (m/s2) |
+|`tfl_maximum_deceleration` | double | `2.7` | If deceleration needed to stop behind the stop line exceeds this value then traffic light is ignored (m/s2) |
+|`stopping_speed_limit` | double | `1.0` | Speed limit (m/s) for other vehicles to consider them as stopped |
 
 
 #### Subscribed Topics

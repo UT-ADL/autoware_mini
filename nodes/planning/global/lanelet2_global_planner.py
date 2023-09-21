@@ -38,6 +38,7 @@ class Lanelet2GlobalPlanner:
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit")
         self.speed_limit = rospy.get_param("~speed_limit")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
+        self.ego_vehicle_stopped_speed_limit = rospy.get_param("~ego_vehicle_stopped_speed_limit")
 
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
@@ -47,7 +48,7 @@ class Lanelet2GlobalPlanner:
 
         # Internal variables
         self.current_location = None
-        self.current_velocity = None
+        self.current_speed = None
         self.goal_point = None
         self.waypoints = []
 
@@ -89,8 +90,8 @@ class Lanelet2GlobalPlanner:
             rospy.logwarn("%s - current_pose not available", rospy.get_name())
             return
         
-        if self.current_velocity == None:
-            rospy.logwarn("%s - current_velocity not available", rospy.get_name())
+        if self.current_speed == None:
+            rospy.logwarn("%s - current_speed not available", rospy.get_name())
             return
 
         if self.lanelet2_map == None:
@@ -158,14 +159,14 @@ class Lanelet2GlobalPlanner:
 
         if self.goal_point != None:
             d = get_distance_between_two_points_2d(self.current_location, self.goal_point)
-            if d < self.distance_to_goal_limit and self.current_velocity < 0.05:
+            if d < self.distance_to_goal_limit and self.current_speed < self.ego_vehicle_stopped_speed_limit:
                 self.waypoints = []
                 self.goal_point = None
                 self.publish_waypoints(self.waypoints)
                 rospy.logwarn("%s - goal reached, clearing path!", rospy.get_name())
 
     def current_velocity_callback(self, msg):
-        self.current_velocity = msg.twist.linear.x
+        self.current_speed = msg.twist.linear.x
 
     def cancel_route_callback(self, msg):
         self.waypoints = []
