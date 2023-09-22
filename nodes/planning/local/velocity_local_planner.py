@@ -188,7 +188,8 @@ class VelocityLocalPlanner:
 
             if wp.stop_line_id > 0 and wp.stop_line_id in red_stop_lines:
                 # use wp distance and caclulate necessary deceleration for stopping
-                deceleration = (current_speed**2) / (2 * (local_path_dists[i] - ego_distance_from_path_start - self.current_pose_to_car_front - self.braking_safety_distance_stopline))
+                # not including self.braking_safety_distance_stopline here, because otherwise we would get negative deceleration already before reaching the stop line
+                deceleration = (current_speed**2) / (2 * (local_path_dists[i] - ego_distance_from_path_start - self.current_pose_to_car_front))
 
                 # ignore red traffic light if deceleration is too high or stop line behind us
                 if deceleration > self.tfl_maximum_deceleration or deceleration < 0.0:
