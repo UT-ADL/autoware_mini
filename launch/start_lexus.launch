@@ -14,7 +14,7 @@
     <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="lanelet2_map_name"       default="tartu_demo.osm" />
-    <arg name="max_speed"               default="30" />
+    <arg name="max_speed"               default="40" />
     <arg name="more_visualizations"     default="false"             doc="By default visualize only the final detections" />
     
     <!-- Localization -->

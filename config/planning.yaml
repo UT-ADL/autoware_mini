@@ -27,8 +27,8 @@ path_smoothing:
   adjust_speeds_using_deceleration: True
   speed_averaging_window: 21              # window size (will be applied only if > 1)
   adjust_endpoint_speed_to_zero: True
-  radius_calc_neighbour_index: 6          # int
-  lateral_acceleration_limit: 1.0         # m/s2
+  radius_calc_neighbour_index: 8          # int
+  lateral_acceleration_limit: 1.5         # m/s2
   output_debug_info: False
 
 velocity_local_planner:
