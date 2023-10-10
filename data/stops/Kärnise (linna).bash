@@ -5,8 +5,8 @@ rostopic pub --once /move_base_simple/goal geometry_msgs/PoseStamped  "header:
   frame_id: 'map'
 pose:
   position:
-    x: -9037.6958283782
-    y: 7494.41662229877
+    x: -9037.539443493588
+    y: 7494.378354572691
     z: 0.0
   orientation:
     x: 0.0
