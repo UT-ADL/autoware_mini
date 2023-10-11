@@ -108,7 +108,9 @@ class CameraTrafficLightDetector:
         if len(local_path_msg.waypoints) > 0:
             for wp in local_path_msg.waypoints:
                 if wp.stop_line_id > 0:
-                    stopline_idx.append(wp.stop_line_id)
+                    # check if there is a signal available for that stop line
+                    if wp.stop_line_id in self.signals:
+                        stopline_idx.append(wp.stop_line_id)
 
         with self.lock:
             self.stoplines_on_path = stopline_idx
