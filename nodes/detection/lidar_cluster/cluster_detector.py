@@ -65,7 +65,11 @@ class ClusterDetector:
 
         # create detected objects
         objects = DetectedObjectArray(header=header)
-        for i in range(np.max(labels) + 1):
+        if len(labels) == 0:
+            num_clusters = 0
+        else:
+            num_clusters = np.max(labels) + 1
+        for i in range(num_clusters):
             # filter points for this cluster
             mask = (labels == i)
 
