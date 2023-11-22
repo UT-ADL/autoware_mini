@@ -106,11 +106,17 @@ class EMATracker:
         # update tracked object speeds with exponential moving average
         new_velocities = (detected_objects_array['centroid'][matched_detection_indicies] - self.tracked_objects_array['centroid'][matched_track_indices]) / time_delta
         old_velocities = self.tracked_objects_array['velocity'][matched_track_indices]
+        # make initial velocity of an object equal to its first velocity estimate instead of zero
+        second_time_detections = self.tracked_objects_array['detection_counter'][matched_track_indices] == 1
+        old_velocities[second_time_detections] = new_velocities[second_time_detections]
         detected_objects_array['velocity'][matched_detection_indicies] = (1 - self.velocity_gain) * old_velocities + self.velocity_gain * new_velocities
 
         # update tracked object accelerations with exponential moving average
         new_accelerations = (new_velocities - old_velocities) / time_delta
         old_accelerations = self.tracked_objects_array['acceleration'][matched_track_indices]
+        # make initial acceleration of an object equal to its first acceleration estimate instead of zero
+        third_time_detections = self.tracked_objects_array['detection_counter'][matched_track_indices] == 2
+        old_accelerations[third_time_detections] = new_accelerations[third_time_detections]
         detected_objects_array['acceleration'][matched_detection_indicies] = (1 - self.acceleration_gain) * old_accelerations + self.acceleration_gain * new_accelerations
 
         ### 5. UPDATE TRACKED OBJECTS ###
