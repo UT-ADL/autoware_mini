@@ -230,9 +230,9 @@ class VelocityLocalPlanner:
 
                 # ALL OBSTACLES
                 # subtract braking_safety_distance and additionally reaction_time and obstacle_speed based distance for larger longitudinal distance when driving faster
-                following_distances = obstacles_ahead_dists - self.current_pose_to_car_front - braking_safety_distances - self.braking_reaction_time * obstacles_ahead_speeds
-                # use following_distance and if sqrt is negative use 0 - we do not want to drive!
-                target_velocities = np.sqrt(np.maximum(0, obstacles_ahead_speeds**2 + 2 * self.default_deceleration * following_distances))
+                target_distances = obstacles_ahead_dists - self.current_pose_to_car_front - braking_safety_distances - self.braking_reaction_time * abs(obstacles_ahead_speeds)
+                # use target_distance and if sqrt is negative use 0 - we do not want to drive!
+                target_velocities = np.sqrt(np.maximum(0, np.maximum(0, obstacles_ahead_speeds)**2 + 2 * self.default_deceleration * target_distances))
 
                 # OBSTACLES ONLY WITHIN SLOWDOWN LATERAL DISTANCE
                 # create mask to select obstacles within slowdown_lateral_distance and outside stopping_lateral_distance
@@ -265,8 +265,8 @@ class VelocityLocalPlanner:
                     obstacle_distance = obstacles_ahead_dists[lowest_target_velocity_idx] - local_path_dists[i] - self.current_pose_to_car_front
 
                     # calculate target velocity as if it is blocking the lane (inside stopping_lateral_distance)
-                    following_distance = obstacle_distance - braking_safety_distances[lowest_target_velocity_idx]- self.braking_reaction_time * obstacles_ahead_speeds[lowest_target_velocity_idx]
-                    target_velocity = np.sqrt(np.maximum(0, obstacles_ahead_speeds[lowest_target_velocity_idx]**2 + 2 * self.default_deceleration * following_distance))
+                    target_distance = obstacle_distance - braking_safety_distances[lowest_target_velocity_idx]- self.braking_reaction_time * abs(obstacles_ahead_speeds[lowest_target_velocity_idx])
+                    target_velocity = np.sqrt(np.maximum(0, np.maximum(0, obstacles_ahead_speeds[lowest_target_velocity_idx])**2 + 2 * self.default_deceleration * target_distance))
 
                     # calculate target velocity in case of obstacle in slowdown_lateral_distance
                     if obstacles_ahead_lateral_dists[lowest_target_velocity_idx] > self.stopping_lateral_distance:
