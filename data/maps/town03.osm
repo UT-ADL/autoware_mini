@@ -1,5 +1,992 @@
-<?xml version="1.0"?>
-<osm version="0.6" generator="lanelet2">
+<?xml version='1.0' encoding='utf-8'?>
+<osm version="0.6" generator="JOSM">
+  <node id="-26865" action="modify" visible="true" lat="-0.00073043228" lon="0.00217317027">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26866" action="modify" visible="true" lat="-0.00073043228" lon="0.00217317027">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26867" action="modify" visible="true" lat="-0.00073068881" lon="0.00218364752">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26868" action="modify" visible="true" lat="-0.00073094534" lon="0.00219412476">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26869" action="modify" visible="true" lat="-0.00073120188" lon="0.00220460201">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26870" action="modify" visible="true" lat="0.00193123047" lon="0.0006429798">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26871" action="modify" visible="true" lat="0.00193132082" lon="0.00064306954">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26872" action="modify" visible="true" lat="0.00193141116" lon="0.00064315928">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26873" action="modify" visible="true" lat="0.00184411352" lon="0.00087573527">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26874" action="modify" visible="true" lat="0.00184411352" lon="0.00087573527">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26875" action="modify" visible="true" lat="0.00185466117" lon="0.00087599856">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26876" action="modify" visible="true" lat="0.00186520882" lon="0.00087626185">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26877" action="modify" visible="true" lat="0.00187575646" lon="0.00087652514">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26878" action="modify" visible="true" lat="0.00193613248" lon="0.00085744093">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26879" action="modify" visible="true" lat="0.00193622283" lon="0.00085753067">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26880" action="modify" visible="true" lat="0.00193631318" lon="0.00085762041">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26881" action="modify" visible="true" lat="0.00165001278" lon="0.00075863353">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26882" action="modify" visible="true" lat="0.00165001278" lon="0.00075863353">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26883" action="modify" visible="true" lat="0.00164998451" lon="0.00076911384">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26884" action="modify" visible="true" lat="0.00164995623" lon="0.00077959414">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26885" action="modify" visible="true" lat="0.00164992795" lon="0.00079007445">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26886" action="modify" visible="true" lat="-0.00128311757" lon="-0.0006046598">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26887" action="modify" visible="true" lat="-0.00128221926" lon="-0.00060376148">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26888" action="modify" visible="true" lat="-0.00128401589" lon="-0.00060555811">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26889" action="modify" visible="true" lat="-0.00121490131" lon="-0.00088172381">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26890" action="modify" visible="true" lat="-0.00121490131" lon="-0.00088172381">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26891" action="modify" visible="true" lat="-0.00122544958" lon="-0.00088148662">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26892" action="modify" visible="true" lat="-0.00123599786" lon="-0.00088124944">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26893" action="modify" visible="true" lat="-0.00124654614" lon="-0.00088101225">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26894" action="modify" visible="true" lat="0.00113028463" lon="-0.00010713802">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26895" action="modify" visible="true" lat="0.00113118295" lon="-0.0001062397">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26896" action="modify" visible="true" lat="0.00112938632" lon="-0.00010803633">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26897" action="modify" visible="true" lat="0.0013497169" lon="-0.00001832558">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26898" action="modify" visible="true" lat="0.0013497169" lon="-0.00001832558">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26899" action="modify" visible="true" lat="0.00134997718" lon="-0.00002880274">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26900" action="modify" visible="true" lat="0.00135023746" lon="-0.00003927989">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26901" action="modify" visible="true" lat="0.00135049773" lon="-0.00004975705">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26902" action="modify" visible="true" lat="-0.00111603457" lon="-0.00086727933">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26903" action="modify" visible="true" lat="-0.00111513625" lon="-0.00086638101">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26904" action="modify" visible="true" lat="-0.00111693288" lon="-0.00086817765">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26905" action="modify" visible="true" lat="-0.00120730176" lon="-0.00054826221">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26906" action="modify" visible="true" lat="-0.00120730176" lon="-0.00054826221">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26907" action="modify" visible="true" lat="-0.00119675348" lon="-0.0005484994">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26908" action="modify" visible="true" lat="-0.0011862052" lon="-0.00054873658">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26909" action="modify" visible="true" lat="-0.00117565693" lon="-0.00054897377">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26910" action="modify" visible="true" lat="-0.00108978666" lon="-0.00060946071">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26911" action="modify" visible="true" lat="-0.00108888834" lon="-0.0006085624">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26912" action="modify" visible="true" lat="-0.00109068497" lon="-0.00061035903">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26913" action="modify" visible="true" lat="-0.00132718318" lon="-0.00068607843">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26914" action="modify" visible="true" lat="-0.00132718318" lon="-0.00068607843">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26915" action="modify" visible="true" lat="-0.00132714408" lon="-0.00067559816">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26916" action="modify" visible="true" lat="-0.00132710499" lon="-0.00066511788">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26917" action="modify" visible="true" lat="-0.0013270659" lon="-0.00065463761">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26918" action="modify" visible="true" lat="0.00193663013" lon="-0.00008595086">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26919" action="modify" visible="true" lat="0.00193672048" lon="-0.00008586112">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26920" action="modify" visible="true" lat="0.00193681083" lon="-0.00008577137">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26921" action="modify" visible="true" lat="0.00186152593" lon="0.00018748372">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26922" action="modify" visible="true" lat="0.00186152593" lon="0.00018748372">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26923" action="modify" visible="true" lat="0.00187207358" lon="0.00018774701">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26924" action="modify" visible="true" lat="0.00188262123" lon="0.0001880103">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26925" action="modify" visible="true" lat="0.00189316887" lon="0.00018827359">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26926" action="modify" visible="true" lat="-0.00127703037" lon="0.00013135114">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26927" action="modify" visible="true" lat="-0.00127613206" lon="0.00013224945">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26928" action="modify" visible="true" lat="-0.00127792869" lon="0.00013045282">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26929" action="modify" visible="true" lat="-0.0011986851" lon="-0.0001701709">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26930" action="modify" visible="true" lat="-0.0011986851" lon="-0.0001701709">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26931" action="modify" visible="true" lat="-0.00120923337" lon="-0.00016993371">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26932" action="modify" visible="true" lat="-0.00121978164" lon="-0.00016969653">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26933" action="modify" visible="true" lat="-0.00123032992" lon="-0.00016945934">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26934" action="modify" visible="true" lat="0.00169854315" lon="0.00018374813">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26935" action="modify" visible="true" lat="0.00169863349" lon="0.00018383787">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26936" action="modify" visible="true" lat="0.00169872384" lon="0.00018392762">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26937" action="modify" visible="true" lat="0.00180569213" lon="-0.00010865043">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26938" action="modify" visible="true" lat="0.00180569213" lon="-0.00010865043">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26939" action="modify" visible="true" lat="0.00179514448" lon="-0.00010891372">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26940" action="modify" visible="true" lat="0.00178459683" lon="-0.00010917701">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26941" action="modify" visible="true" lat="0.00177404918" lon="-0.0001094403">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26942" action="modify" visible="true" lat="0.00132685685" lon="0.00014933135">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26943" action="modify" visible="true" lat="0.0013269472" lon="0.00014942109">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26944" action="modify" visible="true" lat="0.00132703755" lon="0.00014951084">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26945" action="modify" visible="true" lat="0.00112035635" lon="0.00007040444">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26946" action="modify" visible="true" lat="0.00112035635" lon="0.00007040444">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26947" action="modify" visible="true" lat="0.00112009608" lon="0.00008088159">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26948" action="modify" visible="true" lat="0.0011198358" lon="0.00009135875">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26949" action="modify" visible="true" lat="0.00111957552" lon="0.0001018359">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26950" action="modify" visible="true" lat="-6.355240844936533e-05" lon="-0.00141821644623219">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26951" action="modify" visible="true" lat="-6.346206026217921e-05" lon="-0.0014181267028590128">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26952" action="modify" visible="true" lat="-6.337171207497814e-05" lon="-0.001418036959488056">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26953" action="modify" visible="true" lat="0.00009758683" lon="-0.00132268934">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26954" action="modify" visible="true" lat="0.00009758683" lon="-0.00132268934">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26955" action="modify" visible="true" lat="0.00009759233" lon="-0.00133316968">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26956" action="modify" visible="true" lat="0.00009759783" lon="-0.00134365003">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26957" action="modify" visible="true" lat="0.00009760332" lon="-0.00135413037">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26958" action="modify" visible="true" lat="-0.00066122773" lon="0.0022362716">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26959" action="modify" visible="true" lat="-0.00066032942" lon="0.00223716991">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26960" action="modify" visible="true" lat="-0.00066212605" lon="0.00223537328">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26961" action="modify" visible="true" lat="-0.00072966268" lon="0.00214173853">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26962" action="modify" visible="true" lat="-0.00072966268" lon="0.00214173853">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26963" action="modify" visible="true" lat="-0.00072991921" lon="0.00215221578">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26964" action="modify" visible="true" lat="-0.00073017574" lon="0.00216269302">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26965" action="modify" visible="true" lat="0.00133706208" lon="-0.00010773345">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26966" action="modify" visible="true" lat="0.00133715243" lon="-0.00010764371">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26967" action="modify" visible="true" lat="0.00133724278" lon="-0.00010755396">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26968" action="modify" visible="true" lat="0.00123188967" lon="0.00017234608">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26969" action="modify" visible="true" lat="0.00123188967" lon="0.00017234608">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26970" action="modify" visible="true" lat="0.00124243823" lon="0.00017257055">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26971" action="modify" visible="true" lat="0.00125298679" lon="0.00017279502">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26972" action="modify" visible="true" lat="0.00126353534" lon="0.00017301949">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26973" action="modify" visible="true" lat="0.00169193878" lon="0.00150197535">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26974" action="modify" visible="true" lat="0.00169202913" lon="0.00150206509">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26975" action="modify" visible="true" lat="0.00169211948" lon="0.00150215484">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26976" action="modify" visible="true" lat="0.00177096494" lon="0.00126399325">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26977" action="modify" visible="true" lat="0.00177096494" lon="0.00126399325">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26978" action="modify" visible="true" lat="0.00176041729" lon="0.00126372996">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26979" action="modify" visible="true" lat="0.00174986964" lon="0.00126346668">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26980" action="modify" visible="true" lat="0.00173932199" lon="0.00126320339">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26981" action="modify" visible="true" lat="0.00131277857" lon="0.00064155382">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26982" action="modify" visible="true" lat="0.00131286892" lon="0.00064164356">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26983" action="modify" visible="true" lat="0.00131295927" lon="0.0006417333">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26984" action="modify" visible="true" lat="0.00121697677" lon="0.00086380036">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26985" action="modify" visible="true" lat="0.00121697677" lon="0.00086380036">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26986" action="modify" visible="true" lat="0.00122752533" lon="0.00086402483">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26987" action="modify" visible="true" lat="0.00123807389" lon="0.0008642493">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26988" action="modify" visible="true" lat="0.00124862244" lon="0.00086447377">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26989" action="modify" visible="true" lat="0.00193301781" lon="0.00016794181">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26990" action="modify" visible="true" lat="0.00193310816" lon="0.00016803155">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26991" action="modify" visible="true" lat="0.00193319851" lon="0.0001681213">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-26992" action="modify" visible="true" lat="0.00166588683" lon="0.00008377579">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26993" action="modify" visible="true" lat="0.00166588683" lon="0.00008377579">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26994" action="modify" visible="true" lat="0.00166562656" lon="0.00009425295">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26995" action="modify" visible="true" lat="0.00166536628" lon="0.0001047301">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26996" action="modify" visible="true" lat="0.001665106" lon="0.00011520726">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-26997" action="modify" visible="true" lat="-0.00107282722" lon="0.00009653832">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-26998" action="modify" visible="true" lat="-0.0010719289" lon="0.00009743663">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-26999" action="modify" visible="true" lat="-0.00107372553" lon="0.00009564">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27000" action="modify" visible="true" lat="-0.00134749611" lon="0.00003469367">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27001" action="modify" visible="true" lat="-0.00134749611" lon="0.00003469367">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27002" action="modify" visible="true" lat="-0.00134742935" lon="0.00004517381">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27003" action="modify" visible="true" lat="-0.00134736259" lon="0.00005565394">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27004" action="modify" visible="true" lat="-0.00134729583" lon="0.00006613408">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27005" action="modify" visible="true" lat="0.00008339857" lon="-0.00141323234">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27006" action="modify" visible="true" lat="0.00008429689" lon="-0.00141233402">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27007" action="modify" visible="true" lat="0.00008250026" lon="-0.00141413065">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27008" action="modify" visible="true" lat="0.00001505027" lon="-0.00121009517">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27009" action="modify" visible="true" lat="0.00001505027" lon="-0.00121009517">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27010" action="modify" visible="true" lat="0.00002560111" lon="-0.00121004128">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27011" action="modify" visible="true" lat="0.00003615195" lon="-0.00120998739">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27012" action="modify" visible="true" lat="0.00004670279" lon="-0.0012099335">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27013" action="modify" visible="true" lat="0.00111312716" lon="0.00065369085">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27014" action="modify" visible="true" lat="0.00111402547" lon="0.00065458916">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27015" action="modify" visible="true" lat="0.00111222884" lon="0.00065279253">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27016" action="modify" visible="true" lat="0.00133399603" lon="0.0007540106">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27017" action="modify" visible="true" lat="0.00133399603" lon="0.0007540106">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27018" action="modify" visible="true" lat="0.0013343687" lon="0.00074353679">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27019" action="modify" visible="true" lat="0.00133474136" lon="0.00073306299">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27020" action="modify" visible="true" lat="0.00133511402" lon="0.00072258918">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27021" action="modify" visible="true" lat="0.00111970224" lon="0.0008579222">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27022" action="modify" visible="true" lat="0.00112060056" lon="0.00085882051">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27023" action="modify" visible="true" lat="0.00111880393" lon="0.00085702388">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27024" action="modify" visible="true" lat="0.00122188704" lon="0.00063612968">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27025" action="modify" visible="true" lat="0.00122188704" lon="0.00063612968">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27026" action="modify" visible="true" lat="0.00121133849" lon="0.00063590521">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27027" action="modify" visible="true" lat="0.00120078993" lon="0.00063568074">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27028" action="modify" visible="true" lat="0.00119024137" lon="0.00063545627">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27029" action="modify" visible="true" lat="-0.00131686848" lon="-0.00084333017">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27030" action="modify" visible="true" lat="-0.00131677813" lon="-0.00084324043">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27031" action="modify" visible="true" lat="-0.00131668778" lon="-0.00084315068">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27032" action="modify" visible="true" lat="-0.00108787723" lon="-0.00077502203">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27033" action="modify" visible="true" lat="-0.00108787723" lon="-0.00077502203">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27034" action="modify" visible="true" lat="-0.001087906" lon="-0.00078550233">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27035" action="modify" visible="true" lat="-0.00108793478" lon="-0.00079598264">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27036" action="modify" visible="true" lat="-0.00108796356" lon="-0.00080646294">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27037" action="modify" visible="true" lat="-0.00072961607" lon="0.00201493665">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27038" action="modify" visible="true" lat="-0.00072952573" lon="0.00201502639">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27039" action="modify" visible="true" lat="-0.00072943538" lon="0.00201511614">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27040" action="modify" visible="true" lat="-0.00037981925" lon="0.00211873974">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27041" action="modify" visible="true" lat="-0.00037981925" lon="0.00211873974">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27042" action="modify" visible="true" lat="-0.00037956271" lon="0.00210826249">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27043" action="modify" visible="true" lat="-0.00037930618" lon="0.00209778525">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27044" action="modify" visible="true" lat="-0.00037904965" lon="0.002087308">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27045" action="modify" visible="true" lat="0.00195873723" lon="0.00146899589">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27046" action="modify" visible="true" lat="0.00195882757" lon="0.00146908563">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27047" action="modify" visible="true" lat="0.00195891792" lon="0.00146917537">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27048" action="modify" visible="true" lat="0.00163781906" lon="0.0013752132">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27049" action="modify" visible="true" lat="0.00163781906" lon="0.0013752132">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27050" action="modify" visible="true" lat="0.00163763557" lon="0.00138569196">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27051" action="modify" visible="true" lat="0.00163745208" lon="0.00139617072">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27052" action="modify" visible="true" lat="0.00163726859" lon="0.00140664948">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27053" action="modify" visible="true" lat="-0.0012951949" lon="-0.00013630675">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27054" action="modify" visible="true" lat="-0.00129510455" lon="-0.000136217">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27055" action="modify" visible="true" lat="-0.0012950142" lon="-0.00013612726">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27056" action="modify" visible="true" lat="-0.00106925221" lon="-0.00007036346">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27057" action="modify" visible="true" lat="-0.00106925221" lon="-0.00007036346">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27058" action="modify" visible="true" lat="-0.00106931897" lon="-0.0000808436">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27059" action="modify" visible="true" lat="-0.00106938573" lon="-0.00009132373">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27060" action="modify" visible="true" lat="-0.00106945249" lon="-0.00010180387">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27061" action="modify" visible="true" lat="0.00166662034" lon="0.00085264231">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27062" action="modify" visible="true" lat="0.00166671069" lon="0.00085273206">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27063" action="modify" visible="true" lat="0.00166680104" lon="0.0008528218">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27064" action="modify" visible="true" lat="0.00178667342" lon="0.00064309196">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27065" action="modify" visible="true" lat="0.00178667342" lon="0.00064309196">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27066" action="modify" visible="true" lat="0.00177612578" lon="0.00064282867">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27067" action="modify" visible="true" lat="0.00176557813" lon="0.00064256538">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27068" action="modify" visible="true" lat="0.00175503048" lon="0.00064230209">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27069" action="modify" visible="true" lat="-0.00041138449" lon="0.00223859349">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27070" action="modify" visible="true" lat="-0.00041048617" lon="0.00223949181">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27071" action="modify" visible="true" lat="-0.0004122828" lon="0.00223769518">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27072" action="modify" visible="true" lat="0.00011139655" lon="-0.00061946976">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27073" action="modify" visible="true" lat="0.00011229486" lon="-0.00061857144">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27074" action="modify" visible="true" lat="0.00011049823" lon="-0.00062036807">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27075" action="modify" visible="true" lat="-0.00025722579" lon="-0.00071438997">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27076" action="modify" visible="true" lat="-0.00025722579" lon="-0.00071438997">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27077" action="modify" visible="true" lat="-0.00025719701" lon="-0.00070390966">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27078" action="modify" visible="true" lat="-0.00025716823" lon="-0.00069342936">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27079" action="modify" visible="true" lat="-0.00025713946" lon="-0.00068294905">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27080" action="modify" visible="true" lat="-0.00025528253" lon="-0.00084400232">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27081" action="modify" visible="true" lat="-0.00025519218" lon="-0.00084391258">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27082" action="modify" visible="true" lat="-0.00025510183" lon="-0.00084382283">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27083" action="modify" visible="true" lat="0.00009503365" lon="-0.00077822654">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27084" action="modify" visible="true" lat="0.00009503365" lon="-0.00077822654">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27085" action="modify" visible="true" lat="0.00009500488" lon="-0.00078870685">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27086" action="modify" visible="true" lat="0.0000949761" lon="-0.00079918715">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27087" action="modify" visible="true" lat="0.00009494732" lon="-0.00080966746">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27088" action="modify" visible="true" lat="0.00132452689" lon="0.00084450566">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27089" action="modify" visible="true" lat="0.00132461724" lon="0.0008445954">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27090" action="modify" visible="true" lat="0.00132470759" lon="0.00084468515">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27091" action="modify" visible="true" lat="0.00110488141" lon="0.00074596736">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27092" action="modify" visible="true" lat="0.00110488141" lon="0.00074596736">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27093" action="modify" visible="true" lat="0.00110450875" lon="0.00075644116">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27094" action="modify" visible="true" lat="0.00110413609" lon="0.00076691497">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27095" action="modify" visible="true" lat="0.00110376342" lon="0.00077738877">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27096" action="modify" visible="true" lat="-0.0011116072" lon="-0.00016152447">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27097" action="modify" visible="true" lat="-0.00111151685" lon="-0.00016143472">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27098" action="modify" visible="true" lat="-0.0011114265" lon="-0.00016134498">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27099" action="modify" visible="true" lat="-0.00119744914" lon="0.00019031165">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27100" action="modify" visible="true" lat="-0.00119744914" lon="0.00019031165">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27101" action="modify" visible="true" lat="-0.00118689923" lon="0.00019016218">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27102" action="modify" visible="true" lat="-0.00117634933" lon="0.0001900127">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27103" action="modify" visible="true" lat="-0.00116579943" lon="0.00018986322">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27104" action="modify" visible="true" lat="0.00008536355" lon="-0.00121956363">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27105" action="modify" visible="true" lat="0.00008626187" lon="-0.00121866531">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27106" action="modify" visible="true" lat="0.00008446524" lon="-0.00122046194">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27107" action="modify" visible="true" lat="-0.0000662849" lon="-0.00132277414">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27108" action="modify" visible="true" lat="-0.0000662849" lon="-0.00132277414">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27109" action="modify" visible="true" lat="-0.00006629039" lon="-0.0013122938">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27110" action="modify" visible="true" lat="-0.00006629589" lon="-0.00130181345">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27111" action="modify" visible="true" lat="-0.00006630139" lon="-0.00129133311">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27112" action="modify" visible="true" lat="0.00109710794" lon="0.00128288375">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27113" action="modify" visible="true" lat="0.00109800625" lon="0.00128378207">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27114" action="modify" visible="true" lat="0.00109620962" lon="0.00128198544">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27115" action="modify" visible="true" lat="0.00131961957" lon="0.0013697156">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27116" action="modify" visible="true" lat="0.00131961957" lon="0.0013697156">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27117" action="modify" visible="true" lat="0.00131980307" lon="0.00135923684">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27118" action="modify" visible="true" lat="0.00131998656" lon="0.00134875808">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27119" action="modify" visible="true" lat="0.00132017005" lon="0.00133827932">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27120" action="modify" visible="true" lat="0.00113778399" lon="0.00017121511">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27121" action="modify" visible="true" lat="0.0011386823" lon="0.00017211343">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27122" action="modify" visible="true" lat="0.00113688567" lon="0.0001703168">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27123" action="modify" visible="true" lat="0.00123820039" lon="-0.00012025806">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27124" action="modify" visible="true" lat="0.00123820039" lon="-0.00012025806">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27125" action="modify" visible="true" lat="0.00122765184" lon="-0.00012048253">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27126" action="modify" visible="true" lat="0.00121710328" lon="-0.000120707">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27127" action="modify" visible="true" lat="0.00120655472" lon="-0.00012093147">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27128" action="modify" visible="true" lat="0.00191637983" lon="0.00126157276">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27129" action="modify" visible="true" lat="0.00191647018" lon="0.0012616625">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27130" action="modify" visible="true" lat="0.00191656053" lon="0.00126175224">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27131" action="modify" visible="true" lat="0.00186529934" lon="0.00149319611">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27132" action="modify" visible="true" lat="0.00186529934" lon="0.00149319611">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27133" action="modify" visible="true" lat="0.00187585032" lon="0.00149319611">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27134" action="modify" visible="true" lat="0.0018864013" lon="0.00149319611">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27135" action="modify" visible="true" lat="0.00189695227" lon="0.00149319611">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27136" action="modify" visible="true" lat="0.00131451137" lon="0.00146166108">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27137" action="modify" visible="true" lat="0.00131460172" lon="0.00146175082">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27138" action="modify" visible="true" lat="0.00131469207" lon="0.00146184057">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27139" action="modify" visible="true" lat="0.00130025416" lon="0.0014684236">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27140" action="modify" visible="true" lat="0.00130115248" lon="0.00146932192">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27141" action="modify" visible="true" lat="0.00129935585" lon="0.00146752529">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27142" action="modify" visible="true" lat="0.0010935641" lon="0.00136581">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27143" action="modify" visible="true" lat="0.0010935641" lon="0.00136581">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27144" action="modify" visible="true" lat="0.00109338061" lon="0.00137628876">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27145" action="modify" visible="true" lat="0.00109319712" lon="0.00138676752">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27146" action="modify" visible="true" lat="0.00109301363" lon="0.00139724628">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27147" action="modify" visible="true" lat="0.00007894252" lon="-0.00086945313">
+    <tag k="color" v="green" />
+    <tag k="ele" v="4.2" />
+  </node>
+  <node id="-27148" action="modify" visible="true" lat="0.00007984083" lon="-0.00086855481">
+    <tag k="color" v="yellow" />
+    <tag k="ele" v="4.4" />
+  </node>
+  <node id="-27149" action="modify" visible="true" lat="0.0000780442" lon="-0.00087035144">
+    <tag k="color" v="red" />
+    <tag k="ele" v="4.6000000000000005" />
+  </node>
+  <node id="-27150" action="modify" visible="true" lat="-0.00005016882" lon="-0.00058757944">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27151" action="modify" visible="true" lat="-0.00004927051" lon="-0.00058668112">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27152" action="modify" visible="true" lat="-0.00005106714" lon="-0.00058847775">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27153" action="modify" visible="true" lat="0.00001181053" lon="-0.00058424718">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27154" action="modify" visible="true" lat="0.00001181053" lon="-0.00058424718">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27155" action="modify" visible="true" lat="0.00002236137" lon="-0.00058419329">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27156" action="modify" visible="true" lat="0.00003291221" lon="-0.00058413941">
+    <tag k="ele" v="0" />
+  </node>
+  <node id="-27157" action="modify" visible="true" lat="0.00004346304" lon="-0.00058408552">
+    <tag k="ele" v="0" />
+  </node>
   <node id="1002" visible="true" version="1" lat="0.00174653092" lon="0.00087240464">
     <tag k="ele" v="0.000000" />
     <tag k="local_x" v="97.211033" />
@@ -19060,7 +20047,7 @@
     <tag k="local_x" v="131.188466" />
     <tag k="local_y" v="-130.966963" />
   </node>
-  <node id="5311" visible="true" version="1" lat="-0.00116585286" lon="0.00018997041">
+  <node id="5311" action="modify" visible="true" version="1" lat="-0.00116559762" lon="0.00018956932">
     <tag k="ele" v="0.000000" />
     <tag k="local_x" v="21.168223" />
     <tag k="local_y" v="-129.039785" />
@@ -50730,6 +51717,835 @@
     <tag k="local_x" v="-42.194126" />
     <tag k="local_y" v="-205.883672" />
   </node>
+  <way id="-1452" action="modify" visible="true">
+    <nd ref="-26865" />
+    <nd ref="-26866" />
+    <nd ref="-26867" />
+    <nd ref="-26868" />
+    <nd ref="-26869" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1453" action="modify" visible="true">
+    <nd ref="-26870" />
+    <nd ref="-26871" />
+    <nd ref="-26872" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1454" action="modify" visible="true">
+    <nd ref="-26873" />
+    <nd ref="-26874" />
+    <nd ref="-26875" />
+    <nd ref="-26876" />
+    <nd ref="-26877" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1455" action="modify" visible="true">
+    <nd ref="-26870" />
+    <nd ref="-26871" />
+    <nd ref="-26872" />
+    <tag k="traffic_light_id" v="47532" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1456" action="modify" visible="true">
+    <nd ref="-26878" />
+    <nd ref="-26879" />
+    <nd ref="-26880" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1457" action="modify" visible="true">
+    <nd ref="-26881" />
+    <nd ref="-26882" />
+    <nd ref="-26883" />
+    <nd ref="-26884" />
+    <nd ref="-26885" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1458" action="modify" visible="true">
+    <nd ref="-26878" />
+    <nd ref="-26879" />
+    <nd ref="-26880" />
+    <tag k="traffic_light_id" v="47528" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1459" action="modify" visible="true">
+    <nd ref="-26886" />
+    <nd ref="-26887" />
+    <nd ref="-26888" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1460" action="modify" visible="true">
+    <nd ref="-26889" />
+    <nd ref="-26890" />
+    <nd ref="-26891" />
+    <nd ref="-26892" />
+    <nd ref="-26893" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1461" action="modify" visible="true">
+    <nd ref="-26886" />
+    <nd ref="-26887" />
+    <nd ref="-26888" />
+    <tag k="traffic_light_id" v="47492" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1462" action="modify" visible="true">
+    <nd ref="-26894" />
+    <nd ref="-26895" />
+    <nd ref="-26896" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1463" action="modify" visible="true">
+    <nd ref="-26897" />
+    <nd ref="-26898" />
+    <nd ref="-26899" />
+    <nd ref="-26900" />
+    <nd ref="-26901" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1464" action="modify" visible="true">
+    <nd ref="-26894" />
+    <nd ref="-26895" />
+    <nd ref="-26896" />
+    <tag k="traffic_light_id" v="47572" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1465" action="modify" visible="true">
+    <nd ref="-26902" />
+    <nd ref="-26903" />
+    <nd ref="-26904" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1466" action="modify" visible="true">
+    <nd ref="-26905" />
+    <nd ref="-26906" />
+    <nd ref="-26907" />
+    <nd ref="-26908" />
+    <nd ref="-26909" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1467" action="modify" visible="true">
+    <nd ref="-26902" />
+    <nd ref="-26903" />
+    <nd ref="-26904" />
+    <tag k="traffic_light_id" v="47488" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1468" action="modify" visible="true">
+    <nd ref="-26910" />
+    <nd ref="-26911" />
+    <nd ref="-26912" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1469" action="modify" visible="true">
+    <nd ref="-26913" />
+    <nd ref="-26914" />
+    <nd ref="-26915" />
+    <nd ref="-26916" />
+    <nd ref="-26917" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1470" action="modify" visible="true">
+    <nd ref="-26910" />
+    <nd ref="-26911" />
+    <nd ref="-26912" />
+    <tag k="traffic_light_id" v="47496" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1471" action="modify" visible="true">
+    <nd ref="-26918" />
+    <nd ref="-26919" />
+    <nd ref="-26920" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1472" action="modify" visible="true">
+    <nd ref="-26921" />
+    <nd ref="-26922" />
+    <nd ref="-26923" />
+    <nd ref="-26924" />
+    <nd ref="-26925" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1473" action="modify" visible="true">
+    <nd ref="-26918" />
+    <nd ref="-26919" />
+    <nd ref="-26920" />
+    <tag k="traffic_light_id" v="47540" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1474" action="modify" visible="true">
+    <nd ref="-26926" />
+    <nd ref="-26927" />
+    <nd ref="-26928" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1475" action="modify" visible="true">
+    <nd ref="-26929" />
+    <nd ref="-26930" />
+    <nd ref="-26931" />
+    <nd ref="-26932" />
+    <nd ref="-26933" />
+    <nd ref="2335" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1476" action="modify" visible="true">
+    <nd ref="-26926" />
+    <nd ref="-26927" />
+    <nd ref="-26928" />
+    <tag k="traffic_light_id" v="47472" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1477" action="modify" visible="true">
+    <nd ref="-26934" />
+    <nd ref="-26935" />
+    <nd ref="-26936" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1478" action="modify" visible="true">
+    <nd ref="-26937" />
+    <nd ref="-26938" />
+    <nd ref="-26939" />
+    <nd ref="-26940" />
+    <nd ref="-26941" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1479" action="modify" visible="true">
+    <nd ref="-26934" />
+    <nd ref="-26935" />
+    <nd ref="-26936" />
+    <tag k="traffic_light_id" v="47548" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1480" action="modify" visible="true">
+    <nd ref="-26942" />
+    <nd ref="-26943" />
+    <nd ref="-26944" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1481" action="modify" visible="true">
+    <nd ref="-26945" />
+    <nd ref="-26946" />
+    <nd ref="-26947" />
+    <nd ref="-26948" />
+    <nd ref="-26949" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1482" action="modify" visible="true">
+    <nd ref="-26942" />
+    <nd ref="-26943" />
+    <nd ref="-26944" />
+    <tag k="traffic_light_id" v="47576" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1483" action="modify" visible="true">
+    <nd ref="-26950" />
+    <nd ref="-26951" />
+    <nd ref="-26952" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1484" action="modify" visible="true">
+    <nd ref="-26953" />
+    <nd ref="-26954" />
+    <nd ref="-26955" />
+    <nd ref="-26956" />
+    <nd ref="-26957" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1485" action="modify" visible="true">
+    <nd ref="-26950" />
+    <nd ref="-26951" />
+    <nd ref="-26952" />
+    <tag k="traffic_light_id" v="47604" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1486" action="modify" visible="true">
+    <nd ref="-26958" />
+    <nd ref="-26959" />
+    <nd ref="-26960" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1487" action="modify" visible="true">
+    <nd ref="-26961" />
+    <nd ref="-26962" />
+    <nd ref="-26963" />
+    <nd ref="-26964" />
+    <nd ref="-26865" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1488" action="modify" visible="true">
+    <nd ref="-26958" />
+    <nd ref="-26959" />
+    <nd ref="-26960" />
+    <tag k="traffic_light_id" v="47464" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1489" action="modify" visible="true">
+    <nd ref="-26965" />
+    <nd ref="-26966" />
+    <nd ref="-26967" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1490" action="modify" visible="true">
+    <nd ref="-26968" />
+    <nd ref="-26969" />
+    <nd ref="-26970" />
+    <nd ref="-26971" />
+    <nd ref="-26972" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1491" action="modify" visible="true">
+    <nd ref="-26965" />
+    <nd ref="-26966" />
+    <nd ref="-26967" />
+    <tag k="traffic_light_id" v="47568" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1492" action="modify" visible="true">
+    <nd ref="-26973" />
+    <nd ref="-26974" />
+    <nd ref="-26975" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1493" action="modify" visible="true">
+    <nd ref="-26976" />
+    <nd ref="-26977" />
+    <nd ref="-26978" />
+    <nd ref="-26979" />
+    <nd ref="-26980" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1494" action="modify" visible="true">
+    <nd ref="-26973" />
+    <nd ref="-26974" />
+    <nd ref="-26975" />
+    <tag k="traffic_light_id" v="47520" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1495" action="modify" visible="true">
+    <nd ref="-26981" />
+    <nd ref="-26982" />
+    <nd ref="-26983" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1496" action="modify" visible="true">
+    <nd ref="-26984" />
+    <nd ref="-26985" />
+    <nd ref="-26986" />
+    <nd ref="-26987" />
+    <nd ref="-26988" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1497" action="modify" visible="true">
+    <nd ref="-26981" />
+    <nd ref="-26982" />
+    <nd ref="-26983" />
+    <tag k="traffic_light_id" v="47500" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1498" action="modify" visible="true">
+    <nd ref="-26989" />
+    <nd ref="-26990" />
+    <nd ref="-26991" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1499" action="modify" visible="true">
+    <nd ref="-26992" />
+    <nd ref="-26993" />
+    <nd ref="-26994" />
+    <nd ref="-26995" />
+    <nd ref="-26996" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1500" action="modify" visible="true">
+    <nd ref="-26989" />
+    <nd ref="-26990" />
+    <nd ref="-26991" />
+    <tag k="traffic_light_id" v="47544" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1501" action="modify" visible="true">
+    <nd ref="-26997" />
+    <nd ref="-26998" />
+    <nd ref="-26999" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1502" action="modify" visible="true">
+    <nd ref="-27000" />
+    <nd ref="-27001" />
+    <nd ref="-27002" />
+    <nd ref="-27003" />
+    <nd ref="-27004" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1503" action="modify" visible="true">
+    <nd ref="-26997" />
+    <nd ref="-26998" />
+    <nd ref="-26999" />
+    <tag k="traffic_light_id" v="47480" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1504" action="modify" visible="true">
+    <nd ref="-27005" />
+    <nd ref="-27006" />
+    <nd ref="-27007" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1505" action="modify" visible="true">
+    <nd ref="-27008" />
+    <nd ref="-27009" />
+    <nd ref="-27010" />
+    <nd ref="-27011" />
+    <nd ref="-27012" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1506" action="modify" visible="true">
+    <nd ref="-27005" />
+    <nd ref="-27006" />
+    <nd ref="-27007" />
+    <tag k="traffic_light_id" v="47608" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1507" action="modify" visible="true">
+    <nd ref="-27013" />
+    <nd ref="-27014" />
+    <nd ref="-27015" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1508" action="modify" visible="true">
+    <nd ref="-27016" />
+    <nd ref="-27017" />
+    <nd ref="-27018" />
+    <nd ref="-27019" />
+    <nd ref="-27020" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1509" action="modify" visible="true">
+    <nd ref="-27013" />
+    <nd ref="-27014" />
+    <nd ref="-27015" />
+    <tag k="traffic_light_id" v="47508" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1510" action="modify" visible="true">
+    <nd ref="-27021" />
+    <nd ref="-27022" />
+    <nd ref="-27023" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1511" action="modify" visible="true">
+    <nd ref="-27024" />
+    <nd ref="-27025" />
+    <nd ref="-27026" />
+    <nd ref="-27027" />
+    <nd ref="-27028" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1512" action="modify" visible="true">
+    <nd ref="-27021" />
+    <nd ref="-27022" />
+    <nd ref="-27023" />
+    <tag k="traffic_light_id" v="47512" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1513" action="modify" visible="true">
+    <nd ref="-27029" />
+    <nd ref="-27030" />
+    <nd ref="-27031" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1514" action="modify" visible="true">
+    <nd ref="-27032" />
+    <nd ref="-27033" />
+    <nd ref="-27034" />
+    <nd ref="-27035" />
+    <nd ref="-27036" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1515" action="modify" visible="true">
+    <nd ref="-27029" />
+    <nd ref="-27030" />
+    <nd ref="-27031" />
+    <tag k="traffic_light_id" v="47484" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1516" action="modify" visible="true">
+    <nd ref="-27037" />
+    <nd ref="-27038" />
+    <nd ref="-27039" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1517" action="modify" visible="true">
+    <nd ref="-27040" />
+    <nd ref="-27041" />
+    <nd ref="-27042" />
+    <nd ref="-27043" />
+    <nd ref="-27044" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1518" action="modify" visible="true">
+    <nd ref="-27037" />
+    <nd ref="-27038" />
+    <nd ref="-27039" />
+    <tag k="traffic_light_id" v="47584" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1519" action="modify" visible="true">
+    <nd ref="-27045" />
+    <nd ref="-27046" />
+    <nd ref="-27047" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1520" action="modify" visible="true">
+    <nd ref="-27048" />
+    <nd ref="-27049" />
+    <nd ref="-27050" />
+    <nd ref="-27051" />
+    <nd ref="-27052" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1521" action="modify" visible="true">
+    <nd ref="-27045" />
+    <nd ref="-27046" />
+    <nd ref="-27047" />
+    <tag k="traffic_light_id" v="47524" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1522" action="modify" visible="true">
+    <nd ref="-27053" />
+    <nd ref="-27054" />
+    <nd ref="-27055" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1523" action="modify" visible="true">
+    <nd ref="-27056" />
+    <nd ref="-27057" />
+    <nd ref="-27058" />
+    <nd ref="-27059" />
+    <nd ref="-27060" />
+    <nd ref="2437" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1524" action="modify" visible="true">
+    <nd ref="-27053" />
+    <nd ref="-27054" />
+    <nd ref="-27055" />
+    <tag k="traffic_light_id" v="47468" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1525" action="modify" visible="true">
+    <nd ref="-27061" />
+    <nd ref="-27062" />
+    <nd ref="-27063" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1526" action="modify" visible="true">
+    <nd ref="-27064" />
+    <nd ref="-27065" />
+    <nd ref="-27066" />
+    <nd ref="-27067" />
+    <nd ref="-27068" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1527" action="modify" visible="true">
+    <nd ref="-27061" />
+    <nd ref="-27062" />
+    <nd ref="-27063" />
+    <tag k="traffic_light_id" v="47536" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1528" action="modify" visible="true">
+    <nd ref="-27069" />
+    <nd ref="-27070" />
+    <nd ref="-27071" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1529" action="modify" visible="true">
+    <nd ref="-27069" />
+    <nd ref="-27070" />
+    <nd ref="-27071" />
+    <tag k="traffic_light_id" v="47588" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1530" action="modify" visible="true">
+    <nd ref="-27072" />
+    <nd ref="-27073" />
+    <nd ref="-27074" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1531" action="modify" visible="true">
+    <nd ref="-27075" />
+    <nd ref="-27076" />
+    <nd ref="-27077" />
+    <nd ref="-27078" />
+    <nd ref="-27079" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1532" action="modify" visible="true">
+    <nd ref="-27072" />
+    <nd ref="-27073" />
+    <nd ref="-27074" />
+    <tag k="traffic_light_id" v="47560" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1533" action="modify" visible="true">
+    <nd ref="-27080" />
+    <nd ref="-27081" />
+    <nd ref="-27082" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1534" action="modify" visible="true">
+    <nd ref="-27083" />
+    <nd ref="-27084" />
+    <nd ref="-27085" />
+    <nd ref="-27086" />
+    <nd ref="-27087" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1535" action="modify" visible="true">
+    <nd ref="-27080" />
+    <nd ref="-27081" />
+    <nd ref="-27082" />
+    <tag k="traffic_light_id" v="47552" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1536" action="modify" visible="true">
+    <nd ref="-27088" />
+    <nd ref="-27089" />
+    <nd ref="-27090" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1537" action="modify" visible="true">
+    <nd ref="-27091" />
+    <nd ref="-27092" />
+    <nd ref="-27093" />
+    <nd ref="-27094" />
+    <nd ref="-27095" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1538" action="modify" visible="true">
+    <nd ref="-27088" />
+    <nd ref="-27089" />
+    <nd ref="-27090" />
+    <tag k="traffic_light_id" v="47504" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1539" action="modify" visible="true">
+    <nd ref="-27096" />
+    <nd ref="-27097" />
+    <nd ref="-27098" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1540" action="modify" visible="true">
+    <nd ref="-27099" />
+    <nd ref="-27100" />
+    <nd ref="-27101" />
+    <nd ref="-27102" />
+    <nd ref="-27103" />
+    <nd ref="5311" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1541" action="modify" visible="true">
+    <nd ref="-27096" />
+    <nd ref="-27097" />
+    <nd ref="-27098" />
+    <tag k="traffic_light_id" v="47476" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1542" action="modify" visible="true">
+    <nd ref="-27104" />
+    <nd ref="-27105" />
+    <nd ref="-27106" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1543" action="modify" visible="true">
+    <nd ref="-27107" />
+    <nd ref="-27108" />
+    <nd ref="-27109" />
+    <nd ref="-27110" />
+    <nd ref="-27111" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1544" action="modify" visible="true">
+    <nd ref="-27104" />
+    <nd ref="-27105" />
+    <nd ref="-27106" />
+    <tag k="traffic_light_id" v="47612" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1545" action="modify" visible="true">
+    <nd ref="-27112" />
+    <nd ref="-27113" />
+    <nd ref="-27114" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1546" action="modify" visible="true">
+    <nd ref="-27115" />
+    <nd ref="-27116" />
+    <nd ref="-27117" />
+    <nd ref="-27118" />
+    <nd ref="-27119" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1547" action="modify" visible="true">
+    <nd ref="-27112" />
+    <nd ref="-27113" />
+    <nd ref="-27114" />
+    <tag k="traffic_light_id" v="47596" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1548" action="modify" visible="true">
+    <nd ref="-27120" />
+    <nd ref="-27121" />
+    <nd ref="-27122" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1549" action="modify" visible="true">
+    <nd ref="-27123" />
+    <nd ref="-27124" />
+    <nd ref="-27125" />
+    <nd ref="-27126" />
+    <nd ref="-27127" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1550" action="modify" visible="true">
+    <nd ref="-27120" />
+    <nd ref="-27121" />
+    <nd ref="-27122" />
+    <tag k="traffic_light_id" v="47580" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1551" action="modify" visible="true">
+    <nd ref="-27128" />
+    <nd ref="-27129" />
+    <nd ref="-27130" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1552" action="modify" visible="true">
+    <nd ref="-27131" />
+    <nd ref="-27132" />
+    <nd ref="-27133" />
+    <nd ref="-27134" />
+    <nd ref="-27135" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1553" action="modify" visible="true">
+    <nd ref="-27128" />
+    <nd ref="-27129" />
+    <nd ref="-27130" />
+    <tag k="traffic_light_id" v="47516" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1554" action="modify" visible="true">
+    <nd ref="-27136" />
+    <nd ref="-27137" />
+    <nd ref="-27138" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1555" action="modify" visible="true">
+    <nd ref="-27139" />
+    <nd ref="-27140" />
+    <nd ref="-27141" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1556" action="modify" visible="true">
+    <nd ref="-27142" />
+    <nd ref="-27143" />
+    <nd ref="-27144" />
+    <nd ref="-27145" />
+    <nd ref="-27146" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1557" action="modify" visible="true">
+    <nd ref="-27136" />
+    <nd ref="-27137" />
+    <nd ref="-27138" />
+    <tag k="traffic_light_id" v="47600" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1558" action="modify" visible="true">
+    <nd ref="-27147" />
+    <nd ref="-27148" />
+    <nd ref="-27149" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1559" action="modify" visible="true">
+    <nd ref="-27150" />
+    <nd ref="-27151" />
+    <nd ref="-27152" />
+    <tag k="subtype" v="red_yellow_green" />
+    <tag k="type" v="traffic_light" />
+  </way>
+  <way id="-1560" action="modify" visible="true">
+    <nd ref="-27153" />
+    <nd ref="-27154" />
+    <nd ref="-27155" />
+    <nd ref="-27156" />
+    <nd ref="-27157" />
+    <tag k="type" v="stop_line" />
+  </way>
+  <way id="-1561" action="modify" visible="true">
+    <nd ref="-27147" />
+    <nd ref="-27148" />
+    <nd ref="-27149" />
+    <tag k="traffic_light_id" v="47556" />
+    <tag k="type" v="light_bulbs" />
+  </way>
+  <way id="-1573" action="modify" visible="true">
+    <nd ref="5317" />
+    <nd ref="-27100" />
+  </way>
+  <way id="-1589" action="modify" visible="true">
+    <nd ref="2451" />
+    <nd ref="-27004" />
+  </way>
+  <way id="-1590" action="modify" visible="true">
+    <nd ref="2452" />
+    <nd ref="-27001" />
+  </way>
+  <way id="-1593" action="modify" visible="true">
+    <nd ref="2336" />
+    <nd ref="-26930" />
+  </way>
+  <way id="-1601" action="modify" visible="true">
+    <nd ref="2438" />
+    <nd ref="-27057" />
+  </way>
   <way id="1000" visible="true" version="1">
     <nd ref="1002" />
     <nd ref="1004" />
@@ -63478,6 +65294,260 @@
     <nd ref="13338" />
     <nd ref="4779" />
   </way>
+  <relation id="-362" action="modify" visible="true">
+    <member type="way" ref="-1453" role="refers" />
+    <member type="way" ref="-1454" role="ref_line" />
+    <member type="way" ref="-1455" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-363" action="modify" visible="true">
+    <member type="way" ref="-1456" role="refers" />
+    <member type="way" ref="-1457" role="ref_line" />
+    <member type="way" ref="-1458" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-364" action="modify" visible="true">
+    <member type="way" ref="-1459" role="refers" />
+    <member type="way" ref="-1460" role="ref_line" />
+    <member type="way" ref="-1461" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-365" action="modify" visible="true">
+    <member type="way" ref="-1462" role="refers" />
+    <member type="way" ref="-1463" role="ref_line" />
+    <member type="way" ref="-1464" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-366" action="modify" visible="true">
+    <member type="way" ref="-1465" role="refers" />
+    <member type="way" ref="-1466" role="ref_line" />
+    <member type="way" ref="-1467" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-367" action="modify" visible="true">
+    <member type="way" ref="-1468" role="refers" />
+    <member type="way" ref="-1469" role="ref_line" />
+    <member type="way" ref="-1470" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-368" action="modify" visible="true">
+    <member type="way" ref="-1471" role="refers" />
+    <member type="way" ref="-1472" role="ref_line" />
+    <member type="way" ref="-1473" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-369" action="modify" visible="true">
+    <member type="way" ref="-1474" role="refers" />
+    <member type="way" ref="-1475" role="ref_line" />
+    <member type="way" ref="-1476" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-370" action="modify" visible="true">
+    <member type="way" ref="-1477" role="refers" />
+    <member type="way" ref="-1478" role="ref_line" />
+    <member type="way" ref="-1479" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-371" action="modify" visible="true">
+    <member type="way" ref="-1480" role="refers" />
+    <member type="way" ref="-1481" role="ref_line" />
+    <member type="way" ref="-1482" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-372" action="modify" visible="true">
+    <member type="way" ref="-1483" role="refers" />
+    <member type="way" ref="-1484" role="ref_line" />
+    <member type="way" ref="-1485" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-373" action="modify" visible="true">
+    <member type="way" ref="-1486" role="refers" />
+    <member type="way" ref="-1487" role="ref_line" />
+    <member type="way" ref="-1488" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-374" action="modify" visible="true">
+    <member type="way" ref="-1489" role="refers" />
+    <member type="way" ref="-1490" role="ref_line" />
+    <member type="way" ref="-1491" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-375" action="modify" visible="true">
+    <member type="way" ref="-1492" role="refers" />
+    <member type="way" ref="-1493" role="ref_line" />
+    <member type="way" ref="-1494" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-376" action="modify" visible="true">
+    <member type="way" ref="-1495" role="refers" />
+    <member type="way" ref="-1496" role="ref_line" />
+    <member type="way" ref="-1497" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-377" action="modify" visible="true">
+    <member type="way" ref="-1498" role="refers" />
+    <member type="way" ref="-1499" role="ref_line" />
+    <member type="way" ref="-1500" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-378" action="modify" visible="true">
+    <member type="way" ref="-1501" role="refers" />
+    <member type="way" ref="-1502" role="ref_line" />
+    <member type="way" ref="-1503" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-379" action="modify" visible="true">
+    <member type="way" ref="-1504" role="refers" />
+    <member type="way" ref="-1505" role="ref_line" />
+    <member type="way" ref="-1506" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-380" action="modify" visible="true">
+    <member type="way" ref="-1507" role="refers" />
+    <member type="way" ref="-1508" role="ref_line" />
+    <member type="way" ref="-1509" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-381" action="modify" visible="true">
+    <member type="way" ref="-1510" role="refers" />
+    <member type="way" ref="-1511" role="ref_line" />
+    <member type="way" ref="-1512" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-382" action="modify" visible="true">
+    <member type="way" ref="-1513" role="refers" />
+    <member type="way" ref="-1514" role="ref_line" />
+    <member type="way" ref="-1515" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-383" action="modify" visible="true">
+    <member type="way" ref="-1516" role="refers" />
+    <member type="way" ref="-1517" role="ref_line" />
+    <member type="way" ref="-1518" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-384" action="modify" visible="true">
+    <member type="way" ref="-1519" role="refers" />
+    <member type="way" ref="-1520" role="ref_line" />
+    <member type="way" ref="-1521" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-385" action="modify" visible="true">
+    <member type="way" ref="-1522" role="refers" />
+    <member type="way" ref="-1523" role="ref_line" />
+    <member type="way" ref="-1524" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-386" action="modify" visible="true">
+    <member type="way" ref="-1525" role="refers" />
+    <member type="way" ref="-1526" role="ref_line" />
+    <member type="way" ref="-1527" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-387" action="modify" visible="true">
+    <member type="way" ref="-1528" role="refers" />
+    <member type="way" ref="-1452" role="ref_line" />
+    <member type="way" ref="-1529" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-388" action="modify" visible="true">
+    <member type="way" ref="-1530" role="refers" />
+    <member type="way" ref="-1531" role="ref_line" />
+    <member type="way" ref="-1532" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-389" action="modify" visible="true">
+    <member type="way" ref="-1533" role="refers" />
+    <member type="way" ref="-1534" role="ref_line" />
+    <member type="way" ref="-1535" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-390" action="modify" visible="true">
+    <member type="way" ref="-1536" role="refers" />
+    <member type="way" ref="-1537" role="ref_line" />
+    <member type="way" ref="-1538" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-391" action="modify" visible="true">
+    <member type="way" ref="-1539" role="refers" />
+    <member type="way" ref="-1540" role="ref_line" />
+    <member type="way" ref="-1541" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-392" action="modify" visible="true">
+    <member type="way" ref="-1542" role="refers" />
+    <member type="way" ref="-1543" role="ref_line" />
+    <member type="way" ref="-1544" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-393" action="modify" visible="true">
+    <member type="way" ref="-1545" role="refers" />
+    <member type="way" ref="-1546" role="ref_line" />
+    <member type="way" ref="-1547" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-394" action="modify" visible="true">
+    <member type="way" ref="-1548" role="refers" />
+    <member type="way" ref="-1549" role="ref_line" />
+    <member type="way" ref="-1550" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-395" action="modify" visible="true">
+    <member type="way" ref="-1551" role="refers" />
+    <member type="way" ref="-1552" role="ref_line" />
+    <member type="way" ref="-1553" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-396" action="modify" visible="true">
+    <member type="way" ref="-1554" role="refers" />
+    <member type="way" ref="-1555" role="refers" />
+    <member type="way" ref="-1556" role="ref_line" />
+    <member type="way" ref="-1557" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
+  <relation id="-397" action="modify" visible="true">
+    <member type="way" ref="-1558" role="refers" />
+    <member type="way" ref="-1559" role="refers" />
+    <member type="way" ref="-1560" role="ref_line" />
+    <member type="way" ref="-1561" role="light_bulbs" />
+    <tag k="subtype" v="traffic_light" />
+    <tag k="type" v="regulatory_element" />
+  </relation>
   <relation id="1006" visible="true" version="1">
     <member type="way" ref="1001" role="left" />
     <member type="way" ref="1000" role="right" />
