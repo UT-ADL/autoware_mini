@@ -10,7 +10,6 @@ from sensor_msgs.msg import PointCloud2
 
 class PointsClusterer:
     def __init__(self):
-        self.sample_size = rospy.get_param('~sample_size')
         self.cluster_epsilon = rospy.get_param('~cluster_epsilon')
         self.cluster_min_size = rospy.get_param('~cluster_min_size')
 
@@ -29,16 +28,12 @@ class PointsClusterer:
                 rospy.loginfo("Using DBSCAN from Scikit-learn")
 
         self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=1, tcp_nodelay=True)
-        rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=2**24, tcp_nodelay=True)
+        rospy.Subscriber('points_filtered', PointCloud2, self.points_callback, queue_size=1, buff_size=2**24, tcp_nodelay=True)
 
         rospy.loginfo("%s - initialized", rospy.get_name())
 
     def points_callback(self, msg):
         data = numpify(msg)
-
-        # downsample random points to reduce processing time
-        if len(data) > self.sample_size:
-            data = np.random.choice(data, size=self.sample_size, replace=False)
 
         # convert point cloud into ndarray, take only xyz coordinates
         points = structured_to_unstructured(data[['x', 'y', 'z']], dtype=np.float32)
