@@ -11,6 +11,7 @@
     <group if="$(eval 'lidar' in detector)" ns="lidar">
         <remap unless="$(eval 'fusion' in detector)" from="detected_objects" to="/detection/detected_objects" />
         <group if="$(eval 'lidar_cluster' in detector)">
+            <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" required="true" />
             <group if="$(arg use_lidar_center)" ns="center">
                 <node type="ground_removal.py" name="ground_removal" pkg="autoware_mini" output="screen" required="true">
                     <remap from="points_raw" to="/lidar_center/points_raw" />
@@ -19,13 +20,12 @@
                 </node>
             </group>
             <group if="$(arg use_lidar_front)" ns="front">
-                <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" required="true" />
                 <node pkg="nodelet" type="nodelet" name="crop_box" args="load pcl/CropBox pcl_manager" output="screen" required="true">
                     <remap from="~input" to="/lidar_front/points" />
-                    <remap from="~output" to="/lidar_front/points_filtered" />
+                    <remap from="~output" to="/lidar_front/points_cleaned" />
                 </node>
                 <node type="ground_removal.py" name="ground_removal" pkg="autoware_mini" output="screen" required="true">
-                    <remap from="points_raw" to="/lidar_front/points_filtered" />
+                    <remap from="points_raw" to="/lidar_front/points_cleaned" />
                     <remap unless="$(arg use_lidar_center)" from="points_ground" to="/detection/lidar/points_ground" />
                     <remap unless="$(arg use_lidar_center)" from="points_no_ground" to="/detection/lidar/points_no_ground" />
                 </node>
@@ -37,6 +37,10 @@
                     <remap from="points_concatenated" to="points_no_ground" />
                 </node>
             </group>
+            <node pkg="nodelet" type="nodelet" name="voxel_grid_filter" args="load pcl/VoxelGrid pcl_manager" output="screen" required="true">
+                <remap from="~input" to="/detection/lidar/points_no_ground" />
+                <remap from="~output" to="/detection/lidar/points_filtered" />
+            </node>
             <node type="points_clusterer.py" name="points_clusterer" pkg="autoware_mini" output="screen" required="true" />
             <node type="cluster_detector.py" name="cluster_detector" pkg="autoware_mini" output="screen" required="true" />
         </group>

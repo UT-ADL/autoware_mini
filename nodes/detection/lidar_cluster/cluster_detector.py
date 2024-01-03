@@ -86,7 +86,7 @@ class ClusterDetector:
                 # calculate centroid and dimensions
                 maxs = np.max(points3d, axis=0)
                 mins = np.min(points3d, axis=0)
-                center_x, center_y, center_z = (maxs + mins) / 2.0
+                center_x, center_y, center_z = np.mean(points3d, axis=0)
                 dim_x, dim_y, dim_z = maxs - mins
 
                 # always pointing forward
