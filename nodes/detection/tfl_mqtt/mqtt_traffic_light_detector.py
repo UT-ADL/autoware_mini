@@ -11,9 +11,6 @@ from lanelet2.projection import UtmProjector
 import paho.mqtt.client as paho
 
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
-from visualization_msgs.msg import MarkerArray, Marker
-
-from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 
 
 MQTT_TO_AUTOWARE_TFL_MAP = {
