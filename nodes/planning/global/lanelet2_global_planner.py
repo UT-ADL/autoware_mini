@@ -4,8 +4,6 @@ import rospy
 import copy
 import lanelet2
 import numpy as np
-from lanelet2.io import Origin, load
-from lanelet2.projection import UtmProjector
 from lanelet2.core import BasicPoint2d
 from lanelet2.geometry import to2D, findNearest, distance
 
@@ -18,6 +16,7 @@ from visualization_msgs.msg import MarkerArray, Marker
 
 from helpers.geometry import get_heading_between_two_points, get_distance_between_two_points_2d, get_orientation_from_heading
 from helpers.waypoints import get_closest_point_on_path
+from helpers.lanelet2 import load_lanelet2_map
 
 LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
     "straight": WaypointState.STR_STRAIGHT,
@@ -52,15 +51,7 @@ class Lanelet2GlobalPlanner:
         self.goal_point = None
         self.waypoints = []
 
-        # Load lanelet map
-        if coordinate_transformer == "utm":
-                projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
-        else:
-            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
-            exit(1)
-
-        self.lanelet2_map = load(lanelet2_map_name, projector)
-        self.stopline_nodes = extract_stopline_nodes(self.lanelet2_map)
+        self.lanelet2_map = load_lanelet2_map(lanelet2_map_name, coordinate_transformer, use_custom_origin, utm_origin_lat, utm_origin_lon)
 
         # traffic rules
         traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
@@ -211,8 +202,6 @@ class Lanelet2GlobalPlanner:
                 waypoint.pose.pose.position.y = point.y
                 waypoint.pose.pose.position.z = point.z
                 waypoint.wpstate.steering_state = blinker
-                if point.id in self.stopline_nodes:
-                    waypoint.stop_line_id = self.stopline_nodes[point.id]
 
                 # calculate quaternion for orientation
                 if last_lanelet and idx == len(lanelet.centerline)-1:
@@ -275,18 +264,6 @@ class Lanelet2GlobalPlanner:
 
     def run(self):
         rospy.spin()
-
-def extract_stopline_nodes(map):
-
-    stopline_nodes = {}
-
-    for line in map.lineStringLayer:
-        if line.attributes:
-            if line.attributes["type"] == "stop_line":
-                # add all point id's into dictionary and add stopline id as value
-                stopline_nodes.update({point.id: line.id for point in line})
-
-    return stopline_nodes
 
 if __name__ == '__main__':
     rospy.init_node('lanelet2_global_planner')

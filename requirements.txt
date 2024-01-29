@@ -4,3 +4,4 @@ simple-pid < 2.0
 scikit-learn-intelex
 onnxruntime_gpu
 lapsolver
+shapely >= 2.0

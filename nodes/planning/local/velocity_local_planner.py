@@ -10,11 +10,14 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 from autoware_msgs.msg import Lane, DetectedObjectArray, TrafficLightResultArray
-from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3
+from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3, Point
+from shapely.geometry import LineString, Point as ShapelyPoint
+from shapely import line_locate_point
 
 from helpers.geometry import get_closest_point_on_line, get_distance_between_two_points_2d
 from helpers.waypoints import get_two_nearest_waypoint_idx
 from helpers.transform import transform_vector3
+from helpers.lanelet2 import load_lanelet2_map, get_stoplines
 
 
 class VelocityLocalPlanner:
@@ -37,6 +40,12 @@ class VelocityLocalPlanner:
         self.default_deceleration = rospy.get_param("default_deceleration")
         self.tfl_maximum_deceleration = rospy.get_param("~tfl_maximum_deceleration")
 
+        coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
+        utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
+        utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
+        lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
+
         # Internal variables
         self.lock = threading.Lock()
         self.output_frame = None
@@ -49,6 +58,9 @@ class VelocityLocalPlanner:
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer)
         self.waypoint_lookup_radius = np.sqrt(self.slowdown_lateral_distance**2 + self.dense_waypoint_interval**2)
+
+        lanelet2_map = load_lanelet2_map(lanelet2_map_name, coordinate_transformer, use_custom_origin, utm_origin_lat, utm_origin_lon)
+        self.all_stop_lines = get_stoplines(lanelet2_map)
 
         # Publishers
         self.local_path_pub = rospy.Publisher('local_path', Lane, queue_size=1, tcp_nodelay=True)
@@ -137,8 +149,8 @@ class VelocityLocalPlanner:
         local_path_waypoints = copy.deepcopy(global_path_waypoints[wp_backward:end_index])
 
         # project current_position to path
-        current_position_on_path = get_closest_point_on_line(current_position, local_path_waypoints[0].pose.pose.position, local_path_waypoints[1].pose.pose.position)
-        ego_distance_from_path_start = get_distance_between_two_points_2d(current_position_on_path, local_path_waypoints[0].pose.pose.position)
+        local_path_linestring = LineString(local_path_array.tolist())
+        ego_distance_from_path_start = line_locate_point(local_path_linestring, ShapelyPoint(current_position.x, current_position.y))
 
         # calculate distances up to each waypoint
         local_path_dists = np.cumsum(np.sqrt(np.sum(np.diff(local_path_array[:,:2], axis=0)**2, axis=1)))
@@ -156,7 +168,6 @@ class VelocityLocalPlanner:
         local_path_blocked = False
         stopping_point_distance = 0.0
 
-        points_list = []
         # fetch the transform from the object frame to the base_link frame to align the speed with ego vehicle
         try:
             transform = self.tf_buffer.lookup_transform("base_link", msg.header.frame_id, msg.header.stamp, rospy.Duration(self.transform_timeout))
@@ -164,7 +175,9 @@ class VelocityLocalPlanner:
             rospy.logwarn("%s - unable to transform object speed to base frame, using speed 0: %s", rospy.get_name(), e)
             transform = None
 
+        # 1. ADD DETECTED OBJECTS AS OBSTACLES
         # extract object points from detected objects
+        points_list = []
         for obj in msg.objects:
             # project object velocity to base_link frame to get longitudinal speed
             # TODO: project velocity to the path
@@ -183,22 +196,28 @@ class VelocityLocalPlanner:
                 for wp in obj.candidate_trajectories.lanes[0].waypoints:
                     points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, velocity.x, self.braking_safety_distance_obstacle])
 
-        # red traffic lights: add wp with stop line id's where the traffic light status is red to obstacle list
-        for i, wp in enumerate(local_path_waypoints):
-
-            if wp.stop_line_id > 0 and wp.stop_line_id in red_stop_lines:
-                # use wp distance and caclulate necessary deceleration for stopping
-                # not including self.braking_safety_distance_stopline here, because otherwise we would get negative deceleration already before reaching the stop line
-                deceleration = (current_speed**2) / (2 * (local_path_dists[i] - ego_distance_from_path_start - self.current_pose_to_car_front))
-
+        # 2. ADD RED STOPLINES AS OBSTACLES
+        # collect red stopline geometries into one array
+        red_stoplines_linestrings = [self.all_stop_lines[stopline_id] for stopline_id in red_stop_lines]
+        # find intersection points between local path and red stoplines
+        intersection_points = local_path_linestring.intersection(red_stoplines_linestrings)
+        # add all intersection points as obstacles
+        for intersection_point in intersection_points:
+            # if intersection_point is ShapelyPoint the stopline intersects with local path
+            if isinstance(intersection_point, ShapelyPoint):
                 # ignore red traffic light if deceleration is too high or stop line behind us
-                if deceleration > self.tfl_maximum_deceleration or deceleration < 0.0:
-                    rospy.logwarn_throttle(3, "%s - ignore red traffic light, deceleration: %f", rospy.get_name(), deceleration)
+                distance_from_current_position_on_path = line_locate_point(local_path_linestring, intersection_point) - ego_distance_from_path_start - self.current_pose_to_car_front
+                deceleration = (current_speed**2) / (2 * distance_from_current_position_on_path)
+                if 0 <= deceleration <= self.tfl_maximum_deceleration:
+                    # don't have z coordinate for stopline (intersection in 3d is unreliable) - use current_position.z
+                    points_list.append([intersection_point.x, intersection_point.y, current_position.z, 0.0, self.braking_safety_distance_stopline])
                 else:
-                    points_list.append([wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z, 0.0, self.braking_safety_distance_stopline])
+                    rospy.logwarn_throttle(3, "%s - ignore red traffic light, deceleration: %f", rospy.get_name(), deceleration)
 
+        # 3. ADD GOAL POINT AS OBSTACLE
         # Add last wp as goal point to stop the car before it
-        points_list.append([global_path_waypoints[-1].pose.pose.position.x, global_path_waypoints[-1].pose.pose.position.y, global_path_waypoints[-1].pose.pose.position.z, 0.0, self.braking_safety_distance_goal])
+        goal_point = global_path_waypoints[-1].pose.pose.position
+        points_list.append([goal_point.x, goal_point.y, goal_point.z, 0.0, self.braking_safety_distance_goal])
 
         if len(points_list) > 0:
             # convert the points list to a numpy array
@@ -305,6 +324,7 @@ class VelocityLocalPlanner:
         lane.is_blocked = local_path_blocked
         lane.cost = stopping_point_distance
         self.local_path_pub.publish(lane)
+
 
     def run(self):
         rospy.spin()
