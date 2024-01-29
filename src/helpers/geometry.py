@@ -5,8 +5,8 @@ from geometry_msgs.msg import Point, Quaternion
 
 def get_heading_from_orientation(orientation):
     """
-    Get heading angle from pose.orientation.
-    :param pose: PoseStamped
+    Get heading angle from orientation.
+    :param orientation: Quaternion
     :return: heading in radians
     """
 
@@ -20,6 +20,7 @@ def get_orientation_from_heading(heading):
     Get orientation from heading (-pi...pi)
     :param heading: heading in radians
     :return: orientation
+    :rtype: Quaternion
     """
 
     x, y, z, w = quaternion_from_euler(0, 0, heading)
@@ -41,9 +42,9 @@ def get_cross_track_error(ego_pos, pos1, pos2):
     # calc distance from track
     # https://robotics.stackexchange.com/questions/22989/what-is-wrong-with-my-stanley-controller-for-car-steering-control
 
-    :param ego_pose: Pose
-    :param pose1: Pose
-    :param pose2: Pose
+    :param ego_pose: Point
+    :param pose1: Point
+    :param pose2: Point
     :return: cross track error
     """
 
@@ -55,10 +56,11 @@ def get_cross_track_error(ego_pos, pos1, pos2):
 def get_point_using_heading_and_distance(start_point, heading, distance):
     """
     Get pose from given pose and extrapolating it using heading and distance
-    :param start_pose: Pose
+    :param start_point: Point
     :param heading: heading in radians
     :param distance: distance in meters
-    :return: Pose - z and orientation is the same as start_pose
+    :return: new point - z and orientation is the same as start_pose
+    :rtype: Point
     """
 
     point = Point()
@@ -141,8 +143,8 @@ def get_closest_point_on_line(ego_point, point1, point2, clamp_output=True):
 def get_distance_between_two_points_2d(p1, p2):
     """
     Get distance between two points
-    :param point1: Pose
-    :param point2: Pose
+    :param point1: Point
+    :param point2: Point
     :return: distance
     """
 

@@ -42,8 +42,7 @@ class PathSmoothing:
                 wp.wpstate.steering_state,
                 wp.twist.twist.linear.x,
                 wp.dtlane.lw,
-                wp.dtlane.rw,
-                wp.stop_line_id
+                wp.dtlane.rw
             ) for wp in msg.waypoints])
 
         smoothed_path_array = self.smooth_global_path(waypoints_array)
@@ -62,7 +61,6 @@ class PathSmoothing:
         speed = waypoints_array[:,4]
         lw = waypoints_array[:,5]
         rw = waypoints_array[:,6]
-        stop_line_id = waypoints_array[:,7]
 
         # distance differeneces between points
         distances = np.cumsum(np.sqrt(np.sum(np.diff(xy_path, axis=0)**2, axis=1)))
@@ -92,18 +90,6 @@ class PathSmoothing:
         # lw and rw
         lw_new = np.interp(new_distances, distances, lw)
         rw_new = np.interp(new_distances, distances, rw)
-
-        # Stop lines
-        # create empty array for new stopline id's
-        stop_line_id_new = np.zeros(len(new_distances))
-
-        # Extract stop line id's from old array and get the index
-        stop_line_index_old = np.where(stop_line_id > 0)[0]
-        for i in stop_line_index_old:
-            # find the index of the closest distance in the new distances array
-            closest_index = np.argmin(np.abs(new_distances - distances[i]))
-            # set the stop line id of the closest index to the stop line id of the old array
-            stop_line_id_new[closest_index] = stop_line_id[i]
 
         # Speed
         speed_interpolated = np.interp(new_distances, distances, speed)
@@ -149,7 +135,7 @@ class PathSmoothing:
             debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new)
 
         # Stack
-        smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, lw_new, rw_new, yaw, stop_line_id_new), axis=1)
+        smoothed_path_array = np.stack((x_new, y_new, z_new, blinker_new, speed_new, lw_new, rw_new, yaw), axis=1)
 
         return smoothed_path_array
 
@@ -162,7 +148,7 @@ class PathSmoothing:
 
         self.smoothed_path_pub.publish(lane)
 
-    def create_waypoint(self, x, y, z, blinker, speed, lw, rw, yaw, stop_line_id):
+    def create_waypoint(self, x, y, z, blinker, speed, lw, rw, yaw):
         # create waypoint
         waypoint = Waypoint()
         waypoint.pose.pose.position.x = x
@@ -173,7 +159,6 @@ class PathSmoothing:
         waypoint.pose.pose.orientation = get_orientation_from_heading(yaw)
         waypoint.dtlane.lw = lw
         waypoint.dtlane.rw = rw
-        waypoint.stop_line_id = int(stop_line_id)
 
         return waypoint
 

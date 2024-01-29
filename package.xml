@@ -19,6 +19,7 @@
   <exec_depend>joy</exec_depend>
   <exec_depend>topic_tools</exec_depend>
   <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>shapely</exec_depend>
 
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-sklearn</exec_depend>

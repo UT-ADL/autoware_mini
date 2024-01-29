@@ -8,9 +8,7 @@ import tf2_ros
 import onnxruntime
 
 from image_geometry import PinholeCameraModel
-
-from lanelet2.io import Origin, load
-from lanelet2.projection import UtmProjector
+from shapely.geometry import LineString
 
 from geometry_msgs.msg import Point
 from sensor_msgs.msg import Image
@@ -21,6 +19,7 @@ from autoware_msgs.msg import Lane
 from cv_bridge import CvBridge, CvBridgeError
 
 from helpers.transform import transform_point
+from helpers.lanelet2 import get_stoplines, get_stoplines_trafficlights_bulbs, load_lanelet2_map
 
 # Classifier outputs 4 classes (LightState)
 CLASSIFIER_RESULT_TO_STRING = {
@@ -62,16 +61,11 @@ class CameraTrafficLightDetector:
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
 
-        # Load the map using Lanelet2
-        if coordinate_transformer == "utm":
-            projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
-        else:
-            rospy.logfatal("%s - only utm currently supported for lanelet2 map loading", rospy.get_name())
-            exit(1)
-        lanelet2_map = load(lanelet2_map_name, projector)
 
-        # Extract all stop lines and signals from the map
-        self.signals = self.get_signals_from_map(lanelet2_map)
+        # Extract all stop lines and signals from the lanelet2 map
+        lanelet2_map = load_lanelet2_map(lanelet2_map_name, coordinate_transformer, use_custom_origin, utm_origin_lat, utm_origin_lon)
+        self.stoplines = get_stoplines(lanelet2_map)
+        self.signals = get_stoplines_trafficlights_bulbs(lanelet2_map)
 
         self.bridge = CvBridge()
         self.model = onnxruntime.InferenceSession(onnx_path, providers=['CUDAExecutionProvider'])
@@ -102,18 +96,20 @@ class CameraTrafficLightDetector:
 
     def local_path_callback(self, local_path_msg):
 
-        stopline_idx = []
+        # used in calculate_roi_coordinates to filter out only relevant signals
+        stoplines_on_path = []
 
         # If there is a local path collect allt the stop line id's on the path
         if len(local_path_msg.waypoints) > 0:
-            for wp in local_path_msg.waypoints:
-                if wp.stop_line_id > 0:
-                    # check if there is a signal available for that stop line
-                    if wp.stop_line_id in self.signals:
-                        stopline_idx.append(wp.stop_line_id)
+            local_path = LineString([(wp.pose.pose.position.x, wp.pose.pose.position.y) for wp in local_path_msg.waypoints])
+
+            for linkId, stopline in self.stoplines.items():
+                # check if stopline intersects with local path
+                if local_path.intersects(stopline):
+                    stoplines_on_path.append(linkId)
 
         with self.lock:
-            self.stoplines_on_path = stopline_idx
+            self.stoplines_on_path = stoplines_on_path
             self.transform_from_frame = local_path_msg.header.frame_id
 
     def camera_image_callback(self, camera_image_msg):
@@ -183,26 +179,7 @@ class CameraTrafficLightDetector:
 
         if self.tfl_roi_pub.get_num_connections() > 0:
             self.publish_roi_images(image, rois, classes, scores, image_time_stamp)
-    
-    def get_signals_from_map(self, lanelet2_map):
 
-        signals = {}
-
-        for reg_el in lanelet2_map.regulatoryElementLayer:
-            if reg_el.attributes["subtype"] == "traffic_light":
-                # ref_line is the stop line and there is only 1 stopline per traffic light reg_el
-                linkId = reg_el.parameters["ref_line"][0].id
-
-                for bulbs in reg_el.parameters["light_bulbs"]:
-                    # plId represents the traffic light (pole), one stop line can be associated with multiple traffic lights
-                    plId = bulbs.id
-                    # one traffic light has red, yellow and green bulbs
-                    bulb_data = [[bulb.id, bulb.attributes["color"], bulb.x, bulb.y, bulb.z] for bulb in bulbs]
-                    # signals is a dictionary indexed by stopline id and contains dictionary of traffic lights indexed by pole id
-                    # which in turn contains a list of bulbs
-                    signals.setdefault(linkId, {}).setdefault(plId, []).extend(bulb_data)
-
-        return signals
 
     def calculate_roi_coordinates(self, stoplines_on_path, transform):
 
