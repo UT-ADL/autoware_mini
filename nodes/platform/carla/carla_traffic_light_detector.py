@@ -55,6 +55,13 @@ class CarlaTrafficLightDetector:
         self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
                                                               origin_lat=utm_origin_lat,
                                                               origin_lon=utm_origin_lon)
+        
+        # Extract stopline data (coords, light_id, lane_id) from the map
+        self.stopline_data = []
+        self.extractStopLines(lanelet2_map)
+
+        # Carla tfl_id to lanelet2 stopline_id mapping
+        self.light_id_to_stopline_id_map = None
 
         self.stopline_centers_map = get_stoplines_center(lanelet2_map)
 
@@ -146,6 +153,6 @@ class CarlaTrafficLightDetector:
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_traffic_light_detector', log_level=rospy.INFO)
+    rospy.init_node('carla_traffic_light_detector', log_level=rospy.ERROR)
     node = CarlaTrafficLightDetector()
     node.run()
