@@ -10,7 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from carla_msgs.msg import CarlaTrafficLightStatus, CarlaTrafficLightStatusList, CarlaTrafficLightInfoList
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 
-from tf.transformations import quaternion_matrix
+import ros_numpy
 
 from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 from helpers.lanelet2 import get_stoplines_center
@@ -86,21 +86,15 @@ class CarlaTrafficLightDetector:
             pose = tfl.transform
             if self.use_offset:
                 pose = self.sim2utm_transformer.transform_pose(pose)
-            
-            rotation_matrix = quaternion_matrix([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
 
-            # Transform center_location using the rotation matrix
-            center_rotated = np.dot(rotation_matrix, np.array([tfl.trigger_volume.center.x, tfl.trigger_volume.center.y, tfl.trigger_volume.center.z, 1]))
-
-            # Compute the position of the trigger volume based on the center location and the pose
-            pose.position.x += center_rotated[0]
-            pose.position.y += center_rotated[1]
-            pose.position.z += center_rotated[2]
+            # Transform trigger volume location using the transformation matrix from tfl pose
+            trans_matrix = ros_numpy.numpify(pose)
+            center_x, center_y, _, _ = np.dot(trans_matrix, np.array([tfl.trigger_volume.center.x, tfl.trigger_volume.center.y, tfl.trigger_volume.center.z, 1]))
 
             try:
-                stopline_id = self.classifier.predict([(pose.position.x, pose.position.y)])[0]
+                stopline_id = self.classifier.predict([(center_x, center_y)])[0]
             except ValueError:
-                rospy.logdebug("%s - stopline at coordinates (%f, %f) near (traffic light: %s) not found in map", rospy.get_name(), pose.position.x, pose.position.y, tfl.id)
+                rospy.logdebug("%s - stopline at coordinates (%f, %f) near (traffic light: %s) not found in map", rospy.get_name(), center_x, center_y, tfl.id)
                 continue
 
             self.light_id_to_stopline_id_map[tfl.id] = stopline_id
