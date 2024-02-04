@@ -146,6 +146,6 @@ class CarlaTrafficLightDetector:
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_traffic_light_detector', log_level=rospy.INFO)
+    rospy.init_node('carla_traffic_light_detector', log_level=rospy.WARN)
     node = CarlaTrafficLightDetector()
     node.run()
