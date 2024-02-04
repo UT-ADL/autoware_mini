@@ -1,6 +1,7 @@
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 from shapely.geometry import LineString
+import numpy as np
 
 
 def load_lanelet2_map(lanelet2_map_name, coordinate_transformer, use_custom_origin, utm_origin_lat, utm_origin_lon):
@@ -85,3 +86,28 @@ def get_stoplines_trafficlights_bulbs(lanelet2_map):
                 signals.setdefault(linkId, {}).setdefault(plId, []).extend(bulb_data)
 
     return signals
+
+def get_stoplines_center(lanelet2_map):
+    """
+    Iterate over all regulatory_elements with subtype traffic light and extract the stoplines centers.
+    Organize the data into dictionary indexed by stopline id that contains stopline center coordinates and respective traffic light ids
+    :param lanelet2_map: lanelet2 map
+    :return: {stopline_id: [[(center_x, center_y), [PlIds]], ...], ...}
+    """
+
+    stopline_centers = {}
+
+    for reg_el in lanelet2_map.regulatoryElementLayer:
+        if reg_el.attributes["subtype"] == "traffic_light":
+            # ref_line is the stop line and there is only 1 stopline per traffic light reg_el
+            link = reg_el.parameters["ref_line"][0]
+            # Get all geometry points of the stopline
+            line_points = [[point.x, point.y] for point in link]
+            # Extract center point from stopline
+            center_x, center_y = np.mean(line_points, axis=0)
+            # Extract traffic light (Pole) ids for the same stopline
+            plIds = [bulbs.id for bulbs in reg_el.parameters["light_bulbs"]]
+
+            stopline_centers[link.id] = [(center_x, center_y), plIds] 
+
+    return stopline_centers

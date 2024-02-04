@@ -13,6 +13,7 @@ from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 from tf.transformations import quaternion_matrix
 
 from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
+from helpers.lanelet2 import get_stoplines_center
 
 # Carla to Autoware traffic light status mapping
 CARLA_TO_AUTOWARE_TFL_MAP = {
@@ -54,16 +55,18 @@ class CarlaTrafficLightDetector:
         self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
                                                               origin_lat=utm_origin_lat,
                                                               origin_lon=utm_origin_lon)
-        
-        # Extract stopline data (coords, light_id, lane_id) from the map
-        self.stopline_data = []
-        self.extractStopLines(lanelet2_map)
 
-        # Carla tfl_id to lanelet2 stopline_id mapping
-        self.light_id_to_stopline_id_map = None
+        self.stopline_centers_map = get_stoplines_center(lanelet2_map)
+
+        stopline_centers = np.array(list(self.stopline_centers_map.values()))[:, 0].tolist()
+        stopline_ids = [(item,) for item in self.stopline_centers_map.keys()]
 
         # Classifier to find the closest stopline and its corresponding traffic light on map
-        self.classifier = None
+        self.classifier = KNeighborsClassifier(n_neighbors=1)
+        self.classifier.fit(stopline_centers, stopline_ids)
+
+        # Carla tfl_id to lanelet2 stopline_id mapping
+        self.light_id_to_stopline_id_map = {}
 
         # Publishers
         self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
@@ -74,27 +77,11 @@ class CarlaTrafficLightDetector:
         rospy.Subscriber('/carla/traffic_lights/status',
                     CarlaTrafficLightStatusList, self.tfl_status_callback, queue_size=1, tcp_nodelay=True)
 
-    def extractStopLines(self, lanelet2_map):
-        for reg_el in lanelet2_map.regulatoryElementLayer:
-            if reg_el.attributes["subtype"] == "traffic_light":
-                for tfl in reg_el.parameters["light_bulbs"]:
-                    line_points = []
-                    for point in reg_el.parameters["ref_line"][0]:
-                        line_points.append((point.x, point.y))
-                    
-                    # Extract center point from stopline
-                    center_point = np.mean(line_points, axis=0)
-
-                    self.stopline_data.append([(center_point[0], center_point[1]), tfl.id, reg_el.parameters["ref_line"][0].id])
-
     def tfl_info_callback(self, msg):
         """
         callback CarlaTrafficLightInfoList
         """
         
-        trigger_volume_coords = []
-        light_ids = []
-
         for tfl in msg.traffic_lights:
             pose = tfl.transform
             if self.use_offset:
@@ -110,51 +97,47 @@ class CarlaTrafficLightDetector:
             pose.position.y += center_rotated[1]
             pose.position.z += center_rotated[2]
 
-            trigger_volume_coords.append((pose.position.x, pose.position.y))
-            light_ids.append(tfl.id)
+            try:
+                stopline_id = self.classifier.predict([(pose.position.x, pose.position.y)])[0]
+            except ValueError:
+                rospy.logdebug("%s - stopline at coordinates (%f, %f) near (traffic light: %s) not found in map", rospy.get_name(), pose.position.x, pose.position.y, tfl.id)
+                continue
 
-        if self.classifier is None:
-            # Create a classifier to find the closest stopline and its corresponding traffic light on map
-            self.classifier = KNeighborsClassifier(n_neighbors=1)
-            self.classifier.fit(trigger_volume_coords, light_ids)
-
+            self.light_id_to_stopline_id_map[tfl.id] = stopline_id
 
     def tfl_status_callback(self, msg):
         """
         callback CarlaTrafficLightStatusList
         """
-        if self.classifier is None:
-            rospy.logwarn("%s - classifier not initialized", rospy.get_name())
-            return
-        
-        if self.light_id_to_stopline_id_map is None:
-            # Create a mapping between carla traffic light ids and stopline ids using the classifier
-            self.light_id_to_stopline_id_map = {}
-            for stopline_coords, stopline_id, lane_id in self.stopline_data:
-                try:
-                    light_id = self.classifier.predict([stopline_coords])[0]
-                    self.light_id_to_stopline_id_map[light_id] = (stopline_id, lane_id)
-                except:
-                    rospy.logerr("%s - classifier failed to find the closest stopline for traffic light %d", rospy.get_name(), light_id)
-                    continue
             
         tfl_status = TrafficLightResultArray()
         tfl_status.header.stamp = rospy.Time.now()
 
+        stopline_state = {}
+
         for light in msg.traffic_lights:
 
             if light.id not in self.light_id_to_stopline_id_map:
-                rospy.logwarn("%s - traffic light %d not found in info", rospy.get_name(), light.id)
+                rospy.logwarn_throttle(10, "%s - traffic light %d not found in info", rospy.get_name(), light.id)
                 continue
 
-            light_id, lane_id = self.light_id_to_stopline_id_map[light.id]
+            stopline_id = self.light_id_to_stopline_id_map[light.id]
 
-            tfl_result = TrafficLightResult()
-            tfl_result.light_id = light_id
-            tfl_result.lane_id = lane_id
-            tfl_result.recognition_result = CARLA_TO_AUTOWARE_TFL_MAP[light.state]
-            tfl_result.recognition_result_str = CARLA_TO_AUTOWARE_TFL_STR[light.state]
-            tfl_status.results.append(tfl_result)
+            if stopline_id not in stopline_state:
+                stopline_state[stopline_id] = light.state   
+            elif stopline_state[stopline_id] != light.state:
+                rospy.logwarn_throttle(10, "%s - multiple traffic lights for the same stopline %d with different states", rospy.get_name(), stopline_id)
+                continue
+
+            # Add same traffic light status to a stopline if there exists multiple traffic lights for the same stopline
+            for light_id in self.stopline_centers_map[stopline_id][1]:
+                
+                tfl_result = TrafficLightResult()
+                tfl_result.light_id = light_id
+                tfl_result.lane_id = stopline_id
+                tfl_result.recognition_result = CARLA_TO_AUTOWARE_TFL_MAP[stopline_state[stopline_id]]
+                tfl_result.recognition_result_str = CARLA_TO_AUTOWARE_TFL_STR[stopline_state[stopline_id]]
+                tfl_status.results.append(tfl_result)
         
         self.tfl_status_pub.publish(tfl_status)
 
@@ -163,6 +146,6 @@ class CarlaTrafficLightDetector:
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_traffic_light_detector', log_level=rospy.ERROR)
+    rospy.init_node('carla_traffic_light_detector', log_level=rospy.INFO)
     node = CarlaTrafficLightDetector()
     node.run()
