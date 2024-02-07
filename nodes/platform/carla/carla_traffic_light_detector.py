@@ -2,8 +2,6 @@
 
 import rospy
 import numpy as np
-from lanelet2.io import Origin, load
-from lanelet2.projection import UtmProjector
 
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -13,7 +11,7 @@ from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
 import ros_numpy
 
 from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
-from helpers.lanelet2 import get_stoplines_center
+from helpers.lanelet2 import get_stoplines_center, load_lanelet2_map
 
 # Carla to Autoware traffic light status mapping
 CARLA_TO_AUTOWARE_TFL_MAP = {
@@ -43,13 +41,8 @@ class CarlaTrafficLightDetector:
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
 
-        # Load the map using Lanelet2
-        if coordinate_transformer == "utm":
-                projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
-        else:
-            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
-            exit(1)
-        lanelet2_map = load(lanelet2_map_name, projector)
+        # Load lanelet2 map
+        lanelet2_map = load_lanelet2_map(lanelet2_map_name, coordinate_transformer, use_custom_origin, utm_origin_lat, utm_origin_lon)
 
         # Coordinate transformer from simulation coordinates to UTM
         self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
