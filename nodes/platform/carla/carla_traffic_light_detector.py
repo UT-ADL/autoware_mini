@@ -94,7 +94,7 @@ class CarlaTrafficLightDetector:
             trigger_volume_coords.append((center_x, center_y))
             light_ids.append((tfl.id))
 
-        # Initialize classifier to predict the closest trigger volume id
+        # Initialize classifier to predict the closest trigger volume
         if self.classifier is None:
             self.classifier = KNeighborsClassifier(n_neighbors=1)
             self.classifier.fit(trigger_volume_coords, light_ids)
