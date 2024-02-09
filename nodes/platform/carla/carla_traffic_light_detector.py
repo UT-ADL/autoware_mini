@@ -59,9 +59,6 @@ class CarlaTrafficLightDetector:
         # Get stopline centers with stopline_id and corresponding light_ids mapping
         self.stopline_centers_map = get_stoplines_center(lanelet2_map)
 
-        # Classifier to find the closest trigger volume and its corresponding traffic light on map
-        self.classifier = None
-
         # Carla_light_id to stopline_id mapping
         self.light_id_to_stopline_id_map = {}
 
@@ -89,23 +86,23 @@ class CarlaTrafficLightDetector:
 
             # Transform trigger volume location using the transformation matrix from tfl pose
             trans_matrix = ros_numpy.numpify(pose)
-            center_x, center_y, _, _ = np.dot(trans_matrix, np.array([tfl.trigger_volume.center.x, tfl.trigger_volume.center.y, tfl.trigger_volume.center.z, 1]))
+            trigger_coords = np.array([tfl.trigger_volume.center.x, tfl.trigger_volume.center.y, tfl.trigger_volume.center.z, 1])
+            center_x, center_y, _, _ = np.dot(trans_matrix, trigger_coords)
 
             trigger_volume_coords.append((center_x, center_y))
             light_ids.append((tfl.id))
 
         # Initialize classifier to predict the closest trigger volume
-        if self.classifier is None:
-            self.classifier = KNeighborsClassifier(n_neighbors=1)
-            self.classifier.fit(trigger_volume_coords, light_ids)
+        classifier = KNeighborsClassifier(n_neighbors=1)
+        classifier.fit(trigger_volume_coords, light_ids)
         
         # Predict closest trigger volume to stopline center and create carla_light_id to stopline_id mapping
         for stopline_id, ((center_x, center_y), lanelet_light_ids) in self.stopline_centers_map.items():
             try:
-                carla_light_id = self.classifier.predict([(center_x, center_y)])[0]
+                carla_light_id = classifier.predict([(center_x, center_y)])[0]
                 self.light_id_to_stopline_id_map[carla_light_id] = (stopline_id, lanelet_light_ids)
             except:
-                rospy.logerr("%s - classifier failed to predict nearest trigger volume for stopline %d", rospy.get_name(), stopline_id)
+                rospy.logwarn_throttle(10, "%s Unable to find nearest traffic light trigger volume for stopline %d", rospy.get_name(), stopline_id)
 
 
     def tfl_status_callback(self, msg):
@@ -140,6 +137,6 @@ class CarlaTrafficLightDetector:
 
 
 if __name__ == '__main__':
-    rospy.init_node('carla_traffic_light_detector', log_level=rospy.ERROR)
+    rospy.init_node('carla_traffic_light_detector', log_level=rospy.INFO)
     node = CarlaTrafficLightDetector()
     node.run()
