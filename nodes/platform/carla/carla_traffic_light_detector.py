@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import rospy
+import ros_numpy
 import numpy as np
 
 from sklearn.neighbors import KNeighborsClassifier
 
 from carla_msgs.msg import CarlaTrafficLightStatus, CarlaTrafficLightStatusList, CarlaTrafficLightInfoList
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
-
-import ros_numpy
 
 from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 from helpers.lanelet2 import get_stoplines_center, load_lanelet2_map
@@ -75,7 +74,7 @@ class CarlaTrafficLightDetector:
         """
         callback CarlaTrafficLightInfoList
         """
-        
+
         trigger_volume_coords = []
         light_ids = []
 
@@ -109,7 +108,7 @@ class CarlaTrafficLightDetector:
         """
         callback CarlaTrafficLightStatusList
         """
-            
+
         tfl_status = TrafficLightResultArray()
         tfl_status.header.stamp = rospy.Time.now()
 
