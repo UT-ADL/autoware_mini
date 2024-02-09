@@ -48,13 +48,6 @@ class CarlaTrafficLightDetector:
                                                               origin_lat=utm_origin_lat,
                                                               origin_lon=utm_origin_lon)
         
-        # Extract stopline data (coords, light_id, lane_id) from the map
-        self.stopline_data = []
-        self.extractStopLines(lanelet2_map)
-
-        # Carla tfl_id to lanelet2 stopline_id mapping
-        self.light_id_to_stopline_id_map = None
-
         # Get stopline centers with stopline_id and corresponding light_ids mapping
         self.stopline_centers_map = get_stoplines_center(lanelet2_map)
 
@@ -115,7 +108,7 @@ class CarlaTrafficLightDetector:
         for light in msg.traffic_lights:
 
             if light.id not in self.light_id_to_stopline_id_map:
-                rospy.logwarn_throttle(10, "%s - traffic light %d not found in info", rospy.get_name(), light.id)
+                rospy.logdebug_throttle(10, "%s - traffic light %d not found in info", rospy.get_name(), light.id)
                 continue
 
             stopline_id, lanelet_light_ids = self.light_id_to_stopline_id_map[light.id]
