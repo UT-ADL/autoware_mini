@@ -77,7 +77,7 @@ class CarlaVehicleInterface:
         status = VehicleStatus()
         status.header = data.header
 
-        status.angle = data.control.steer * math.degrees(self.max_steer_angle)
+        status.angle = -data.control.steer * self.max_steer_angle
         status.speed = data.velocity * 3.6  # speed is expected in km/h
 
         if data.control.reverse:

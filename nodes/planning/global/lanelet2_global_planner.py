@@ -4,20 +4,19 @@ import rospy
 import copy
 import lanelet2
 import numpy as np
-from lanelet2.io import Origin, load
-from lanelet2.projection import UtmProjector
 from lanelet2.core import BasicPoint2d
-from lanelet2.geometry import to2D, findNearest
+from lanelet2.geometry import to2D, findNearest, distance
 
 from sklearn.neighbors import NearestNeighbors
 
-from geometry_msgs.msg import PoseStamped, Point
+from geometry_msgs.msg import PoseStamped, TwistStamped, Point
 from autoware_msgs.msg import Lane, Waypoint, WaypointState
 from std_msgs.msg import Empty, ColorRGBA
 from visualization_msgs.msg import MarkerArray, Marker
 
 from helpers.geometry import get_heading_between_two_points, get_distance_between_two_points_2d, get_orientation_from_heading
 from helpers.waypoints import get_closest_point_on_path
+from helpers.lanelet2 import load_lanelet2_map
 
 LANELET_TURN_DIRECTION_TO_WAYPOINT_STATE_MAP = {
     "straight": WaypointState.STR_STRAIGHT,
@@ -37,9 +36,8 @@ class Lanelet2GlobalPlanner:
         self.distance_to_goal_limit = rospy.get_param("~distance_to_goal_limit")
         self.distance_to_centerline_limit = rospy.get_param("~distance_to_centerline_limit")
         self.speed_limit = rospy.get_param("~speed_limit")
-        self.wp_left_width = rospy.get_param("~wp_left_width")
-        self.wp_right_width = rospy.get_param("~wp_right_width")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
+        self.ego_vehicle_stopped_speed_limit = rospy.get_param("~ego_vehicle_stopped_speed_limit")
 
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
@@ -49,21 +47,15 @@ class Lanelet2GlobalPlanner:
 
         # Internal variables
         self.current_location = None
+        self.current_speed = None
         self.goal_point = None
         self.waypoints = []
 
-        # Load lanelet map
-        if coordinate_transformer == "utm":
-                projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
-        else:
-            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
-            exit(1)
-
-        self.lanelet2_map = load(lanelet2_map_name, projector)
+        self.lanelet2_map = load_lanelet2_map(lanelet2_map_name, coordinate_transformer, use_custom_origin, utm_origin_lat, utm_origin_lon)
 
         # traffic rules
         traffic_rules = lanelet2.traffic_rules.create(lanelet2.traffic_rules.Locations.Germany,
-                                                  lanelet2.traffic_rules.Participants.Vehicle)
+                                                  lanelet2.traffic_rules.Participants.VehicleTaxi)
 
         # routing graph
         self.graph = lanelet2.routing.RoutingGraph(self.lanelet2_map, traffic_rules)
@@ -75,6 +67,7 @@ class Lanelet2GlobalPlanner:
         # Subscribers
         rospy.Subscriber('/move_base_simple/goal', PoseStamped, self.goal_callback, queue_size=None, tcp_nodelay=True)
         rospy.Subscriber('/localization/current_pose', PoseStamped, self.current_pose_callback, queue_size=1, tcp_nodelay=True)
+        rospy.Subscriber('/localization/current_velocity', TwistStamped, self.current_velocity_callback, queue_size=1, tcp_nodelay=True)
         rospy.Subscriber('cancel_route', Empty, self.cancel_route_callback, queue_size=None, tcp_nodelay=True)
 
     def goal_callback(self, msg):
@@ -86,6 +79,10 @@ class Lanelet2GlobalPlanner:
         if self.current_location == None:
             # TODO handle if current_pose gets lost at later stage - see current_pose_callback
             rospy.logwarn("%s - current_pose not available", rospy.get_name())
+            return
+        
+        if self.current_speed == None:
+            rospy.logwarn("%s - current_speed not available", rospy.get_name())
             return
 
         if self.lanelet2_map == None:
@@ -153,11 +150,14 @@ class Lanelet2GlobalPlanner:
 
         if self.goal_point != None:
             d = get_distance_between_two_points_2d(self.current_location, self.goal_point)
-            if d < self.distance_to_goal_limit:
+            if d < self.distance_to_goal_limit and self.current_speed < self.ego_vehicle_stopped_speed_limit:
                 self.waypoints = []
                 self.goal_point = None
                 self.publish_waypoints(self.waypoints)
                 rospy.logwarn("%s - goal reached, clearing path!", rospy.get_name())
+
+    def current_velocity_callback(self, msg):
+        self.current_speed = msg.twist.linear.x
 
     def cancel_route_callback(self, msg):
         self.waypoints = []
@@ -212,8 +212,8 @@ class Lanelet2GlobalPlanner:
                 waypoint.pose.pose.orientation = get_orientation_from_heading(heading)
 
                 waypoint.twist.twist.linear.x = speed
-                waypoint.dtlane.lw = self.wp_left_width
-                waypoint.dtlane.rw = self.wp_right_width
+                waypoint.dtlane.lw = distance(point, lanelet.leftBound)
+                waypoint.dtlane.rw = distance(point, lanelet.rightBound)
 
                 waypoints.append(waypoint)
 

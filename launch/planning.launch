@@ -42,7 +42,7 @@
 
         <!-- Local planner -->
         <group if="$(eval local_planner=='velocity')">
-            <node pkg="autoware_mini" type="velocity_local_planner.py" name="velocity_local_planner" output="screen" required="true">
+            <node pkg="autoware_mini" type="velocity_local_planner.py" name="velocity_local_planner" output="screen" required="true" >
                 <param name="lanelet2_map_name" value="$(find autoware_mini)/data/maps/$(arg lanelet2_map_name)" />
             </node>
             <node pkg="autoware_mini" type="local_path_visualizer.py" name="local_path_visualizer" output="screen" required="true"/>

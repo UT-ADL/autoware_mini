@@ -65,7 +65,11 @@ class ClusterDetector:
 
         # create detected objects
         objects = DetectedObjectArray(header=header)
-        for i in range(np.max(labels) + 1):
+        if len(labels) == 0:
+            num_clusters = 0
+        else:
+            num_clusters = np.max(labels) + 1
+        for i in range(num_clusters):
             # filter points for this cluster
             mask = (labels == i)
 
@@ -82,7 +86,7 @@ class ClusterDetector:
                 # calculate centroid and dimensions
                 maxs = np.max(points3d, axis=0)
                 mins = np.min(points3d, axis=0)
-                center_x, center_y, center_z = (maxs + mins) / 2.0
+                center_x, center_y, center_z = np.mean(points3d, axis=0)
                 dim_x, dim_y, dim_z = maxs - mins
 
                 # always pointing forward

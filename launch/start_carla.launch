@@ -11,14 +11,13 @@
     <arg name="tracker"                 default="ema"                   if="$(eval detector != 'carla')" />
     <arg name="tracker"                 default="none"                  if="$(eval detector == 'carla')" />
     <arg name="predictor"               default="none"                  doc="none, naive" />
-    <arg name='map_name'                default='tartu'/>
+    <arg name='map_name'                default='tartu_demo'/>
     <arg name="follower"                default="pure_pursuit"          doc="pure_pursuit, stanley" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map_name"       default="$(arg map_name).osm"   if="$(eval 'tartu' not in map_name.lower())" />
-    <arg name="lanelet2_map_name"       default="tartu_demo.osm"        if="$(eval 'tartu' in map_name.lower())" />
-    <arg name='use_lexus_model'         default='true'/>
-    <arg name='use_lidar_center'        default='true'/>
-    <arg name='use_lidar_front'         default='false'/>
+    <arg name="lanelet2_map_name"       default="$(arg map_name).osm" />
+    <arg name='use_lexus_model'         default='true' />
+    <arg name='use_lidar_center'        default='true' />
+    <arg name='use_lidar_front'         default='false' />
     
     <!-- Scenario Runner args -->
     <arg name='use_scenario_runner'     default='false'/>
@@ -80,5 +79,9 @@
     <!-- Rviz -->
     <include file="$(find autoware_mini)/launch/dashboard.launch" />
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
+
+    <!-- Patch controller params because simulation does not have delay -->
+    <rosparam param="simulate_cmd_delay" ns="control/pure_pursuit_follower">0.0</rosparam>
+    <rosparam param="simulate_cmd_delay" ns="control/stanley_follower">0.0</rosparam>
 
 </launch>

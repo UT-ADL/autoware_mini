@@ -1,0 +1,7 @@
+novatel_oem7_visualizer:
+  number_of_satellites_good: 16
+  number_of_satellites_bad: 8
+  location_accuracy_stdev_good: 0.15
+  location_accuracy_stdev_bad: 0.5
+  differential_age_good: 2.0
+  differential_age_bad: 5.0

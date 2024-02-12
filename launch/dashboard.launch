@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="driver_status" default="false"/>   
+
     <group ns="dashboard">
         <!-- Current and target speed -->
         <node pkg="topic_tools" type="transform" name="current_speed_transform" args="--wait-for-start /localization/current_velocity current_speed std_msgs/Float32 'm.twist.linear.x * 3.6'" output="screen" required="true"/>
@@ -9,10 +11,24 @@
         <node pkg="topic_tools" type="transform" name="closest_object_speed_transform" args="--wait-for-start /planning/local_path closest_object_speed std_msgs/Float32 'm.closest_object_velocity * 3.6'" output="screen" required="true"/>
         <!-- Steering angle -->
         <node pkg="topic_tools" type="transform" name="steering_angle_cmd_transform" args="--wait-for-start /control/vehicle_cmd steering_angle_cmd std_msgs/Float32 'm.ctrl_cmd.steering_angle * 180 / 3.14'" output="screen" required="true"/>
-        <node pkg="topic_tools" type="transform" name="steering_angle_status_transform" args="--wait-for-start /ssc/steering_feedback steering_angle_status std_msgs/Float32 'm.steering_wheel_angle'" output="screen" required="true"/> 
+        <node pkg="topic_tools" type="transform" name="steering_angle_status_transform" args="--wait-for-start /vehicle/vehicle_status steering_angle_status std_msgs/Float32 'm.angle * 180 / 3.14'" output="screen" required="true"/> 
         <!-- Acceleration and limits -->
         <node pkg="topic_tools" type="transform" name="acceleration_transform" args="--wait-for-start /control/vehicle_cmd acceleration std_msgs/Float32 'm.ctrl_cmd.linear_acceleration'" output="screen" required="true"/>
         <node pkg="topic_tools" type="transform" name="acceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands acceleration_limit std_msgs/Float32 'm.acceleration_limit'" output="screen" required="true"/>
         <node pkg="topic_tools" type="transform" name="deceleration_limit_transform" args="--wait-for-start /ssc/arbitrated_speed_commands deceleration_limit std_msgs/Float32 'm.deceleration_limit'" output="screen" required="true"/>
+
+        <!-- Vehicle state visualizer -->
+        <node pkg="autoware_mini" type="vehicle_state_visualizer.py" name="vehicle_state_visualizer" output="screen" required="true" >
+            <param name="image_path"  value="$(find autoware_mini)/images/dashboard/"/>
+        </node>
+        <!-- Novatel visualizer -->
+        <node if="$(arg driver_status)" pkg="autoware_mini" type="novatel_oem7_visualizer.py" name="novatel_oem7_visualizer" output="screen" required="true"/>
+        <!-- SSC and Pacmod state visualizer -->
+        <node if="$(arg driver_status)" pkg="autoware_mini" type="pacmod_state_visualizer.py" name="pacmod_state_visualizer" output="screen" required="true" >
+            <param name="image_path"  value="$(find autoware_mini)/images/dashboard/"/>
+        </node>
+
+        <rosparam command="load" file="$(find autoware_mini)/config/dashboard.yaml"/>
+
     </group>
 </launch>

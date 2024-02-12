@@ -11,11 +11,11 @@ class PathSmoothing:
     def __init__(self):
 
         # Parameters
-        self.waypoint_interval = rospy.get_param("~waypoint_interval")
+        self.waypoint_interval = rospy.get_param("waypoint_interval")
         self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves")
         self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration")
         self.adjust_endpoint_speed_to_zero = rospy.get_param("~adjust_endpoint_speed_to_zero")
-        self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
+        self.default_deceleration = rospy.get_param("default_deceleration")
         self.speed_averaging_window = rospy.get_param("~speed_averaging_window")
         self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index")
         self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit")
@@ -103,7 +103,7 @@ class PathSmoothing:
 
         # loop over array backwards and forwards to adjust speeds using the deceleration limit
         if self.adjust_speeds_using_deceleration:
-            accel_constant = 2 * self.speed_deceleration_limit * self.waypoint_interval
+            accel_constant = 2 * self.default_deceleration * self.waypoint_interval
             # backward loop
             for i in range(len(speed_new) - 2, 0, -1):
                 speed_new[i] = min(speed_new[i], np.sqrt(speed_new[i + 1]**2 + accel_constant))
@@ -123,7 +123,7 @@ class PathSmoothing:
             speed_new[-1] = 0
 
             # adjust speed graphs using deceleartion limit and waypoint interval
-            accel_constant = 2 * self.speed_deceleration_limit * self.waypoint_interval
+            accel_constant = 2 * self.default_deceleration * self.waypoint_interval
             # backward loop - end point
             for i in range(len(speed_new) - 2, 0, -1):
                 adjusted_speed = np.sqrt(speed_new[i + 1]**2 + accel_constant)

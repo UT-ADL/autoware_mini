@@ -1,17 +1,18 @@
 current_pose_to_car_front: 4.0  # m
-braking_safety_distance: 4.0
 braking_reaction_time: 1.6
-car_safety_radius: 1.2
-speed_deceleration_limit: 1.0
+stopping_lateral_distance: 1.35           # m
+slowdown_lateral_distance: 1.60       # m
+waypoint_interval: 1.0          # m
+default_deceleration: 1.0
+stopping_speed_limit: 1.0
 
 lanelet2_global_planner:
   output_frame: map
-  distance_to_goal_limit: 1.5
+  distance_to_goal_limit: 5.0
   distance_to_centerline_limit: 5.0
-  speed_limit: 40.0                   # max velocity for route (km/h), will be replaced by speed taken from map
-  wp_left_width: 1.4
-  wp_right_width: 1.4
+  speed_limit: 50.0                 # max velocity for route (km/h), will be replaced by speed taken from map
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
+  ego_vehicle_stopped_speed_limit: 0.1
 
 waypoint_loader:
   output_frame: map
@@ -22,16 +23,20 @@ waypoint_saver:
   interval: 1.0
 
 path_smoothing:
-  waypoint_interval: 1.0                  # m
   adjust_speeds_in_curves: True
   adjust_speeds_using_deceleration: True
   speed_averaging_window: 21              # window size (will be applied only if > 1)
   adjust_endpoint_speed_to_zero: True
-  radius_calc_neighbour_index: 6          # int
-  lateral_acceleration_limit: 1.0         # m/s2
+  radius_calc_neighbour_index: 8          # int
+  lateral_acceleration_limit: 1.5         # m/s2
   output_debug_info: False
 
 velocity_local_planner:
   local_path_length: 100
   nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
   transform_timeout: 0.06
+  dense_waypoint_interval: 0.1
+  tfl_maximum_deceleration: 2.8
+  braking_safety_distance_obstacle: 4.0
+  braking_safety_distance_stopline: 2.0
+  braking_safety_distance_goal: 0.0

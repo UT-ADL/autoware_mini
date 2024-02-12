@@ -73,7 +73,7 @@
                         {
                             "type": "sensor.lidar.ray_cast",
                             "id": "lidar_center",
-                            "spawn_point": {"x": 1.02, "y": 0, "z": 1.51, "roll": -0.02879793, "pitch": 0.0003490659, "yaw": -0.0459},
+                            "spawn_point": {"x": 1.02, "y": 0, "z": 1.51, "roll": -0.02879793, "pitch": 0.0003490659, "yaw": -0.055},
                             "range": 200,
                             "channels": 32,
                             "points_per_second": 600000,

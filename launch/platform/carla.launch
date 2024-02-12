@@ -93,9 +93,9 @@
       <arg name='host'                                              value='$(arg host)' />
       <arg name='port'                                              value='$(arg port)' />
       <!-- If using tartu map then run Tartu environment of Carla -->
-      <arg if="$(eval 'tartu' in map_name.lower())"
+      <arg if="$(eval 'tartu_demo' == map_name.lower())"
            name='town'                                              value='Tartu'/>
-      <arg unless="$(eval 'tartu' in map_name.lower())"
+      <arg unless="$(eval 'tartu_demo' == map_name.lower())"
            name='town'                                              value='$(arg map_name)'/>
       <arg name='timeout'                                           value='$(arg timeout)' />
       <arg name='passive'                                           value='$(arg passive)' />

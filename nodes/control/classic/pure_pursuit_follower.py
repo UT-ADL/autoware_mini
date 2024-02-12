@@ -9,8 +9,8 @@ import traceback
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error
-from helpers.waypoints import get_blinker_state_with_lookahead_time, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
+from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error, get_distance_between_two_points_2d
+from helpers.waypoints import get_blinker_state_with_lookahead, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
@@ -22,7 +22,7 @@ class PurePursuitFollower:
     def __init__(self):
 
         # Parameters
-        self.planning_time = rospy.get_param("~planning_time")
+        self.lookahead_time = rospy.get_param("~lookahead_time")
         self.min_lookahead_distance = rospy.get_param("~min_lookahead_distance")
         self.wheel_base = rospy.get_param("/vehicle/wheel_base")
         self.heading_angle_limit = rospy.get_param("heading_angle_limit")
@@ -31,14 +31,18 @@ class PurePursuitFollower:
         self.blinker_lookahead_distance = rospy.get_param("blinker_lookahead_distance")
         self.publish_debug_info = rospy.get_param("~publish_debug_info")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
-        self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
-        self.speed_deceleration_limit = rospy.get_param("/planning/speed_deceleration_limit")
+        self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
+        self.default_deceleration = rospy.get_param("/planning/default_deceleration")
+        self.stopping_speed_limit = rospy.get_param("/planning/stopping_speed_limit")
+        self.current_pose_to_car_front = rospy.get_param("/planning/current_pose_to_car_front")
+        self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
 
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
         self.closest_object_distance = 0.0
         self.closest_object_velocity = 0.0
+        self.stopping_point_distance = 0.0
         self.lock = threading.Lock()
 
         # Publishers
@@ -67,6 +71,7 @@ class PurePursuitFollower:
                 self.waypoints = None
                 self.closest_object_distance = 0.0
                 self.closest_object_velocity = 0.0
+                self.stopping_point_distance = 0.0
             return
 
         # prepare waypoints for nearest neighbor search
@@ -77,6 +82,7 @@ class PurePursuitFollower:
             self.waypoints = path_msg.waypoints
             self.closest_object_distance = path_msg.closest_object_distance
             self.closest_object_velocity = path_msg.closest_object_velocity
+            self.stopping_point_distance = path_msg.cost
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
@@ -90,15 +96,30 @@ class PurePursuitFollower:
                 waypoint_tree = self.waypoint_tree
                 closest_object_distance = self.closest_object_distance
                 closest_object_velocity = self.closest_object_velocity
+                stopping_point_distance = self.stopping_point_distance
 
             stamp = current_pose_msg.header.stamp
-            current_pose = current_pose_msg.pose
-            current_velocity = current_velocity_msg.twist.linear.x
-
             if waypoint_tree is None:
                 # if no waypoints received yet or global_path cancelled, stop the vehicle
                 self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
                 return
+
+            current_pose = current_pose_msg.pose
+            current_velocity = current_velocity_msg.twist.linear.x
+
+            # simulate delay in vehicle command. Project car into future location and use it to calculate current steering command
+            if self.simulate_cmd_delay > 0.0:
+
+                # extract heading angle from orientation
+                heading_angle = get_heading_from_orientation(current_pose.orientation)
+                x_dot = current_velocity * math.cos(heading_angle)
+                y_dot = current_velocity * math.sin(heading_angle)
+
+                x_new = current_pose.position.x + x_dot * self.simulate_cmd_delay
+                y_new = current_pose.position.y + y_dot * self.simulate_cmd_delay
+
+                current_pose.position.x = x_new
+                current_pose.position.y = y_new
 
             # Find 2 nearest waypoint idx's on path (from base_link)
             back_wp_idx, front_wp_idx = get_two_nearest_waypoint_idx(waypoint_tree, current_pose.position.x, current_pose.position.y)
@@ -111,9 +132,10 @@ class PurePursuitFollower:
 
             # get nearest point on path from base_link
             nearest_point = get_closest_point_on_line(current_pose.position, waypoints[back_wp_idx].pose.pose.position, waypoints[front_wp_idx].pose.pose.position)
+            ego_distance_from_path_start = get_distance_between_two_points_2d(waypoints[0].pose.pose.position, nearest_point)
 
-            # calc lookahead distance (velocity * planning_time)
-            lookahead_distance = current_velocity * self.planning_time
+            # calc lookahead distance (velocity * lookahead_time)
+            lookahead_distance = current_velocity * self.lookahead_time
             if lookahead_distance < self.min_lookahead_distance:
                 lookahead_distance = self.min_lookahead_distance
 
@@ -136,16 +158,19 @@ class PurePursuitFollower:
                 return
         
             # calculate steering angle
-            curvature = 2 * math.sin(heading_error) / lookahead_distance
+            curvature = 2 * math.sin(heading_error) / get_distance_between_two_points_2d(current_pose.position, lookahead_point)
             steering_angle = math.atan(self.wheel_base * curvature)
 
             # target_velocity from map and based on closest object
             target_velocity = interpolate_velocity_between_waypoints(nearest_point, waypoints[back_wp_idx], waypoints[front_wp_idx])
+            # if target velocity too low, consider it 0
+            if target_velocity < self.stopping_speed_limit:
+                target_velocity = 0.0
 
-            # if decelerating because of obstacle then calculate necessary deceleration to stop at safety distance
-            if closest_object_distance - self.braking_safety_distance > 0:
+            # if decelerating because of obstacle then calculate necessary deceleration
+            if stopping_point_distance > 0:
                 # always allow minimum deceleration, to be able to adapt to map speeds
-                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), -self.speed_deceleration_limit)
+                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (stopping_point_distance - ego_distance_from_path_start - self.current_pose_to_car_front), -self.default_deceleration)
             # otherwise use vehicle default deceleration limit
             else:
                 acceleration = 0.0
@@ -155,7 +180,7 @@ class PurePursuitFollower:
                 acceleration = 0.0
 
             # blinkers
-            left_blinker, right_blinker = get_blinker_state_with_lookahead_time(waypoints, front_wp_idx, current_velocity, self.blinker_lookahead_time, self.blinker_lookahead_distance)
+            left_blinker, right_blinker = get_blinker_state_with_lookahead(waypoints, self.waypoint_interval, front_wp_idx, current_velocity, self.blinker_lookahead_time, self.blinker_lookahead_distance)
 
             # Publish
             self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker)

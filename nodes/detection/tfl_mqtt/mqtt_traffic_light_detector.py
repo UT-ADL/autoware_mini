@@ -5,16 +5,11 @@ import json
 import time
 import traceback
 
-from lanelet2.io import Origin, load
-from lanelet2.projection import UtmProjector
-
 import paho.mqtt.client as paho
 
 from autoware_msgs.msg import TrafficLightResult, TrafficLightResultArray
-from visualization_msgs.msg import MarkerArray, Marker
 
-from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
-
+from helpers.lanelet2 import load_lanelet2_map, get_stoplines_api_id
 
 MQTT_TO_AUTOWARE_TFL_MAP = {
     "RED": 0,
@@ -52,21 +47,8 @@ class MqttTrafficLightDetector:
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
 
-        # Load the map using Lanelet2
-        if coordinate_transformer == "utm":
-                projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
-        else:
-            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
-            exit(1)
-        lanelet2_map = load(lanelet2_map_name, projector)
-
-        # extract all stop lines that have api_id and add to dict
-        self.stop_line_ids = {}
-        for line in lanelet2_map.lineStringLayer:
-            if line.attributes:
-                if line.attributes["type"] == "stop_line":
-                    if "api_id" in line.attributes:
-                        self.stop_line_ids[line.id] = line.attributes["api_id"]
+        lanelet2_map = load_lanelet2_map(lanelet2_map_name, coordinate_transformer, use_custom_origin, utm_origin_lat, utm_origin_lon)
+        self.stop_line_ids = get_stoplines_api_id(lanelet2_map)
 
         # MQTT traffic light status
         self.mqtt_status = {}

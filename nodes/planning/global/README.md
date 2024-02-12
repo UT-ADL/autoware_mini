@@ -14,9 +14,9 @@ A ROS node that implements a global planner for autonomous vehicles based on Lan
 | `distance_to_goal_limit` | `float` | `2.0` | The minimum distance from the last waypoint to the goal position for the generated path |
 | `distance_to_centerline_limit` | `float` | `5.0` | The maximum distance from the centerline for a waypoint on the generated path |
 | `speed_limit` | `float` | `40.0` | The speed limit for the generated path |
-| `wp_left_width` | `float` | `1.4` | The width of the left lane of the generated path |
-| `wp_right_width` | `float` | `1.4` | The width of the right lane of the generated path |
 | `nearest_neighbor_search` | `string` | `"kd_tree"` | The type of the nearest neighbor search algorithm used by the planner |
+| `ego_vehicle_stopped_speed_limit` | `float` | `"0.1"` | Below this speed limit ego vehicle is considered as stopped |
+
 
 
 #### Subscribed Topics
@@ -24,7 +24,8 @@ A ROS node that implements a global planner for autonomous vehicles based on Lan
 | Name | Type | Description |
 |------|------|-------------|
 | `/move_base_simple/goal` | `geometry_msgs/PoseStamped` | The goal position of the vehicle |
-| `/localization/current_pose` | `geometry_msgs/PoseStamped` | The current position of the vehicle |
+| `/localization/current_pose` | `geometry_msgs/PoseStamped` | The current position of the ego vehicle |
+| `/localization/current_velocity` | `geometry_msgs/TwistStamped` | The current velocity of the ego vehicle |
 | `/cancel_route` | `std_msgs/Bool` | A boolean flag to cancel the existing global path |
 
 #### Published Topics
@@ -49,7 +50,7 @@ A ROS node for smoothing global path using interpolation and optional speed adju
 | `~adjust_speeds_in_curves` | bool | `True` | Whether to adjust speeds based on the curvature of the path. |
 | `~adjust_speeds_using_deceleration` | bool | `True` | Whether to adjust speeds based on maximum deceleration. |
 | `~adjust_endpoint_speed_to_zero` | bool | `True` | Whether to adjust the speeds at the end of the path to decelerate to zero. |
-| `speed_deceleration_limit` | float | `1.0` | Deceleration limit used in speed adjustment (m/s2) |
+| `default_deceleration` | float | `1.0` | Deceleration limit used in speed adjustment (m/s2) |
 | `~speed_averaging_window` | int | `21` | Number of points used to calculate average speed. |
 | `~radius_calc_neighbour_index` | int | `4` | Index of points (+/- from center point) used to calculate radius for the path. |
 | `~lateral_acceleration_limit` | float | `3.0` | Maximum allowed lateral acceleration limit (m/s2) |

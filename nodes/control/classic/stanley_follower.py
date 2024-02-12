@@ -9,8 +9,8 @@ import traceback
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error, get_point_using_heading_and_distance
-from helpers.waypoints import get_blinker_state_with_lookahead_time, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
+from helpers.geometry import get_heading_from_orientation, get_heading_between_two_points, normalize_heading_error, get_closest_point_on_line, get_cross_track_error, get_point_using_heading_and_distance, get_distance_between_two_points_2d
+from helpers.waypoints import get_blinker_state_with_lookahead, get_point_and_orientation_on_path_within_distance, interpolate_velocity_between_waypoints, get_two_nearest_waypoint_idx
 
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped
@@ -30,14 +30,18 @@ class StanleyFollower:
         self.blinker_lookahead_distance = rospy.get_param("blinker_lookahead_distance")
         self.publish_debug_info = rospy.get_param("~publish_debug_info")
         self.nearest_neighbor_search = rospy.get_param("~nearest_neighbor_search")
-        self.braking_safety_distance = rospy.get_param("/planning/braking_safety_distance")
-        self.speed_deceleration_limit = rospy.get_param("/planning/speed_deceleration_limit")
+        self.waypoint_interval = rospy.get_param("/planning/waypoint_interval")
+        self.default_deceleration = rospy.get_param("/planning/default_deceleration")
+        self.stopping_speed_limit = rospy.get_param("/planning/stopping_speed_limit")
+        self.current_pose_to_car_front = rospy.get_param("/planning/current_pose_to_car_front")
+        self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
 
         # Variables - init
         self.waypoint_tree = None
         self.waypoints = None
         self.closest_object_distance = 0.0
         self.closest_object_velocity = 0.0
+        self.stopping_point_distance = 0.0
         self.lock = threading.Lock()
 
         # Publishers
@@ -67,6 +71,7 @@ class StanleyFollower:
                 self.waypoints = None
                 self.closest_object_distance = 0.0
                 self.closest_object_velocity = 0.0
+                self.stopping_point_distance = 0.0
             return
 
         # prepare waypoints for nearest neighbor search
@@ -77,6 +82,7 @@ class StanleyFollower:
             self.waypoints = path_msg.waypoints
             self.closest_object_distance = path_msg.closest_object_distance
             self.closest_object_velocity = path_msg.closest_object_velocity
+            self.stopping_point_distance = path_msg.cost
 
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
@@ -91,16 +97,31 @@ class StanleyFollower:
                 waypoint_tree = self.waypoint_tree
                 closest_object_distance = self.closest_object_distance
                 closest_object_velocity = self.closest_object_velocity
+                stopping_point_distance = self.stopping_point_distance
         
             stamp = current_pose_msg.header.stamp
-            current_pose = current_pose_msg.pose
-            current_velocity = current_velocity_msg.twist.linear.x
-            current_heading = get_heading_from_orientation(current_pose.orientation)
-
             if waypoint_tree is None:
                 # if no waypoints received yet or global_path cancelled, stop the vehicle
                 self.publish_vehicle_command(stamp, 0.0, 0.0, 0.0, 0, 0)
                 return
+
+            current_pose = current_pose_msg.pose
+            current_velocity = current_velocity_msg.twist.linear.x
+            current_heading = get_heading_from_orientation(current_pose.orientation)
+
+            # simulate delay in vehicle command. Project car into future location and use it to calculate current steering command
+            if self.simulate_cmd_delay > 0.0:
+
+                # extract heading angle from orientation
+                heading_angle = get_heading_from_orientation(current_pose.orientation)
+                x_dot = current_velocity * math.cos(heading_angle)
+                y_dot = current_velocity * math.sin(heading_angle)
+
+                x_new = current_pose.position.x + x_dot * self.simulate_cmd_delay
+                y_new = current_pose.position.y + y_dot * self.simulate_cmd_delay
+
+                current_pose.position.x = x_new
+                current_pose.position.y = y_new
 
             # Find pose for the front wheel and 2 closest waypoint idx (fw_)
             front_wheel_position = get_point_using_heading_and_distance(current_pose.position, current_heading, self.wheel_base)
@@ -117,6 +138,7 @@ class StanleyFollower:
                 return
         
             bl_nearest_point = get_closest_point_on_line(current_pose.position, waypoints[bl_back_wp_idx].pose.pose.position, waypoints[bl_front_wp_idx].pose.pose.position)
+            ego_distance_from_path_start = get_distance_between_two_points_2d(waypoints[0].pose.pose.position, bl_nearest_point)
             lookahead_point, _ = get_point_and_orientation_on_path_within_distance(waypoints, bl_front_wp_idx, bl_nearest_point, self.wheel_base)
 
             track_heading = get_heading_between_two_points(bl_nearest_point, lookahead_point)
@@ -134,11 +156,14 @@ class StanleyFollower:
 
             # target_velocity from map and based on closest object
             target_velocity = interpolate_velocity_between_waypoints(bl_nearest_point, waypoints[bl_back_wp_idx], waypoints[bl_front_wp_idx])
+            # if target velocity too low, consider it 0
+            if target_velocity < self.stopping_speed_limit:
+                target_velocity = 0.0
 
-            # if decelerating because of obstacle then calculate necessary deceleration to stop at safety distance
-            if closest_object_distance - self.braking_safety_distance > 0:
+            # if decelerating because of obstacle then calculate necessary deceleration
+            if stopping_point_distance > 0:
                 # always allow minimum deceleration, to be able to adapt to map speeds
-                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (closest_object_distance - self.braking_safety_distance), -self.speed_deceleration_limit)
+                acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / (stopping_point_distance - ego_distance_from_path_start - self.current_pose_to_car_front), -self.default_deceleration)
             # otherwise use vehicle default deceleration limit
             else:
                 acceleration = 0.0
@@ -148,7 +173,7 @@ class StanleyFollower:
                 acceleration = 0.0
 
             # blinkers
-            left_blinker, right_blinker = get_blinker_state_with_lookahead_time(waypoints, bl_front_wp_idx, current_velocity, self.blinker_lookahead_time, self.blinker_lookahead_distance)
+            left_blinker, right_blinker = get_blinker_state_with_lookahead(waypoints, self.waypoint_interval, bl_front_wp_idx, current_velocity, self.blinker_lookahead_time, self.blinker_lookahead_distance)
 
             # Publish
             self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker)

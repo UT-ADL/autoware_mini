@@ -37,13 +37,17 @@ lidar:
       filter_size: 3
   points_concatenator:
     transform_timeout: 0.06
-    min_range_front: 1.2  # radius value within which the points from ouster are discarded. Done after transforming to lidar_center frame
+  voxel_grid_filter:
+    leaf_size: 0.25
+    filter_field_name: z
+    filter_limit_min: -2.0
+    filter_limit_max: 0.5
+    filter_limit_negative: False
   points_clusterer:
-    sample_size: 10000
-    cluster_epsilon: 1.0
-    cluster_min_size: 5
+    cluster_epsilon: 0.7
+    cluster_min_size: 4
   cluster_detector:
-    min_cluster_size: 5
+    min_cluster_size: 4
     bounding_box_type: axis_aligned # axis_aligned, min_area
     enable_pointcloud: False
     enable_convex_hull: True
