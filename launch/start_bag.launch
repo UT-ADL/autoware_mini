@@ -28,7 +28,7 @@
     <param name="/use_sim_time" value="true" />
 
     <!-- Play back bag -->
-    <node pkg="rosbag" type="play" name="player" required="true" args="$(find autoware_mini)/data/bags/$(arg bag_file) --clock --queue=1 $(arg loop_option)">
+    <node pkg="rosbag" type="play" name="player" required="true" args="$(find autoware_mini)/data/bags/$(arg bag_file) --clock -s 45 -r 0.2 --queue=1 $(arg loop_option)">
         <!-- Rename saved topics that are replaced by current ones -->
         <remap from="/tf" to="/bag/tf" if="$(arg use_tf)"/>
         <remap from="/tf_static" to="/bag/tf_static" if="$(arg use_tf)"/>
@@ -38,6 +38,7 @@
         <remap from="/detection/lidar/points_ground" to="/bag/detection/lidar/points_ground" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/points_no_ground" to="/bag/detection/lidar/points_no_ground" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/points_clustered" to="/bag/detection/lidar/points_clustered" if="$(arg use_detection)"/>
+        <remap from="/detection/lidar/points_filtered" to="/bag/detection/lidar/points_filtered" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/detected_objects" to="/bag/detection/lidar/detected_objects" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/detected_objects_markers" to="/bag/detection/lidar/detected_objects_markers" if="$(arg use_detection)"/>
         <remap from="/detection/radar/detected_objects" to="/bag/detection/radar/detected_objects" if="$(arg use_detection)"/>
