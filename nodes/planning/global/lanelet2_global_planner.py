@@ -98,7 +98,7 @@ class Lanelet2GlobalPlanner:
         start_lanelet = findNearest(self.lanelet2_map.laneletLayer, start_point, 1)[0][1]
         self.publish_target_lanelets(start_lanelet, goal_lanelet)
 
-        route = self.graph.getRoute(start_lanelet, goal_lanelet, 0, True)        # lanelet2.routing.Route
+        route = self.graph.getRoute(start_lanelet, goal_lanelet, 0, False)        # lanelet2.routing.Route
         if route == None:
             rospy.logwarn("%s - no route found, try new goal!", rospy.get_name())
             return
