@@ -52,13 +52,13 @@ class ClusterDetector:
             except (TransformException, rospy.ROSTimeMovedBackwardsException) as e:
                 rospy.logwarn("%s - %s", rospy.get_name(), e)
                 return
-            tf_matrix = numpify(transform.transform).astype(np.float32).T
+            tf_matrix = numpify(transform.transform).astype(np.float32)
             # make copy of points
             points = points.copy()
             # turn into homogeneous coordinates
             points[:,3] = 1
             # transform points to target frame
-            points = points.dot(tf_matrix)
+            points = points.dot(tf_matrix.T)
 
         # prepare header for all objects
         header = Header(stamp=msg.header.stamp, frame_id=self.output_frame)

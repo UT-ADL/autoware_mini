@@ -67,6 +67,9 @@ class CameraTrafficLightDetector:
         self.stoplines = get_stoplines(lanelet2_map)
         self.signals = get_stoplines_trafficlights_bulbs(lanelet2_map)
 
+        # remove stoplines that have no signals. If stopline_id is not in self.signals then it has no signals (traffic lights)
+        self.stoplines = {k: v for k, v in self.stoplines.items() if k in self.signals}
+
         self.bridge = CvBridge()
         self.model = onnxruntime.InferenceSession(onnx_path, providers=['CUDAExecutionProvider'])
 
