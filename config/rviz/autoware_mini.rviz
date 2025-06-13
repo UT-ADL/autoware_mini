@@ -1,0 +1,2881 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 0
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Detection1/Detected objects1/Namespaces1
+        - /Detection1/Tracked objects1/Namespaces1
+        - /Detection1/Predicted objects1/Namespaces1
+        - /Planning1/Local path1/Namespaces1
+      Splitter Ratio: 0.6286267042160034
+    Tree Height: 525
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.5886790156364441
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Name: Time
+    SyncMode: 0
+    SyncSource: All collision points
+  - Class: rviz_carla_plugin/CarlaControl
+    Name: CarlaControl
+  - Class: jsk_rviz_plugin/EmptyServiceCallInterfaceAction
+    Name: Actions
+  - Class: jsk_rviz_plugin/RecordAction
+    Name: Record Bags
+Preferences:
+  PromptSaveOnExit: true
+Toolbars:
+  toolButtonStyle: 2
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: false
+      Line Style:
+        Line Width: 0.029999999329447746
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: false
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/TF
+          Enabled: false
+          Filter (blacklist): ""
+          Filter (whitelist): ""
+          Frame Timeout: 15
+          Frames:
+            All Enabled: false
+          Marker Alpha: 1
+          Marker Scale: 1.5
+          Name: TF
+          Show Arrows: true
+          Show Axes: true
+          Show Names: true
+          Tree:
+            {}
+          Update Interval: 0
+          Value: false
+        - Alpha: 1
+          Class: rviz/RobotModel
+          Collision Enabled: false
+          Enabled: true
+          Links:
+            All Links Enabled: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+            base_link:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+            lexus_model:
+              Alpha: 1
+              Show Axes: false
+              Show Trail: false
+              Value: true
+          Name: Lexus model
+          Robot Description: lexus_model/robot_description
+          TF Prefix: ""
+          Update Interval: 0
+          Value: true
+          Visual Enabled: true
+        - Alpha: 0.5
+          Class: rviz/RobotModel
+          Collision Enabled: false
+          Enabled: true
+          Links:
+            All Links Enabled: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+          Name: Lexus shadow
+          Robot Description: lexus_shadow/robot_description
+          TF Prefix: ""
+          Update Interval: 0
+          Value: true
+          Visual Enabled: true
+        - Alpha: 1
+          Axes Length: 1
+          Axes Radius: 0.10000000149011612
+          Class: rviz/Pose
+          Color: 255; 25; 0
+          Enabled: false
+          Head Length: 0.30000001192092896
+          Head Radius: 0.10000000149011612
+          Name: Current pose
+          Queue Size: 10
+          Shaft Length: 1
+          Shaft Radius: 0.05000000074505806
+          Shape: Arrow
+          Topic: /localization/current_pose
+          Unreliable: false
+          Value: false
+        - Alpha: 1
+          Angular Arrow Scale: 2
+          Angular Color: 204; 204; 51
+          Arrow Width: 0.5
+          Class: rviz/TwistStamped
+          Enabled: false
+          Hide Small Values: true
+          History Length: 1
+          Linear Arrow Scale: 2
+          Linear Color: 204; 51; 51
+          Name: Current velocity
+          Queue Size: 10
+          Topic: /localization/current_velocity
+          Unreliable: false
+          Value: false
+      Enabled: true
+      Name: System
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Group
+          Displays:
+            - Buffer length: 100
+              Class: jsk_rviz_plugin/Plotter2D
+              Enabled: true
+              Name: Current speed
+              Show Value: true
+              Topic: /dashboard/current_speed
+              Value: true
+              auto color change: false
+              auto scale: false
+              background color: 0; 0; 0
+              backround alpha: 0
+              border: true
+              foreground alpha: 0.800000011920929
+              foreground color: 25; 255; 240
+              height: 128
+              left: 10
+              linewidth: 2
+              max color: 255; 0; 0
+              max value: 40
+              min value: 16
+              show caption: true
+              text size: 10
+              top: 10
+              update interval: 0.03999999910593033
+              width: 128
+            - Buffer length: 100
+              Class: jsk_rviz_plugin/Plotter2D
+              Enabled: true
+              Name: Target speed
+              Show Value: false
+              Topic: /dashboard/target_speed
+              Value: true
+              auto color change: false
+              auto scale: false
+              background color: 0; 0; 0
+              backround alpha: 0
+              border: false
+              foreground alpha: 0.800000011920929
+              foreground color: 252; 175; 62
+              height: 128
+              left: 10
+              linewidth: 1
+              max color: 255; 0; 0
+              max value: 40
+              min value: 16
+              show caption: false
+              text size: 12
+              top: 10
+              update interval: 0.03999999910593033
+              width: 128
+          Enabled: true
+          Name: Speed
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: true
+          Name: Target obj dist
+          Show Value: true
+          Topic: /dashboard/closest_object_distance
+          Value: true
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.800000011920929
+          foreground color: 25; 255; 240
+          height: 128
+          left: 148
+          linewidth: 2
+          max color: 255; 0; 0
+          max value: 75
+          min value: 25
+          show caption: true
+          text size: 10
+          top: 10
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: true
+          Name: Target obj spd
+          Show Value: true
+          Topic: /dashboard/closest_object_speed
+          Value: true
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 286
+          linewidth: 2
+          max color: 255; 0; 0
+          max value: 40
+          min value: 16
+          show caption: true
+          text size: 10
+          top: 10
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: false
+          Name: Steering status
+          Show Value: false
+          Topic: /dashboard/steering_angle_status
+          Value: false
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 237; 212; 0
+          height: 128
+          left: 10
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 3
+          min value: -3
+          show caption: false
+          text size: 10
+          top: 168
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: false
+          Name: Steering cmd
+          Show Value: true
+          Topic: /dashboard/steering_angle_cmd
+          Value: false
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 10
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 5
+          min value: -5
+          show caption: true
+          text size: 10
+          top: 168
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: false
+          Name: Acceleration
+          Show Value: true
+          Topic: /dashboard/acceleration
+          Value: false
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 424
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 2
+          min value: -2
+          show caption: true
+          text size: 10
+          top: 10
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: false
+          Name: Accel limit
+          Show Value: true
+          Topic: /dashboard/acceleration_limit
+          Value: false
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 562
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 2
+          min value: -2
+          show caption: true
+          text size: 10
+          top: 10
+          update interval: 0.03999999910593033
+          width: 128
+        - Buffer length: 100
+          Class: jsk_rviz_plugin/Plotter2D
+          Enabled: false
+          Name: Decel limit
+          Show Value: true
+          Topic: /dashboard/deceleration_limit
+          Value: false
+          auto color change: false
+          auto scale: false
+          background color: 0; 0; 0
+          backround alpha: 0
+          border: true
+          foreground alpha: 0.699999988079071
+          foreground color: 25; 255; 240
+          height: 128
+          left: 700
+          linewidth: 1
+          max color: 255; 0; 0
+          max value: 2
+          min value: -2
+          show caption: true
+          text size: 10
+          top: 10
+          update interval: 0.03999999910593033
+          width: 128
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 0.800000011920929
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
+          Name: Autonomous Manual
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: false
+          Overtake Position Properties: true
+          Topic: /dashboard/vehicle_drivemode
+          Value: true
+          font: DejaVu Sans Mono
+          height: 35
+          left: 10
+          line width: 2
+          text size: 20
+          top: 170
+          width: 266
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 0.800000011920929
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
+          Name: Recording symbol
+          Overtake BG Color Properties: false
+          Overtake FG Color Properties: false
+          Overtake Position Properties: true
+          Topic: /dashboard/recording_symbol
+          Value: true
+          font: DejaVu Sans Mono
+          height: 50
+          left: 260
+          line width: 2
+          text size: 15
+          top: 175
+          width: 100
+        - Class: rviz/Group
+          Displays:
+            - Align Bottom: false
+              Background Alpha: 0.800000011920929
+              Background Color: 0; 0; 0
+              Class: jsk_rviz_plugin/OverlayText
+              Enabled: true
+              Foreground Alpha: 0.800000011920929
+              Foreground Color: 25; 255; 240
+              Invert Shadow: false
+              Name: Left blinker cmd
+              Overtake BG Color Properties: true
+              Overtake FG Color Properties: true
+              Overtake Position Properties: true
+              Topic: /dashboard/left_blinker_cmd
+              Value: true
+              font: DejaVu Sans Condensed
+              height: 80
+              left: 10
+              line width: 2
+              text size: 40
+              top: 205
+              width: 47
+            - Align Bottom: false
+              Background Alpha: 0.800000011920929
+              Background Color: 0; 0; 0
+              Class: jsk_rviz_plugin/OverlayText
+              Enabled: true
+              Foreground Alpha: 0.800000011920929
+              Foreground Color: 25; 255; 240
+              Invert Shadow: false
+              Name: Left blinker arrow
+              Overtake BG Color Properties: true
+              Overtake FG Color Properties: true
+              Overtake Position Properties: true
+              Topic: /dashboard/left_blinker_arrow
+              Value: true
+              font: DejaVu Sans Condensed
+              height: 80
+              left: 57
+              line width: 2
+              text size: 40
+              top: 205
+              width: 46
+            - Class: jsk_rviz_plugin/OverlayImage
+              Enabled: true
+              Name: Wheel
+              Topic: /dashboard/steering_wheel
+              Value: true
+              alpha: 0.800000011920929
+              height: 80
+              keep aspect ratio: false
+              left: 103
+              overwrite alpha value: false
+              top: 205
+              transport hint: raw
+              width: 80
+            - Align Bottom: false
+              Background Alpha: 0.800000011920929
+              Background Color: 0; 0; 0
+              Class: jsk_rviz_plugin/OverlayText
+              Enabled: true
+              Foreground Alpha: 0.800000011920929
+              Foreground Color: 25; 255; 240
+              Invert Shadow: false
+              Name: Right blinker arrow
+              Overtake BG Color Properties: true
+              Overtake FG Color Properties: true
+              Overtake Position Properties: true
+              Topic: /dashboard/right_blinker_arrow
+              Value: true
+              font: DejaVu Sans Condensed
+              height: 80
+              left: 183
+              line width: 2
+              text size: 40
+              top: 205
+              width: 47
+            - Align Bottom: false
+              Background Alpha: 0.800000011920929
+              Background Color: 0; 0; 0
+              Class: jsk_rviz_plugin/OverlayText
+              Enabled: true
+              Foreground Alpha: 0.800000011920929
+              Foreground Color: 25; 255; 240
+              Invert Shadow: false
+              Name: Right blinker cmd
+              Overtake BG Color Properties: true
+              Overtake FG Color Properties: true
+              Overtake Position Properties: true
+              Topic: /dashboard/right_blinker_cmd
+              Value: true
+              font: DejaVu Sans Condensed
+              height: 80
+              left: 230
+              line width: 2
+              text size: 40
+              top: 205
+              width: 46
+          Enabled: true
+          Name: Wheel and blinkers
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 1
+          Foreground Color: 128; 128; 128
+          Invert Shadow: false
+          Name: Planner status
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: true
+          Overtake Position Properties: true
+          Topic: /dashboard/planner_status
+          Value: true
+          font: DejaVu Sans Condensed
+          height: 30
+          left: 10
+          line width: 2
+          text size: 11
+          top: 285
+          width: 266
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 0.4000000059604645
+          Foreground Color: 25; 255; 240
+          Invert Shadow: false
+          Name: Planner log
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: true
+          Overtake Position Properties: true
+          Topic: /dashboard/log_text
+          Value: true
+          font: DejaVu Sans Condensed
+          height: 105
+          left: 10
+          line width: 2
+          text size: 9
+          top: 315
+          width: 266
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 1
+          Foreground Color: 128; 128; 128
+          Invert Shadow: false
+          Name: GNSS general
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: true
+          Overtake Position Properties: true
+          Topic: /dashboard/gnss_general
+          Value: true
+          font: DejaVu Sans Condensed
+          height: 20
+          left: 10
+          line width: 2
+          text size: 11
+          top: 420
+          width: 266
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 1
+          Foreground Color: 128; 128; 128
+          Invert Shadow: false
+          Name: SSC general
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: true
+          Overtake Position Properties: true
+          Topic: /dashboard/ssc_general
+          Value: true
+          font: DejaVu Sans Condensed
+          height: 20
+          left: 10
+          line width: 2
+          text size: 11
+          top: 440
+          width: 266
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 1
+          Foreground Color: 128; 128; 128
+          Invert Shadow: false
+          Name: Pacmod general
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: true
+          Overtake Position Properties: true
+          Topic: /dashboard/pacmod_general
+          Value: true
+          font: DejaVu Sans Condensed
+          height: 30
+          left: 10
+          line width: 2
+          text size: 11
+          top: 460
+          width: 266
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 1
+          Foreground Color: 128; 128; 128
+          Invert Shadow: false
+          Name: GNSS detailed
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: true
+          Overtake Position Properties: true
+          Topic: /dashboard/gnss_detailed
+          Value: true
+          font: DejaVu Sans Condensed
+          height: 110
+          left: 10
+          line width: 2
+          text size: 9
+          top: 490
+          width: 266
+        - Align Bottom: false
+          Background Alpha: 0.30000001192092896
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: false
+          Foreground Alpha: 1
+          Foreground Color: 128; 128; 128
+          Invert Shadow: false
+          Name: SSC detailed
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: true
+          Overtake Position Properties: true
+          Topic: /dashboard/ssc_detailed
+          Value: false
+          font: DejaVu Sans Condensed
+          height: 120
+          left: 430
+          line width: 2
+          text size: 9
+          top: 10
+          width: 250
+        - Align Bottom: false
+          Background Alpha: 0.30000001192092896
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: false
+          Foreground Alpha: 1
+          Foreground Color: 128; 128; 128
+          Invert Shadow: false
+          Name: Pacmod detailed
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: true
+          Overtake Position Properties: true
+          Topic: /dashboard/pacmod_detailed
+          Value: false
+          font: DejaVu Sans Condensed
+          height: 120
+          left: 680
+          line width: 2
+          text size: 9
+          top: 10
+          width: 300
+        - Align Bottom: false
+          Background Alpha: 0.800000011920929
+          Background Color: 0; 0; 0
+          Class: jsk_rviz_plugin/OverlayText
+          Enabled: true
+          Foreground Alpha: 1
+          Foreground Color: 128; 128; 128
+          Invert Shadow: false
+          Name: GNSS corrections detailed
+          Overtake BG Color Properties: true
+          Overtake FG Color Properties: true
+          Overtake Position Properties: true
+          Topic: /dashboard/gnss_corrections_detailed
+          Value: true
+          font: DejaVu Sans Condensed
+          height: 70
+          left: 10
+          line width: 2
+          text size: 9
+          top: 600
+          width: 266
+      Enabled: true
+      Name: Dashboard
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /planning/lanelet2_map_markers
+          Name: Lanelet2 map
+          Namespaces:
+            Bicycle lane: true
+            Bus lane: true
+            Centerline: true
+            Crosswalk: true
+            Left boundary: true
+            Right boundary: true
+            Traffic light stop lines: true
+            Traffic lights: true
+            Yield stop line: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /detection/road_area_markers
+          Name: Road area
+          Namespaces:
+            Road area: true
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: Map
+    - Class: rviz/Group
+      Displays:
+        - Alpha: 1
+          Autocompute Intensity Bounds: true
+          Autocompute Value Bounds:
+            Max Value: 10
+            Min Value: -10
+            Value: true
+          Axis: Z
+          Channel Name: intensity
+          Class: rviz/PointCloud2
+          Color: 255; 255; 255
+          Color Transformer: Intensity
+          Decay Time: 0
+          Enabled: false
+          Invert Rainbow: false
+          Max Color: 255; 255; 255
+          Min Color: 0; 0; 0
+          Name: Points raw center
+          Position Transformer: XYZ
+          Queue Size: 10
+          Selectable: true
+          Size (Pixels): 3
+          Size (m): 0.10000000149011612
+          Style: Flat Squares
+          Topic: /lidar_center/points_raw
+          Unreliable: false
+          Use Fixed Frame: true
+          Use rainbow: true
+          Value: false
+        - Alpha: 1
+          Autocompute Intensity Bounds: true
+          Autocompute Value Bounds:
+            Max Value: 10
+            Min Value: -10
+            Value: true
+          Axis: Z
+          Channel Name: intensity
+          Class: rviz/PointCloud2
+          Color: 255; 255; 255
+          Color Transformer: Intensity
+          Decay Time: 0
+          Enabled: false
+          Invert Rainbow: false
+          Max Color: 255; 255; 255
+          Min Color: 0; 0; 0
+          Name: Points raw front
+          Position Transformer: XYZ
+          Queue Size: 10
+          Selectable: true
+          Size (Pixels): 3
+          Size (m): 0.10000000149011612
+          Style: Flat Squares
+          Topic: /lidar_front/points
+          Unreliable: false
+          Use Fixed Frame: true
+          Use rainbow: true
+          Value: false
+        - Class: rviz/MarkerArray
+          Enabled: false
+          Marker Topic: /radar_fc/can_viz_markers
+          Name: Radar raw
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /camera_fr/image_raw
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Image right
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /camera_fl/image_raw
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Image left
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Class: rviz/Camera
+              Enabled: false
+              Image Rendering: background and overlay
+              Image Topic: /camera_fr/image_raw
+              Name: Camera right
+              Overlay Alpha: 0.5
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+              Visibility:
+                Control:
+                  Controller markers: true
+                  Current pose: true
+                  Value: true
+                Dashboard:
+                  Accel limit: true
+                  Acceleration: true
+                  Autonomous Manual: true
+                  Decel limit: true
+                  GNSS corrections detailed: true
+                  GNSS detailed: true
+                  GNSS general: true
+                  Pacmod detailed: true
+                  Pacmod general: true
+                  Planner log: true
+                  Planner status: true
+                  Recording symbol: true
+                  SSC detailed: true
+                  SSC general: true
+                  Speed:
+                    Current speed: true
+                    Target speed: true
+                    Value: true
+                  Steering cmd: true
+                  Steering status: true
+                  Target obj dist: true
+                  Target obj spd: true
+                  Value: true
+                  Wheel and blinkers:
+                    Left blinker arrow: true
+                    Left blinker cmd: true
+                    Right blinker arrow: true
+                    Right blinker cmd: true
+                    Value: true
+                    Wheel: true
+                Detection:
+                  Detected objects: true
+                  Let's go yield line: true
+                  Lidar:
+                    Center:
+                      Points center ground: true
+                      Points center no ground: true
+                      Value: true
+                    Front:
+                      Points front filtered: true
+                      Points front ground: true
+                      Points front no ground: true
+                      Value: true
+                    Lidar detections: true
+                    Points clustered: true
+                    Points filtered: true
+                    Points ground: true
+                    Points no ground: true
+                    Value: true
+                  Predicted objects: true
+                  Radar:
+                    Radar detections: true
+                    Value: true
+                  Tracked objects: true
+                  Tracked objects bboxes: true
+                  Traffic lights:
+                    Forward camera ROI image: true
+                    Right camera ROI image: true
+                    Stop line status: true
+                    Value: true
+                  Value: true
+                Grid: true
+                Map:
+                  Lanelet2 map: true
+                  Road area: true
+                  Value: true
+                Planning:
+                  Collision points:
+                    All collision points: true
+                    Goal: true
+                    Local path: true
+                    Pedestrian crosswalk: true
+                    Stop line: true
+                    Traffic light stopline: true
+                    Trajectory: true
+                    Value: true
+                  Global path: true
+                  Local path: true
+                  Start and Goal lanelet markers: true
+                  Stop point: true
+                  Value: true
+                Sensing:
+                  Mako:
+                    Camera left: true
+                    Image left: true
+                    Image right: true
+                    Value: true
+                  Nvidia:
+                    "": true
+                    Value: true
+                  Openpilot:
+                    "":
+                      "": true
+                      Value: true
+                    Value: true
+                  Points raw center: true
+                  Points raw front: true
+                  Radar raw: true
+                  Value: true
+                Simulation:
+                  Bicycle markers: true
+                  Carla camera view: true
+                  Carla image view: true
+                  Carla route: true
+                  Value: true
+                System:
+                  Current pose: true
+                  Current velocity: true
+                  Lexus model: true
+                  Lexus shadow: true
+                  TF: true
+                  Value: false
+                Value: true
+              Zoom Factor: 1
+            - Class: rviz/Camera
+              Enabled: false
+              Image Rendering: background and overlay
+              Image Topic: /camera_fl/image_raw
+              Name: Camera left
+              Overlay Alpha: 0.5
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+              Visibility:
+                Control:
+                  Controller markers: true
+                  Current pose: true
+                  Value: true
+                Dashboard:
+                  Accel limit: true
+                  Acceleration: true
+                  Autonomous Manual: true
+                  Decel limit: true
+                  GNSS corrections detailed: true
+                  GNSS detailed: true
+                  GNSS general: true
+                  Pacmod detailed: true
+                  Pacmod general: true
+                  Planner log: true
+                  Planner status: true
+                  Recording symbol: true
+                  SSC detailed: true
+                  SSC general: true
+                  Speed:
+                    Current speed: true
+                    Target speed: true
+                    Value: true
+                  Steering cmd: true
+                  Steering status: true
+                  Target obj dist: true
+                  Target obj spd: true
+                  Value: true
+                  Wheel and blinkers:
+                    Left blinker arrow: true
+                    Left blinker cmd: true
+                    Right blinker arrow: true
+                    Right blinker cmd: true
+                    Value: true
+                    Wheel: true
+                Detection:
+                  Detected objects: true
+                  Let's go yield line: true
+                  Lidar:
+                    Center:
+                      Points center ground: true
+                      Points center no ground: true
+                      Value: true
+                    Front:
+                      Points front filtered: true
+                      Points front ground: true
+                      Points front no ground: true
+                      Value: true
+                    Lidar detections: true
+                    Points clustered: true
+                    Points filtered: true
+                    Points ground: true
+                    Points no ground: true
+                    Value: true
+                  Predicted objects: true
+                  Radar:
+                    Radar detections: true
+                    Value: true
+                  Tracked objects: true
+                  Tracked objects bboxes: true
+                  Traffic lights:
+                    Forward camera ROI image: true
+                    Right camera ROI image: true
+                    Stop line status: true
+                    Value: true
+                  Value: true
+                Grid: true
+                Map:
+                  Lanelet2 map: true
+                  Road area: true
+                  Value: true
+                Planning:
+                  Collision points:
+                    All collision points: true
+                    Goal: true
+                    Local path: true
+                    Pedestrian crosswalk: true
+                    Stop line: true
+                    Traffic light stopline: true
+                    Trajectory: true
+                    Value: true
+                  Global path: true
+                  Local path: true
+                  Start and Goal lanelet markers: true
+                  Stop point: true
+                  Value: true
+                Sensing:
+                  Mako:
+                    Camera right: true
+                    Image left: true
+                    Image right: true
+                    Value: true
+                  Nvidia:
+                    "": true
+                    Value: true
+                  Openpilot:
+                    "":
+                      "": true
+                      Value: true
+                    Value: true
+                  Points raw center: true
+                  Points raw front: true
+                  Radar raw: true
+                  Value: true
+                Simulation:
+                  Bicycle markers: true
+                  Carla camera view: true
+                  Carla image view: true
+                  Carla route: true
+                  Value: true
+                System:
+                  Current pose: true
+                  Current velocity: true
+                  Lexus model: true
+                  Lexus shadow: true
+                  TF: true
+                  Value: false
+                Value: true
+              Zoom Factor: 1
+          Enabled: true
+          Name: Mako
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/Camera
+              Enabled: false
+              Image Rendering: background and overlay
+              Image Topic: /interfaceb/link0/image_rect
+              Name: Camera InterfaceB link 0 Base
+              Overlay Alpha: 0.5
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+              Visibility:
+                Control:
+                  Controller markers: true
+                  Current pose: true
+                  Value: true
+                Dashboard:
+                  Accel limit: true
+                  Acceleration: true
+                  Autonomous Manual: true
+                  Decel limit: true
+                  GNSS corrections detailed: true
+                  GNSS detailed: true
+                  GNSS general: true
+                  Pacmod detailed: true
+                  Pacmod general: true
+                  Planner log: true
+                  Planner status: true
+                  Recording symbol: true
+                  SSC detailed: true
+                  SSC general: true
+                  Speed:
+                    Current speed: true
+                    Target speed: true
+                    Value: true
+                  Steering cmd: true
+                  Steering status: true
+                  Target obj dist: true
+                  Target obj spd: true
+                  Value: true
+                  Wheel and blinkers:
+                    Left blinker arrow: true
+                    Left blinker cmd: true
+                    Right blinker arrow: true
+                    Right blinker cmd: true
+                    Value: true
+                    Wheel: true
+                Detection:
+                  Detected objects: true
+                  Let's go yield line: true
+                  Lidar:
+                    Center:
+                      Points center ground: true
+                      Points center no ground: true
+                      Value: true
+                    Front:
+                      Points front filtered: true
+                      Points front ground: true
+                      Points front no ground: true
+                      Value: true
+                    Lidar detections: true
+                    Points clustered: true
+                    Points filtered: true
+                    Points ground: true
+                    Points no ground: true
+                    Value: true
+                  Predicted objects: true
+                  Radar:
+                    Radar detections: true
+                    Value: true
+                  Tracked objects: true
+                  Tracked objects bboxes: true
+                  Traffic lights:
+                    Forward camera ROI image: true
+                    Right camera ROI image: true
+                    Stop line status: true
+                    Value: true
+                  Value: true
+                Grid: true
+                Map:
+                  Lanelet2 map: true
+                  Road area: true
+                  Value: true
+                Planning:
+                  Collision points:
+                    All collision points: true
+                    Goal: true
+                    Local path: true
+                    Pedestrian crosswalk: true
+                    Stop line: true
+                    Traffic light stopline: true
+                    Trajectory: true
+                    Value: true
+                  Global path: true
+                  Local path: true
+                  Start and Goal lanelet markers: true
+                  Stop point: true
+                  Value: true
+                Sensing:
+                  Mako:
+                    Camera left: true
+                    Camera right: true
+                    Image left: true
+                    Image right: true
+                    Value: true
+                  Nvidia:
+                    Camera Interface link1 Right: true
+                    Camera Interface link2 Forward: true
+                    Camera Interface link3 Backward: true
+                    Camera Interfacea link 0 Left: true
+                    Image Interface link1 Right: true
+                    Image Interface link2 Forward: true
+                    Image Interface link3 Backward: true
+                    Image InterfaceB link0 Base: true
+                    Image Interfacea link0 Left: true
+                    Value: true
+                  Openpilot:
+                    "":
+                      "": true
+                      Value: true
+                    Value: true
+                  Points raw center: true
+                  Points raw front: true
+                  Radar raw: true
+                  Value: true
+                Simulation:
+                  Bicycle markers: true
+                  Carla camera view: true
+                  Carla image view: true
+                  Carla route: true
+                  Value: true
+                System:
+                  Current pose: true
+                  Current velocity: true
+                  Lexus model: true
+                  Lexus shadow: true
+                  TF: true
+                  Value: false
+                Value: true
+              Zoom Factor: 1
+            - Class: rviz/Camera
+              Enabled: false
+              Image Rendering: background and overlay
+              Image Topic: /interfacea/link0/image_rect
+              Name: Camera Interfacea link 0 Left
+              Overlay Alpha: 0.5
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+              Visibility:
+                Control:
+                  Controller markers: true
+                  Current pose: true
+                  Value: true
+                Dashboard:
+                  Accel limit: true
+                  Acceleration: true
+                  Autonomous Manual: true
+                  Decel limit: true
+                  GNSS corrections detailed: true
+                  GNSS detailed: true
+                  GNSS general: true
+                  Pacmod detailed: true
+                  Pacmod general: true
+                  Planner log: true
+                  Planner status: true
+                  Recording symbol: true
+                  SSC detailed: true
+                  SSC general: true
+                  Speed:
+                    Current speed: true
+                    Target speed: true
+                    Value: true
+                  Steering cmd: true
+                  Steering status: true
+                  Target obj dist: true
+                  Target obj spd: true
+                  Value: true
+                  Wheel and blinkers:
+                    Left blinker arrow: true
+                    Left blinker cmd: true
+                    Right blinker arrow: true
+                    Right blinker cmd: true
+                    Value: true
+                    Wheel: true
+                Detection:
+                  Detected objects: true
+                  Let's go yield line: true
+                  Lidar:
+                    Center:
+                      Points center ground: true
+                      Points center no ground: true
+                      Value: true
+                    Front:
+                      Points front filtered: true
+                      Points front ground: true
+                      Points front no ground: true
+                      Value: true
+                    Lidar detections: true
+                    Points clustered: true
+                    Points filtered: true
+                    Points ground: true
+                    Points no ground: true
+                    Value: true
+                  Predicted objects: true
+                  Radar:
+                    Radar detections: true
+                    Value: true
+                  Tracked objects: true
+                  Tracked objects bboxes: true
+                  Traffic lights:
+                    Forward camera ROI image: true
+                    Right camera ROI image: true
+                    Stop line status: true
+                    Value: true
+                  Value: true
+                Grid: true
+                Map:
+                  Lanelet2 map: true
+                  Road area: true
+                  Value: true
+                Planning:
+                  Collision points:
+                    All collision points: true
+                    Goal: true
+                    Local path: true
+                    Pedestrian crosswalk: true
+                    Stop line: true
+                    Traffic light stopline: true
+                    Trajectory: true
+                    Value: true
+                  Global path: true
+                  Local path: true
+                  Start and Goal lanelet markers: true
+                  Stop point: true
+                  Value: true
+                Sensing:
+                  Mako:
+                    Camera left: true
+                    Camera right: true
+                    Image left: true
+                    Image right: true
+                    Value: true
+                  Nvidia:
+                    Camera Interface link1 Right: true
+                    Camera Interface link2 Forward: true
+                    Camera Interface link3 Backward: true
+                    Camera InterfaceB link 0 Base: true
+                    Image Interface link1 Right: true
+                    Image Interface link2 Forward: true
+                    Image Interface link3 Backward: true
+                    Image InterfaceB link0 Base: true
+                    Image Interfacea link0 Left: true
+                    Value: true
+                  Openpilot:
+                    "":
+                      "": true
+                      Value: true
+                    Value: true
+                  Points raw center: true
+                  Points raw front: true
+                  Radar raw: true
+                  Value: true
+                Simulation:
+                  Bicycle markers: true
+                  Carla camera view: true
+                  Carla image view: true
+                  Carla route: true
+                  Value: true
+                System:
+                  Current pose: true
+                  Current velocity: true
+                  Lexus model: true
+                  Lexus shadow: true
+                  TF: true
+                  Value: false
+                Value: true
+              Zoom Factor: 1
+            - Class: rviz/Camera
+              Enabled: false
+              Image Rendering: background and overlay
+              Image Topic: /interfacea/link1/image_rect
+              Name: Camera Interface link1 Right
+              Overlay Alpha: 0.5
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+              Visibility:
+                Control:
+                  Controller markers: true
+                  Current pose: true
+                  Value: true
+                Dashboard:
+                  Accel limit: true
+                  Acceleration: true
+                  Autonomous Manual: true
+                  Decel limit: true
+                  GNSS corrections detailed: true
+                  GNSS detailed: true
+                  GNSS general: true
+                  Pacmod detailed: true
+                  Pacmod general: true
+                  Planner log: true
+                  Planner status: true
+                  Recording symbol: true
+                  SSC detailed: true
+                  SSC general: true
+                  Speed:
+                    Current speed: true
+                    Target speed: true
+                    Value: true
+                  Steering cmd: true
+                  Steering status: true
+                  Target obj dist: true
+                  Target obj spd: true
+                  Value: true
+                  Wheel and blinkers:
+                    Left blinker arrow: true
+                    Left blinker cmd: true
+                    Right blinker arrow: true
+                    Right blinker cmd: true
+                    Value: true
+                    Wheel: true
+                Detection:
+                  Detected objects: true
+                  Let's go yield line: true
+                  Lidar:
+                    Center:
+                      Points center ground: true
+                      Points center no ground: true
+                      Value: true
+                    Front:
+                      Points front filtered: true
+                      Points front ground: true
+                      Points front no ground: true
+                      Value: true
+                    Lidar detections: true
+                    Points clustered: true
+                    Points filtered: true
+                    Points ground: true
+                    Points no ground: true
+                    Value: true
+                  Predicted objects: true
+                  Radar:
+                    Radar detections: true
+                    Value: true
+                  Tracked objects: true
+                  Tracked objects bboxes: true
+                  Traffic lights:
+                    Forward camera ROI image: true
+                    Right camera ROI image: true
+                    Stop line status: true
+                    Value: true
+                  Value: true
+                Grid: true
+                Map:
+                  Lanelet2 map: true
+                  Road area: true
+                  Value: true
+                Planning:
+                  Collision points:
+                    All collision points: true
+                    Goal: true
+                    Local path: true
+                    Pedestrian crosswalk: true
+                    Stop line: true
+                    Traffic light stopline: true
+                    Trajectory: true
+                    Value: true
+                  Global path: true
+                  Local path: true
+                  Start and Goal lanelet markers: true
+                  Stop point: true
+                  Value: true
+                Sensing:
+                  Mako:
+                    Camera left: true
+                    Camera right: true
+                    Image left: true
+                    Image right: true
+                    Value: true
+                  Nvidia:
+                    Camera Interface link2 Forward: true
+                    Camera Interface link3 Backward: true
+                    Camera InterfaceB link 0 Base: true
+                    Camera Interfacea link 0 Left: true
+                    Image Interface link1 Right: true
+                    Image Interface link2 Forward: true
+                    Image Interface link3 Backward: true
+                    Image InterfaceB link0 Base: true
+                    Image Interfacea link0 Left: true
+                    Value: true
+                  Openpilot:
+                    "":
+                      "": true
+                      Value: true
+                    Value: true
+                  Points raw center: true
+                  Points raw front: true
+                  Radar raw: true
+                  Value: true
+                Simulation:
+                  Bicycle markers: true
+                  Carla camera view: true
+                  Carla image view: true
+                  Carla route: true
+                  Value: true
+                System:
+                  Current pose: true
+                  Current velocity: true
+                  Lexus model: true
+                  Lexus shadow: true
+                  TF: true
+                  Value: false
+                Value: true
+              Zoom Factor: 1
+            - Class: rviz/Camera
+              Enabled: false
+              Image Rendering: background and overlay
+              Image Topic: /interfacea/link2/image_rect
+              Name: Camera Interface link2 Forward
+              Overlay Alpha: 0.5
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+              Visibility:
+                Control:
+                  Controller markers: true
+                  Current pose: true
+                  Value: true
+                Dashboard:
+                  Accel limit: true
+                  Acceleration: true
+                  Autonomous Manual: true
+                  Decel limit: true
+                  GNSS corrections detailed: true
+                  GNSS detailed: true
+                  GNSS general: true
+                  Pacmod detailed: true
+                  Pacmod general: true
+                  Planner log: true
+                  Planner status: true
+                  Recording symbol: true
+                  SSC detailed: true
+                  SSC general: true
+                  Speed:
+                    Current speed: true
+                    Target speed: true
+                    Value: true
+                  Steering cmd: true
+                  Steering status: true
+                  Target obj dist: true
+                  Target obj spd: true
+                  Value: true
+                  Wheel and blinkers:
+                    Left blinker arrow: true
+                    Left blinker cmd: true
+                    Right blinker arrow: true
+                    Right blinker cmd: true
+                    Value: true
+                    Wheel: true
+                Detection:
+                  Detected objects: true
+                  Let's go yield line: true
+                  Lidar:
+                    Center:
+                      Points center ground: true
+                      Points center no ground: true
+                      Value: true
+                    Front:
+                      Points front filtered: true
+                      Points front ground: true
+                      Points front no ground: true
+                      Value: true
+                    Lidar detections: true
+                    Points clustered: true
+                    Points filtered: true
+                    Points ground: true
+                    Points no ground: true
+                    Value: true
+                  Predicted objects: true
+                  Radar:
+                    Radar detections: true
+                    Value: true
+                  Tracked objects: true
+                  Tracked objects bboxes: true
+                  Traffic lights:
+                    Forward camera ROI image: true
+                    Right camera ROI image: true
+                    Stop line status: true
+                    Value: true
+                  Value: true
+                Grid: true
+                Map:
+                  Lanelet2 map: true
+                  Road area: true
+                  Value: true
+                Planning:
+                  Collision points:
+                    All collision points: true
+                    Goal: true
+                    Local path: true
+                    Pedestrian crosswalk: true
+                    Stop line: true
+                    Traffic light stopline: true
+                    Trajectory: true
+                    Value: true
+                  Global path: true
+                  Local path: true
+                  Start and Goal lanelet markers: true
+                  Stop point: true
+                  Value: true
+                Sensing:
+                  Mako:
+                    Camera left: true
+                    Camera right: true
+                    Image left: true
+                    Image right: true
+                    Value: true
+                  Nvidia:
+                    Camera Interface link1 Right: true
+                    Camera Interface link3 Backward: true
+                    Camera InterfaceB link 0 Base: true
+                    Camera Interfacea link 0 Left: true
+                    Image Interface link1 Right: true
+                    Image Interface link2 Forward: true
+                    Image Interface link3 Backward: true
+                    Image InterfaceB link0 Base: true
+                    Image Interfacea link0 Left: true
+                    Value: true
+                  Openpilot:
+                    "":
+                      "": true
+                      Value: true
+                    Value: true
+                  Points raw center: true
+                  Points raw front: true
+                  Radar raw: true
+                  Value: true
+                Simulation:
+                  Bicycle markers: true
+                  Carla camera view: true
+                  Carla image view: true
+                  Carla route: true
+                  Value: true
+                System:
+                  Current pose: true
+                  Current velocity: true
+                  Lexus model: true
+                  Lexus shadow: true
+                  TF: true
+                  Value: false
+                Value: true
+              Zoom Factor: 1
+            - Class: rviz/Camera
+              Enabled: false
+              Image Rendering: background and overlay
+              Image Topic: /interfacea/link3/image_rect
+              Name: Camera Interface link3 Backward
+              Overlay Alpha: 0.5
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+              Visibility:
+                Control:
+                  Controller markers: true
+                  Current pose: true
+                  Value: true
+                Dashboard:
+                  Accel limit: true
+                  Acceleration: true
+                  Autonomous Manual: true
+                  Decel limit: true
+                  GNSS corrections detailed: true
+                  GNSS detailed: true
+                  GNSS general: true
+                  Pacmod detailed: true
+                  Pacmod general: true
+                  Planner log: true
+                  Planner status: true
+                  Recording symbol: true
+                  SSC detailed: true
+                  SSC general: true
+                  Speed:
+                    Current speed: true
+                    Target speed: true
+                    Value: true
+                  Steering cmd: true
+                  Steering status: true
+                  Target obj dist: true
+                  Target obj spd: true
+                  Value: true
+                  Wheel and blinkers:
+                    Left blinker arrow: true
+                    Left blinker cmd: true
+                    Right blinker arrow: true
+                    Right blinker cmd: true
+                    Value: true
+                    Wheel: true
+                Detection:
+                  Detected objects: true
+                  Let's go yield line: true
+                  Lidar:
+                    Center:
+                      Points center ground: true
+                      Points center no ground: true
+                      Value: true
+                    Front:
+                      Points front filtered: true
+                      Points front ground: true
+                      Points front no ground: true
+                      Value: true
+                    Lidar detections: true
+                    Points clustered: true
+                    Points filtered: true
+                    Points ground: true
+                    Points no ground: true
+                    Value: true
+                  Predicted objects: true
+                  Radar:
+                    Radar detections: true
+                    Value: true
+                  Tracked objects: true
+                  Tracked objects bboxes: true
+                  Traffic lights:
+                    Forward camera ROI image: true
+                    Right camera ROI image: true
+                    Stop line status: true
+                    Value: true
+                  Value: true
+                Grid: true
+                Map:
+                  Lanelet2 map: true
+                  Road area: true
+                  Value: true
+                Planning:
+                  Collision points:
+                    All collision points: true
+                    Goal: true
+                    Local path: true
+                    Pedestrian crosswalk: true
+                    Stop line: true
+                    Traffic light stopline: true
+                    Trajectory: true
+                    Value: true
+                  Global path: true
+                  Local path: true
+                  Start and Goal lanelet markers: true
+                  Stop point: true
+                  Value: true
+                Sensing:
+                  Mako:
+                    Camera left: true
+                    Camera right: true
+                    Image left: true
+                    Image right: true
+                    Value: true
+                  Nvidia:
+                    Camera Interface link1 Right: true
+                    Camera Interface link2 Forward: true
+                    Camera InterfaceB link 0 Base: true
+                    Camera Interfacea link 0 Left: true
+                    Image Interface link1 Right: true
+                    Image Interface link2 Forward: true
+                    Image Interface link3 Backward: true
+                    Image InterfaceB link0 Base: true
+                    Image Interfacea link0 Left: true
+                    Value: true
+                  Openpilot:
+                    "":
+                      "": true
+                      Value: true
+                    Value: true
+                  Points raw center: true
+                  Points raw front: true
+                  Radar raw: true
+                  Value: true
+                Simulation:
+                  Bicycle markers: true
+                  Carla camera view: true
+                  Carla image view: true
+                  Carla route: true
+                  Value: true
+                System:
+                  Current pose: true
+                  Current velocity: true
+                  Lexus model: true
+                  Lexus shadow: true
+                  TF: true
+                  Value: false
+                Value: true
+              Zoom Factor: 1
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /interfaceb/link0/image_rect
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Image InterfaceB link0 Base
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /interfacea/link0/image_rect
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Image Interfacea link0 Left
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /interfacea/link1/image_raw
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Image Interface link1 Right
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /interfacea/link2/image_rect
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Image Interface link2 Forward
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /interfacea/link3/image_rect
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Image Interface link3 Backward
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+          Enabled: true
+          Name: Nvidia
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: false
+              Marker Topic: /openpilot/lanes_markers
+              Name: Openpilot lane lines
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: false
+            - Class: rviz/MarkerArray
+              Enabled: false
+              Marker Topic: /openpilot/plan_markers
+              Name: Openpilot plan
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: false
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /localization/lane_boundary_matcher_markers
+              Name: Lane boundary matcher
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: true
+            - Class: rviz/Group
+              Displays:
+                - Class: rviz/Image
+                  Enabled: false
+                  Image Topic: /openpilot/qroad_camera
+                  Max Value: 1
+                  Median window: 5
+                  Min Value: 0
+                  Name: qRoad camera
+                  Normalize Range: true
+                  Queue Size: 2
+                  Transport Hint: h264
+                  Unreliable: false
+                  Value: false
+                - Class: rviz/Image
+                  Enabled: false
+                  Image Topic: /openpilot/road_camera
+                  Max Value: 1
+                  Median window: 5
+                  Min Value: 0
+                  Name: Road camera
+                  Normalize Range: true
+                  Queue Size: 2
+                  Transport Hint: h265
+                  Unreliable: false
+                  Value: false
+                - Class: rviz/Image
+                  Enabled: false
+                  Image Topic: /openpilot/wide_road_camera
+                  Max Value: 1
+                  Median window: 5
+                  Min Value: 0
+                  Name: Wide road camera
+                  Normalize Range: true
+                  Queue Size: 2
+                  Transport Hint: h265
+                  Unreliable: false
+                  Value: false
+                - Class: rviz/Image
+                  Enabled: false
+                  Image Topic: /openpilot/driver_camera
+                  Max Value: 1
+                  Median window: 5
+                  Min Value: 0
+                  Name: Driver camera
+                  Normalize Range: true
+                  Queue Size: 2
+                  Transport Hint: h265
+                  Unreliable: false
+                  Value: false
+              Enabled: true
+              Name: Cameras
+          Enabled: true
+          Name: Openpilot
+      Enabled: true
+      Name: Sensing
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/Group
+              Displays:
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: false
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points center ground
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /detection/lidar/center/points_ground
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: false
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: true
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points center no ground
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /detection/lidar/center/points_no_ground
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: true
+              Enabled: false
+              Name: Center
+            - Class: rviz/Group
+              Displays:
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: false
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points front filtered
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /lidar_front/points_filtered
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: false
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: false
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points front ground
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /detection/lidar/front/points_ground
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: false
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 255; 255
+                  Color Transformer: Intensity
+                  Decay Time: 0
+                  Enabled: true
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Min Color: 0; 0; 0
+                  Name: Points front no ground
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.10000000149011612
+                  Style: Flat Squares
+                  Topic: /detection/lidar/front/points_no_ground
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: true
+              Enabled: false
+              Name: Front
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Min Color: 0; 0; 0
+              Name: Points ground
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.10000000149011612
+              Style: Flat Squares
+              Topic: detection/lidar/points_ground
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: false
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Min Color: 0; 0; 0
+              Name: Points no ground
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.10000000149011612
+              Style: Flat Squares
+              Topic: detection/lidar/points_no_ground
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: false
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 252; 233; 79
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Min Color: 0; 0; 0
+              Name: Points filtered
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.10000000149011612
+              Style: Flat Squares
+              Topic: /detection/lidar/points_filtered
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: false
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 39.87565612792969
+                Min Value: 34.16856384277344
+                Value: true
+              Axis: Z
+              Channel Name: label
+              Class: rviz/PointCloud2
+              Color: 114; 159; 207
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Min Color: 0; 0; 0
+              Name: Points clustered
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.10000000149011612
+              Style: Points
+              Topic: /detection/lidar/points_clustered
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: false
+              Marker Topic: /detection/lidar/detected_objects_markers
+              Name: Lidar detections
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: false
+          Enabled: true
+          Name: Lidar
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: false
+              Marker Topic: /detection/radar/detected_objects_markers
+              Name: Radar detections
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: false
+          Enabled: false
+          Name: Radar
+        - Class: rviz/MarkerArray
+          Enabled: false
+          Marker Topic: /detection/detected_objects_markers
+          Name: Detected objects
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /detection/tracked_objects_markers
+          Name: Tracked objects
+          Namespaces:
+            bounding_box: false
+            centroid: true
+            convex_hull: true
+            speed: true
+            text: true
+          Queue Size: 100
+          Value: true
+        - Class: jsk_rviz_plugin/BoundingBoxArray
+          Enabled: false
+          Name: Tracked objects bboxes
+          Queue Size: 10
+          Topic: /detection/tracked_objects_bboxes
+          Unreliable: false
+          Value: false
+          alpha: 0.800000011920929
+          color: 252; 175; 62
+          coloring: Flat color
+          line width: 0.10000000149011612
+          only edge: true
+          show coords: false
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /detection/predicted_objects_markers
+          Name: Predicted objects
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: true
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /detection/camera1/traffic_light_roi
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Forward camera ROI image
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /detection/camera2/traffic_light_roi
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Right camera ROI image
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /planning/tfl_stop_line_markers
+              Name: Stop line status
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: true
+          Enabled: true
+          Name: Traffic lights
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /planning/yield_stop_line_markers
+          Name: Let's go yield line
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: Detection
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 1
+              Autocompute Intensity Bounds: false
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: category
+              Class: rviz/PointCloud2
+              Color: 239; 41; 41
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 32; 74; 135
+              Max Intensity: 11
+              Min Color: 252; 233; 79
+              Min Intensity: 0
+              Name: All collision points
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 8
+              Size (m): 0.4000000059604645
+              Style: Spheres
+              Topic: /planning/collision_points
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Alpha: 0.699999988079071
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: category
+              Class: rviz/PointCloud2
+              Color: 238; 238; 236
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 78; 154; 6
+              Min Color: 138; 226; 52
+              Name: Goal
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 8
+              Size (m): 1
+              Style: Points
+              Topic: /planning/goal_collision_points
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: false
+              Value: false
+            - Alpha: 0.699999988079071
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: category
+              Class: rviz/PointCloud2
+              Color: 238; 238; 236
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 78; 154; 6
+              Min Color: 138; 226; 52
+              Name: Stop line
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 8
+              Size (m): 1
+              Style: Points
+              Topic: /planning/stop_line_collision_points
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: false
+              Value: false
+            - Alpha: 0.699999988079071
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: category
+              Class: rviz/PointCloud2
+              Color: 173; 245; 63
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 78; 154; 6
+              Min Color: 138; 226; 52
+              Name: Local path
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 8
+              Size (m): 1
+              Style: Points
+              Topic: /planning/local_path_collision_points
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: false
+              Value: false
+            - Alpha: 0.699999988079071
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: category
+              Class: rviz/PointCloud2
+              Color: 213; 31; 237
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 78; 154; 6
+              Min Color: 138; 226; 52
+              Name: Trajectory
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 8
+              Size (m): 1
+              Style: Points
+              Topic: /planning/trajectory_collision_points
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: false
+              Value: false
+            - Alpha: 0.699999988079071
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: category
+              Class: rviz/PointCloud2
+              Color: 239; 41; 41
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 78; 154; 6
+              Min Color: 138; 226; 52
+              Name: Traffic light stopline
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 8
+              Size (m): 1
+              Style: Points
+              Topic: /planning/tfl_stopline_collision_points
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: false
+              Value: false
+            - Alpha: 0.699999988079071
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: category
+              Class: rviz/PointCloud2
+              Color: 213; 31; 237
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 78; 154; 6
+              Min Color: 138; 226; 52
+              Name: Pedestrian crosswalk
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 8
+              Size (m): 1
+              Style: Points
+              Topic: /planning/crosswalk_collision_points
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: false
+              Value: false
+          Enabled: true
+          Name: Collision points
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /planning/global_path_markers
+          Name: Global path
+          Namespaces:
+            Path: true
+            Velocity label: false
+            Waypoint pose: false
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /planning/local_path_markers
+          Name: Local path
+          Namespaces:
+            Stopping lateral distance: true
+            Stopping point: true
+            Velocity label: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /planning/stop_point_visualization
+          Name: Stop point
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: false
+          Marker Topic: /planning/target_lane_markers
+          Name: Start and Goal lanelet markers
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
+      Enabled: true
+      Name: Planning
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: false
+          Marker Topic: /control/controller_markers
+          Name: Controller markers
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
+        - Alpha: 1
+          Axes Length: 1
+          Axes Radius: 0.10000000149011612
+          Class: rviz/Pose
+          Color: 255; 25; 0
+          Enabled: false
+          Head Length: 0.8999999761581421
+          Head Radius: 0.30000001192092896
+          Name: Current pose
+          Queue Size: 10
+          Shaft Length: 2
+          Shaft Radius: 0.10000000149011612
+          Shape: Arrow
+          Topic: /localization/current_pose
+          Unreliable: false
+          Value: false
+      Enabled: true
+      Name: Control
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: false
+          Marker Topic: /vehicle/bicycle_markers
+          Name: Bicycle markers
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
+        - Class: rviz/Camera
+          Enabled: false
+          Image Rendering: background and overlay
+          Image Topic: /carla/ego_vehicle/rgb_view/image
+          Name: Carla camera view
+          Overlay Alpha: 0.5
+          Queue Size: 2
+          Transport Hint: raw
+          Unreliable: false
+          Value: false
+          Visibility:
+            Control:
+              "": true
+              Value: true
+            Dashboard:
+              Accel limit: true
+              Acceleration: true
+              Autonomous Manual: true
+              Decel limit: true
+              GNSS corrections detailed: true
+              GNSS detailed: true
+              GNSS general: true
+              Pacmod detailed: true
+              Pacmod general: true
+              Planner log: true
+              Planner status: true
+              Recording symbol: true
+              SSC detailed: true
+              SSC general: true
+              Speed:
+                Current speed: true
+                Target speed: true
+                Value: true
+              Steering cmd: true
+              Steering status: true
+              Target obj dist: true
+              Target obj spd: true
+              Value: true
+              Wheel and blinkers:
+                Left blinker arrow: true
+                Left blinker cmd: true
+                Right blinker arrow: true
+                Right blinker cmd: true
+                Value: true
+                Wheel: true
+            Detection:
+              "": true
+              Value: true
+            Grid: true
+            Map:
+              "": true
+              Value: true
+            Planning:
+              "": true
+              Value: true
+            Sensing:
+              "":
+                "":
+                  "": true
+                  Value: true
+                Value: true
+              Value: true
+            Simulation:
+              Bicycle markers: true
+              Carla image view: true
+              Carla route: true
+              Value: true
+            System:
+              Current pose: true
+              Current velocity: true
+              Lexus model: true
+              Lexus shadow: true
+              TF: true
+              Value: true
+            Value: true
+          Zoom Factor: 1
+        - Class: rviz/Image
+          Enabled: false
+          Image Topic: /carla/ego_vehicle/rgb_view/image
+          Max Value: 1
+          Median window: 5
+          Min Value: 0
+          Name: Carla image view
+          Normalize Range: true
+          Queue Size: 2
+          Transport Hint: raw
+          Unreliable: false
+          Value: false
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 25; 255; 0
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Lines
+          Line Width: 0.029999999329447746
+          Name: Carla route
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Queue Size: 10
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /carla/ego_vehicle/waypoints
+          Unreliable: false
+          Value: true
+      Enabled: true
+      Name: Simulation
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Default Light: true
+    Fixed Frame: map
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Theta std deviation: 0.2617993950843811
+      Topic: /initialpose
+      X std deviation: 0.5
+      Y std deviation: 0.5
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: false
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Angle: -0.004999999888241291
+      Class: rviz/TopDownOrtho
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.0010000000474974513
+      Scale: 20
+      Target Frame: base_link
+      X: 0
+      Y: 0
+    Saved:
+      - Angle: 0
+        Class: rviz/TopDownOrtho
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.05999999865889549
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Invert Z Axis: false
+        Name: TopDownFollow
+        Near Clip Distance: 0.0010000000474974513
+        Scale: 20
+        Target Frame: base_link
+        X: 0
+        Y: 0
+      - Class: rviz/ThirdPersonFollower
+        Distance: 16.29290199279785
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.05999999865889549
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Field of View: 0.7853981852531433
+        Focal Point:
+          X: 0
+          Y: 0
+          Z: 0
+        Focal Shape Fixed Size: true
+        Focal Shape Size: 0.05000000074505806
+        Invert Z Axis: false
+        Name: ThirdPersonFollow
+        Near Clip Distance: 0.009999999776482582
+        Pitch: 0.2747974097728729
+        Target Frame: base_link
+        Yaw: 3.1404006481170654
+      - Angle: 0
+        Class: rviz/TopDownOrtho
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.05999999865889549
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Invert Z Axis: false
+        Name: TartuDemoRoute
+        Near Clip Distance: 0.0010000000474974513
+        Scale: 1.0889099836349487
+        Target Frame: map
+        X: 91.94154357910156
+        Y: -336.5230712890625
+      - Angle: 0
+        Class: rviz/TopDownOrtho
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.05999999865889549
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Invert Z Axis: false
+        Name: RaadiParkingLot
+        Near Clip Distance: 0.0010000000474974513
+        Scale: 5.084094047546387
+        Target Frame: map
+        X: 1578.68505859375
+        Y: 1319.7745361328125
+Window Geometry:
+  Actions:
+    collapsed: false
+  Camera Interface link1 Right:
+    collapsed: false
+  Camera Interface link2 Forward:
+    collapsed: false
+  Camera Interface link3 Backward:
+    collapsed: false
+  Camera InterfaceB link 0 Base:
+    collapsed: false
+  Camera Interfacea link 0 Left:
+    collapsed: false
+  Camera left:
+    collapsed: false
+  Camera right:
+    collapsed: false
+  Carla camera view:
+    collapsed: false
+  Carla image view:
+    collapsed: false
+  CarlaControl:
+    collapsed: false
+  Displays:
+    collapsed: false
+  Driver camera:
+    collapsed: false
+  Forward camera ROI image:
+    collapsed: false
+  Height: 1370
+  Hide Left Dock: false
+  Hide Right Dock: false
+  Image Interface link1 Right:
+    collapsed: false
+  Image Interface link2 Forward:
+    collapsed: false
+  Image Interface link3 Backward:
+    collapsed: false
+  Image InterfaceB link0 Base:
+    collapsed: false
+  Image Interfacea link0 Left:
+    collapsed: false
+  Image left:
+    collapsed: false
+  Image right:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000021f000004f4fc0200000018fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006a00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000004500000253000000e800fffffffa000000010100000002fb0000000c00430061006d0065007200610000000000ffffffff0000000000000000fb000000100044006900730070006c0061007900730100000000000001360000016100fffffffb0000000e0041006300740069006f006e0073010000029f000000970000004900fffffffb0000000a0049006d006100670065010000028e000000d20000000000000000fb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000120049006d006100670065005f0072006100770000000000ffffffff0000000000000000fb0000000c00430061006d006500720061000000024e000001710000000000000000fb000000120049006d00610067006500200052006100770100000421000000160000000000000000fb0000000a0049006d00610067006501000002f4000000cb0000000000000000fb0000000a0049006d006100670065010000056c0000026c0000000000000000fb00000024004400650063006900730069006f006e004d0061006b0065007200500061006e0065006c00000002110000018f0000000000000000fb0000000c00430061006d006500720061010000040a000000d60000000000000000fb0000000a0049006d006100670065010000040a000000d60000000000000000fb0000000c00430061006d0065007200610100000117000001f10000000000000000fb0000000c00430061006d006500720061010000030e000002350000000000000000fb0000000c00430061006d006500720061010000046b000000d80000000000000000fb0000000e0042007500740074006f006e007300000003cf000000670000000000000000fb0000001800430061006e00630065006c00200072006f00750074006500000003ce000000840000000000000000fc0000033d000001fc000000fb01000022fa000000000100000003fb0000000a005600690065007700730100000000ffffffff0000010200fffffffb00000018004300610072006c00610043006f006e00740072006f006c010000000000000207000001f700fffffffb00000016005200650063006f00720064002000420061006700730100000000ffffffff000000ac00ffffff000000010000029800000286fc0200000015fc0000003d000002860000000000fffffffaffffffff0100000004fb0000001800710052006f00610064002000630061006d0065007200610000000000ffffffff000000c400fffffffb000000160052006f00610064002000630061006d00650072006100000001f6000002c2000000b900fffffffb00000020005700690064006500200072006f00610064002000630061006d0065007200610000000000ffffffff000000e300fffffffb0000001a004400720069007600650072002000630061006d0065007200610000000000ffffffff000000c100fffffffb0000000a0049006d006100670065010000003d000002860000000000000000fb0000003800430061006d00650072006100200049006e00740065007200660061006300650020006c0069006e006b0031002000520069006700680074000000003d0000039e0000001900fffffffb000000360049006d00610067006500200049006e00740065007200660061006300650020006c0069006e006b00310020005200690067006800740000000215000001c60000001900fffffffb0000003a00430061006d00650072006100200049006e007400650072006600610063006500420020006c0069006e006b0020003000200042006100730065000000003d0000039e0000001900fffffffb000000360049006d00610067006500200049006e007400650072006600610063006500420020006c0069006e006b003000200042006100730065000000003d0000039e0000001900fffffffb0000003e00430061006d00650072006100200049006e00740065007200660061006300650020006c0069006e006b00330020004200610063006b0077006100720064000000003d0000039e0000001900fffffffb0000003a00430061006d00650072006100200049006e007400650072006600610063006500610020006c0069006e006b002000300020004c006500660074000000003d0000039e0000001900fffffffb0000003c0049006d00610067006500200049006e00740065007200660061006300650020006c0069006e006b00330020004200610063006b00770061007200640000000212000001c90000001900fffffffb000000360049006d00610067006500200049006e007400650072006600610063006500610020006c0069006e006b00300020004c006500660074000000020f000001cc0000001900fffffffb000000160049006d006100670065002000720069006700680074000000003d000003b90000001900fffffffb000000140049006d0061006700650020006c006500660074000000021d000001d90000001900fffffffb0000001800430061006d006500720061002000720069006700680074000000003d000001f00000001900fffffffb0000001600430061006d0065007200610020006c006500660074000000003d000003b90000001900fffffffb000000300046006f00720077006100720064002000630061006d00650072006100200052004f004900200069006d006100670065000000003d0000029a0000001900fffffffc0000003d000005210000000000fffffffaffffffff0100000003fb0000003c00430061006d00650072006100200049006e00740065007200660061006300650020006c0069006e006b003200200046006f007200770061007200640000000000ffffffff0000015000fffffffb0000003a0049006d00610067006500200049006e00740065007200660061006300650020006c0069006e006b003200200046006f007200770061007200640000000000ffffffff0000014400fffffffb0000002c00520069006700680074002000630061006d00650072006100200052004f004900200069006d0061006700650000000687000003310000011300fffffffc00000047000004f10000000000fffffffaffffffff0100000002fb00000022004300610072006c0061002000630061006d0065007200610020007600690065007700000006cf00000331000000e300fffffffb00000020004300610072006c006100200069006d006100670065002000760069006500770000000000ffffffff000000d900fffffffb0000000c00430061006d00650072006100000002360000030d0000000000000000fb0000000c00430061006d0065007200610100000268000002db0000000000000000fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000073f000000a8fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000052700000167fc0100000005fb00000012005200610077005f0069006d0061006700650000000000000005270000000000000000fb000000140072006f0069005f007300690067006e0061006c0000000241000002e60000000000000000fb0000002400560065006800690063006c00650045006e006700610067006500500061006e0065006c0000000000000005740000000000000000fb0000000800540069006d006500000000c4000004b0000004be00fffffffb0000000800540069006d0065010000000000000450000000000000000000000792000004f400000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Record Bags:
+    collapsed: false
+  Right camera ROI image:
+    collapsed: false
+  Road camera:
+    collapsed: false
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Wide road camera:
+    collapsed: false
+  Width: 2488
+  X: 72
+  Y: 33
+  qRoad camera:
+    collapsed: false

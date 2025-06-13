@@ -1,0 +1,2645 @@
+name: Delta tasku
+positions:
+- x: -0.4822743295226246
+  y: -2.4188089473173022
+  z: 34.514373779296875
+---
+name: Demo route
+positions:
+- x: -153.66
+  y: -232.03
+  z: 34.6
+  delay: 20
+- x: -0.4822743295226246
+  y: -2.4188089473173022
+  z: 34.514373779296875
+---
+name: Soola route
+positions:
+- x: 195.0
+  y: -807.8
+  z: 34.6
+  delay: 20
+- x: -0.4822743295226246
+  y: -2.4188089473173022
+  z: 35.3
+---
+name: "Bus 2: Delta-Lõunakeskus"
+positions:
+- x: -1335.96
+  y: -2067.59
+  z: 69.0
+  delay: 3
+- x: -2460.51
+  y: -798.77
+  z: 60.0
+  delay: 3
+- x: -3161.474471521622
+  y: -2929.139334718697
+  z: 71.6668701171875
+---
+name: "Bus 2: Lõunakeskus-Delta"
+positions:
+- x: -2488.58
+  y: -826.27
+  z: 60.0
+  delay: 3
+- x: -1336.18
+  y: -2089.18
+  z: 69.0
+  delay: 3
+- x: -0.4822743295226246
+  y: -2.4188089473173022
+  z: 34.514373779296875
+---
+name: "Bus 3: Delta-Zoomeedikum"
+positions:
+- x: -570.68
+  y: -960.31
+  z: 66.0
+  delay: 3
+- x: -1335.59
+  y: -1002.37
+  z: 64.0
+  delay: 3
+- x: -1257.65
+  y: -490.98
+  z: 60.0
+  delay: 3
+- x: -1826.98
+  y: -380.25
+  z: 60.0
+  delay: 3
+- x: -2271.368750086869
+  y: 876.0897022346035
+  z: 34.514373779296875
+---
+name: "Bus 3: Zoomeedikum-Delta"
+positions:
+- x: -1829.54
+  y: -389.60
+  z: 60.0
+  delay: 3
+- x: -1069.57
+  y: -678.18
+  z: 60.0
+  delay: 3
+- x: -1188.77
+  y: -1182.79
+  z: 64.0
+  delay: 3
+- x: -548.93
+  y: -980.02
+  z: 66.0
+  delay: 3
+- x: -0.4822743295226246
+  y: -2.4188089473173022
+  z: 51.23374938964844
+---
+name: AHHAA
+positions:
+- x: 422.4329188433476
+  y: -934.0330951586366
+  z: 33.75937271118164
+---
+name: Aardla (Aardla tn. suunas)
+positions:
+- x: -207.80309179367032
+  y: -3387.6579961897805
+  z: 55.65187454223633
+---
+name: "Aardla (linnast v\xE4ljuv)"
+positions:
+- x: -319.18846397585
+  y: -3437.0453976383433
+  z: 56.61000061035156
+---
+name: "Aardla (linnast v\xE4ljuv)"
+positions:
+- x: -217.6154755798052
+  y: -3411.031392050907
+  z: 55.61874771118164
+---
+name: Aiandi
+positions:
+- x: -594.6299209826393
+  y: 1011.1465156264603
+  z: 51.36437225341797
+---
+name: Aianduse (linna sisenev)
+positions:
+- x: -455.99598278518533
+  y: -3784.4985847622156
+  z: 57.60124969482422
+---
+name: "Aianduse (linnast v\xE4ljuv)"
+positions:
+- x: -509.9584662381094
+  y: -3890.075545269996
+  z: 57.31062316894531
+---
+name: "Aida (linnast v\xE4ljuv)"
+positions:
+- x: 612.3831546087749
+  y: -1351.2213840233162
+  z: 33.97187423706055
+---
+name: "Akvarelli (N\xF5lvaku suunas)"
+positions:
+- x: 4110.3823672574945
+  y: -2862.80525332503
+  z: 41.881248474121094
+---
+name: Akvarelli (Vana-Ihaste suunas)
+positions:
+- x: 4099.848013315001
+  y: -2907.0332582565024
+  z: 41.44124984741211
+---
+name: Alasi (Karete suunas)
+positions:
+- x: -543.967910297215
+  y: -4172.96464439854
+  z: 55.701873779296875
+---
+name: "Alasi (V\xF5ru tn. suunas)"
+positions:
+- x: -557.3543458138593
+  y: -4158.9404445346445
+  z: 56.104373931884766
+---
+name: Alevi
+positions:
+- x: 245.10568708914798
+  y: -2597.6715631028637
+  z: 47.80624771118164
+---
+name: Anne (Jaama tn. suunas)
+positions:
+- x: 1487.909010699077
+  y: -814.9665341917425
+  z: 34.508750915527344
+---
+name: "Anne (S\xF5pruse ringi suunas)"
+positions:
+- x: 1427.7701276461012
+  y: -921.9628110779449
+  z: 33.959999084472656
+---
+name: "Annelinna g\xFCmnaasium (Jaama tn. suunas)"
+positions:
+- x: 2576.762829204439
+  y: -1058.3132494091988
+  z: 50.3068733215332
+---
+name: "Annelinna g\xFCmnaasium (Kalda tee suunas)"
+positions:
+- x: 2534.539355838904
+  y: -1104.4250282896683
+  z: 48.627498626708984
+---
+name: Annelinna keskus (Kesklinna suunas)
+positions:
+- x: 2358.2585620451136
+  y: -1667.0016843965277
+  z: 38.358123779296875
+---
+name: "Annelinna keskus (M\xF5isavahe tn. suunas)"
+positions:
+- x: 2405.837967555679
+  y: -1769.8735313937068
+  z: 37.44499969482422
+---
+name: "Annem\xF5isa (Kaunase pst. suunas)"
+positions:
+- x: 2905.1035217242315
+  y: -774.3532973220572
+  z: 60.54499816894531
+---
+name: "Annem\xF5isa (N\xF5lvaku suunas)"
+positions:
+- x: 3016.501225665037
+  y: -967.4494807887822
+  z: 59.79624938964844
+---
+name: Arhitekti (linna sisenev)
+positions:
+- x: -2522.94197847083
+  y: -1899.3474211161956
+  z: 68.59375
+---
+name: "Arhitekti (linnast v\xE4ljuv)"
+positions:
+- x: -2552.2487184300553
+  y: -1900.0534871667624
+  z: 68.40937042236328
+---
+name: Atlantis (linna sisenev)
+positions:
+- x: 151.58393273194088
+  y: -458.72382299788296
+  z: 34.64125061035156
+---
+name: Aura veekeskus (linna sisenev)
+positions:
+- x: 393.68937342299614
+  y: -1076.5155390966684
+  z: 34.73187255859375
+---
+name: Autokeskus (FI suunas)
+positions:
+- x: -399.84139939950546
+  y: -3336.2419433584437
+  z: 56.72187423706055
+---
+name: "Autokeskus (Ropkam\xF5isa suunas)"
+positions:
+- x: -553.1628116630018
+  y: -3362.4547754200175
+  z: 57.91562271118164
+---
+name: Betooni (Hiie tn. suunas)
+positions:
+- x: -2046.072308995179
+  y: -178.74383729230613
+  z: 55.91812515258789
+---
+name: Betooni (Tuglase tn. suunas)
+positions:
+- x: -2030.0298243710422
+  y: -184.00617804005742
+  z: 56.13750076293945
+---
+name: E-Kaubamaja (Kesklinna suunas)
+positions:
+- x: 258.3236552836606
+  y: -2926.3743270700797
+  z: 50.170623779296875
+---
+name: "E-Kaubamaja (Ropkam\xF5isa suunas)"
+positions:
+- x: 251.6661080365302
+  y: -2987.125286921859
+  z: 49.788124084472656
+---
+name: ERM (linna sisenev)
+positions:
+- x: 1086.0648161032586
+  y: 969.1749512748793
+  z: 53.51124954223633
+---
+name: "ERM (linnast v\xE4ljuv)"
+positions:
+- x: 1143.750233130937
+  y: 916.5609718589112
+  z: 53.25312423706055
+---
+name: Eeden (Annelinna suunas)
+positions:
+- x: 1462.334634998464
+  y: -1287.4551582708955
+  z: 34.22687530517578
+---
+name: "Eeden (S\xF5pruse ringi suunas)"
+positions:
+- x: 1519.6723894170136
+  y: -1290.5525550693274
+  z: 34.51874923706055
+---
+name: "Eerika (L\xF5unakeskuse suunas)"
+positions:
+- x: -3051.101243895071
+  y: -2132.1489564199
+  z: 69.93374633789062
+---
+name: Eerika (kesklinna suunas)
+positions:
+- x: -3000.7884348894586
+  y: -2117.6905983183533
+  z: 69.5512466430664
+---
+name: Eesti Rahva Muuseum
+positions:
+- x: 965.4905125330552
+  y: 1131.615165923722
+  z: 55.0412483215332
+---
+name: Eha (Kesklinna suunas)
+positions:
+- x: 68.57626119762426
+  y: -1678.7241219766438
+  z: 49.73999786376953
+---
+name: "Eha (linnast v\xE4ljuv)"
+positions:
+- x: 82.00909142295131
+  y: -1729.8578136162832
+  z: 51.12687301635742
+---
+name: Erminurme (linna sisenev)
+positions:
+- x: 1638.76060842874
+  y: 1605.311089974828
+  z: 63.29999923706055
+---
+name: "Erminurme (linnast v\xE4ljuv)"
+positions:
+- x: 1657.8412711470737
+  y: 1568.4592309966683
+  z: 62.886871337890625
+---
+name: FI (Riia tn. suunas)
+positions:
+- x: -2673.00526874786
+  y: -3534.8805994316936
+  z: 77.43687438964844
+---
+name: Fi (Tamme pst. suunas)
+positions:
+- x: -2661.7966422111494
+  y: -3547.1561816371977
+  z: 77.19249725341797
+---
+name: Haigla (Riia ringi suunas)
+positions:
+- x: -2855.1451071617194
+  y: -2405.4298858754337
+  z: 72.46312713623047
+---
+name: Herne (Kesklinna suunas)
+positions:
+- x: -715.6826692564064
+  y: 106.47112844698131
+  z: 33.73999786376953
+---
+name: "Herne (linnast v\xE4ljuv)"
+positions:
+- x: -667.24256064574
+  y: 72.63489024806768
+  z: 33.666873931884766
+---
+name: Hiie (Taara pst. suuanas)
+positions:
+- x: -1736.8748368173256
+  y: -259.91393354255706
+  z: 56.72374725341797
+---
+name: Hiie (Vaksali tn. suunas)
+positions:
+- x: -1724.392835105129
+  y: -235.39697060920298
+  z: 56.62687301635742
+---
+name: Hotell Sophia
+positions:
+- x: -2795.8687478649663
+  y: -3168.277343134396
+  z: 77.25999450683594
+---
+name: Hurda (linna)
+positions:
+- x: -1032.7020612254855
+  y: -175.03953688871115
+  z: 60.15187454223633
+---
+name: Hurda (maale)
+positions:
+- x: -975.0497292685905
+  y: -199.31372381653637
+  z: 60.83250045776367
+---
+name: Ihaste (Kasteheina suunas)
+positions:
+- x: 3102.4396841837442
+  y: -4517.812305024825
+  z: 40.72999954223633
+---
+name: Ihaste (Kraavikalda suunas)
+positions:
+- x: 3090.0417894957936
+  y: -4510.926149079576
+  z: 40.62062454223633
+---
+name: Ihaste tee I (Ihaste suunas)
+positions:
+- x: 1885.4970356046688
+  y: -2283.626709835604
+  z: 32.858123779296875
+---
+name: Ihaste tee I (Kesklinna suunas)
+positions:
+- x: 1893.600943403202
+  y: -2253.749872991815
+  z: 33.041873931884766
+---
+name: Ihaste tee II (Ihaste suunas)
+positions:
+- x: 1939.1624354768428
+  y: -2821.571158470586
+  z: 32.950626373291016
+---
+name: Ihaste tee II (Kesklinna suunas)
+positions:
+- x: 1947.6486477463623
+  y: -2699.1320758359507
+  z: 33.224998474121094
+---
+name: Iie (linna)
+positions:
+- x: -7737.505452340294
+  y: 7400.720295481384
+  z: 39.27812576293945
+---
+name: Iie (maale)
+positions:
+- x: -7698.130622577912
+  y: 7362.106223504059
+  z: 39.29312515258789
+---
+name: "Ilmatsalu (Maarjam\xF5isa suunas)"
+positions:
+- x: -2104.304310734151
+  y: -947.1134135695174
+  z: 60.64187240600586
+---
+name: Ilmatsalu (Ravila tn. suunas)
+positions:
+- x: -2189.533469856833
+  y: -904.681744042784
+  z: 60.818748474121094
+---
+name: Jaama (kesklinna suunas)
+positions:
+- x: 817.1406264298712
+  y: -145.74850701726973
+  z: 36.564998626708984
+---
+name: "Jaama (linnast v\xE4ljuv)"
+positions:
+- x: 824.2222432837007
+  y: -159.684915388003
+  z: 36.59562301635742
+---
+name: Jalaka (Turu tn. suunas)
+positions:
+- x: -163.0173578338581
+  y: -4731.569037380628
+  z: 50.771873474121094
+---
+name: "Jalaka (V\xF5ru tn suunas)"
+positions:
+- x: -179.74688836035784
+  y: -4696.83882541582
+  z: 51.19937515258789
+---
+name: Jannseni (Raudteejaama suunas)
+positions:
+- x: -1831.2452716163243
+  y: -453.47660415712744
+  z: 58.270626068115234
+---
+name: Jannseni (Tuglase tn. suunas)
+positions:
+- x: -1890.678964884195
+  y: -371.3502841806039
+  z: 57.260623931884766
+---
+name: "J\xE4nese"
+positions:
+- x: 324.0483375529293
+  y: 776.2794850235805
+  z: 52.984375
+---
+name: "J\xE4rve\xE4\xE4re (L\xF5pp-peatus)"
+positions:
+- x: 2310.148992170347
+  y: 4294.845746873878
+  z: 58.2974967956543
+---
+name: "J\xF5e"
+positions:
+- x: 765.3485906338901
+  y: -1648.2207132456824
+  z: 34.56749725341797
+---
+name: Kaare (FI suunas)
+positions:
+- x: -1363.2310663750977
+  y: -2132.068435662426
+  z: 70.58875274658203
+---
+name: Kaare (Kesklinna suunas)
+positions:
+- x: -1283.0919116257573
+  y: -2086.7368357926607
+  z: 69.93562316894531
+---
+name: Kabeli (Aardla tn. suunas)
+positions:
+- x: -298.4883635874139
+  y: -2912.925486967899
+  z: 57.52812576293945
+---
+name: Kalda tee (Annelinna suunas)
+positions:
+- x: 1947.2202068397892
+  y: -1483.4283381560817
+  z: 35.73937225341797
+---
+name: Kalda tee (Kesklinna suunas)
+positions:
+- x: 1821.7407943208236
+  y: -1434.6882084999233
+  z: 35.58937454223633
+---
+name: Kana-Oleski (linna)
+positions:
+- x: -2707.14899528306
+  y: 2674.5777490455657
+  z: 43.299373626708984
+---
+name: Kana-Oleski (maale)
+positions:
+- x: -2707.2863919513184
+  y: 2684.378371939063
+  z: 43.49937438964844
+---
+name: Kanali (Kesklinna suunas)
+positions:
+- x: 1066.7859594621114
+  y: -967.4192962478846
+  z: 33.69187545776367
+---
+name: "Kanali (S\xF5pruse pst. suunas)"
+positions:
+- x: 1143.4645624581608
+  y: -1061.9770578444004
+  z: 33.55875015258789
+---
+name: Kannikese (Ilmatsalu tn. suunas)
+positions:
+- x: -2488.0086037704605
+  y: -919.2922307802364
+  z: 61.30562210083008
+---
+name: Kannikese (Viljandi mnt. suunas)
+positions:
+- x: -2500.645654846565
+  y: -946.6714510610327
+  z: 61.4693717956543
+---
+name: Kardla kool (linna)
+positions:
+- x: -9780.377345428278
+  y: 6801.15007787291
+  z: 38.805625915527344
+---
+name: Kardla kool (maale)
+positions:
+- x: -9804.513268355222
+  y: 6766.649750984274
+  z: 38.61874771118164
+---
+name: Kardla tee (linna)
+positions:
+- x: -8700.084241032426
+  y: 3190.9897977355868
+  z: 50.67312240600586
+---
+name: Kardla tee (maale)
+positions:
+- x: -8598.944971956662
+  y: 3182.8644371470436
+  z: 50.36874771118164
+---
+name: Karete (Aardla tn. suunas)
+positions:
+- x: -183.95808742468944
+  y: -4031.91220869869
+  z: 54.48187255859375
+---
+name: Karete (Alasi tn. suunas)
+positions:
+- x: -195.1423594217631
+  y: -3931.904353696853
+  z: 55.518123626708984
+---
+name: Karlova kool
+positions:
+- x: 384.4519109377288
+  y: -1516.7351261721924
+  z: 41.82062530517578
+---
+name: Kastani (linna sisenev)
+positions:
+- x: -287.40679988259217
+  y: -2184.1009216336533
+  z: 55.98500061035156
+---
+name: "Kastani (linnast v\xE4ljuv)"
+positions:
+- x: -307.8864315559622
+  y: -2286.881715542637
+  z: 56.49687194824219
+---
+name: Kasteheina (Hipodroomi suunas)
+positions:
+- x: 3566.960544283502
+  y: -4032.868982486427
+  z: 45.271873474121094
+---
+name: Kasteheina (Pallase pst. suunas)
+positions:
+- x: 3580.3449340417283
+  y: -4025.4968372881413
+  z: 45.30187225341797
+---
+name: Kaubabaas (linna sisenev)
+positions:
+- x: -2673.4134716465487
+  y: 24.059066983871162
+  z: 53.0787467956543
+---
+name: "Kaubabaas (linnast v\xE4ljuv)"
+positions:
+- x: -2670.8676730406005
+  y: 50.66178023535758
+  z: 52.74937438964844
+---
+name: Kaubajaam
+positions:
+- x: -1107.7603841475793
+  y: -1735.0256765037775
+  z: 62.689998626708984
+---
+name: Kaunase puiestee (Jaama tn. suunas)
+positions:
+- x: 2347.9647026284947
+  y: -1544.9817478191108
+  z: 38.70062255859375
+---
+name: Kaunase puiestee (Kesklinna suunas)
+positions:
+- x: 2192.256020560686
+  y: -1531.6907824883237
+  z: 37.39125061035156
+---
+name: "Kaupmehe (K\xF5rvek\xFCla suunas)"
+positions:
+- x: 1174.0161667485372
+  y: 2457.6490219859406
+  z: 57.04812240600586
+---
+name: Kaupmehe (linna sisenev)
+positions:
+- x: 1146.0465042535216
+  y: 2421.096655429341
+  z: 56.45812225341797
+---
+name: Kesa
+positions:
+- x: -1310.0612079557031
+  y: -4086.744701884687
+  z: 61.41749954223633
+---
+name: Kesa (Kesklinna suunas)
+positions:
+- x: -1267.3710646092659
+  y: -4090.7556061409414
+  z: 60.96875
+---
+name: Kesk kaar (raudtee suunas)
+positions:
+- x: -1304.417408418958
+  y: -2165.2948621995747
+  z: 70.79437255859375
+---
+name: "Kesklinn (L\xF5pp-peatus)"
+positions:
+- x: 89.79471299267607
+  y: -904.2349332198501
+  z: 37.182498931884766
+---
+name: Kesklinn I
+positions:
+- x: 30.591732850589324
+  y: -954.4439388010651
+  z: 40.59937286376953
+---
+name: Kesklinn II
+positions:
+- x: 92.59081137360772
+  y: -901.9724659528583
+  z: 37.10874938964844
+---
+name: Kesklinn III
+positions:
+- x: 129.02043097867863
+  y: -873.6968314517289
+  z: 35.79312515258789
+---
+name: Kesklinn IV
+positions:
+- x: 92.19850680953823
+  y: -863.9169065095484
+  z: 36.48999786376953
+---
+name: Kesklinn V
+positions:
+- x: 76.22068442130694
+  y: -878.2936524003744
+  z: 37.046875
+---
+name: Kesklinn VI
+positions:
+- x: 10.133441547281109
+  y: -939.2096873149276
+  z: 40.94687271118164
+---
+name: Killustiku (linna sisenev)
+positions:
+- x: 472.9631028752774
+  y: 1331.9771343087777
+  z: 51.20499801635742
+---
+name: "Killustiku (linnast v\xE4ljuv)"
+positions:
+- x: 417.9537218976766
+  y: 1392.1933768112212
+  z: 51.416873931884766
+---
+name: Kivilinna (Kaunase pst. suunas)
+positions:
+- x: 2199.5652905131574
+  y: -603.5143805965781
+  z: 50.38687515258789
+---
+name: "Kivilinna (S\xF5pruse pst. suunas)"
+positions:
+- x: 2197.889554925612
+  y: -586.6904987832531
+  z: 50.211875915527344
+---
+name: "Kivis\xE4ki (linna)"
+positions:
+- x: -4409.31248983671
+  y: 4546.937912842259
+  z: 42.3068733215332
+---
+name: "Kivis\xE4ki (maale)"
+positions:
+- x: -4424.35652128997
+  y: 4585.490734957159
+  z: 42.178123474121094
+---
+name: Klaose
+positions:
+- x: -1300.116090889147
+  y: 2350.7996494695544
+  z: 35.07875061035156
+---
+name: Kloostri
+positions:
+- x: -572.5191278092097
+  y: -138.64869219716638
+  z: 36.893123626708984
+---
+name: Kopli (kesklinna suunas)
+positions:
+- x: -975.4644107600325
+  y: -4089.0308657875285
+  z: 58.81624984741211
+---
+name: "Kopli (linnast v\xE4ljuv)"
+positions:
+- x: -960.699380187667
+  y: -4084.3058191929013
+  z: 58.72812271118164
+---
+name: Kraavi (kesklinna suunas)
+positions:
+- x: -1071.7480008528219
+  y: -3510.345745093189
+  z: 62.20874786376953
+---
+name: "Kraavi (linnast v\xE4ljuv)"
+positions:
+- x: -1113.0754539656918
+  y: -3540.3959805192426
+  z: 62.65687561035156
+---
+name: Kraavikalda (Kasteheina suunas)
+positions:
+- x: 2771.958575297671
+  y: -4317.766753381118
+  z: 36.56312561035156
+---
+name: Kraavikalda (kesklinna suunas)
+positions:
+- x: 2735.0901406521443
+  y: -4265.655771565624
+  z: 36.377498626708984
+---
+name: Kreutzwaldi (linna)
+positions:
+- x: -1503.208658215648
+  y: 42.06047348212451
+  z: 54.701873779296875
+---
+name: Kreutzwaldi (maale)
+positions:
+- x: -1442.272690429585
+  y: 21.01196314394474
+  z: 55.58374786376953
+---
+name: Kroonuaia
+positions:
+- x: -398.08806491817813
+  y: -25.759071900509298
+  z: 34.694374084472656
+---
+name: Kroonuaia (kesklinna suunas)
+positions:
+- x: -402.93429870094405
+  y: 74.16329548414797
+  z: 34.415000915527344
+---
+name: "Kruusam\xE4e (Narva mnt. suunas)"
+positions:
+- x: -148.15800198249053
+  y: 1445.8097823802382
+  z: 48.07937240600586
+---
+name: "Kruusam\xE4e (P\xF5llu tn. suunas)"
+positions:
+- x: -92.9961514613824
+  y: 1432.5134638501331
+  z: 48.461875915527344
+---
+name: Kummeli
+positions:
+- x: -296.9446701366105
+  y: 1772.6198027441278
+  z: 49.366249084472656
+---
+name: Kummeli (linna sisenev)
+positions:
+- x: -393.1686374692945
+  y: 1755.2670140927657
+  z: 48.95249938964844
+---
+name: Kungla (Riia tn. suunas)
+positions:
+- x: -789.1794823913951
+  y: -2760.6035124333575
+  z: 64.8125
+---
+name: Kungla (raudtee suunas)
+positions:
+- x: -757.3938146006549
+  y: -2782.1416121423244
+  z: 64.31312561035156
+---
+name: Kuperjanovi (Kesklinna suunas)
+positions:
+- x: -930.2229719908792
+  y: -1041.4688422624022
+  z: 64.29999542236328
+---
+name: Kuperjanovi (Raudteejaama suunas)
+positions:
+- x: -937.276678405935
+  y: -1037.882902411744
+  z: 64.5062484741211
+---
+name: Kuu
+positions:
+- x: 574.7798505206592
+  y: -2092.041942349635
+  z: 41.323123931884766
+---
+name: Kvartsi
+positions:
+- x: -2218.6698529930436
+  y: -3789.7601590733975
+  z: 70.39437103271484
+---
+name: Kvartsi (linna sisenev)
+positions:
+- x: -2247.362103445921
+  y: -3721.59384037368
+  z: 71.22999572753906
+---
+name: Kvissentali
+positions:
+- x: -1725.636500531633
+  y: 2364.814910383895
+  z: 34.915000915527344
+---
+name: "Kvissentali (L\xF5pp-peatus)"
+positions:
+- x: -1724.3145323194913
+  y: 2363.736790106632
+  z: 34.912498474121094
+---
+name: Kvissentali tee
+positions:
+- x: -1043.0109028685838
+  y: 2341.7105153705925
+  z: 46.092498779296875
+---
+name: "K\xE4o"
+positions:
+- x: -1317.4185583460494
+  y: -3068.520638130605
+  z: 67.56312561035156
+---
+name: "K\xE4rnise (linna)"
+positions:
+- x: -9037.539443493588
+  y: 7494.378354572691
+  z: 39.713748931884766
+---
+name: "K\xE4rnise (maale)"
+positions:
+- x: -9058.927207195724
+  y: 7476.072616153397
+  z: 39.696250915527344
+---
+name: "K\xF5rvek\xFCla (Tartu suunas)"
+positions:
+- x: 2123.14956430078
+  y: 3808.209047839977
+  z: 54.23624801635742
+---
+name: "K\xF5rvek\xFCla (Vasula suunas)"
+positions:
+- x: 2135.4332255360205
+  y: 3810.126744955778
+  z: 54.33187484741211
+---
+name: "K\xF5rvek\xFCla kool (Tartu suunas)"
+positions:
+- x: 2198.9357845461345
+  y: 4279.317760933191
+  z: 57.258750915527344
+---
+name: "K\xFClas\xFCda (linna)"
+positions:
+- x: -3721.926027310721
+  y: 3988.93408445362
+  z: 42.07374954223633
+---
+name: "K\xFClas\xFCda (maale)"
+positions:
+- x: -3735.768917179259
+  y: 4002.826981527731
+  z: 42.24625015258789
+---
+name: "K\xFClmhoone"
+positions:
+- x: -393.5243169607711
+  y: -1984.3056587595493
+  z: 57.611873626708984
+---
+name: Lai
+positions:
+- x: -442.88159351580543
+  y: -227.15921832993627
+  z: 38.96125030517578
+---
+name: Lammi (Annelinna suunas)
+positions:
+- x: 3006.44791286852
+  y: -2884.2234724592417
+  z: 36.70124816894531
+---
+name: Lammi (Kasteheina suunas)
+positions:
+- x: 3002.6107000808697
+  y: -2904.769549038261
+  z: 36.413124084472656
+---
+name: Lammi ring (Annelinna suunas)
+positions:
+- x: 2501.4110079358798
+  y: -2359.019672997296
+  z: 35.65250015258789
+---
+name: "Lammi ring (V\xF5ru tn suunas)"
+positions:
+- x: 2630.519927705638
+  y: -2639.777811827138
+  z: 37.881248474121094
+---
+name: "Lammim\xF5isa (linna sisenev)"
+positions:
+- x: 2470.6524904952967
+  y: -2025.6927192509174
+  z: 34.93562316894531
+---
+name: "Lammim\xF5isa (linnast v\xE4ljuv)"
+positions:
+- x: 2438.9234587121173
+  y: -2121.2117205085233
+  z: 34.040000915527344
+---
+name: Lao
+positions:
+- x: 4202.4077634882415
+  y: -1927.6717257499695
+  z: 47.446876525878906
+---
+name: Laululava
+positions:
+- x: -1259.2766011017957
+  y: 434.01591573655605
+  z: 38.76374816894531
+---
+name: Laululava (linna sisenev)
+positions:
+- x: -1245.1331078860094
+  y: 412.53998358082026
+  z: 38.7912483215332
+---
+name: Lembitu
+positions:
+- x: -915.7080438794801
+  y: -1783.0239919396117
+  z: 61.71999740600586
+---
+name: Lemmatsi
+positions:
+- x: -1381.3912677235203
+  y: -2900.9226174764335
+  z: 69.94625091552734
+---
+name: "Lennujaam (L\xF5pp-peatus)"
+positions:
+- x: -2093.4811462623184
+  y: -8296.819799594581
+  z: 0.0
+---
+name: Lennujaam (Tartu suunas)
+positions:
+- x: -2093.7330624063616
+  y: -8292.884272774681
+  z: 0.0
+---
+name: Liiva
+positions:
+- x: -69.51760895602638
+  y: 620.867608170025
+  z: 51.584999084472656
+---
+name: Lille
+positions:
+- x: -85.51279224513564
+  y: -1299.813354127109
+  z: 57.373748779296875
+---
+name: Linda (kesklinna suunas)
+positions:
+- x: 192.92827934585512
+  y: -2031.9585915794596
+  z: 51.72312545776367
+---
+name: "Linda (linnast v\xE4ljuv)"
+positions:
+- x: 190.76802155928453
+  y: -2048.9772737408057
+  z: 51.49374771118164
+---
+name: Linnamuuseum
+positions:
+- x: 103.8076016191626
+  y: -313.5073967287317
+  z: 34.234375
+---
+name: Linnupargi (linna sisenev)
+positions:
+- x: 2113.856112401176
+  y: -2126.5233260085806
+  z: 33.283748626708984
+---
+name: "Linnupargi (linnast v\xE4ljuv)"
+positions:
+- x: 2040.7410639411537
+  y: -2086.870987724513
+  z: 33.34562301635742
+---
+name: Lohkva Katlamaja
+positions:
+- x: 3874.262184230145
+  y: -1688.7375852763653
+  z: 52.74937438964844
+---
+name: "Lohkva katlamaja (N\xF5lvaku suunas)"
+positions:
+- x: 3798.9775512055494
+  y: -1677.8346726484597
+  z: 52.55812454223633
+---
+name: Lootuse (Kesklinna suunas)
+positions:
+- x: -284.7043728165445
+  y: -1771.551748639904
+  z: 55.78437423706055
+---
+name: "Lootuse (linnast v\xE4ljuv)"
+positions:
+- x: -282.19713066262193
+  y: -1620.0592378675938
+  z: 54.5568733215332
+---
+name: Luha
+positions:
+- x: 1593.7389923566952
+  y: -1465.6751962574199
+  z: 33.56624984741211
+---
+name: "L\xF5kketule (Hipodroomi suunas)"
+positions:
+- x: 3288.13873913273
+  y: -4386.7474888674915
+  z: 41.946250915527344
+---
+name: "L\xF5kketule (Kasteheina suunas)"
+positions:
+- x: 3332.5926334646647
+  y: -4346.7634721547365
+  z: 41.69562530517578
+---
+name: "L\xF5una (Ravila tn. suunas)"
+positions:
+- x: -1701.707037351909
+  y: -1159.242892271839
+  z: 62.40999984741211
+---
+name: "L\xF5una (Riia tn. suunas)"
+positions:
+- x: -1712.5516388098476
+  y: -1159.4054286228493
+  z: 62.38062286376953
+---
+name: "L\xF5unakeskus"
+positions:
+- x: -3113.4076024662936
+  y: -2940.7412710618228
+  z: 72.8637466430664
+---
+name: "L\xF5unakeskus (L\xF5pp-peatus)"
+positions:
+- x: -3133.4858378455974
+  y: -2930.082193505019
+  z: 72.40187072753906
+---
+name: "L\xF5unakeskus III"
+positions:
+- x: -3161.474471521622
+  y: -2929.139334718697
+  z: 71.6668701171875
+---
+name: "Maarjam\xF5isa (Kesklinna suunas)"
+positions:
+- x: -1442.833022991137
+  y: -1746.6743300519884
+  z: 63.01687240600586
+---
+name: "Maarjam\xF5isa (linnast v\xE4ljuv)"
+positions:
+- x: -1447.0358829718898
+  y: -1707.0417665094137
+  z: 62.658748626708984
+---
+name: "Maarjam\xF5isa haigla (Riia tn. suunas)"
+positions:
+- x: -1647.0712661623256
+  y: -1771.927699177526
+  z: 64.32312774658203
+---
+name: "Maarjam\xF5isa haigla (Viljandi mnt. suunas)"
+positions:
+- x: -1657.5501072450425
+  y: -1703.410442724824
+  z: 63.506874084472656
+---
+name: "Maa\xFClikool"
+positions:
+- x: -1740.3285808169749
+  y: 228.7731284983456
+  z: 53.217498779296875
+---
+name: Melissi (linna sisenev)
+positions:
+- x: -280.0687719400157
+  y: 1846.4521339992061
+  z: 49.41562271118164
+---
+name: "Melissi (linnast v\xE4ljuv)"
+positions:
+- x: -229.88000571681187
+  y: 1837.6372263152152
+  z: 49.28312301635742
+---
+name: Mesika (Kesklinna suunas)
+positions:
+- x: -1136.8912124507478
+  y: -3912.6447672583163
+  z: 61.764373779296875
+---
+name: "Mesika (linnast v\xE4ljuv)"
+positions:
+- x: -1107.2995084714494
+  y: -3916.1134917046875
+  z: 61.33374786376953
+---
+name: Metsamaja (linna)
+positions:
+- x: -1980.8450440071174
+  y: 720.6501050572842
+  z: 50.741249084472656
+---
+name: Metsamaja (maale)
+positions:
+- x: -2051.0724661810673
+  y: 928.0139714982361
+  z: 50.2756233215332
+---
+name: "Mileedi (L\xF5unakeskuse suunas)"
+positions:
+- x: -3017.130967631587
+  y: -2494.4403296206146
+  z: 71.24687194824219
+---
+name: Mileedi (linna sisenev)
+positions:
+- x: -3003.0556288685766
+  y: -2449.870329912752
+  z: 71.25
+---
+name: Mudaniku (linna)
+positions:
+- x: -8834.70825247158
+  y: 3914.179296885617
+  z: 49.38437271118164
+---
+name: Mudaniku (maale)
+positions:
+- x: -8826.335872777447
+  y: 3848.98533783108
+  z: 49.56812286376953
+---
+name: Muide (linna)
+positions:
+- x: -3283.1039313043
+  y: 2242.602787544951
+  z: 50.28062438964844
+---
+name: Muide (maale)
+positions:
+- x: -3258.3808141446207
+  y: 2244.60831337329
+  z: 50.174373626708984
+---
+name: Muru (Narva mnt. suunas)
+positions:
+- x: -533.6215350411949
+  y: 1594.513325783424
+  z: 47.877498626708984
+---
+name: "Muru (P\xF5llu tn. suunas)"
+positions:
+- x: -542.6211961493245
+  y: 1619.4273584624752
+  z: 47.698123931884766
+---
+name: "M\xE4nni (S\xF5pruse ringi suunas)"
+positions:
+- x: 1588.5029677937855
+  y: -536.8461954873055
+  z: 42.15687561035156
+---
+name: "M\xE4nnimetsa (Kasteheina suunas)"
+positions:
+- x: 2322.5647328778286
+  y: -3565.183578095399
+  z: 33.95249938964844
+---
+name: "M\xE4nnimetsa (Kesklinna suunas)"
+positions:
+- x: 2340.557139778626
+  y: -3591.4814893025905
+  z: 34.03125
+---
+name: "M\xE4rja (Tartu suunas)"
+positions:
+- x: -3930.584881355986
+  y: -2572.504688016139
+  z: 62.279998779296875
+---
+name: "M\xE4rja (Viljandi suunas)"
+positions:
+- x: -4054.9423733844887
+  y: -2611.4350826423615
+  z: 61.236873626708984
+---
+name: "M\xF5isa puiestee"
+positions:
+- x: -289.0911703007296
+  y: 2341.440075916238
+  z: 49.51312255859375
+---
+name: "M\xF5isa puiestee (linna sisenev)"
+positions:
+- x: -307.8220767294406
+  y: 2413.3194405147806
+  z: 49.15625
+---
+name: "M\xF5isapargi"
+positions:
+- x: 60.919705946638715
+  y: 1724.0177154242992
+  z: 50.23749923706055
+---
+name: "M\xF5isapargi (linna sisenev)"
+positions:
+- x: 183.04824405250838
+  y: 1619.5991955259815
+  z: 50.09187316894531
+---
+name: "M\xF5isavahe (Kesklinna suunas)"
+positions:
+- x: 2861.3009619344957
+  y: -1773.2222647303715
+  z: 44.80562210083008
+---
+name: "M\xF5isavahe (N\xF5lvaku suunas)"
+positions:
+- x: 2861.6452075724374
+  y: -1790.486979784444
+  z: 44.661251068115234
+---
+name: Nisu (Ilmatsalu tn. suunas)
+positions:
+- x: -2395.9535237805103
+  y: -1355.6851572580636
+  z: 64.06312561035156
+---
+name: Nisu (Riia tn. suunas)
+positions:
+- x: -2371.810934221081
+  y: -1397.7627612343058
+  z: 64.06062316894531
+---
+name: Nooruse
+positions:
+- x: -1821.0626827960368
+  y: -2098.264445430599
+  z: 69.62562561035156
+---
+name: Nurme (kesklinna suunas)
+positions:
+- x: -477.4110139342956
+  y: 888.4302826113999
+  z: 52.54750061035156
+---
+name: "N\xE4ituse (Taara pst. suunas)"
+positions:
+- x: -1044.3172163529089
+  y: -709.3525468409061
+  z: 64.86812591552734
+---
+name: "N\xE4ituse (Vaksali tn. suunas)"
+positions:
+- x: -1075.9140557365608
+  y: -712.7800606973469
+  z: 64.72125244140625
+---
+name: "N\xF5lvakaare (linna sisenev)"
+positions:
+- x: 1505.0543461296475
+  y: 2333.4352222820744
+  z: 60.39937210083008
+---
+name: "N\xF5lvakaare (linnast v\xE4ljuv)"
+positions:
+- x: 1454.7913273582235
+  y: 2367.8810231387615
+  z: 60.30125045776367
+---
+name: "N\xF5lvaku (Ihaste suunas)"
+positions:
+- x: 3168.7232377907494
+  y: -1413.0297424774617
+  z: 52.44249725341797
+---
+name: "N\xF5lvaku (Kesklinna suunas)"
+positions:
+- x: 3147.6785875915084
+  y: -1474.7152038570493
+  z: 51.88374710083008
+---
+name: "Optika (L\xF5unakeskuse suunas)"
+positions:
+- x: -3136.6161290946184
+  y: -3244.4820498777553
+  z: 72.92687225341797
+---
+name: Optika (Riia tn. suunas)
+positions:
+- x: -3077.5417334508966
+  y: -3294.568380875513
+  z: 73.88375091552734
+---
+name: Orava
+positions:
+- x: 243.77453882753616
+  y: 684.6546255480498
+  z: 52.955623626708984
+---
+name: Paju (Annelinna suunas)
+positions:
+- x: 1200.5334767053137
+  y: -339.773061029613
+  z: 36.975624084472656
+---
+name: Paju (Kesklinna suunas)
+positions:
+- x: 1139.3979698295007
+  y: -308.6953509133309
+  z: 37.30875015258789
+---
+name: Pallase puiestee (Kasteheina suunas)
+positions:
+- x: 3382.392426077451
+  y: -2970.5188661515713
+  z: 39.1506233215332
+---
+name: Pallase puiestee (Kesklinna suunas)
+positions:
+- x: 3297.3896919591352
+  y: -2957.99011727795
+  z: 38.69124984741211
+---
+name: Palmihoone (Kroonuaia tn. suunas)
+positions:
+- x: -198.57809980533784
+  y: -16.79202701151371
+  z: 34.24625015258789
+---
+name: Pauluse (Kesklinna suunas)
+positions:
+- x: -631.8939926130697
+  y: -1588.2084912508726
+  z: 58.765625
+---
+name: "Pauluse (linnast v\xE4ljuv)"
+positions:
+- x: -590.5173205258325
+  y: -1535.8308870438486
+  z: 58.869998931884766
+---
+name: "Peetri (linnast v\xE4ljuv)"
+positions:
+- x: 169.3849235046655
+  y: 526.1206012004986
+  z: 50.44062423706055
+---
+name: Peetri kirik (Narva mnt. suunas)
+positions:
+- x: 70.32903819199419
+  y: 513.6464587757364
+  z: 49.893123626708984
+---
+name: "Peetri kirik (P\xF5llu tn. suunas)"
+positions:
+- x: 93.01647757284809
+  y: 509.3232922339812
+  z: 49.78187561035156
+---
+name: Pepleri (Raudteejaama suunas)
+positions:
+- x: -487.90147090813844
+  y: -1087.1337852710858
+  z: 63.23562240600586
+---
+name: Pepleri (kesklinna suunas)
+positions:
+- x: -406.49976419389714
+  y: -1265.2703052079305
+  z: 60.55624771118164
+---
+name: Piiri (linna sisenev)
+positions:
+- x: -1016.8696538244258
+  y: 328.7133752172813
+  z: 34.221248626708984
+---
+name: "Piiri (linnast v\xE4ljuv)"
+positions:
+- x: -1050.1493907863041
+  y: 358.07441881112754
+  z: 34.43562316894531
+---
+name: Pikk (Annelinna suunas)
+positions:
+- x: 675.6015759825823
+  y: -554.9035344021395
+  z: 32.98124694824219
+---
+name: Pikk (Raatuse tn. suunas)
+positions:
+- x: 622.3070554549922
+  y: -470.86021981574595
+  z: 33.01937484741211
+---
+name: Polikliiniku
+positions:
+- x: -1346.5133352388511
+  y: -1888.3764855740592
+  z: 64.87374877929688
+---
+name: Postimaja (linna sisenev)
+positions:
+- x: -685.434793655877
+  y: -4461.197908515111
+  z: 56.31749725341797
+---
+name: "Postimaja (linnast v\xE4ljuv)"
+positions:
+- x: -700.2879680815386
+  y: -4447.027840672992
+  z: 56.23500061035156
+---
+name: Prisma
+positions:
+- x: 3067.541960385861
+  y: -1041.1337175108492
+  z: 58.35687255859375
+---
+name: Puidu
+positions:
+- x: -2697.1026627826504
+  y: 657.0549656925723
+  z: 52.1256217956543
+---
+name: Puidu (linna sisenev)
+positions:
+- x: -2734.1864248026977
+  y: 634.6398194022477
+  z: 52.27874755859375
+---
+name: Purde
+positions:
+- x: 238.1084368089796
+  y: -2431.560530912131
+  z: 49.287498474121094
+---
+name: Puupilli
+positions:
+- x: 4220.303751607833
+  y: -2194.1558564500883
+  z: 44.08562469482422
+---
+name: Puupilli
+positions:
+- x: 4220.801006641006
+  y: -2144.1835533175617
+  z: 45.287498474121094
+---
+name: Puusepa
+positions:
+- x: -1332.1407586120185
+  y: -2070.314035968855
+  z: 69.34312438964844
+---
+name: "P\xE4rna (K\xF5rvek\xFCla suunas)"
+positions:
+- x: 923.3537707673968
+  y: 2031.9430226152763
+  z: 56.15562438964844
+---
+name: "P\xE4rna (linna sisenev)"
+positions:
+- x: 915.1218720492325
+  y: 2036.6469053383917
+  z: 56.123748779296875
+---
+name: "P\xF5llu (Kummeli tn. suunas)"
+positions:
+- x: -954.3300082369242
+  y: 1458.5074716350064
+  z: 49.791873931884766
+---
+name: "P\xF5llu (Puiestee tn. suunas)"
+positions:
+- x: -919.4999283606303
+  y: 1493.3927467986941
+  z: 49.61062240600586
+---
+name: Raadi (Narva mnt. suunas)
+positions:
+- x: 282.60930136876414
+  y: 1255.8845395743847
+  z: 54.3756217956543
+---
+name: "Raadi (P\xF5llu tn. suunas)"
+positions:
+- x: 365.7015010800096
+  y: 1221.969365376979
+  z: 54.464996337890625
+---
+name: Raadiraja (linna sisenev)
+positions:
+- x: 1650.2818230321282
+  y: 1080.4572355281562
+  z: 56.48124694824219
+---
+name: "Raadiraja (linnast v\xE4ljuv)"
+positions:
+- x: 1705.9287345227203
+  y: 1113.5534177077934
+  z: 57.11375045776367
+---
+name: Raatuse (kesklinna suunas)
+positions:
+- x: 361.8439196057734
+  y: -324.73967481125146
+  z: 33.14125061035156
+---
+name: "Raatuse (linnast v\xE4ljuv)"
+positions:
+- x: 358.22090198809747
+  y: -336.1398784574121
+  z: 33.36375045776367
+---
+name: Raeplats (linna)
+positions:
+- x: -29.067102130618878
+  y: -625.9113580184057
+  z: 35.46437454223633
+---
+name: Raeplats (maale)
+positions:
+- x: -89.96568412176566
+  y: -461.127799494192
+  z: 34.47312545776367
+---
+name: Rahu (Kesklinna suunas)
+positions:
+- x: -266.6849945182912
+  y: -2998.415923706256
+  z: 57.1037483215332
+---
+name: "Rahum\xE4e (Kalda tee suunas)"
+positions:
+- x: 2585.1039484453504
+  y: -755.5370130548254
+  z: 55.361873626708984
+---
+name: "Rahum\xE4e (N\xF5lvaku suunas)"
+positions:
+- x: 2747.009751931182
+  y: -708.2933191368356
+  z: 59.32062530517578
+---
+name: Raja (Kesklinna suunas)
+positions:
+- x: -2051.190751996299
+  y: -2620.814788606949
+  z: 76.3699951171875
+---
+name: "Raja (linnast v\xE4ljuv)"
+positions:
+- x: -2131.5988891668385
+  y: -2667.4807008579373
+  z: 76.52749633789062
+---
+name: Raua
+positions:
+- x: 584.3640557461767
+  y: -2383.1159583246335
+  z: 43.23500061035156
+---
+name: Raudtee I (raudtee suunas)
+positions:
+- x: -1101.2998558692634
+  y: -3372.19178153947
+  z: 64.34249877929688
+---
+name: Raudtee II (raudtee suunas)
+positions:
+- x: -1116.5207072459743
+  y: -3414.0068711386994
+  z: 64.1156234741211
+---
+name: "Raudtee III (linnast v\xE4ljuv)"
+positions:
+- x: -1136.8289507775917
+  y: -3410.2096915002912
+  z: 64.40499877929688
+---
+name: Raudtee IV (Riia tn. Suunas)
+positions:
+- x: -1109.5127922106767
+  y: -3348.8113451860845
+  z: 64.55374908447266
+---
+name: Raudteejaam (Vaksali tn. kaudu)
+positions:
+- x: -732.28
+  y: -1646.00
+  z: 58.415
+  delay: 10
+- x: -1120.8918419593247
+  y: -1287.549305576831
+  z: 62.53562545776367
+---
+name: Raudteejaam (Kesklinna ja Riia tn. suunas)
+positions:
+- x: -1120.8918419593247
+  y: -1287.549305576831
+  z: 62.53562545776367
+---
+name: "Raudteejaam (L\xF5pp-peatus)"
+positions:
+- x: -1146.7013985210215
+  y: -1257.1494396477938
+  z: 62.573123931884766
+---
+name: "Raudteejaam (T\xE4htvere suunas)"
+positions:
+- x: -1145.021404353669
+  y: -1259.3527030022815
+  z: 62.584999084472656
+---
+name: Raudteejaam III
+positions:
+- x: -1082.9713587907027
+  y: -1316.24675280042
+  z: 62.34187316894531
+---
+name: Ravila (Ravila tn. suunas)
+positions:
+- x: -2140.403746553173
+  y: -1709.9696743469685
+  z: 65.66312408447266
+---
+name: "Ravila (linnast v\xE4ljuv)"
+positions:
+- x: -2171.4494720207294
+  y: -1721.562337398529
+  z: 65.93624877929688
+---
+name: Rebase (Kesklinna suunas)
+positions:
+- x: 896.8835484320298
+  y: -1799.1531759584323
+  z: 34.908748626708984
+---
+name: "Rebase (linnast v\xE4ljuv)"
+positions:
+- x: 835.4475021139951
+  y: -2005.9096071673557
+  z: 35.53062438964844
+---
+name: Riia
+positions:
+- x: -600.7523858181085
+  y: -1720.6723136147484
+  z: 58.98749923706055
+---
+name: Riia ring (Kesklinna suunas)
+positions:
+- x: -2431.700991613674
+  y: -2953.450846218504
+  z: 79.62874603271484
+---
+name: "Riia ring (linnast v\xE4ljuv)"
+positions:
+- x: -2477.0446271019173
+  y: -2970.817662370391
+  z: 79.58562469482422
+---
+name: "Riiam\xE4e (Kesklinn suunas)"
+positions:
+- x: -204.56162693421356
+  y: -1377.8864482399076
+  z: 57.381874084472656
+---
+name: "Riiam\xE4e (linnast v\xE4ljuv)"
+positions:
+- x: -262.4230649819947
+  y: -1281.2391379848123
+  z: 58.49187469482422
+---
+name: Ringtee
+positions:
+- x: -614.9002448689425
+  y: -4877.851111233234
+  z: 0.0
+---
+name: "Ringtee I (V\xF5ru tn. suunas)"
+positions:
+- x: -688.5660277749412
+  y: -4856.495521049947
+  z: 57.64875030517578
+---
+name: Ringtee II (Ringtee Turu tn. suunas)
+positions:
+- x: -628.8713232600712
+  y: -4781.044319751672
+  z: 56.7818717956543
+---
+name: Risti (Narva mnt. suunas)
+positions:
+- x: -241.13331003079657
+  y: 728.2766650458798
+  z: 53.13812255859375
+---
+name: "Risti (P\xF5llu tn. suunas)"
+positions:
+- x: -265.71214826230425
+  y: 751.8595871618018
+  z: 53.139373779296875
+---
+name: Roheline park
+positions:
+- x: -2389.2248520184658
+  y: 1258.0918647814542
+  z: 51.035621643066406
+---
+name: "Roheline park (L\xF5pp-peatus)"
+positions:
+- x: -2391.0316387570347
+  y: 1260.9883602615446
+  z: 51.01499938964844
+---
+name: Roopa (Kesklinna suunas)
+positions:
+- x: -1692.366250999563
+  y: -4075.107889132574
+  z: 65.3812484741211
+---
+name: "Roopa (L\xF5pp-peatus)"
+positions:
+- x: -1691.1305124162463
+  y: -4073.930767116137
+  z: 65.33187103271484
+---
+name: Roosi (kesklinna suunas)
+positions:
+- x: 711.0082404607092
+  y: 431.09078013151884
+  z: 51.98374938964844
+---
+name: "Roosi (linnast v\xE4ljuv)"
+positions:
+- x: 763.9229445876554
+  y: 489.3524396419525
+  z: 53.33625030517578
+---
+name: Ropka tee (kesklinna suunas)
+positions:
+- x: 839.6535139581538
+  y: -3256.1530722761527
+  z: 35.47312545776367
+---
+name: "Ropka tee (linnast v\xE4ljuv)"
+positions:
+- x: 829.7791845864849
+  y: -3424.692581645213
+  z: 35.078125
+---
+name: "Ropkam\xF5isa (T\xE4he tn. suunas)"
+positions:
+- x: 41.477465924748685
+  y: -3305.9275943357497
+  z: 53.54624938964844
+---
+name: "Ropkam\xF5isa (V\xF5ru tn. suunas)"
+positions:
+- x: 141.63804599107243
+  y: -3286.0504967737943
+  z: 51.90562438964844
+---
+name: "R\xE4hni (linna)"
+positions:
+- x: -5589.950402601622
+  y: 2813.8296282505617
+  z: 55.21999740600586
+---
+name: "R\xE4hni (maale)"
+positions:
+- x: -5632.095044920105
+  y: 2816.1604786571115
+  z: 55.06437301635742
+---
+name: Saekoja
+positions:
+- x: 480.7159200439346
+  y: -2426.874529815279
+  z: 44.96125030517578
+---
+name: Salemi
+positions:
+- x: 464.30054173379904
+  y: -1860.90414291434
+  z: 43.10625076293945
+---
+name: Salvest (Kesklinna suunas)
+positions:
+- x: -1002.9505208369228
+  y: 1471.464957298711
+  z: 49.526248931884766
+---
+name: "Salvest (linnast v\xE4ljuv)"
+positions:
+- x: -1010.4517305456102
+  y: 1525.2831571316347
+  z: 49.80437469482422
+---
+name: "Savim\xE4e"
+positions:
+- x: -415.8372602756135
+  y: 3200.7122578984126
+  z: 47.319374084472656
+---
+name: "Savim\xE4e (linna sisenev)"
+positions:
+- x: -405.4026703021955
+  y: 3204.3128704959527
+  z: 47.29499816894531
+---
+name: Savioja
+positions:
+- x: -39.4935584088671
+  y: 3392.0757119907066
+  z: 48.26499938964844
+---
+name: Savioja (linna sisenev)
+positions:
+- x: -45.00518089678371
+  y: 3382.3565358659253
+  z: 48.086875915527344
+---
+name: Sepa turg (Sepa turu poolne)
+positions:
+- x: 837.6461529547814
+  y: -4006.4844759944826
+  z: 33.63687515258789
+---
+name: Sepa turg (Sepa turu vastas)
+positions:
+- x: 853.5741065839538
+  y: -3959.158668773249
+  z: 33.5
+---
+name: Silla I (Annelinna suunas)
+positions:
+- x: 805.8333000335842
+  y: -1811.543010532856
+  z: 35.256874084472656
+---
+name: Silla II (Kalevi tn. suunas)
+positions:
+- x: 577.7951951728901
+  y: -1845.9497397821397
+  z: 39.088748931884766
+---
+name: Sinepi (linna sisenev)
+positions:
+- x: -579.5634529913077
+  y: 1927.7577628865838
+  z: 48.946250915527344
+---
+name: "Sinepi (linnast v\xE4ljuv)"
+positions:
+- x: -565.7319473148673
+  y: 1928.007781879045
+  z: 48.87062454223633
+---
+name: Soinaste I (kesklinna suunas)
+positions:
+- x: -1590.707638368127
+  y: -2328.8417910905555
+  z: 71.17562103271484
+---
+name: "Soinaste II (linnast v\xE4ljuv)"
+positions:
+- x: -1697.0415866394178
+  y: -2381.0400482108817
+  z: 73.04374694824219
+---
+name: Soinaste III (raudtee suunas)
+positions:
+- x: -1618.4432306466042
+  y: -2417.954752999358
+  z: 73.69124603271484
+---
+name: Soojuse tee (linna sisenev)
+positions:
+- x: 3444.0817879994866
+  y: -1606.6494336389005
+  z: 52.073123931884766
+---
+name: "Soojuse tee (linnast v\xE4ljuv)"
+positions:
+- x: 3428.3457042667433
+  y: -1609.5469972202554
+  z: 52.15312194824219
+---
+name: Soola (Tasku)
+positions:
+- x: 225.89685161103262
+  y: -878.6687371721491
+  z: 34.204376220703125
+---
+name: "Soola I (Kvartali k\xF5rval, S\xF5pruse silla suunas)"
+positions:
+- x: 217.3678741902113
+  y: -910.893110755831
+  z: 34.244998931884766
+---
+name: "Soola I (L\xF5pp-peatus)"
+positions:
+- x: 209.68820779840462
+  y: -901.7238066149876
+  z: 34.3224983215332
+---
+name: "Soola II (S\xF5pruse silla suunas)"
+positions:
+- x: 265.6329987763311
+  y: -958.6963851274922
+  z: 34.51374816894531
+---
+name: "Soomek\xFCla (linna)"
+positions:
+- x: -6125.510117978731
+  y: 6607.8244858449325
+  z: 40.131248474121094
+---
+name: "Soomek\xFCla (maale)"
+positions:
+- x: -6168.248479496047
+  y: 6630.184882031754
+  z: 39.95062255859375
+---
+name: Suur kaar (Aardla tn. suunas)
+positions:
+- x: -751.2869421104551
+  y: -3078.439232809469
+  z: 62.21562194824219
+---
+name: Suur kaar (Kesk kaar tn. suunas)
+positions:
+- x: -732.4889025024604
+  y: -3070.1680843420327
+  z: 62.04062271118164
+---
+name: "S\xF5bra"
+positions:
+- x: 501.95114445406944
+  y: -2323.3189648883417
+  z: 44.61375045776367
+---
+name: "S\xF5pruse puiestee (Kaunase pst. suunas)"
+positions:
+- x: 1673.0587687137304
+  y: -521.7382694231346
+  z: 43.70062255859375
+---
+name: "S\xF5pruse puiestee (Puiestee tn. suunas)"
+positions:
+- x: 1562.9837291473523
+  y: -470.9841501247138
+  z: 43.03312683105469
+---
+name: Taara pst. (Hiie tn. suunas)
+positions:
+- x: -1331.249329750368
+  y: -433.031042734161
+  z: 60.854373931884766
+---
+name: "Taara pst. (N\xE4ituse tn. suunas)"
+positions:
+- x: -1379.1321384261828
+  y: -408.9742002924904
+  z: 60.371246337890625
+---
+name: Tamme (linna)
+positions:
+- x: -9941.33963560377
+  y: 5295.514903807081
+  z: 39.053749084472656
+---
+name: Tamme (maale)
+positions:
+- x: -9920.25710393663
+  y: 5250.678198090754
+  z: 40.053123474121094
+---
+name: Tamme kool (Riia tn. suunas)
+positions:
+- x: -1161.9926060058642
+  y: -2368.8552721068263
+  z: 70.51437377929688
+---
+name: Tamme kool (raudtee suunas)
+positions:
+- x: -1133.6153481472284
+  y: -2418.905305137858
+  z: 70.2699966430664
+---
+name: Tamme puiestee (FI suunas)
+positions:
+- x: -1781.8186966344365
+  y: -3466.718897744082
+  z: 70.58125305175781
+---
+name: Tamme puiestee (raudtee suunas)
+positions:
+- x: -1723.018305823265
+  y: -3466.4410710791126
+  z: 70.16312408447266
+---
+name: "Tarmeko (S\xF5pruse silla suunas)"
+positions:
+- x: 822.7880202030065
+  y: -2245.1328353416175
+  z: 37.48374938964844
+---
+name: "Tarmeko (linnast v\xE4ljuv)"
+positions:
+- x: 797.950863428181
+  y: -2372.105599220842
+  z: 39.004371643066406
+---
+name: "Tartu Maja I (linnast v\xE4ljuv)"
+positions:
+- x: -2498.9100135228364
+  y: -286.7930363500491
+  z: 56.71562194824219
+---
+name: Tartu Maja II (Betooni tn. suunas)
+positions:
+- x: -2491.5666710067308
+  y: -324.8198157893494
+  z: 57.30062484741211
+---
+name: Tartu Maja III (Ravila tn. suunas)
+positions:
+- x: -2375.279063039634
+  y: -357.60639607720077
+  z: 58.42499923706055
+---
+name: Tartu Maja IV (raudtee suunas)
+positions:
+- x: -2392.1779710585834
+  y: -380.7256671404466
+  z: 58.81749725341797
+---
+name: "Tartu n\xE4itused (linna)"
+positions:
+- x: -1861.5064572730334
+  y: 396.14292148221284
+  z: 51.510623931884766
+---
+name: "Tartu n\xE4itused (maale)"
+positions:
+- x: -1861.4888227640768
+  y: 433.2748124701902
+  z: 51.77874755859375
+---
+name: Teaduspark (linna sisenev)
+positions:
+- x: -2746.847767624655
+  y: -3360.663629646413
+  z: 78.4106216430664
+---
+name: "Teaduspark (linnast v\xE4ljuv)"
+positions:
+- x: -2771.997243775986
+  y: -3364.055948698893
+  z: 78.04437255859375
+---
+name: Teguri (kesklinna suunas)
+positions:
+- x: -304.44423530984204
+  y: -2617.288355170749
+  z: 57.60187530517578
+---
+name: "Teguri (linnast v\xE4ljuv)"
+positions:
+- x: -305.4091169779422
+  y: -2717.1633400376886
+  z: 57.16562271118164
+---
+name: "Tehase (T\xE4he tn. suunas)"
+positions:
+- x: 437.0021256803884
+  y: -2664.4484241399914
+  z: 43.44874954223633
+---
+name: Tehase (linna sisenev)
+positions:
+- x: 487.1120210165973
+  y: -2676.460116930306
+  z: 43.135623931884766
+---
+name: Tehnoloogiainstituut
+positions:
+- x: -1850.2359319201205
+  y: -2076.6268814289942
+  z: 69.42937469482422
+---
+name: Televisiooni
+positions:
+- x: -1443.6704072397551
+  y: -2685.1709767151624
+  z: 72.04562377929688
+---
+name: Tervishoiu (Ravila tn. suunas)
+positions:
+- x: -1556.4858576192055
+  y: -1349.490885832347
+  z: 63.506248474121094
+---
+name: Tervishoiu (Riia tn. suunas)
+positions:
+- x: -1541.3555464852252
+  y: -1432.6863851780072
+  z: 63.08124923706055
+---
+name: Tiksoja (linna)
+positions:
+- x: -4223.840452814242
+  y: 2583.723004963249
+  z: 50.776248931884766
+---
+name: Tiksoja (maale)
+positions:
+- x: -4255.163842508569
+  y: 2606.2779032383114
+  z: 50.91374969482422
+---
+name: Tref (linna sisenev)
+positions:
+- x: 815.8989932498662
+  y: -2685.245764574036
+  z: 40.178123474121094
+---
+name: "Tref (linnast v\xE4ljuv)"
+positions:
+- x: 815.3684963694541
+  y: -2733.289545113221
+  z: 39.744998931884766
+---
+name: Triigi (Annelinna suunas)
+positions:
+- x: 3657.190325622738
+  y: -3278.755560274236
+  z: 44.901248931884766
+---
+name: Triigi (Kasteheina suunas)
+positions:
+- x: 3649.940669701202
+  y: -3393.6065393723547
+  z: 46.13749694824219
+---
+name: Tuglase (Kreutzwaldi tn. suunas)
+positions:
+- x: -1828.5202586880187
+  y: 104.42365293949842
+  z: 53.92250061035156
+---
+name: Tuglase (Vaksali tn. suunas)
+positions:
+- x: -1844.0756037920946
+  y: 104.62058049626648
+  z: 53.598751068115234
+---
+name: Tulbi (Lunini tn. suunas)
+positions:
+- x: -1866.0551926607732
+  y: -1549.4868601271883
+  z: 62.90374755859375
+---
+name: Tulbi (Ravila tn. suunas)
+positions:
+- x: -1906.845662998734
+  y: -1561.2122096093372
+  z: 63.44124984741211
+---
+name: Turu
+positions:
+- x: 435.7371561595355
+  y: -819.4146225256845
+  z: 33.57749938964844
+---
+name: "Turu (L\xF5pp-peatus)"
+positions:
+- x: 440.1200769111165
+  y: -823.2605226226151
+  z: 33.58374786376953
+---
+name: Turu ring (Turu tn. suunas)
+positions:
+- x: 677.0985798910842
+  y: -4739.098611816764
+  z: 34.90374755859375
+---
+name: "Turu ring (V\xF5ru tn suunas)"
+positions:
+- x: 609.9548594237422
+  y: -4710.209223080426
+  z: 36.045623779296875
+---
+name: "T\xE4he (Turu tn. suunas)"
+positions:
+- x: 208.6896080864244
+  y: -4742.373672263697
+  z: 44.07187271118164
+---
+name: "T\xE4he (V\xF5ru tn. suunas)"
+positions:
+- x: 173.08110485662473
+  y: -4707.973075709306
+  z: 44.785621643066406
+---
+name: "T\xF5nise (linna)"
+positions:
+- x: -5468.260090835334
+  y: 5466.054071944207
+  z: 44.94687271118164
+---
+name: "T\xF5nise (maale)"
+positions:
+- x: -5497.494190161757
+  y: 5526.71188584622
+  z: 44.125
+---
+name: "T\xF5rvandi"
+positions:
+- x: -1039.9619154543034
+  y: -7014.960374918766
+  z: 0.0
+---
+name: "T\xF5rvandi (L\xF5pp-peatus)"
+positions:
+- x: -1040.4464736573282
+  y: -7013.849686121568
+  z: 0.0
+---
+name: "T\xF5rvandi tee (T\xF5rvandi suunas)"
+positions:
+- x: -355.3317543513258
+  y: -7009.543484440073
+  z: 0.0
+---
+name: Uus-Veeriku
+positions:
+- x: 3968.72675323725
+  y: -3213.777313027531
+  z: 43.97312545776367
+---
+name: Uus-Veeriku (Kasteheina suunas)
+positions:
+- x: 3861.393676812353
+  y: -3404.6862340802327
+  z: 48.30937194824219
+---
+name: Vaba
+positions:
+- x: 471.9852056814707
+  y: -2202.485637609847
+  z: 43.54874801635742
+---
+name: Vabaduse puiestee (maale)
+positions:
+- x: 52.56928169092862
+  y: -693.0524366348982
+  z: 35.69062423706055
+---
+name: Vabadussild-Palmihoone (linna)
+positions:
+- x: -168.57188490580302
+  y: -194.82407138310373
+  z: 34.34562301635742
+---
+name: Vabadussild-Palmihoone (maale)
+positions:
+- x: -153.3032067301101
+  y: -219.84442568104714
+  z: 34.36249923706055
+---
+name: Vahi
+positions:
+- x: -1033.5690902645001
+  y: 2116.9211321920156
+  z: 43.850624084472656
+---
+name: "Vahi t\xF6\xF6stuspark (L\xF5pp-peatus)"
+positions:
+- x: -256.7026934493333
+  y: 3592.5220000827685
+  z: 48.86874771118164
+---
+name: "Vahi t\xF6\xF6stuspark (linna sisenev)"
+positions:
+- x: -258.8557822612929
+  y: 3592.305829744786
+  z: 48.84187316894531
+---
+name: Vahipargi
+positions:
+- x: -470.1755332869361
+  y: 3016.499504840933
+  z: 46.72812271118164
+---
+name: Vahipargi (linna sisenev)
+positions:
+- x: -478.35211433208315
+  y: 3034.1747833415866
+  z: 46.77312469482422
+---
+name: "Vaksali (N\xE4ituse tn. suunas)"
+positions:
+- x: -1384.4124062780757
+  y: -940.1694113174453
+  z: 64.06812286376953
+---
+name: Vaksali (Raudteejaama suunas)
+positions:
+- x: -1435.5524905442144
+  y: -890.0126803237945
+  z: 63.38874816894531
+---
+name: Vallikraavi (Kesklinna suunas)
+positions:
+- x: -667.8744779840345
+  y: -972.1833922192454
+  z: 66.00499725341797
+---
+name: Vallikraavi (Raudteejaama suunas)
+positions:
+- x: -687.8635195344104
+  y: -968.9089950472116
+  z: 65.9481201171875
+---
+name: Vana-Linnavere (linna sisenev)
+positions:
+- x: -549.5805965225445
+  y: -5755.87394578848
+  z: 0.0
+---
+name: "Vana-Linnavere (\xDClenurme suunas)"
+positions:
+- x: -566.6816376558272
+  y: -5727.031810956076
+  z: 0.0
+---
+name: Vanaaseme tee (linna)
+positions:
+- x: -6921.772800048871
+  y: 2848.0628664530814
+  z: 54.23062515258789
+---
+name: Vanaaseme tee (maale)
+positions:
+- x: -6957.416441215435
+  y: 2866.2391247125342
+  z: 53.920623779296875
+---
+name: Vangla
+positions:
+- x: 860.6133719698992
+  y: -4465.311601006426
+  z: 34.0881233215332
+---
+name: Vangla
+positions:
+- x: 841.9818626979832
+  y: -4467.980298791081
+  z: 33.99374771118164
+---
+name: Vene (Kesklinna suunas)
+positions:
+- x: 7.34165538882371
+  y: 49.17870533466339
+  z: 34.65999984741211
+---
+name: "Vene (linnast v\xE4ljuv)"
+positions:
+- x: 34.712880067527294
+  y: 147.627567762509
+  z: 35.373748779296875
+---
+name: Viadukti (Annelinna suunas)
+positions:
+- x: 2239.8283452072646
+  y: -3240.5117248659953
+  z: 37.64249801635742
+---
+name: "Viadukti (V\xF5ru tn suunas)"
+positions:
+- x: 2118.545315307041
+  y: -3419.0721630631015
+  z: 37.45874786376953
+---
+name: Viljandi maantee (Riia tn. suunas)
+positions:
+- x: -2081.795815237041
+  y: -1729.5917508061975
+  z: 66.1187515258789
+---
+name: Viljandi maantee (lmatsalu tn. suunas)
+positions:
+- x: -2070.1024880447076
+  y: -1730.9440515507013
+  z: 66.18437194824219
+---
+name: Visa hall (Betooni tn. suunas)
+positions:
+- x: -2473.5180155743146
+  y: -707.9237307021394
+  z: 61.21437454223633
+---
+name: Visa hall (Ilmatsalu tn. suunas)
+positions:
+- x: -2492.536885648733
+  y: -746.0009660637006
+  z: 61.116249084472656
+---
+name: Vorbuse (linna)
+positions:
+- x: -4056.674324091582
+  y: 3900.4248603880405
+  z: 44.85187530517578
+---
+name: Vorbuse (maale)
+positions:
+- x: -4049.028078345349
+  y: 3927.531155486591
+  z: 44.17937469482422
+---
+name: Vorbuse tee (linna)
+positions:
+- x: -2459.686793495959
+  y: 1626.7831697920337
+  z: 49.006874084472656
+---
+name: Vorbuse tee (maale)
+positions:
+- x: -2530.797081052093
+  y: 1751.6530208587646
+  z: 48.80500030517578
+---
+name: "V\xE4lja (Kesklinna suunas)"
+positions:
+- x: -684.4727653819136
+  y: 1651.496580206789
+  z: 48.29437255859375
+---
+name: "V\xE4lja (linnast v\xE4ljuv)"
+positions:
+- x: -694.6410139774089
+  y: 1638.9086256204173
+  z: 48.39937210083008
+---
+name: "V\xF5ru ring"
+positions:
+- x: -652.133394493605
+  y: -4536.603188365698
+  z: 57.12187194824219
+---
+name: Zoomeedikum
+positions:
+- x: -2271.368750086869
+  y: 876.0897022346035
+  z: 51.23374938964844
+---
+name: "Zoomeedikum (L\xF5pp-peatus)"
+positions:
+- x: -2266.5247691168333
+  y: 889.759340330027
+  z: 51.00812530517578
+---
+name: "\xD5ssu"
+positions:
+- x: -4526.483020039974
+  y: -2422.5328577337787
+  z: 57.48999786376953
+---
+name: "\xD5ssu (L\xF5pp-peatus)"
+positions:
+- x: -4531.705608697608
+  y: -2417.736210537143
+  z: 57.56749725341797
+---
+name: "\xDClenurme G\xFCmnaasium (linna sisenev)"
+positions:
+- x: -309.1979867242626
+  y: -6959.803177071735
+  z: 0.0

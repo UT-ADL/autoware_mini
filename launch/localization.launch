@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="map_name"            default="tartu_demo" />
+    <arg name="localizer"           default="novatel"    doc="novatel, carla" />
+    <arg name="use_lane_matching"   default="false" />
+    <arg name="map_config"          default="$(find autoware_mini)/data/maps/$(arg map_name).yaml" />
+
+    <group ns="localization">
+
+        <group if="$(eval localizer=='novatel')">
+            <node pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true">
+                <!-- <remap if="$(arg use_lane_matching)" from="current_pose" to="current_pose_gnss"/> -->
+                <param name="parent_frame" value="$(eval 'map_gnss' if use_lane_matching else 'map')" />
+                <remap if="$(arg use_lane_matching)" from="current_pose" to="current_pose_gnss" />
+            </node>
+
+            <!-- Lane boundary matcher -->
+            <node if="$(arg use_lane_matching)" pkg="autoware_mini" type="lane_boundary_matcher.py" name="lane_boundary_matcher" output="screen" required="true" />
+        </group>
+
+        <group if="$(eval localizer=='carla')">
+            <node pkg='autoware_mini' type='carla_localizer.py' name='carla_localizer' output='screen' required="true" />
+            <node pkg="autoware_mini" type="carla_initialpose.py" name="carla_initialpose" output="screen" required="true" />
+        </group>
+
+        <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" />
+
+        <!-- File existance check taken from https://alspitz.github.io/blog/roslaunch_import.html -->
+        <group if="$(eval eval('_' + '_import_' + '_(\'os\')').path.exists(map_config))">
+            <rosparam command="load" file="$(arg map_config)" />
+        </group>
+
+    </group>
+
+</launch>

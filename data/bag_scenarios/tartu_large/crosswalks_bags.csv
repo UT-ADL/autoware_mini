@@ -1,0 +1,27 @@
+# bag_name, start, duration, scenario_number, regenerate
+2023-10-13-12-51-29_tiksoja_ride_01.bag, 2573, 26, 01, true
+2023-10-13-12-51-29_tiksoja_ride_01.bag, 2611, 30, 02, true
+2023-10-13-12-51-29_tiksoja_ride_01.bag, 2660, 31, 03, true
+2023-10-13-12-51-29_tiksoja_ride_01.bag, 2703, 26, 04, true
+2023-10-16-14-39-15_tiksoja_ride_07_sfa.bag, 214, 22, 05, true
+2023-10-16-14-39-15_tiksoja_ride_07_sfa.bag, 1918, 24, 06, true
+2023-10-16-14-39-15_tiksoja_ride_07_sfa.bag, 2005, 22, 07, true
+2023-10-16-15-23-20_tiksoja_ride_08_cluster.bag, 339, 23, 08, true
+2023-10-30-09-55-20_tiksoja_ride_09_sfa_split_2.bag, 622, 23, 09, true
+2023-10-30-09-55-20_tiksoja_ride_09_sfa_split_2.bag, 1020, 22, 10, true
+2023-10-30-10-21-51_tiksoja_ride_10_cluster_split_1.bag, 416, 26, 11, true
+2023-10-30-10-34-58_tiksoja_ride_10_cluster_split_2.bag, 884, 28, 12, true
+2023-10-30-11-07-11_tiksoja_ride_11_cluster_split_2.bag, 496, 28, 13, true
+2023-10-30-14-28-38_tiksoja_ride_12_sfa_split_1.bag, 215, 26, 14, true
+2023-10-30-14-43-40_tiksoja_ride_12_sfa_split_2.bag, 769, 43, 15, true
+2023-10-30-15-19-32_tiksoja_ride_13_cluster_split_2.bag, 484, 27, 16, true
+2023-10-30-15-19-32_tiksoja_ride_13_cluster_split_2.bag, 550, 23, 17, true
+2023-10-30-15-19-32_tiksoja_ride_13_cluster_split_2.bag, 723, 34, 18, true
+2023-10-31-10-17-12_tiksoja_ride_14_sfa_split_2.bag, 1293, 35, 19, true
+2023-10-31-10-41-16_tiksoja_ride_15_cluster_split_1.bag, 190, 24, 20, true
+2023-10-31-10-59-27_tiksoja_ride_15_cluster_split_2.bag, 1223, 30, 21, true
+2023-11-02-12-00-24_tiksoja_ride_16_sfa_split_2.bag, 411, 24, 22, true
+2023-11-03-10-21-22_tiksoja_ride_18_sfa_split_2.bag, 1429, 23, 23, true
+2023-11-03-10-21-22_tiksoja_ride_18_sfa_split_2.bag, 1487, 24, 24, true
+2023-11-03-13-42-01_tiksoja_ride_20_sfa_split_1.bag, 409, 23, 25, true
+2023-11-03-13-56-06_tiksoja_ride_20_sfa_split_2.bag, 1079, 26, 26, true

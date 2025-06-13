@@ -1,0 +1,22 @@
+<routes>
+   <route id="0" town="tartu_demo">
+      <weathers>
+         <weather route_percentage="0"
+            cloudiness="5.0" precipitation="0.0" precipitation_deposits="0.0" wetness="0.0"
+            wind_intensity="10.0" sun_azimuth_angle="-1.0" sun_altitude_angle="90.0" fog_density="2.0"/>
+         <weather route_percentage="100"
+            cloudiness="5.0" precipitation="0.0" precipitation_deposits="0.0" wetness="0.0"
+            wind_intensity="10.0" sun_azimuth_angle="-1.0" sun_altitude_angle="15.0" fog_density="2.0"/>
+      </weathers>
+      <ego_vehicle x="12.108187" y="-88.158859" z="35.166393" yaw="97.9912567138672" rolename="ego_vehicle" model="vehicle.lexus.utlexus" />
+      <waypoints>
+         <position pitch="0.0" x="12.108187" y="-88.158859" z="35.166393" yaw="97.9912567138672" />
+         <position pitch="0.0" x="-2" y="73" z="34.568905" yaw="67.74333953857423" />
+      </waypoints>
+      <scenarios>
+         <scenario name="FollowLeadingVehicle" type="FollowLeadingVehicle">
+            <trigger_point x="13.026952" y="-84.670746" z="35.035805" yaw="90.45"/>
+         </scenario>
+      </scenarios>
+   </route>
+</routes>

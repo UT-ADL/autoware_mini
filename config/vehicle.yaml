@@ -1,0 +1,24 @@
+wheel_base: 2.789
+steer_ratio: 16.135
+acceleration_limit: 5.0
+deceleration_limit: 5.0
+
+ssc_interface:
+  use_adaptive_gear_ratio: True
+  enable_reverse_motion: False
+  command_timeout: 200
+  max_curvature_rate: 0.15
+  agr_coef_a: 15.713
+  agr_coef_b: 0.053
+  agr_coef_c: 0.042
+  enable_emergency_braking: False
+
+button_panel:
+  cooldown: 2.0
+
+bicycle_simulation:
+  publish_rate: 20
+
+scenario_metrics_calculator:
+  metrics_frequency: 10
+  transform_timeout: 0.06

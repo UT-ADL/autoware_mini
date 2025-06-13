@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find lexus_platform)/launch/platform.launch">
+    <!-- Args to enable all sensors -->
+    <arg name="use_lidar_center" value="true" />
+    <arg name="use_lidar_front" value="true" />
+    <arg name="use_camera_fl" value="true" />
+    <arg name="use_camera_fr" value="true" />
+    <arg name="use_radar_fc" value="true" />
+    <arg name="use_gnss" value="false" />
+    <arg name="use_dbw" value="false" />
+  </include>
+
+  <!-- Transforms -->
+  <include file="$(find autoware_mini)/launch/platform/tf.launch" />
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find autoware_mini)/config/rviz/sensor_visualization.rviz" required="true" />
+</launch>

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="use_tf"              default="true" />
+    <arg name="repub_camera_info"   default="false" />
+    <arg name="use_nvidia_cameras"  default="false" />
+    <arg name="nvidia_encoder"      default="h264" />
+    <arg name="max_speed"           default="30" />
+    <arg name="use_ssc"             default="false" />
+
+    <!-- Transforms -->
+    <include if="$(arg use_tf)" file="$(find autoware_mini)/launch/platform/tf.launch" />
+
+    <!-- Launch lexus platform to publish nvidia camera images -->
+    <include if="$(arg use_nvidia_cameras)" file="$(find lexus_platform)/launch/platform.launch">
+        <arg name="use_nvidia_cameras"          value="$(arg use_nvidia_cameras)" />
+        <arg name="nvidia_encoder"              value="$(arg nvidia_encoder)" />
+        <!-- Don't run remote nvidia driver in Bag mode -->
+        <arg name="use_remote_nvidia_driver"    value="false" />
+        <!-- Rectify only nvidia camera images -->
+        <arg name="nvidia_rectify"              value="$(arg use_nvidia_cameras)" />
+        <!-- Republish camera infos for nvidia cameras -->
+        <arg name="repub_camera_info"           value="$(arg repub_camera_info)" />
+    </include>
+
+    <node pkg="autoware_mini" type="pause_bag.py" name="pause_bag" output="screen" required="true"/>
+
+    <group ns="vehicle">
+        <!-- SSC interface -->
+        <node if="$(arg use_ssc)" pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true" >
+            <param name="max_speed" value="$(arg max_speed)"/>
+        </node>
+
+        <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />
+    </group>
+
+</launch>

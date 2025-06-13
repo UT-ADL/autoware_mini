@@ -1,0 +1,48 @@
+### UT Lexus RX450h ###
+### Using Velodyne VLP-32 mounted on the roof of the vehicle ###
+### Notes: <use this area to write specific notes about this vehicle setup if it is unique> ###
+
+id:
+  vin: UNKNOWN
+
+vehicle:
+  wheel_base: 2.789 # meters
+  steering_rack_ratio: 16.135 # ratio
+  steering_wheel_offset: 0.0 # adder (to correct for steering wheel angle mis-alignement)
+
+local_frame:
+  vehicle: # forward, left, up (normal)
+    forward: [1,0,0] # x,y,z
+    left: [0,1,0]
+    up: [0,0,1]
+  vehicle_front: # forward, left, up (normal)
+    forward: [1,0,0] # x,y,z
+    left: [0,1,0]
+    up: [0,0,1]
+
+use_euler_for_tf: false
+tf:
+  - # this transform represents the base_link to vehicle transform: both frames are the same. Vella needs vehicle while
+    # our pipeline calls it base_link
+    frame_from: 'vehicle'
+    frame_to: 'base_link'
+    tx: 0.0 # meters
+    ty: 0.0 # meters
+    tz: 0.0 # meters
+    qx: 0.0
+    qy: 0.0
+    qz: 0.0
+    qw: 1.0
+    ### Lidar_center is called lidar_0 in the Vella tree. The pointcloud published by velodyne driver in vella has the frame_id lidar_0
+  - ### therefore lidar_0 needs be part of the main tree so that we have map->lidar_0 transform available. This allows pointcloud to be visualized in rviz
+    frame_from: 'lidar_0'
+    frame_to: 'lidar_center'
+    tx: 0.0 # meters
+    ty: 0.0 # meters
+    tz: 0.0 # meters
+    qx: 0.0
+    qy: 0.0
+    qz: 0.0
+    qw: 1.0
+debug:
+  enable: False # general purpose terminal print option

@@ -1,0 +1,6 @@
+<launch>
+  <group ns="vehicle_platform_frames">
+    <param name="robot_description" textfile="$(find autoware_mini)/config/urdf/lexus.urdf" />
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="vehicle_platform_frames_publisher" />
+  </group>
+</launch>

@@ -1,0 +1,225 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 70
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /velodyne1/Autocompute Value Bounds1
+        - /ouster1/Autocompute Value Bounds1
+      Splitter Ratio: 0.5168776512145996
+    Tree Height: 524
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.5886790156364441
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Experimental: false
+    Name: Time
+    SyncMode: 0
+    SyncSource: camera_fl
+Preferences:
+  PromptSaveOnExit: true
+Toolbars:
+  toolButtonStyle: 2
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz/Axes
+      Enabled: true
+      Length: 1
+      Name: Axes
+      Radius: 0.10000000149011612
+      Reference Frame: base_link
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 5
+        Min Value: 4.5
+        Value: false
+      Axis: X
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: velodyne
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /lidar_center/points_raw
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 0.5
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 5
+        Min Value: 4.5
+        Value: false
+      Axis: X
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: AxisColor
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: ouster
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Squares
+      Topic: /lidar_front/points_raw
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /camera_fr/image_rect_color
+      Name: camera_fr
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+      Visibility:
+        Axes: true
+        Value: true
+        camera_fl: true
+        nvidia_camera: true
+        ouster: true
+        velodyne: true
+      Zoom Factor: 1
+    - Class: rviz/Camera
+      Enabled: false
+      Image Rendering: background and overlay
+      Image Topic: /camera_fl/image_rect_color
+      Name: camera_fl
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: false
+      Visibility:
+        Axes: true
+        Value: true
+        camera_fr: true
+        nvidia_camera: true
+        ouster: true
+        velodyne: true
+      Zoom Factor: 1
+    - Class: rviz/Camera
+      Enabled: false
+      Image Rendering: background and overlay
+      Image Topic: ""
+      Name: nvidia_camera
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: false
+      Visibility:
+        Axes: true
+        Value: true
+        camera_fl: true
+        camera_fr: true
+        ouster: true
+        velodyne: true
+      Zoom Factor: 1
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Default Light: true
+    Fixed Frame: base_link
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Theta std deviation: 0.2617993950843811
+      Topic: /initialpose
+      X std deviation: 0.5
+      Y std deviation: 0.5
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 6.9774041175842285
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 0.5481167435646057
+        Y: -1.358498215675354
+        Z: 2.847944974899292
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 0.480398952960968
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 3.0785741806030273
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 745
+  Hide Left Dock: false
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd0000000400000000000001560000028ffc0200000012fb000000100044006900730070006c006100790073010000003d0000028f000000c900fffffffb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d0061006700650000000213000000b90000000000000000fb0000001400630061006d005f006c006500660074005f003201000002300000009c0000000000000000fb0000001400630061006d005f006c006500660074005f00330100000228000000a40000000000000000fb0000001400630061006d005f006c006500660074005f00340100000224000000a80000000000000000fb0000000c00430061006d0065007200610100000213000000b90000000000000000fb0000001e006e00760069006400690061005f00630061006d006500720061005f00310000000213000000b90000000000000000fb0000001e006e00760069006400690061005f00630061006d006500720061005f00320000000213000000b90000000000000000fb0000000c00430061006d0065007200610000000213000000b90000000000000000fb0000001e006e00760069006400690061005f00630061006d006500720061005f00330000000213000000b90000000000000000fb0000001e006e00760069006400690061005f00630061006d006500720061005f00340000000213000000b90000000000000000000000010000033b0000028ffc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fc0000003d0000028f000000c10100001cfa000000080100000009fb0000001200630061006d006500720061005f006600720100000000ffffffff0000007900fffffffb0000001200630061006d006500720061005f0066006c0000000000ffffffff0000007700fffffffb0000001a006e00760069006400690061005f00630061006d0065007200610000000000ffffffff0000009600fffffffb0000000c00430061006d0065007200610000000000ffffffff0000000000000000fb0000000c00430061006d0065007200610100000000ffffffff0000000000000000fb0000000c00430061006d0065007200610100000000ffffffff0000000000000000fb0000001400630061006d005f006c006500660074005f00310100000000ffffffff0000000000000000fb0000000c00430061006d0065007200610100000000ffffffff0000000000000000fb0000000a0056006900650077007301000003ae0000010f0000010000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b2000000000000000000000002000004bd000001dcfc0100000002fb0000000c00430061006d0065007200610000000000000004bd0000000000000000fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004bd00000039fc0100000002fb0000000800540069006d00650000000000000004bd000004f300fffffffb0000000800540069006d00650100000000000004500000000000000000000000200000028f00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 1213
+  X: 67
+  Y: 27
+  camera_fl:
+    collapsed: false
+  camera_fr:
+    collapsed: false
+  nvidia_camera:
+    collapsed: false

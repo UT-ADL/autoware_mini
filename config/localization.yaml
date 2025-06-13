@@ -1,0 +1,27 @@
+coordinate_transformer: utm         # utm, lest97
+use_custom_origin: True
+utm_origin_lat: 0.0
+utm_origin_lon: 0.0
+lest97_origin_northing: 6465000.0
+lest97_origin_easting: 650000.0
+
+novatel_oem7_localizer:
+  use_msl_height: True
+  offline_azimuth: 185.0  # degrees, from North cw
+  offline_height: 34.5    # meters above sea level (MSL height)
+  offline_lat: 58.3854    # degrees
+  offline_lon: 26.7264    # degrees
+  child_frame: base_link
+
+lane_boundary_matcher:
+  lookahead_distance: 3.5
+  enable_height_correction: False
+  x_correction_treshold: 0.5
+  y_correction_treshold: 0.5
+  yaw_correction_treshold: 0.1
+  probability_treshold: 0.4
+  transform_timeout: 0.06
+  openpilot_delay_compensation: 0.1
+  alpha: 0.03
+  no_correction_weight: 0.4
+  

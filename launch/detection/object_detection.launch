@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Map configuration -->
+    <arg name="map_name"            default="tartu_demo"        doc="Map name for road area filter" />
+    <arg name="lanelet2_map_path"   default="$(find autoware_mini)/data/maps/$(arg map_name).osm" doc="For map-based prediction" />
+    <arg name="road_area_file_path" default="$(find autoware_mini)/data/maps/$(arg map_name).geojson" />
+    
+    <!-- Detection -->
+    <arg name="detector"            default="lidar_cluster"     doc="lidar_cluster,lidar_cluster_fast,lidar_sfa,lidar_vella,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion,carla,sim" />
+    <arg name="use_lidar_center"    default="true"              doc="Use velodyne lidar"/>
+    <arg name="use_lidar_front"     default="false"             doc="Use velodyne lidar"/>
+    <arg name="use_road_area_filter"  default="false"           doc="Use road area filter"/>
+    <arg name="ground_removal"      default="naive"             doc="naive, jcp" />
+    <arg name="detection_range"     default=""                  doc="Enter a value in meters to enable it" />
+    <arg name="sfa_onnx_path"       default="$(find autoware_mini)/data/models/sfa/nulyaronar2_02_30.onnx" />
+    
+    <!-- Tracking and Prediction -->
+    <arg name="tracker"             default="ema"               doc="none, ema" />
+    <arg name="predictor"           default="none"              doc="none, naive, map, map_naive" />
+    
+    <!-- Visualization and Debug -->
+    <arg name="more_visualizations" default="false"             doc="By default only visualize final detections" />
+
+    <group>
+        <group if="$(eval 'lidar' in detector)" ns="lidar">
+            <remap if="$(eval 'fusion' not in detector)" from="detected_objects" to="/detection/detected_objects" />
+            <group if="$(eval 'lidar_cluster' in detector)">
+                <node if="$(eval 'fast' in detector)" type="points_preprocessor_fast.py" name="points_preprocessor_fast" pkg="autoware_mini" output="screen" required="true">
+                    <rosparam if="$(eval use_lidar_center and not use_lidar_front)" param="points_topics">["/lidar_center/points_raw"]</rosparam>
+                    <rosparam if="$(eval not use_lidar_center and use_lidar_front)" param="points_topics">["/lidar_front/points"]</rosparam>
+                    <rosparam if="$(eval use_lidar_center and use_lidar_front)" param="points_topics">["/lidar_center/points_raw", "/lidar_front/points"]</rosparam>
+                </node>
+                <group unless="$(eval 'fast' in detector)">
+                    <group if="$(arg use_lidar_center)" ns="center">
+                        <!-- Only functional in Carla simulation -->
+                        <node pkg="nodelet" type="nodelet" name="crop_box" args="standalone pcl/CropBox" output="screen" required="true">
+                            <remap from="~input" to="/lidar_center/pointcloud" />
+                            <remap from="~output" to="/lidar_center/points_raw" />
+                        </node>
+                        <remap from="points_raw" to="/lidar_center/points_raw" />
+                        <remap unless="$(arg use_lidar_front)" from="points_ground" to="/detection/lidar/points_ground" />
+                        <remap unless="$(arg use_lidar_front)" from="points_no_ground" to="/detection/lidar/points_no_ground" />
+                        <node if="$(eval ground_removal == 'naive')" type="naive_ground_removal.py" name="naive_ground_removal" pkg="autoware_mini" output="screen" required="true" />
+                        <node if="$(eval ground_removal == 'jcp')" type="jcp_ground_removal.py" name="jcp_ground_removal" pkg="autoware_mini" output="screen" required="true" />
+                    </group>
+                    <group if="$(arg use_lidar_front)" ns="front">
+                        <node pkg="nodelet" type="nodelet" name="crop_box" args="standalone pcl/CropBox" output="screen" required="true">
+                            <remap from="~input" to="/lidar_front/points" />
+                            <remap from="~output" to="/lidar_front/points_cleaned" />
+                        </node>
+                        <remap from="points_raw" to="/lidar_front/points_cleaned" />
+                        <remap unless="$(arg use_lidar_center)" from="points_ground" to="/detection/lidar/points_ground" />
+                        <remap unless="$(arg use_lidar_center)" from="points_no_ground" to="/detection/lidar/points_no_ground" />
+                        <node if="$(eval ground_removal == 'naive')" type="naive_ground_removal.py" name="naive_ground_removal" pkg="autoware_mini" output="screen" required="true" />
+                        <node if="$(eval ground_removal == 'jcp')" type="jcp_ground_removal.py" name="jcp_ground_removal" pkg="autoware_mini" output="screen" required="true" />
+                    </group>
+                    <group if="$(eval use_lidar_center and use_lidar_front)">
+                        <node type="points_concatenator.py" name="points_concatenator" pkg="autoware_mini" output="screen" required="true">
+                            <remap from="points1" to="center/points_no_ground" />
+                            <remap from="points2" to="front/points_no_ground" />
+                            <remap from="points_concatenated" to="points_no_ground" />
+                        </node>
+                    </group>
+                    <node pkg="nodelet" type="nodelet" name="voxel_grid_filter" args="standalone pcl/VoxelGrid" output="screen" required="true">
+                        <remap from="~input" to="/detection/lidar/points_no_ground" />
+                        <remap from="~output" to="/detection/lidar/points_filtered" />
+                    </node>
+                    <node type="points_clusterer.py" name="points_clusterer" pkg="autoware_mini" output="screen" required="true" />
+                </group>
+                <node type="cluster_detector.py" name="cluster_detector" pkg="autoware_mini" output="screen" required="true" />
+            </group>
+
+            <node if="$(eval 'lidar_sfa' in detector)" pkg="autoware_mini" type="sfa_detector.py" name="sfa_detector" output="screen" required="true">
+                <param name="onnx_path"  value="$(arg sfa_onnx_path)"/>
+                <remap if="$(eval use_lidar_center and not use_lidar_front)" from="points_raw" to="/lidar_center/points_raw" />
+                <remap if="$(eval use_lidar_front and not use_lidar_center)" from="points_raw" to="/lidar_front/points" />
+            </node>
+
+            <!-- Velodyne Vella detections -->
+            <group if="$(eval 'lidar_vella' in detector)">
+                <!--node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args="2.11
+                $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen" required="true" /-->
+                <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
+            </group>
+
+            <group if="$(arg more_visualizations)">
+                <!--visualizer for lidar detections-->
+                <node if="$(eval 'fusion' in detector)" type="detected_objects_visualizer.py" name="lidar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+            </group>
+        </group>
+
+        <group if="$(eval 'radar' in detector)" ns="radar">
+            <remap if="$(eval 'fusion' not in detector)" from="detected_objects" to="/detection/detected_objects" />
+            <node pkg="autoware_mini" type="radar_detector.py" name="radar_detector" output="screen" required="true"/>
+            <group if="$(arg more_visualizations)">
+                <!-- visualizer for radar detections-->
+                <node if="$(eval 'fusion' in detector)" type="detected_objects_visualizer.py" name="radar_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+            </group>
+        </group>
+
+        <node if="$(eval 'radar_fusion' in detector)" pkg="autoware_mini" type="lidar_radar_fusion.py" name="lidar_radar_fusion" output="screen" required="true" />
+        
+        <!-- Carla's ground truth objects -->
+        <node if="$(eval detector=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
+
+        <!-- Obstacle simulator -->
+        <node if="$(eval detector=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />
+
+        <!-- Detected objects visualizer -->
+        <node if="$(arg more_visualizations)" type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+
+        <!-- Object filters -->
+        <node if="$(eval detection_range != '')" pkg="autoware_mini" type="detection_range_filter.py" name="detection_range_filter" output="screen" required="true" >
+            <param name="detection_range" value="$(arg detection_range)" />
+        </node>
+        <node if="$(arg use_road_area_filter)" pkg="autoware_mini" type="road_area_filter.py" name="road_area_filter" output="screen" required="true" >
+            <param name="road_area_file_path" value="$(arg road_area_file_path)" />
+        </node>
+    </group>
+
+    <node if="$(eval tracker=='ema')" type="ema_tracker.py" name="ema_tracker" pkg="autoware_mini" output="screen" required="true">
+        <remap if="$(eval detection_range != '' or use_road_area_filter)" from="detected_objects" to="detected_objects_filtered" />
+    </node>
+    <node if="$(eval tracker=='none')" pkg="topic_tools" type="relay" args="detected_objects tracked_objects" name="detected_objects_relay" output="screen" required="true" />
+    <node type="detected_objects_visualizer.py" name="tracked_objects_visualizer" pkg="autoware_mini" output="screen" required="true">
+        <remap from="detected_objects" to="tracked_objects" />
+        <remap from="detected_objects_markers" to="tracked_objects_markers" />
+        <remap from="detected_objects_bboxes" to="tracked_objects_bboxes" />
+    </node>
+
+    <group unless="$(eval predictor=='none')">
+        <node if="$(eval 'map' in predictor)" type="map_based_predictor.py" name="map_based_predictor" pkg="autoware_mini" output="screen" required="true">
+            <remap from="predicted_objects" to="predicted_objects_map" />
+            <param name="lanelet2_map_path" value="$(arg lanelet2_map_path)" />
+        </node>
+        <node if="$(eval predictor=='map')" pkg="topic_tools" type="relay" args="predicted_objects_map predicted_objects" name="predicted_objects_relay" output="screen" required="true" />
+        <node if="$(eval predictor=='naive')" pkg="topic_tools" type="relay" args="tracked_objects predicted_objects_map" name="predicted_objects_map_relay" output="screen" required="true" />
+        <node if="$(eval 'naive' in predictor)" type="naive_predictor.py" name="naive_predictor" pkg="autoware_mini" output="screen" required="true">
+            <remap from="tracked_objects" to="predicted_objects_map" />
+        </node>
+        <node type="predicted_trajectory_visualizer.py" name="predicted_trajectory_visualizer" pkg="autoware_mini" output="screen" required="true" />
+    </group>
+    <group if="$(eval predictor=='none')">
+        <node pkg="topic_tools" type="relay" args="tracked_objects predicted_objects_map" name="predicted_objects_map_relay" output="screen" required="true" />
+        <node pkg="topic_tools" type="relay" args="predicted_objects_map predicted_objects" name="predicted_objects_relay" output="screen" required="true" />
+    </group>
+
+</launch>

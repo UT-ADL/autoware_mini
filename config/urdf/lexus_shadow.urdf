@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- created with Phobos 1.0.1 "Capricious Choutengan" -->
+<robot name="lexus_shadow">
+
+  <link name="lexus_shadow">
+    <visual name="Body">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://autoware_mini/config/urdf/lexus_model/Exterior.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+  </link>
+
+</robot>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="waypoints_file"   default="waypoints_erm.csv"  doc="full path with filename" />
+
+    <group ns="planning">
+	    <!-- Waypoint_loader -->
+	    <node pkg="autoware_mini" type="waypoint_loader.py" name="waypoint_loader" output="screen" required="true">
+	        <param name="waypoints_file"  value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
+	    </node>
+    </group>
+
+</launch>

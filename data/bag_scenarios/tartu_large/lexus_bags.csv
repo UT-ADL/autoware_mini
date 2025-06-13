@@ -1,0 +1,13 @@
+# No, bag_name, start, end
+1, 2025-04-10-13-03-30_demo_april.bag, 195, 230
+2, 2025-04-10-13-03-30_demo_april.bag, 279, 309
+3, 2025-04-10-13-03-30_demo_april.bag, 355, 385
+4, 2025-04-10-13-03-30_demo_april.bag, 420, 450
+5, 2025-04-10-13-03-30_demo_april.bag, 470, 490
+6, 2025-04-10-13-03-30_demo_april.bag, 525, 545
+7, 2025-04-10-13-03-30_demo_april.bag, 668, 691, turn to Railway station
+8, 2025-04-10-13-16-56_demo_april.bag, 6, 43, exit railway station follow bus
+9, 2025-04-10-13-16-56_demo_april.bag, 110, 137, turn pedestrian approaching
+10, 2025-04-10-13-16-56_demo_april.bag, 390, 415, through roundabout
+11, 2025-04-10-13-42-02_demo_april.bag, 320, 355, pedestrian crossing (ahhaa)
+12, 2025-04-10-13-54-54_demo_april.bag, 80, 105, pedestrians crossing
