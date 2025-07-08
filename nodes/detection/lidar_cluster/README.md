@@ -14,7 +14,7 @@ ROS node that clusters point cloud data and publishes detected objects.
 | `bounding_box_type` | string | `"axis_aligned"` | Type of bounding box. It can be `"axis_aligned"` for axis-aligned bounding box, or `"min_area"` for minimum area bounding box. |
 | `enable_pointcloud` | bool | `False` | Whether to publish point cloud data for each detected object. |
 | `enable_convex_hull` | bool | `True` | Whether to calculate a convex hull for the cluster points. |
-| `target_frame` | string | `"map"` | Target frame for the detected objects. |
+| `output_frame` | string | `"map"` | Target frame for the detected objects. |
 | `transform_timeout` | float | `0.05` | Timeout in seconds for waiting for a transform to become available.
 
 

@@ -22,20 +22,20 @@ CARLA_TO_AUTOWARE_TFL_MAP = {
 }
 
 CARLA_TO_AUTOWARE_TFL_STR = {
-    CarlaTrafficLightStatus.RED: "red",
-    CarlaTrafficLightStatus.YELLOW: "yellow",
-    CarlaTrafficLightStatus.GREEN: "green",
-    CarlaTrafficLightStatus.OFF: "off",
-    CarlaTrafficLightStatus.UNKNOWN: "unknown"
+    CarlaTrafficLightStatus.RED: "RED",
+    CarlaTrafficLightStatus.YELLOW: "YELLOW",
+    CarlaTrafficLightStatus.GREEN: "GREEN",
+    CarlaTrafficLightStatus.OFF: "OFF",
+    CarlaTrafficLightStatus.UNKNOWN: "UNKNOWN"
 }
 
 class CarlaTrafficLightDetector:
     def __init__(self):
 
         # Node parameters
-        self.use_offset = rospy.get_param("~use_offset", default=True)
+        self.use_offset = rospy.get_param("/carla/use_offset")
         coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
         lanelet2_map_name = rospy.get_param("~lanelet2_map_name")
@@ -44,7 +44,7 @@ class CarlaTrafficLightDetector:
         if coordinate_transformer == "utm":
                 projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
             exit(1)
         lanelet2_map = load(lanelet2_map_name, projector)
 
@@ -55,17 +55,20 @@ class CarlaTrafficLightDetector:
 
         # Create a classifier to find the closest traffic light on map
         tfl_coords, tfl_ids = self.extractTrafficLights(lanelet2_map)
-        self.classifier = RadiusNeighborsClassifier(radius=1.0).fit(tfl_coords, tfl_ids)
+        self.classifier = RadiusNeighborsClassifier(radius=1.0)
+        if len(tfl_coords) > 0:
+            assert len(tfl_coords) == len(tfl_ids)
+            self.classifier.fit(tfl_coords, tfl_ids)
         self.tlf_id_to_coords_map = {}
 
         # Publishers
-        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1)
+        self.tfl_status_pub = rospy.Publisher('traffic_light_status', TrafficLightResultArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
         rospy.Subscriber('/carla/traffic_lights/info',
-                         CarlaTrafficLightInfoList, self.tfl_info_callback, queue_size=1)
+                         CarlaTrafficLightInfoList, self.tfl_info_callback, queue_size=1, tcp_nodelay=True)
         rospy.Subscriber('/carla/traffic_lights/status',
-                    CarlaTrafficLightStatusList, self.tfl_status_callback, queue_size=1)
+                    CarlaTrafficLightStatusList, self.tfl_status_callback, queue_size=1, tcp_nodelay=True)
 
     def extractTrafficLights(self, lanelet2_map):
         tfl_coords = []
@@ -99,14 +102,14 @@ class CarlaTrafficLightDetector:
         tfl_status.header.stamp = rospy.Time.now()
         for light in msg.traffic_lights:
             if light.id not in self.tlf_id_to_coords_map:
-                rospy.logwarn("Traffic light %d not found in info", light.id)
+                rospy.logwarn("%s - traffic light %d not found in info", rospy.get_name(), light.id)
                 continue
             tfl_coords = self.tlf_id_to_coords_map[light.id]
 
             try:
                 light_id, lane_id = self.classifier.predict([tfl_coords])[0]
             except ValueError:
-                rospy.logdebug("Traffic light %d at coordinates (%f, %f) not found in map", light.id, tfl_coords[0], tfl_coords[1])
+                rospy.logdebug("%s - traffic light %d at coordinates (%f, %f) not found in map", rospy.get_name(), light.id, tfl_coords[0], tfl_coords[1])
                 continue
 
             tfl_result = TrafficLightResult()

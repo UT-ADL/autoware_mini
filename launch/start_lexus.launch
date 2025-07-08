@@ -2,43 +2,64 @@
 <launch>
 
     <arg name="localizer"               default="novatel"           doc="novatel, carla"/>
-    <arg name="detector"                default="cluster"           doc="cluster, sim, carla"/>
+    <arg name="use_lidar_center"        default="true"              doc="use velodyne lidar"/>
+    <arg name="use_lidar_front"         default="false"             doc="use ouster lidar"/>
+    <arg name="detector"                default="lidar_cluster"     doc="lidar_cluster, sim, carla"/>
+    <arg name="tfl_detector"            default="mqtt"              doc="mqtt, camera, mqtt_camera_fusion" />
+    <arg name="tracker"                 default="ema"               doc="none, ema" />
+    <arg name="predictor"               default="none"              doc="none, naive" />
     <arg name="follower"                default="pure_pursuit"      doc="pure_pursuit, stanley" />
-    <arg name="planner"                 default="lanelet2"          doc="waypoints, lanelet2" />
+    <arg name="global_planner"          default="lanelet2"          doc="waypoints, lanelet2" />
+    <arg name="local_planner"           default="velocity"          doc="velocity, none"/>
+    <arg name="use_path_smoothing"      default="true" />
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map_name"       default="tartu_demo_l_c_wp_dem.osm" />
-    <arg name="use_detection"           default="false"             doc="use object detection" />    
+    <arg name="lanelet2_map_name"       default="tartu_demo.osm" />
     <arg name="max_speed"               default="30" />
+    <arg name="more_visualizations"     default="false"             doc="By default visualize only the final detections" />
     
-    <!-- Localizer -->
+    <!-- Localization -->
     <include file="$(find autoware_mini)/launch/localization.launch">
         <arg name="localizer"           value="$(arg localizer)" />
     </include>
 
-    <!-- Planner -->
+    <!-- Detection -->
+    <include file="$(find autoware_mini)/launch/detection.launch">
+        <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
+        <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
+        <arg name="detector"            value="$(arg detector)" />
+        <arg name="tfl_detector"        value="$(arg tfl_detector)" />
+        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+        <arg name="tracker"             value="$(arg tracker)" />
+        <arg name="predictor"           value="$(arg predictor)" />
+        <arg name="more_visualizations" value="$(arg more_visualizations)" />
+    </include>
+
+    <!-- Planning -->
     <include file="$(find autoware_mini)/launch/planning.launch">
-        <arg name="planner"             value="$(arg planner)" />
+        <arg name="global_planner"      value="$(arg global_planner)" />
+        <arg name="local_planner"       value="$(arg local_planner)" />
+        <arg name="use_path_smoothing"  value="$(arg use_path_smoothing)" />
         <arg name="waypoints_file"      value="$(arg waypoints_file)" />
         <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
     </include>
 
-    <!-- Detection -->
-    <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
-        <arg name="detector"           value="$(arg detector)" />
-    </include>
-
-    <!-- Follower -->
+    <!-- Control -->
     <include file="$(find autoware_mini)/launch/control.launch">
-        <arg name="follower" value="$(arg follower)" />
+        <arg name="follower"        value="$(arg follower)" />
     </include>
 
     <!-- Vehicle -->
     <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
-        <arg name="max_speed" value="$(arg max_speed)" />
-        <arg name="use_lidar_center"  value="$(eval arg('detector')!='vella')" />
+        <arg name="max_speed"           value="$(arg max_speed)" />
+        <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
+        <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
+        <arg name="use_camera_fl"       value="$(eval 'camera' in tfl_detector)" />
+        <arg name="use_camera_fr"       value="$(eval 'camera' in tfl_detector)" />
+        <arg name="use_radar_fc"        value="$(eval 'radar' in detector)" />
     </include>
 
     <!-- Rviz -->
+    <include file="$(find autoware_mini)/launch/dashboard.launch" />
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
 
 </launch>

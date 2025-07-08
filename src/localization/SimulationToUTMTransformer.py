@@ -46,8 +46,8 @@ class SimulationToUTMTransformer:
         """
         pose_utm = Pose()
         
-        pose_utm.position.x, pose_utm.position.y = \
-            self.sim2utm_transformer.transform(pose_sim.position.x, pose_sim.position.y)
+        pose_utm.position.x, pose_utm.position.y, pose_utm.position.z = \
+            self.sim2utm_transformer.transform(pose_sim.position.x, pose_sim.position.y, pose_sim.position.z)
 
         lat, lon = self.utm2wgs84_transformer.transform(pose_utm.position.x, pose_utm.position.y)
         yaw_offset = self.utm_crs.get_factors(lon, lat).meridian_convergence

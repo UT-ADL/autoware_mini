@@ -67,9 +67,9 @@ A ROS node that visualizes the local path and other relevant information.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `/planning/local_planner/car_safety_radius` | `float` | `1.3` | Safety radius of the car used for visualization |
-| `/planning/local_planner/current_pose_to_car_front` | `float` | `4.0` | Distance between the current pose and the car front |
-| `/planning/local_planner/braking_safety_distance` | `float` | `2.0` | Safety distance to use for braking visualization |
+| `car_safety_radius` | `float` | `1.3` | Safety radius of the car used for visualization |
+| `current_pose_to_car_front` | `float` | `4.0` | Distance between the current pose and the car front |
+| `braking_safety_distance` | `float` | `2.0` | Safety distance to use for braking visualization |
 
 
 #### Subscribed Topics

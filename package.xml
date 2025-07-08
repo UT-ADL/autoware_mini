@@ -2,7 +2,7 @@
   <name>autoware_mini</name>
   <version>1.0.0</version>
   <description>Minimalistic python based autonomy software</description>
-  <license>Closed-Source</license>
+  <license>MIT</license>
   <author email="edgar.sepp@ut.ee">Edgar Sepp</author>
   <maintainer email="adl@ut.ee">Autonomous Driving Lab</maintainer>
 
@@ -17,14 +17,18 @@
   <exec_depend>rviz</exec_depend>
   <exec_depend>jsk_rviz_plugins</exec_depend>
   <exec_depend>joy</exec_depend>
+  <exec_depend>topic_tools</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
 
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-sklearn</exec_depend>
   <exec_depend>python3-pyproj</exec_depend>
   <exec_depend>python3-opencv</exec_depend>
   <exec_depend>python3-pygame</exec_depend>
-  <exec_depend>python3-simple-pid-pip</exec_depend>
   <exec_depend>python3-catkin-tools</exec_depend>
+  <exec_depend>python3-paho-mqtt</exec_depend>
+  <exec_depend>python3-pip</exec_depend>
+  <exec_depend>python-is-python3</exec_depend>
 
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
@@ -34,7 +38,16 @@
   <exec_depend>automotive_platform_msgs</exec_depend>
   <exec_depend>automotive_navigation_msgs</exec_depend>
   <exec_depend>novatel_oem7_msgs</exec_depend>
+  <exec_depend>radar_msgs</exec_depend>
 
+  <exec_depend>carla_msgs</exec_depend>
+  <exec_depend>carla_ros_bridge</exec_depend>
+  <exec_depend>carla_ackermann_control</exec_depend>
+  <exec_depend>ackermann_msgs</exec_depend>
+  <exec_depend>carla_manual_control</exec_depend>
+  <exec_depend>carla_spawn_objects</exec_depend>
+  <exec_depend>carla_ros_scenario_runner</exec_depend>
+  <exec_depend>carla_waypoint_publisher</exec_depend>
   <exec_depend>vehicle_platform</exec_depend>
 
 </package>

@@ -3,30 +3,35 @@
 import rospy
 import numpy as np
 
+from numpy.lib.recfunctions import structured_to_unstructured, unstructured_to_structured
 from ros_numpy import numpify, msgify
-try:
-    from sklearnex.cluster import DBSCAN
-    DBSCAN_ALGORITHM = 'auto'
-    rospy.logwarn("Intel® Extension for Scikit-learn found")
-except ImportError:
-    rospy.logwarn("Intel® Extension for Scikit-learn not found, reverting to original Scikit-learn. To speed up clustering install Intel® Extension for Scikit-learn, see https://intel.github.io/scikit-learn-intelex/.")
-    from sklearn.cluster import DBSCAN
-    DBSCAN_ALGORITHM = 'ball_tree'
 
 from sensor_msgs.msg import PointCloud2
 
 class PointsClusterer:
     def __init__(self):
-        self.sample_size = rospy.get_param('~sample_size', 10000)
-        self.cluster_epsilon = rospy.get_param('~cluster_epsilon', 1.0)
-        self.cluster_min_size = rospy.get_param('~cluster_min_size', 7)
+        self.sample_size = rospy.get_param('~sample_size')
+        self.cluster_epsilon = rospy.get_param('~cluster_epsilon')
+        self.cluster_min_size = rospy.get_param('~cluster_min_size')
 
-        self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm=DBSCAN_ALGORITHM)
+        try:
+            from cuml.cluster import DBSCAN
+            self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size)
+            rospy.loginfo("Using DBSCAN from cuML")
+        except ImportError:
+            try:
+                from sklearnex.cluster import DBSCAN
+                self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='auto')
+                rospy.loginfo("Using DBSCAN from Intel® Extension for Scikit-learn")
+            except ImportError:
+                from sklearn.cluster import DBSCAN
+                self.clusterer = DBSCAN(eps=self.cluster_epsilon, min_samples=self.cluster_min_size, algorithm='ball_tree')
+                rospy.loginfo("Using DBSCAN from Scikit-learn")
 
-        self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=1)
-        rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=1024*1024)
+        self.cluster_pub = rospy.Publisher('points_clustered', PointCloud2, queue_size=1, tcp_nodelay=True)
+        rospy.Subscriber('points_no_ground', PointCloud2, self.points_callback, queue_size=1, buff_size=2**24, tcp_nodelay=True)
 
-        rospy.loginfo("points_clusterer - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def points_callback(self, msg):
         data = numpify(msg)
@@ -36,28 +41,24 @@ class PointsClusterer:
             data = np.random.choice(data, size=self.sample_size, replace=False)
 
         # convert point cloud into ndarray, take only xyz coordinates
-        points = np.empty((data.shape[0], 3), dtype=np.float32)
-        points[:, 0] = data['x']
-        points[:, 1] = data['y']
-        points[:, 2] = data['z']
+        points = structured_to_unstructured(data[['x', 'y', 'z']], dtype=np.float32)
 
         # get labels for clusters
         labels = self.clusterer.fit_predict(points)
 
-        # populate data with labels
-        data = np.empty(points.shape[0], dtype=[
+        # concatenate points with labels
+        points_labeled = np.hstack((points, labels.reshape(-1, 1)))
+
+        # filter out noise points
+        points_labeled = points_labeled[labels != -1]
+
+        # convert labeled points to PointCloud2 format
+        data = unstructured_to_structured(points_labeled, dtype=np.dtype([
             ('x', np.float32),
             ('y', np.float32),
             ('z', np.float32),
             ('label', np.int32)
-        ])
-        data['x'] = points[:, 0]
-        data['y'] = points[:, 1]
-        data['z'] = points[:, 2]
-        data['label'] = labels
-
-        # filter out noise points
-        data = data[labels != -1]
+        ]))
 
         # publish clustered points message
         cluster_msg = msgify(PointCloud2, data)
@@ -65,7 +66,7 @@ class PointsClusterer:
         cluster_msg.header.frame_id = msg.header.frame_id
         self.cluster_pub.publish(cluster_msg)
 
-        rospy.logdebug("%d points, %d clusters", len(points), np.max(labels) + 1)
+        rospy.logdebug("%s - %d points, %d clusters", rospy.get_name(), len(points), np.max(labels) + 1)
 
     def run(self):
         rospy.spin()

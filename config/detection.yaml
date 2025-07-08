@@ -1,14 +1,43 @@
+output_frame: map
+
 lidar:
-  ground_removal:
-    min_x: -60.0
-    max_x: 60.0
-    min_y: -60.0
-    max_y: 60.0
-    min_z: -3.0
-    max_z: 0.1
-    cell_size: 0.6
-    tolerance: 0.15
-    filter: none                    # none, median, average
+  center:
+    ground_removal:
+      min_x: -60.0
+      max_x: 60.0
+      min_y: -60.0
+      max_y: 60.0
+      min_z: -2.5
+      max_z: 0.1
+      cell_size: 0.6
+      tolerance: 0.15
+      filter: average                    # none, median, average, minimum
+      filter_size: 3
+  front:
+    crop_box:
+      min_x: -1.0
+      max_x: 1.0
+      min_y: -1.0
+      max_y: 1.0
+      min_z: -1.0
+      max_z: 1.0
+      negative: True
+      input_frame: lidar_center
+      output_frame: lidar_center
+    ground_removal:
+      min_x: -60.0
+      max_x: 60.0
+      min_y: -60.0
+      max_y: 60.0
+      min_z: -2.0
+      max_z: 0.5
+      cell_size: 0.6
+      tolerance: 0.15
+      filter: average                    # none, median, average, minimum
+      filter_size: 3
+  points_concatenator:
+    transform_timeout: 0.06
+    min_range_front: 1.2  # radius value within which the points from ouster are discarded. Done after transforming to lidar_center frame
   points_clusterer:
     sample_size: 10000
     cluster_epsilon: 1.0
@@ -18,14 +47,68 @@ lidar:
     bounding_box_type: axis_aligned # axis_aligned, min_area
     enable_pointcloud: False
     enable_convex_hull: True
-    target_frame: map
-    transform_timeout: 0.05         # needed for Carla
+    transform_timeout: 0.06         # needed for Carla
+
+  sfa_detector:
+    min_z: -2.73
+    max_z: 1.27
+    score_thresh: 0.2
+    top_k: 50
+    transform_timeout: 0.06
 
   vella_detector:
     confidence_filter: 0.5
     track_length_filter: 0
     lidar_frame: lidar_center
-    output_frame: map
+    transform_timeout: 0.06
+
+radar:
+  radar_detector:
+    consistency_check: 5 # Number of consecutive detections over which a radar object is detected before it is published/used further
+    transform_timeout: 0.06
+
+lidar_radar_fusion:
+  radar_speed_threshold: 0.6 # Threshold for filtering out stationary objects based on speed
+  association_method: euclidean   # iou, euclidean
+  max_euclidean_distance: 2.0
 
 obstacle_simulation:
   publish_rate: 10
+
+ema_tracker:
+  detection_counter_threshold: 2
+  missed_counter_threshold: 2
+  velocity_gain: 0.1
+  acceleration_gain: 0.1
+  association_method: iou   # iou, euclidean
+  max_euclidean_distance: 2.0
+
+naive_predictor:
+  prediction_horizon: 1.0
+  prediction_interval: 0.1
+
+mqtt_traffic_light_detector:
+  mqtt_host: mqtt.cloud.ut.ee
+  mqtt_port: 8883
+  mqtt_topic: Tartu/#
+  timeout: 2.0
+  id_string: " api"      # string added to traffic light result and displayed in rviz
+
+traffic_light_majority_merger:
+  id_string: " cam"      # string added to traffic light result and displayed in rviz
+  
+camera_fl:
+  camera_traffic_light_detector_left:
+    traffic_light_bulb_radius: 0.1    # meters
+    radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
+    min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
+    rectify_image: False  # the distortions of Mako cameras are so small they don't matter
+    transform_timeout: 0.06
+
+camera_fr:
+  camera_traffic_light_detector_right:
+    traffic_light_bulb_radius: 0.1    # meters
+    radius_to_roi_multiplier: 8.0  # multiplier for radius to get roi size
+    min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
+    rectify_image: False  # the distortions of Mako cameras are so small they don't matter
+    transform_timeout: 0.06

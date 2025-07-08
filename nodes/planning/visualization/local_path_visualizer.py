@@ -2,24 +2,23 @@
 
 import rospy
 from autoware_msgs.msg import Lane
-from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
-from helpers import get_point_and_orientation_on_path_within_distance, get_distance_between_two_points
+from helpers.waypoints import get_point_and_orientation_on_path_within_distance
 
 class LocalPathVisualizer:
     def __init__(self):
 
         # Parameters
-        self.car_safety_radius = rospy.get_param("/planning/local_planner/car_safety_radius", 1.3)
-        self.current_pose_to_car_front = rospy.get_param("/planning/local_planner/current_pose_to_car_front", 4.0)
-        self.braking_safety_distance = rospy.get_param("/planning/local_planner/braking_safety_distance", 2.0)
+        self.car_safety_radius = rospy.get_param("car_safety_radius")
+        self.current_pose_to_car_front = rospy.get_param("current_pose_to_car_front")
+        self.braking_safety_distance = rospy.get_param("braking_safety_distance")
 
         # Publishers
-        self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, latch=True)
+        self.local_path_markers_pub = rospy.Publisher('local_path_markers', MarkerArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('local_path', Lane, self.local_path_callback, queue_size=1)
+        rospy.Subscriber('local_path', Lane, self.local_path_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
 
     def local_path_callback(self, lane):
         marker_array = MarkerArray()
@@ -65,10 +64,11 @@ class LocalPathVisualizer:
 
             stop_position, stop_orientation = get_point_and_orientation_on_path_within_distance(lane.waypoints, 0, lane.waypoints[0].pose.pose.position, lane.closest_object_distance + self.current_pose_to_car_front - self.braking_safety_distance)
 
-            if lane.closest_object_velocity < 1.0:
-                color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
-            else:
+            color = ColorRGBA(0.0, 1.0, 0.0, 0.5)
+            if lane.is_blocked:
                 color = ColorRGBA(1.0, 1.0, 0.0, 0.5)
+                if lane.closest_object_velocity < 1.0:
+                    color = ColorRGBA(1.0, 0.0, 0.0, 0.5)
 
             marker = Marker()
             marker.header.frame_id = lane.header.frame_id

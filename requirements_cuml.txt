@@ -1,0 +1,2 @@
+--extra-index-url https://pypi.nvidia.com/
+cuml-cu11 == 23.4.1

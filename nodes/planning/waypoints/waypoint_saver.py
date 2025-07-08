@@ -2,14 +2,16 @@
 
 import math
 import csv
+import traceback
 import rospy
 import message_filters
-import tf
 
 from autoware_msgs.msg import WaypointState, VehicleStatus
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import ColorRGBA
+
+from helpers.geometry import get_heading_from_orientation
 
 VEHICLE_STATUS_LAMP_TO_WAYPOINT_STATE_MAP = {
     0: WaypointState.STR_STRAIGHT,
@@ -22,8 +24,8 @@ class WaypointSaver:
     def __init__(self):
 
         # Parameters
-        self.interval = rospy.get_param("~interval", 1.0)
-        self.waypoints_file = rospy.get_param("~waypoints_file", "/tmp/waypoints.csv")
+        self.interval = rospy.get_param("~interval")
+        self.waypoints_file = rospy.get_param("~waypoints_file")
 
         # Internal params
         self.written_x = 0  # last x coordinate written into text file, kept to calculate distance interval
@@ -38,20 +40,20 @@ class WaypointSaver:
         self.writer.writerow(['x', 'y', 'z', 'yaw', 'velocity', 'change_flag', 'steering_flag', 'accel_flag', 'stop_flag', 'event_flag'])
 
         # Publishers
-        self.waypoint_marker_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=1)
+        self.waypoint_marker_pub = rospy.Publisher('path_markers', MarkerArray, queue_size=10, latch=True, tcp_nodelay=True)
 
         # Subscribers
-        self.current_pose_sub = message_filters.Subscriber('/localization/current_pose', PoseStamped, queue_size=1)
-        self.current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1)
-        self.turn_rpt_sub = rospy.Subscriber('/vehicle/vehicle_status', VehicleStatus, self.vehicle_status_callback, queue_size=1)
+        self.current_pose_sub = message_filters.Subscriber('/localization/current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
+        self.current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
+        self.turn_rpt_sub = rospy.Subscriber('/vehicle/vehicle_status', VehicleStatus, self.vehicle_status_callback, queue_size=1, tcp_nodelay=True)
 
         # Sync 2 source topics in callback
         ts = message_filters.ApproximateTimeSynchronizer([self.current_pose_sub, self.current_velocity_sub], queue_size=2, slop=0.02)
         ts.registerCallback(self.data_callback)
 
         # loginfo
-        rospy.loginfo("waypoint_saver - interval: %i m", self.interval)
-        rospy.loginfo("waypoint_saver - save to %s ", self.waypoints_file)
+        rospy.loginfo("%s - interval: %i m", rospy.get_name(), self.interval)
+        rospy.loginfo("%s - save to %s ", rospy.get_name(), self.waypoints_file)
 
 
     def vehicle_status_callback(self, vehicle_status_msg):
@@ -59,26 +61,31 @@ class WaypointSaver:
 
     def data_callback(self, current_pose, current_velocity):
         
-        x = current_pose.pose.position.x
-        y = current_pose.pose.position.y
+        try:
 
-        # distance between current and last written waypoint coordinates
-        distance = math.sqrt((self.written_x - x) ** 2 + (self.written_y - y) ** 2)
+            x = current_pose.pose.position.x
+            y = current_pose.pose.position.y
 
-        if distance >= self.interval:
-            # calculate current_heading
-            current_heading = get_current_heading_degrees(current_pose.pose.orientation)
-            # write data to waypoints.csv file
-            self.write_to_waypoints_file(x, y, current_pose.pose.position.z, current_heading, current_velocity.twist.linear.x, self.turn_signal)
-            # create and publish a marker of the waypoint
-            self.publish_wp_marker(current_pose, current_velocity.twist.linear.x)
+            # distance between current and last written waypoint coordinates
+            distance = math.sqrt((self.written_x - x) ** 2 + (self.written_y - y) ** 2)
 
-            # update stored values
-            self.written_x = x
-            self.written_y = y
+            if distance >= self.interval:
+                # calculate current_heading
+                current_heading = math.degrees(get_heading_from_orientation(current_pose.pose.orientation))
+                # write data to waypoints.csv file
+                self.write_to_waypoints_file(x, y, current_pose.pose.position.z, current_heading, current_velocity.twist.linear.x, self.turn_signal)
+                # create and publish a marker of the waypoint
+                self.publish_wp_marker(current_pose, current_velocity.twist.linear.x)
 
-            # increment wp_id
-            self.wp_id += 1
+                # update stored values
+                self.written_x = x
+                self.written_y = y
+
+                # increment wp_id
+                self.wp_id += 1
+
+        except Exception as e:
+            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
     def write_to_waypoints_file(self, x, y, z, yaw, v, steering_flag):
         
@@ -128,13 +135,6 @@ class WaypointSaver:
 
     def run(self):
         rospy.spin()
-
-def get_current_heading_degrees(orientation):
-    # convert quaternion to euler angles
-    quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
-    _, _, yaw = tf.transformations.euler_from_quaternion(quaternion)
-
-    return math.degrees(yaw)
 
 
 if __name__ == '__main__':

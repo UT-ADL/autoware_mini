@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (c) 2023 Autonomous Driving Lab (ADL), University of Tartu.
 #
@@ -9,16 +9,13 @@ ground truth detections. Publishes the following topics:
     receive :derived_object_msgs::ObjectArray and publishes autoware_msgs::DetectedObjectArray
 """
 import rospy
-import math
-import cv2
 
 from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import PolygonStamped, Point
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
-from tf.transformations import euler_from_quaternion
 from derived_object_msgs.msg import ObjectArray, Object
 from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
-
+from helpers.detection import create_hull
 
 CLASS_ID_TO_LABEL = {
     Object.CLASSIFICATION_UNKNOWN: 'unknown',
@@ -42,10 +39,11 @@ class CarlaDetector:
     def __init__(self):
 
         # Node parameters
-        self.use_offset = rospy.get_param("~use_offset", default=True)
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
+        self.use_offset = rospy.get_param("/carla/use_offset")
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
+        self.output_frame = rospy.get_param("/detection/output_frame")
 
         # Internal parameters
         self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
@@ -54,11 +52,11 @@ class CarlaDetector:
 
         # Publishers
         self.detected_objects_pub = rospy.Publisher(
-            'detected_objects', DetectedObjectArray, queue_size=1)
+            'detected_objects', DetectedObjectArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
         rospy.Subscriber('/carla/ground_truth_objects',
-                         ObjectArray, self.carla_objects_callback, queue_size=1)
+                         ObjectArray, self.carla_objects_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
 
     def carla_objects_callback(self, data):
         """
@@ -77,7 +75,7 @@ class CarlaDetector:
             object_msg.color = YELLOW80P
             object_msg.score = 1
             object_msg.valid = True
-            object_msg.space_frame = 'map'
+            object_msg.space_frame = self.output_frame
             object_msg.pose = obj.pose
 
             if self.use_offset:
@@ -88,7 +86,7 @@ class CarlaDetector:
             object_msg.dimensions.z = obj.shape.dimensions[2]
             object_msg.velocity = obj.twist
             object_msg.acceleration = obj.accel
-            object_msg.convex_hull = self.produce_hull(object_msg.pose, object_msg.dimensions, object_msg.header)
+            object_msg.convex_hull = create_hull(object_msg, self.output_frame, object_msg.header.stamp)
             object_msg.pose_reliable = True
             object_msg.velocity_reliable = True
             object_msg.acceleration_reliable = True
@@ -98,27 +96,6 @@ class CarlaDetector:
 
         # Publish converted detected objects
         self.detected_objects_pub.publish(objects_msg)
-
-    def produce_hull(self, obj_pose, obj_dims, header):
-        """
-        create hull for a given pose and dimension
-        """
-
-        convex_hull = PolygonStamped()
-        convex_hull.header = header
-
-        # compute heading angle from object's orientation
-        _, _, heading  = euler_from_quaternion((obj_pose.orientation.x, obj_pose.orientation.y, obj_pose.orientation.z, obj_pose.orientation.w))
-
-        # use cv2.boxPoints to get a rotated rectangle given the angle
-        points = cv2.boxPoints((
-                                (obj_pose.position.x, obj_pose.position.y),
-                                (obj_dims.x, obj_dims.y),
-                                math.degrees(heading)
-                                ))
-        convex_hull.polygon.points = [Point(x, y, obj_pose.position.z) for x, y in points]
-
-        return convex_hull
 
     def run(self):
         rospy.spin()

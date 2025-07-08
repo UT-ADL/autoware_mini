@@ -2,30 +2,31 @@
 
 import rospy
 import csv
-import tf
 import math
 
 from autoware_msgs.msg import Lane, Waypoint
+
+from helpers.geometry import get_orientation_from_heading
 
 class WaypointLoader:
     def __init__(self):
 
         # Parameters
         self.waypoints_file = rospy.get_param("~waypoints_file")
-        self.output_frame = rospy.get_param("~output_frame", "map")
-        self.wp_left_width = rospy.get_param("~wp_left_width", 1.4)
-        self.wp_right_width = rospy.get_param("~wp_right_width", 1.4)
+        self.output_frame = rospy.get_param("~output_frame")
+        self.wp_left_width = rospy.get_param("~wp_left_width")
+        self.wp_right_width = rospy.get_param("~wp_right_width")
 
         # Publishers
-        self.waypoints_pub = rospy.Publisher('global_path', Lane, queue_size=1, latch=True)
+        self.waypoints_pub = rospy.Publisher('global_path', Lane, queue_size=10, latch=True, tcp_nodelay=True)
 
         self.waypoints = self.load_waypoints(self.waypoints_file)
         self.publish_waypoints()  
 
         if len(self.waypoints) == 0:
-            rospy.logerr("waypoint_loader - no waypoints found in file: %s ", self.waypoints_file)
+            rospy.logerr("%s - no waypoints found in file: %s ", rospy.get_name(), self.waypoints_file)
         else:
-            rospy.loginfo("waypoint_loader - %i waypoints published from file: %s" % (len(self.waypoints), self.waypoints_file))
+            rospy.loginfo("%s - %i waypoints published from file: %s", rospy.get_name(), len(self.waypoints), self.waypoints_file)
         
     def load_waypoints(self, waypoints_file):
         
@@ -53,12 +54,8 @@ class WaypointLoader:
                 waypoint.pose.pose.position.z = float(row[2])
 
                 # convert yaw (contains heading in waypoints file) to quaternion
-                x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, math.radians(float(row[3])))
-                waypoint.pose.pose.orientation.x = x
-                waypoint.pose.pose.orientation.y = y
-                waypoint.pose.pose.orientation.z = z
-                waypoint.pose.pose.orientation.w = w
-
+                waypoint.pose.pose.orientation = get_orientation_from_heading(math.radians(float(row[3])))
+                # set waypoint velocity
                 waypoint.twist.twist.linear.x = float(row[4])
 
                 # set waypoint flags

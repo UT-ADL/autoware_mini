@@ -3,7 +3,7 @@
 import rospy
 import numpy as np
 from autoware_msgs.msg import Lane, Waypoint
-from helpers import get_orientation_from_yaw, debug_plots_path_smoothing
+from helpers.geometry import get_orientation_from_heading
 
 
 class PathSmoothing:
@@ -11,21 +11,21 @@ class PathSmoothing:
     def __init__(self):
 
         # Parameters
-        self.waypoint_interval = rospy.get_param("~waypoint_interval", 1.0)
-        self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves", True)
-        self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration", True)
-        self.adjust_endpoint_speed_to_zero = rospy.get_param("~adjust_endpoint_speed_to_zero", True)
-        self.speed_deceleration_limit = rospy.get_param("~speed_deceleration_limit", 1.0)
-        self.speed_averaging_window = rospy.get_param("~speed_averaging_window", 21)
-        self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index", 4)
-        self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit", 3.0)
-        self.output_debug_info = rospy.get_param("~output_debug_info", False)
+        self.waypoint_interval = rospy.get_param("~waypoint_interval")
+        self.adjust_speeds_in_curves = rospy.get_param("~adjust_speeds_in_curves")
+        self.adjust_speeds_using_deceleration = rospy.get_param("~adjust_speeds_using_deceleration")
+        self.adjust_endpoint_speed_to_zero = rospy.get_param("~adjust_endpoint_speed_to_zero")
+        self.speed_deceleration_limit = rospy.get_param("speed_deceleration_limit")
+        self.speed_averaging_window = rospy.get_param("~speed_averaging_window")
+        self.radius_calc_neighbour_index = rospy.get_param("~radius_calc_neighbour_index")
+        self.lateral_acceleration_limit = rospy.get_param("~lateral_acceleration_limit")
+        self.output_debug_info = rospy.get_param("~output_debug_info")
 
         # Publishers
-        self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=1, latch=True)
+        self.smoothed_path_pub = rospy.Publisher('smoothed_path', Lane, queue_size=10, latch=True, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=1)
+        rospy.Subscriber('global_path', Lane, self.global_path_callback, queue_size=None, tcp_nodelay=True)
 
 
     def global_path_callback(self, msg):
@@ -156,7 +156,7 @@ class PathSmoothing:
         waypoint.pose.pose.position.z = z
         waypoint.wpstate.steering_state = int(blinker)
         waypoint.twist.twist.linear.x = speed
-        waypoint.pose.pose.orientation = get_orientation_from_yaw(yaw)
+        waypoint.pose.pose.orientation = get_orientation_from_heading(yaw)
         waypoint.dtlane.lw = lw
         waypoint.dtlane.rw = rw
 
@@ -195,6 +195,42 @@ def calculate_radius_step_n_triangle_equation(x, y, n):
     radius = np.append(radius, np.repeat(radius[-1], n))
 
     return radius
+
+def debug_plots_path_smoothing(x_path, y_path, z_path, blinker, x_new, y_new, z_new, blinker_new, distances, new_distances, speed, speed_new):
+
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.subplots()
+    ax.scatter(x_path,y_path, color = 'blue')
+    ax.scatter(x_new, y_new, color = 'red', marker = 'x', alpha = 0.5, label = 'interpolated')
+    plt.legend()
+    plt.show()
+
+    # new plot for heights 
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.subplots()
+    ax.scatter(new_distances, z_new, color = 'red', marker = 'x', alpha = 0.5, label = 'height interpolated')
+    ax.plot(new_distances, z_new, color = 'red', alpha = 0.5, label = 'height interpolated')
+    ax.scatter(distances, z_path, color = 'blue', alpha = 0.5, label = 'height old')
+    plt.legend()
+    plt.show()
+
+    # new plot for blinkers
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.subplots()
+    ax.scatter(new_distances, blinker_new, color = 'red', marker = 'x', alpha = 0.5, label = 'blinker interpolated')
+    ax.plot(new_distances, blinker_new, color = 'red', alpha = 0.5, label = 'blinker interpolated')
+    ax.scatter(distances, blinker, color = 'blue', alpha = 0.5, label = 'blinker old')
+    plt.legend()
+    plt.show()
+
+    # new plot for speed
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.subplots()
+    ax.scatter(new_distances, speed_new * 3.6, color = 'red', marker = 'x', alpha = 0.5, label = 'speed interpolated')
+    ax.plot(new_distances, speed_new * 3.6, color = 'red', alpha = 0.5, label = 'speed interpolated')
+    ax.scatter(distances, speed * 3.6, color = 'blue', alpha = 0.5, label = 'speed old')
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':

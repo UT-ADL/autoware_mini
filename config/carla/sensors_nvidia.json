@@ -135,7 +135,14 @@
                                 {
                                     "type": "sensor.other.imu",
                                     "id": "lidar_front/os_sensor",
-                                    "spawn_point": {"x": 0.8559, "y": 0.0642, "z": -0.4051, "roll": 0.003995038, "pitch": -0.009182, "yaw": 0.8641542}
+                                    "spawn_point": {"x": 0.8559, "y": 0.0642, "z": -0.4051, "roll": 0.003995038, "pitch": -0.009182, "yaw": 0.8641542},
+                                    "range": 120,
+                                    "channels": 128,
+                                    "points_per_second": 2621440,
+                                    "upper_fov": 22.5,
+                                    "lower_fov": -22.5,
+                                    "rotation_frequency": 10,
+                                    "noise_stddev": 0.0
                                 }
                             ]
                         },

@@ -1,40 +1,35 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="detector"            default="cluster"   doc="cluster,vella,carla,sim" />
-    <arg name="tfl_detector"        default="none"      doc="carla" />
-    <arg name="lanelet2_map_name"   default="tartu_demo_l_c_wp.osm" doc="for carla traffic light detector" />
-    <arg name="use_lidar_center"    default="true"      doc="whether to use center lidar for detection" />
+    <arg name="detector"            default="lidar_cluster"     doc="lidar_cluster,lidar_sfa,lidar_vella,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion,carla,sim" />
+    <arg name="use_lidar_center"    default="true"              doc="use velodyne lidar"/>
+    <arg name="use_lidar_front"     default="false"             doc="use ouster lidar"/>
+    <arg name="tfl_detector"        default="none"              doc="carla, mqtt, camera, mqtt_camera_fusion" />
+    <arg name="lanelet2_map_name"   default="tartu_demo.osm"    doc="for carla traffic light detector" />
+    <arg name="tracker"             default="ema"               doc="none, ema" />
+    <arg name="predictor"           default="none"              doc="none, naive" />
+    <arg name="more_visualizations" default="false"             doc="By default only visualize final detections" />
 
     <group ns="detection">
-        <group ns="lidar">
-            <remap if="$(arg use_lidar_center)" from="points_raw" to="/lidar_center/points_raw" />
-            <remap from="detected_objects" to="/detection/detected_objects" />
-            
-            <include if="$(eval arg('detector')=='cluster')" file="$(find autoware_mini)/launch/detection/lidar_cluster.launch" />
-        </group>
-        
-        <!-- Carla's ground truth objects -->
-        <node if="$(eval arg('detector')=='carla')" pkg="autoware_mini" type="carla_detector.py" name="carla_detector" output="screen" required="true" />
 
-        <!-- Carla's ground truth traffic lights -->
-        <node if="$(eval arg('tfl_detector')=='carla')" pkg="autoware_mini" type="carla_traffic_light_detector.py" name="carla_traffic_light_detector" output="screen" required="true">
-            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/lanelet2/$(arg lanelet2_map_name)" />
-        </node>
+        <!-- Obstacle detection -->
+        <include file="$(find autoware_mini)/launch/detection/object_detection.launch">
+            <arg name="detector"            value="$(arg detector)" />
+            <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
+            <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
+            <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+            <arg name="tracker"             value="$(arg tracker)" />
+            <arg name="predictor"           value="$(arg predictor)" />
+            <arg name="more_visualizations" value="$(arg more_visualizations)" />
+        </include>
 
-        <!-- Velodyne Vella detections -->
-        <group if="$(eval arg('detector')=='vella')">
-<!--        <node pkg="autoware_mini" type="vella_detector.sh" name="vella_detector" args="2.11
-            $(find autoware_mini)/config/vella/vella_extrinsics.yaml /localization/odometry 2" output="screen" required="true" /> -->
-            <node pkg="autoware_mini" type="vella_detector.py" name="vella_detector" output="screen" required="true" />
-        </group>
-
-        <!-- Obstacle simulator -->
-        <node if="$(eval arg('detector')=='sim')" pkg="autoware_mini" type="obstacle_simulation.py" name="obstacle_simulation" output="screen" required="true" />
-
-        <!-- Detected objects visualizer -->
-        <node type="detected_objects_visualizer.py" name="detected_objects_visualizer" pkg="autoware_mini" output="screen" required="true" />
+        <!-- Traffic light detection -->
+        <include file="$(find autoware_mini)/launch/detection/traffic_light_detection.launch">
+            <arg name="tfl_detector"        value="$(arg tfl_detector)" />
+            <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+        </include>
 
         <rosparam command="load" file="$(find autoware_mini)/config/detection.yaml"/>
+
     </group>
 
 </launch>

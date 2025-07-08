@@ -2,6 +2,7 @@
 
 import math
 import sys
+import traceback
 
 import rospy
 import message_filters
@@ -25,18 +26,18 @@ TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP = {
 class SSCInterface:
     def __init__(self):
         # get parameters
-        self.use_adaptive_gear_ratio = rospy.get_param('~use_adaptive_gear_ratio', True)
-        self.enable_reverse_motion = rospy.get_param('~enable_reverse_motion', False)
-        self.command_timeout = rospy.get_param('~command_timeout', 200)
-        self.wheel_base = rospy.get_param('wheel_base', 2.789)
-        self.ssc_gear_ratio = rospy.get_param('~ssc_gear_ratio', 16.135)
-        self.acceleration_limit = rospy.get_param('~acceleration_limit', 1.0)
-        self.deceleration_limit = rospy.get_param('~deceleration_limit', 1.0)
-        self.max_curvature_rate = rospy.get_param('~max_curvature_rate', 0.15)
-        self.agr_coef_a = rospy.get_param('~agr_coef_a', 15.713)
-        self.agr_coef_b = rospy.get_param('~agr_coef_b', 0.053)
-        self.agr_coef_c = rospy.get_param('~agr_coef_c', 0.042)
-        self.max_speed = rospy.get_param('~max_speed', 30.0)
+        self.use_adaptive_gear_ratio = rospy.get_param('~use_adaptive_gear_ratio')
+        self.enable_reverse_motion = rospy.get_param('~enable_reverse_motion')
+        self.command_timeout = rospy.get_param('~command_timeout')
+        self.wheel_base = rospy.get_param('wheel_base')
+        self.ssc_gear_ratio = rospy.get_param('~ssc_gear_ratio')
+        self.acceleration_limit = rospy.get_param('acceleration_limit')
+        self.deceleration_limit = rospy.get_param('deceleration_limit')
+        self.max_curvature_rate = rospy.get_param('~max_curvature_rate')
+        self.agr_coef_a = rospy.get_param('~agr_coef_a')
+        self.agr_coef_b = rospy.get_param('~agr_coef_b')
+        self.agr_coef_c = rospy.get_param('~agr_coef_c')
+        self.max_speed = rospy.get_param('~max_speed')
 
         # initialize variables
         self.engage = False
@@ -45,30 +46,30 @@ class SSCInterface:
         self.turn_signals = SystemRptInt.TURN_NONE
         
         # initialize SSC command publishers
-        self.speed_mode_pub = rospy.Publisher('/ssc/arbitrated_speed_commands', SpeedMode, queue_size=1)
-        self.steer_mode_pub = rospy.Publisher('/ssc/arbitrated_steering_commands', SteerMode, queue_size=1)
-        self.turn_signal_pub = rospy.Publisher('/ssc/turn_signal_command', TurnSignalCommand, queue_size=1)
-        self.gear_pub = rospy.Publisher('/ssc/gear_select', GearCommand, queue_size=1)
+        self.speed_mode_pub = rospy.Publisher('/ssc/arbitrated_speed_commands', SpeedMode, queue_size=1, tcp_nodelay=True)
+        self.steer_mode_pub = rospy.Publisher('/ssc/arbitrated_steering_commands', SteerMode, queue_size=1, tcp_nodelay=True)
+        self.turn_signal_pub = rospy.Publisher('/ssc/turn_signal_command', TurnSignalCommand, queue_size=1, tcp_nodelay=True)
+        self.gear_pub = rospy.Publisher('/ssc/gear_select', GearCommand, queue_size=1, tcp_nodelay=True)
 
         # initialize vehicle status publisher
-        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1)
+        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1, tcp_nodelay=True)
 
         # initialize command subscribers
-        rospy.Subscriber('engage', Bool, self.engage_callback, queue_size=1)
-        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
+        rospy.Subscriber('engage', Bool, self.engage_callback, queue_size=None, tcp_nodelay=True)
+        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1, tcp_nodelay=True)
 
         # initialize SSC feedback subscribers
-        rospy.Subscriber('/ssc/module_states', ModuleState, self.module_states_callback, queue_size=1)
+        rospy.Subscriber('/ssc/module_states', ModuleState, self.module_states_callback, queue_size=1, tcp_nodelay=True)
         message_filters.ApproximateTimeSynchronizer([
-                message_filters.Subscriber('/ssc/curvature_feedback', CurvatureFeedback), 
-                message_filters.Subscriber('/ssc/throttle_feedback', ThrottleFeedback),
-                message_filters.Subscriber('/ssc/brake_feedback', BrakeFeedback),
-                message_filters.Subscriber('/ssc/gear_feedback', GearFeedback),
-                message_filters.Subscriber('/ssc/steering_feedback', SteeringFeedback),
-                message_filters.Subscriber('/ssc/velocity_accel_cov', VelocityAccelCov)
+                message_filters.Subscriber('/ssc/curvature_feedback', CurvatureFeedback, queue_size=1, tcp_nodelay=True), 
+                message_filters.Subscriber('/ssc/throttle_feedback', ThrottleFeedback, queue_size=1, tcp_nodelay=True),
+                message_filters.Subscriber('/ssc/brake_feedback', BrakeFeedback, queue_size=1, tcp_nodelay=True),
+                message_filters.Subscriber('/ssc/gear_feedback', GearFeedback, queue_size=1, tcp_nodelay=True),
+                message_filters.Subscriber('/ssc/steering_feedback', SteeringFeedback, queue_size=1, tcp_nodelay=True),
+                message_filters.Subscriber('/ssc/velocity_accel_cov', VelocityAccelCov, queue_size=1, tcp_nodelay=True)
             ], queue_size=2, slop=1.0/30.0).registerCallback(self.ssc_feedbacks_callback)
         # take turn signal info from Pacmod, because it is not available from SSC
-        rospy.Subscriber('/pacmod/turn_rpt', SystemRptInt, self.turn_rpt_callback, queue_size=1)
+        rospy.Subscriber('/pacmod/turn_rpt', SystemRptInt, self.turn_rpt_callback, queue_size=1, tcp_nodelay=True)
 
         # initialize timeout timer
         self.alive = False
@@ -89,8 +90,8 @@ class SSCInterface:
             desired_mode = int(self.engage)
             desired_speed = min(self.max_speed / 3.6, abs(msg.ctrl_cmd.linear_velocity))
         else:
-            rospy.logwarn("Invalid vehicle command: gear = %d, velocity = %lf", msg.gear_cmd.gear, msg.ctrl_cmd.linear_velocity)
-            rospy.logwarn("Disengaging autonomy")
+            rospy.logwarn("%s - invalid vehicle command: gear = %d, velocity = %lf", rospy.get_name(), msg.gear_cmd.gear, msg.ctrl_cmd.linear_velocity)
+            rospy.logwarn("%s - disengaging autonomy", rospy.get_name())
             # if not valid command then disengage
             desired_mode = 0
             desired_speed = 0.0
@@ -110,7 +111,7 @@ class SSCInterface:
             desired_gear = msg.gear_cmd.gear
             # refuse REVERSE gear when not enabled
             if desired_gear == Gear.REVERSE and not self.enable_reverse_motion:
-                rospy.logerr("Reverse gear ignored, reverse motion not enabled")
+                rospy.logerr("%s - reverse gear ignored, reverse motion not enabled", rospy.get_name())
                 desired_gear = Gear.NONE
 
         # calculate desired turn signal for SSC
@@ -127,14 +128,25 @@ class SSCInterface:
 
         # emergency mode stops the car
         if msg.emergency == 1:
-            rospy.logerr("Emergency stopping, speed overridden to 0")
+            rospy.logerr("%s - emergency stopping, speed overridden to 0", rospy.get_name())
             desired_speed = 0.0
+
+        # calculate acceleration and deceleration limits
+        if msg.ctrl_cmd.linear_acceleration == 0.0:
+            acceleration_limit = self.acceleration_limit
+            deceleration_limit = self.deceleration_limit
+        elif msg.ctrl_cmd.linear_acceleration > 0.0:
+            acceleration_limit = msg.ctrl_cmd.linear_acceleration
+            deceleration_limit = self.deceleration_limit
+        elif msg.ctrl_cmd.linear_acceleration < 0.0:
+            acceleration_limit = self.acceleration_limit
+            deceleration_limit = -msg.ctrl_cmd.linear_acceleration
 
         # publish command messages
         header = Header()
         header.stamp = msg.header.stamp
         header.frame_id = 'base_link'
-        self.publish_speed_command(header, desired_mode, desired_speed)
+        self.publish_speed_command(header, desired_mode, desired_speed, acceleration_limit, deceleration_limit)
         self.publish_steer_command(header, desired_mode, desired_curvature)
         self.publish_turn_command(header, desired_mode, desired_turn_signal)
         self.publish_gear_command(header, desired_gear)
@@ -144,8 +156,8 @@ class SSCInterface:
 
     def timeout_callback(self, event=None):
         if not self.alive and self.engage:
-            rospy.logerr("Did not receive any commands for at least %d ms", self.command_timeout)
-            rospy.logerr("Disengaging autonomy until re-enabled")
+            rospy.logerr("%s - did not receive any commands for at least %d ms", rospy.get_name(), self.command_timeout)
+            rospy.logerr("%s - disengaging autonomy until re-enabled", rospy.get_name())
             self.engage = False
 
             # send dummy commands to keep SSC alive
@@ -172,55 +184,60 @@ class SSCInterface:
                 self.engage = False
 
     def ssc_feedbacks_callback(self, curvature_msg, throttle_msg, brake_msg, gear_msg, steering_msg, velocity_accel_msg):
-        # calculate adaptive gear ratio, guard against division by zero later
-        self.adaptive_gear_ratio = max(self.agr_coef_a + self.agr_coef_b * velocity_accel_msg.velocity**2 - self.agr_coef_c * steering_msg.steering_wheel_angle, sys.float_info.min)
+        try:
 
-        # current steering curvature
-        if self.use_adaptive_gear_ratio:
-            curvature = math.tan(steering_msg.steering_wheel_angle / self.adaptive_gear_ratio) / self.wheel_base
-        else:
-            curvature = curvature_msg.curvature
+            # calculate adaptive gear ratio, guard against division by zero later
+            self.adaptive_gear_ratio = max(self.agr_coef_a + self.agr_coef_b * velocity_accel_msg.velocity**2 - self.agr_coef_c * steering_msg.steering_wheel_angle, sys.float_info.min)
 
-        vehicle_status = VehicleStatus()
-        vehicle_status.header.frame_id = 'base_link'
-        vehicle_status.header.stamp = rospy.Time.now()
+            # current steering curvature
+            if self.use_adaptive_gear_ratio:
+                curvature = math.tan(steering_msg.steering_wheel_angle / self.adaptive_gear_ratio) / self.wheel_base
+            else:
+                curvature = curvature_msg.curvature
 
-        # current drive and steering mode
-        if self.dbw_enabled:
-            vehicle_status.drivemode = VehicleStatus.MODE_AUTO
-        else:
-            vehicle_status.drivemode = VehicleStatus.MODE_MANUAL
-        vehicle_status.steeringmode = vehicle_status.drivemode
+            vehicle_status = VehicleStatus()
+            vehicle_status.header.frame_id = 'base_link'
+            vehicle_status.header.stamp = rospy.Time.now()
 
-        # current speed km/h
-        vehicle_status.speed = velocity_accel_msg.velocity * 3.6
-        
-        # current pedal positions [0,1000]
-        vehicle_status.drivepedal = int(1000 * throttle_msg.throttle_pedal)
-        vehicle_status.brakepedal = int(1000 * brake_msg.brake_pedal)
+            # current drive and steering mode
+            if self.dbw_enabled:
+                vehicle_status.drivemode = VehicleStatus.MODE_AUTO
+            else:
+                vehicle_status.drivemode = VehicleStatus.MODE_MANUAL
+            vehicle_status.steeringmode = vehicle_status.drivemode
 
-        # steering angle in radians
-        vehicle_status.angle = math.atan(curvature * self.wheel_base)
+            # current speed km/h
+            vehicle_status.speed = velocity_accel_msg.velocity * 3.6
+            
+            # current pedal positions [0,1000]
+            vehicle_status.drivepedal = int(1000 * throttle_msg.throttle_pedal)
+            vehicle_status.brakepedal = int(1000 * brake_msg.brake_pedal)
 
-        # current gear
-        vehicle_status.current_gear.gear = gear_msg.current_gear.gear
+            # steering angle in radians
+            vehicle_status.angle = math.atan(curvature * self.wheel_base)
 
-        # turn signals
-        vehicle_status.lamp = TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP[self.turn_signals]
+            # current gear
+            vehicle_status.current_gear.gear = gear_msg.current_gear.gear
 
-        # publish the status message
-        self.vehicle_status_pub.publish(vehicle_status)
+            # turn signals
+            vehicle_status.lamp = TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP[self.turn_signals]
+
+            # publish the status message
+            self.vehicle_status_pub.publish(vehicle_status)
+
+        except Exception as e:
+            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
     def turn_rpt_callback(self, turn_rpt_msg):
         self.turn_signals = turn_rpt_msg.output
 
-    def publish_speed_command(self, header, desired_mode, desired_speed):
+    def publish_speed_command(self, header, desired_mode, desired_speed, acceleration_limit=0.0, deceleration_limit=0.0):
         # publish speed command
         msg = SpeedMode(header = header)
         msg.mode = desired_mode
         msg.speed = desired_speed
-        msg.acceleration_limit = self.acceleration_limit
-        msg.deceleration_limit = self.deceleration_limit
+        msg.acceleration_limit = acceleration_limit
+        msg.deceleration_limit = deceleration_limit
         self.speed_mode_pub.publish(msg)
 
     def publish_steer_command(self, header, desired_mode, desired_curvature):

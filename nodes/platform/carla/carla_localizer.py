@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (c) 2023 Autonomous Driving Lab (ADL), University of Tartu.
 #
@@ -22,8 +22,8 @@ class CarlaLocalizer:
     def __init__(self):
 
         # Node parameters
-        self.use_offset = rospy.get_param("~use_offset", default=True)
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin", True)
+        self.use_offset = rospy.get_param("/carla/use_offset")
+        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
@@ -32,13 +32,13 @@ class CarlaLocalizer:
                                                               origin_lat=utm_origin_lat,
                                                               origin_lon=utm_origin_lon)
         # Publishers
-        self.pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=2)
-        self.twist_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=2)
-        self.odom_pub = rospy.Publisher('odometry', Odometry, queue_size=2)
+        self.pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
+        self.twist_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
+        self.odom_pub = rospy.Publisher('odometry', Odometry, queue_size=1, tcp_nodelay=True)
         self.br = tf.TransformBroadcaster()
 
         # Subscribers
-        rospy.Subscriber('/carla/odometry', Odometry, self.odometry_callback, queue_size=2)
+        rospy.Subscriber('/carla/odometry', Odometry, self.odometry_callback, queue_size=2, tcp_nodelay=True)
 
 
     def odometry_callback(self, msg):

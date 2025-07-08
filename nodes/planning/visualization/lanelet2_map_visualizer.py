@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
+import time
 from lanelet2.io import Origin, load
 from lanelet2.projection import UtmProjector
 
@@ -20,11 +21,18 @@ GREY = ColorRGBA(0.4, 0.4, 0.4, 0.6)
 ORANGE = ColorRGBA(1.0, 0.5, 0.0, 0.6)
 WHITE = ColorRGBA(1.0, 1.0, 1.0, 0.6)
 CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.3)
+WHITE100 = ColorRGBA(1.0, 1.0, 1.0, 1.0)
+
+TRAFFIC_LIGHT_STATE_TO_MARKER_COLOR = {
+    0: RED,     # red and yellow
+    1: GREEN,
+    2: WHITE
+}
 
 LANELET_COLOR_TO_MARKER_COLOR = {
     "red": RED,
     "yellow": YELLOW,
-    "green": GREEN
+    "green": GREEN,
 }
 
 class Lanelet2MapVisualizer:
@@ -43,7 +51,7 @@ class Lanelet2MapVisualizer:
         if coordinate_transformer == "utm":
             projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
         else:
-            rospy.logfatal("lanelet2_global_planner - only utm and custom origin currently supported for lanelet2 map loading")
+            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
             exit(1)
 
         self.lanelet2_map = load(lanelet2_map_name, projector)
@@ -52,14 +60,14 @@ class Lanelet2MapVisualizer:
         marker_array = visualize_lanelet2_map(self.lanelet2_map)
 
         # create MarkerArray publisher
-        markers_pub = rospy.Publisher('lanelet2_map_markers', MarkerArray, queue_size=1, latch=True)
+        markers_pub = rospy.Publisher('lanelet2_map_markers', MarkerArray, queue_size=10, latch=True, tcp_nodelay=True)
         markers_pub.publish(marker_array)
 
         # Special publisher for stop line markers
-        self.stop_line_markers_pub = rospy.Publisher('stop_line_markers', MarkerArray, queue_size=1, latch=True)
-        rospy.Subscriber("/detection/traffic_light_status", TrafficLightResultArray, self.traffic_light_status_callback)
+        self.stop_line_markers_pub = rospy.Publisher('stop_line_markers', MarkerArray, queue_size=10, latch=True, tcp_nodelay=True)
+        rospy.Subscriber("/detection/traffic_light_status", TrafficLightResultArray, self.traffic_light_status_callback, queue_size=1, tcp_nodelay=True)
 
-        rospy.loginfo("lanelet2_map_visualizer - map loaded with %i lanelets and %i regulatory elements from file: %s",
+        rospy.loginfo("%s - map loaded with %i lanelets and %i regulatory elements from file: %s", rospy.get_name(),
                       len(self.lanelet2_map.laneletLayer), len(self.lanelet2_map.regulatoryElementLayer), lanelet2_map_name)
 
     def traffic_light_status_callback(self, msg):
@@ -76,14 +84,24 @@ class Lanelet2MapVisualizer:
             points = [Point(x=p.x, y=p.y, z=p.z + 0.01) for p in stop_line]
 
             # choose the color of stopline based on the traffic light state
-            if result.recognition_result_str in LANELET_COLOR_TO_MARKER_COLOR:
-                color = LANELET_COLOR_TO_MARKER_COLOR[result.recognition_result_str]
+            if result.recognition_result in TRAFFIC_LIGHT_STATE_TO_MARKER_COLOR:
+                color = TRAFFIC_LIGHT_STATE_TO_MARKER_COLOR[result.recognition_result]
             else:
+                rospy.logwarn("%s - unrecognized traffic light state: %d", rospy.get_name(), result.recognition_result)
                 color = WHITE
+
+            # check if string contains "FLASH" string in it
+            if "FLASH" in result.recognition_result_str:
+                color = ColorRGBA(color.r, color.g, color.b, color.a * get_multiplier())
 
             # create linestring marker
             stopline_marker = linestring_to_marker(points, "Stop line", stop_line.id, color, 0.5, rospy.Time.now())
+
             marker_array.markers.append(stopline_marker)
+
+            # create traffic light status marker
+            text_marker = text_to_marker(result.recognition_result_str, points, "Status text", stop_line.id, WHITE100, 0.5, rospy.Time.now())
+            marker_array.markers.append(text_marker)
 
             # record the state of this stop line
             states[result.lane_id] = result.recognition_result_str
@@ -92,6 +110,13 @@ class Lanelet2MapVisualizer:
 
     def run(self):
         rospy.spin()
+
+
+def get_multiplier():
+    if time.time() % 1 < 0.5:
+        return 0.5
+    else:
+        return 1.0
 
 
 def visualize_lanelet2_map(map):
@@ -221,6 +246,34 @@ def linestring_to_marker(linestring, namespace, id, color, scale, stamp):
     # Add the points to the marker
     for point in linestring:
         marker.points.append(point)
+
+    return marker
+
+def text_to_marker(text, linestring, namespace, id, color, scale, stamp):
+    """
+    Creates a Marker from a text
+    :param text: text
+    :param namespace: Marker namespace
+    :param id: Marker id
+    :param color: Marker color
+    :param stamp: Marker timestamp
+    :return: Marker
+    """
+    # Create a Marker
+    marker = Marker()
+    marker.header.frame_id = "map"
+    marker.header.stamp = stamp
+    marker.ns = namespace
+    marker.id = id
+    marker.type = marker.TEXT_VIEW_FACING
+    marker.action = marker.ADD
+    marker.scale.z = scale
+    marker.color = color
+    marker.pose.position.x = (linestring[0].x + linestring[-1].x) / 2.0
+    marker.pose.position.y = (linestring[0].y + linestring[-1].y) / 2.0
+    marker.pose.position.z = (linestring[0].z + linestring[-1].z) / 2.0
+    marker.pose.orientation.w = 1.0
+    marker.text = text
 
     return marker
 

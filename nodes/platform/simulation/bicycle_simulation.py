@@ -4,7 +4,6 @@ import threading
 import math
 
 import rospy
-import tf
 from tf2_ros import TransformBroadcaster
 
 from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Quaternion, Point
@@ -13,39 +12,42 @@ from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 
+from helpers.geometry import get_orientation_from_heading, get_heading_from_orientation
+
 class BicycleSimulation:
 
     def __init__(self):
         # get parameters
-        self.publish_rate = rospy.get_param("~publish_rate", 50)
-        self.wheel_base = rospy.get_param("wheel_base", 2.789)
-        self.acceleration_limit = rospy.get_param("~acceleration_limit", 3.0)
-        self.deceleration_limit = rospy.get_param("~deceleration_limit", 3.0)
+        self.publish_rate = rospy.get_param("~publish_rate")
+        self.wheel_base = rospy.get_param("wheel_base")
+        self.acceleration_limit = rospy.get_param("acceleration_limit")
+        self.deceleration_limit = rospy.get_param("deceleration_limit")
 
         # internal state of bicycle model
-        self.x = 0
-        self.y = 0
-        self.acceleration = 0
-        self.velocity = 0
-        self.heading_angle = 0
-        self.steering_angle = 0
+        self.x = 0.0
+        self.y = 0.0
+        self.acceleration = 0.0
+        self.velocity = 0.0
+        self.heading_angle = 0.0
+        self.target_velocity = 0.0
+        self.steering_angle = 0.0
         self.orientation = Quaternion(0, 0, 0, 1)
         self.blinkers = 0
 
         # localization publishers
-        self.current_pose_pub = rospy.Publisher('/localization/current_pose', PoseStamped, queue_size=1)
-        self.current_velocity_pub = rospy.Publisher('/localization/current_velocity', TwistStamped, queue_size=1)
-        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1)
+        self.current_pose_pub = rospy.Publisher('/localization/current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
+        self.current_velocity_pub = rospy.Publisher('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
+        self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1, tcp_nodelay=True)
         self.br = TransformBroadcaster()
 
         # visualization of the bicycle model
-        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=1)
+        self.bicycle_markers_pub = rospy.Publisher('bicycle_markers', MarkerArray, queue_size=1, tcp_nodelay=True)
 
         # initial position and vehicle command from outside
-        rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
-        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1)
+        rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback, queue_size=None, tcp_nodelay=True)
+        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1, tcp_nodelay=True)
 
-        rospy.loginfo("bicycle_simulation - initialized")
+        rospy.loginfo("%s - initialized", rospy.get_name())
 
     def initialpose_callback(self, msg):
         # extract position
@@ -53,35 +55,30 @@ class BicycleSimulation:
         self.y = msg.pose.pose.position.y
 
         # extract heading angle from orientation
-        orientation = msg.pose.pose.orientation
-        quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
-        _, _, self.heading_angle = tf.transformations.euler_from_quaternion(quaternion)
+        self.heading_angle = get_heading_from_orientation(msg.pose.pose.orientation)
 
-        rospy.loginfo("bicycle_simulation - initial position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame", 
+        rospy.loginfo("%s - initial position (%f, %f, %f) orientation (%f, %f, %f, %f) in %s frame", rospy.get_name(), 
                     msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.position.z,
                     msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, 
                     msg.pose.pose.orientation.w, msg.header.frame_id)
 
     def vehicle_cmd_callback(self, msg):
-        # if target velocity is higher than current velocity
-        if msg.ctrl_cmd.linear_velocity > self.velocity + 0.0001:
-            # if acceleration is provided, use it, otherwise take from parameters
-            if msg.ctrl_cmd.linear_acceleration != 0:
-                self.acceleration = abs(msg.ctrl_cmd.linear_acceleration)
+        self.target_velocity = msg.ctrl_cmd.linear_velocity
+        # calculate acceleration based on limits
+        if self.target_velocity > self.velocity:
+            if msg.ctrl_cmd.linear_acceleration > 0.0:
+                self.acceleration = msg.ctrl_cmd.linear_acceleration
             else:
-                self.acceleration = abs(self.acceleration_limit)
-        # if target velocity is lower than current velocity
-        elif msg.ctrl_cmd.linear_velocity < self.velocity - 0.0001:
-            # if acceleration is provided, use it, otherwise take from parameters
-            if msg.ctrl_cmd.linear_acceleration != 0:
-                self.acceleration = -abs(msg.ctrl_cmd.linear_acceleration)
+                self.acceleration = self.acceleration_limit
+        elif self.target_velocity < self.velocity:
+            if msg.ctrl_cmd.linear_acceleration < 0.0:
+                self.acceleration = msg.ctrl_cmd.linear_acceleration
             else:
-                self.acceleration = -abs(self.deceleration_limit)
-        # target velocity achieved, no need for acceleration
+                self.acceleration = -self.deceleration_limit
         else:
-            self.acceleration = 0
+            self.acceleration = 0.0
 
-        rospy.logdebug("target velocity: %.3f, current velocity: %.3f, acceleration: %.3f", msg.ctrl_cmd.linear_velocity, self.velocity, self.acceleration)
+        rospy.logdebug("%s - target velocity: %.3f, current velocity: %.3f, acceleration: %.3f", rospy.get_name(), msg.ctrl_cmd.linear_velocity, self.velocity, self.acceleration)
 
         # new steering angle takes effect instantaneously
         self.steering_angle = msg.ctrl_cmd.steering_angle
@@ -100,6 +97,9 @@ class BicycleSimulation:
         # change velocity by acceleration
         self.velocity += self.acceleration * delta_t
 
+        # clip velocity at 0
+        self.velocity = max(self.velocity, 0)
+
         # compute change according to bicycle model equations
         x_dot = self.velocity * math.cos(self.heading_angle)
         y_dot = self.velocity * math.sin(self.heading_angle)
@@ -111,8 +111,7 @@ class BicycleSimulation:
         self.heading_angle += heading_angle_dot * delta_t
 
         # create quaternion from heading angle to be used later in tf and pose and marker messages
-        x, y, z, w = tf.transformations.quaternion_from_euler(0, 0, self.heading_angle)
-        self.orientation = Quaternion(x, y, z, w)
+        self.orientation = get_orientation_from_heading(self.heading_angle)
 
     def run(self):
         # start separate thread for spinning subcribers
@@ -245,6 +244,34 @@ class BicycleSimulation:
         # draw front wheel
         marker.points.append(Point(self.wheel_base + wheel_length * math.cos(self.steering_angle), wheel_length * math.sin(self.steering_angle), 0))
         marker.points.append(Point(self.wheel_base - wheel_length * math.cos(self.steering_angle), -wheel_length * math.sin(self.steering_angle), 0))
+
+        marker_array.markers.append(marker)
+
+        marker = Marker()
+        marker.header.frame_id = "map"
+        marker.header.stamp = stamp
+        marker.type = marker.SPHERE_LIST
+        marker.action = marker.ADD
+        marker.id = 2
+        marker.scale.x = 0.3
+        marker.scale.y = 0.3
+        marker.scale.z = 0.3
+        marker.color = ColorRGBA(0.0, 1.0, 0.0, round((rospy.get_time() % 0.5) * 2))
+
+        # the location of the marker is current pose
+        marker.pose.position.x = self.x
+        marker.pose.position.y = self.y
+        marker.pose.position.z = 1.0 # raise a bit above map
+        marker.pose.orientation = self.orientation
+
+        # draw blinkers
+        if self.blinkers in [VehicleStatus.LAMP_LEFT, VehicleStatus.LAMP_HAZARD]:
+            marker.points.append(Point(self.wheel_base, 0.5, 0))
+            marker.points.append(Point(0, 0.5, 0))
+
+        if self.blinkers in [VehicleStatus.LAMP_RIGHT, VehicleStatus.LAMP_HAZARD]:
+            marker.points.append(Point(self.wheel_base, -0.5, 0))
+            marker.points.append(Point(0, -0.5, 0))
 
         marker_array.markers.append(marker)
 
