@@ -60,7 +60,7 @@ Here are couple of short videos introducing the Autoware Mini features.
    # not needed for the simplest planner simulation
    git clone https://github.com/UT-ADL/vehicle_platform.git
    # if using Carla simulation
-   git clone --recurse-submodules https://github.com/carla-simulator/ros-bridge.git carla_ros_bridge
+   git clone --recurse-submodules -b async_bridge https://github.com/UT-ADL/ros-bridge carla_ros_bridge
    ```
 
 3. Install system dependencies
@@ -165,7 +165,7 @@ To see the traffic light detections enable **Detections** > **Traffic lights** >
 1. In a new terminal, (assuming enviornment variables are exported) run Carla simulator by entering the following command.
 
    ```
-   $CARLA_ROOT/CarlaUE4.sh -prefernvidia -quality-level=Low
+   $CARLA_ROOT/CarlaUE4.sh
    ```
 
 2. In a new terminal, (assuming enviornment variables are exported) run the following command. This runs Tartu environment of Carla with minimal sensors and our autonomy stack. The detected objects and traffic light statuses come from Carla directly.
@@ -190,23 +190,38 @@ To see the traffic light detections enable **Detections** > **Traffic lights** >
 
 ### Launching with Scenario Runner
 
-1. Clone [Scenario Runner](https://github.com/carla-simulator/scenario_runner) to a directory of your choice
+1. Clone [Scenario Runner](https://github.com/UT-ADL/scenario_runner/tree/route_scenario) to a directory of your choice
    ```
-   git clone git@github.com:carla-simulator/scenario_runner.git
+   git clone -b route_scenario https://github.com/UT-ADL/scenario_runner.git
    ```
 2. Install requirements
    ```
    pip install -r scenario_runner/requirements.txt
    ```
-3. Point environment variable SCENARIO_RUNNER_ROOT to the Scenario Runner location
+3. We need to make sure that different modules find each other. Following environment variables should be set in `.bashrc`.
    ```
-   export SCENARIO_RUNNER_ROOT=<path_to>/scenario_runner
+   SCENARIO_RUNNER_ROOT=<path_to>/scenario_runner
    ```
-4. Launch Autoware Mini with `use_scenario_runner=true` parameter
+4. In a new terminal, (assuming enviornment variables are exported) run Carla simulator by entering the following command.
+
    ```
-   roslaunch autoware_mini start_carla.launch use_scenario_runner=true
+   $CARLA_ROOT/CarlaUE4.sh
    ```
-   At the moment you need to manually set the destination for the ego car.
+5. Launch the autonomy stack:
+
+   a) **OpenScenario:** In a new terminal, (assuming enviornment variables are exported) launch route scenario with:
+   ```
+   roslaunch autoware_mini start_carla.launch use_scenario_runner:=true
+   ```
+   You can now execute scenarios by choosing them from RViz Carla plugin dropdown and pressing Execute button. You need to manually set the destination for the ego car when scenario is launched. The predefined scenarios are available under `data/scenarios/MAP_NAME/SCENARIO_NAME.xosc`.
+
+   **OR**
+
+   b) **Route Scenario:**  In a new terminal, (assuming enviornment variables are exported) launch route scenario with:
+   ```
+   roslaunch autoware_mini start_carla.launch use_scenario_runner:=true map_name:=tartu_demo route_id:=0
+   ```
+   This will launch route scenarios using `route_id = 0` which corresponds to `Tartu` map in routes definition file [routes_devtest.xml](data/routes/routes_devtest.xml). Make sure to match the `route_id` with the correct `map_name` to avoid discrepancy. For example for `route_id = 2` the `map_name = Town03`.
 
 ## Launching in Lexus
 

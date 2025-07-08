@@ -2,25 +2,35 @@ output_frame: map
 
 lidar:
   center:
+    crop_box:
+      min_x: -2.0
+      max_x: 3.0
+      min_y: -1.0
+      max_y: 1.0
+      min_z: -2.0
+      max_z: 2.0
+      negative: True
+      input_frame: lidar_center
+      output_frame: lidar_center
     ground_removal:
-      min_x: -60.0
-      max_x: 60.0
-      min_y: -60.0
-      max_y: 60.0
+      min_x: -30.0
+      max_x: 70.0
+      min_y: -30.0
+      max_y: 30.0
       min_z: -2.5
-      max_z: 0.1
+      max_z: 0.05
       cell_size: 0.6
       tolerance: 0.15
       filter: average                    # none, median, average, minimum
       filter_size: 3
   front:
     crop_box:
-      min_x: -1.0
-      max_x: 1.0
+      min_x: -2.0
+      max_x: 3.0
       min_y: -1.0
       max_y: 1.0
-      min_z: -1.0
-      max_z: 1.0
+      min_z: -2.0
+      max_z: 2.0
       negative: True
       input_frame: lidar_center
       output_frame: lidar_center
@@ -30,20 +40,24 @@ lidar:
       min_y: -60.0
       max_y: 60.0
       min_z: -2.0
-      max_z: 0.5
+      max_z: 0.05
       cell_size: 0.6
       tolerance: 0.15
       filter: average                    # none, median, average, minimum
       filter_size: 3
   points_concatenator:
     transform_timeout: 0.06
-    min_range_front: 1.2  # radius value within which the points from ouster are discarded. Done after transforming to lidar_center frame
+  voxel_grid_filter:
+    leaf_size: 0.25
+    filter_field_name: z
+    filter_limit_min: -2.0
+    filter_limit_max: 0.5
+    filter_limit_negative: False
   points_clusterer:
-    sample_size: 10000
-    cluster_epsilon: 1.0
-    cluster_min_size: 5
+    cluster_epsilon: 0.7
+    cluster_min_size: 4
   cluster_detector:
-    min_cluster_size: 5
+    min_cluster_size: 4
     bounding_box_type: axis_aligned # axis_aligned, min_area
     enable_pointcloud: False
     enable_convex_hull: True
@@ -76,16 +90,29 @@ obstacle_simulation:
   publish_rate: 10
 
 ema_tracker:
-  detection_counter_threshold: 2
+  enable_initial_velocity_estimate: True
+  enable_initial_acceleration_estimate: False
+  enable_missed_detection_propagation: True
+  detection_counter_threshold: 4
   missed_counter_threshold: 2
   velocity_gain: 0.1
-  acceleration_gain: 0.1
+  acceleration_gain: 0.0
   association_method: iou   # iou, euclidean
   max_euclidean_distance: 2.0
 
 naive_predictor:
   prediction_horizon: 1.0
   prediction_interval: 0.1
+
+map_based_predictor:
+  prediction_horizon: 4.0
+  prediction_interval: 0.1
+  distance_from_lanelet: 0.1        # m - outside of lanelet area
+  distance_from_centerline: 1.0     # m - from centerline
+  angle_threshold: 30.0             # degrees - object heading and lanelet heading
+
+road_area_filter:
+  use_centroid_filtering: True
 
 mqtt_traffic_light_detector:
   mqtt_host: mqtt.cloud.ut.ee

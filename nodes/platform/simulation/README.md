@@ -12,7 +12,10 @@ Implements a simple bicycle model for testing waypoint followers based on the bl
 | ---- | ---- | ------- | ----------- |
 | `publish_rate` | `int` | `10` | Rate in Hz at which to publish detected objects. |
 | `wheel_base` | `float` | `2.789` | distance between rear and front axle |
-
+| `acceleration_limit` | float | `1.0` | Maximum allowed acceleration (in m/s^2). |
+| `deceleration_limit` | float | `5.0` | Maximum allowed deceleration (in m/s^2). |
+| `/planning/default_acceleration` | float | `1.0` | Default acceleration (in m/s^2). |
+| `/planning/default_deceleration` | float | `1.0` | Default deceleration (in m/s^2). |
 
 #### Subscribes
 

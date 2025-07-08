@@ -7,9 +7,12 @@ from tf.transformations import quaternion_from_euler
 from tf2_ros import TransformBroadcaster
 
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
-from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion, TransformStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion, TransformStamped, PoseWithCovarianceStamped, Pose
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu
+from std_srvs.srv import Empty, EmptyResponse
+from ros_numpy import numpify, msgify
+import numpy as np
 
 from localization.WGS84ToUTMTransformer import WGS84ToUTMTransformer
 from localization.WGS84ToLest97Transformer import WGS84ToLest97Transformer
@@ -30,6 +33,8 @@ class NovatelOem7Localizer:
 
         # variable to store undulation value from bestpos message
         self.undulation = 0.0
+        self.current_pose = None
+        self.relative_pose_matrix = None
 
         # initialize coordinate_transformer
         if self.coordinate_transformer == "utm":
@@ -46,6 +51,7 @@ class NovatelOem7Localizer:
         self.odometry_pub = rospy.Publisher('odometry', Odometry, queue_size=1, tcp_nodelay=True)
         
         # Subscribers
+        rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback, queue_size=1, tcp_nodelay=True)
         if self.use_msl_height:
             self.bestpos_sub = rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback, queue_size=1, tcp_nodelay=True)
 
@@ -54,8 +60,28 @@ class NovatelOem7Localizer:
 
         ts = message_filters.ApproximateTimeSynchronizer([inspva_sub, imu_sub], queue_size=5, slop=0.03)
         ts.registerCallback(self.synchronized_callback)
+
+        # Services
+        rospy.Service('cancel_pose', Empty, self.cancel_pose_callback)
+
         # output information to console
         rospy.loginfo("%s - localizer initialized using %s coordinates", rospy.get_name(), str(self.coordinate_transformer))
+
+
+    def initialpose_callback(self, pose_msg):
+        if self.current_pose is None:
+            return
+        # take the z value for initialpose from current_pose
+        pose_msg.pose.pose.position.z = self.current_pose.position.z
+        initialpose_matrix = numpify(pose_msg.pose.pose)
+        current_pose_matrix = numpify(self.current_pose)
+        # get the difference between initialpose and current_pose
+        self.relative_pose_matrix = initialpose_matrix.dot(np.linalg.inv(current_pose_matrix))
+
+
+    def cancel_pose_callback(self, req):
+        self.relative_pose_matrix = None
+        return EmptyResponse()
 
 
     def synchronized_callback(self, inspva_msg, imu_msg):
@@ -77,27 +103,38 @@ class NovatelOem7Localizer:
         if self.use_msl_height:
             height -= self.undulation
 
+        current_pose = Pose()
+        current_pose.position.x = x
+        current_pose.position.y = y
+        current_pose.position.z = height
+        current_pose.orientation = orientation
+
+        # set true current_pose (from GNSS) to class variable
+        self.current_pose = current_pose
+
+        # if initalpose is set reposition car
+        if self.relative_pose_matrix is not None:
+            current_pose_matrix = numpify(self.current_pose)
+            new_current_pose_matrix = self.relative_pose_matrix.dot(current_pose_matrix)
+            # replace current_pose with new_current_pose
+            current_pose = msgify(Pose, new_current_pose_matrix)
+
         # Publish 
-        self.publish_current_pose(stamp, x, y, height, orientation)
+        self.publish_current_pose(stamp, current_pose)
         self.publish_current_velocity(stamp, linear_velocity, angular_velocity)
-        self.publish_map_to_baselink_tf(stamp, x, y, height, orientation)
-        self.publish_odometry(stamp, linear_velocity, x, y, height, orientation, angular_velocity)
+        self.publish_map_to_baselink_tf(stamp, current_pose)
+        self.publish_odometry(stamp, linear_velocity, current_pose, angular_velocity)
 
     def bestpos_callback(self, bestpos_msg):
         self.undulation = bestpos_msg.undulation
 
 
-    def publish_current_pose(self, stamp, x, y, height, orientation):
+    def publish_current_pose(self, stamp, current_pose):
 
         pose_msg = PoseStamped()
-
         pose_msg.header.stamp = stamp
         pose_msg.header.frame_id = "map"
-
-        pose_msg.pose.position.x = x
-        pose_msg.pose.position.y = y
-        pose_msg.pose.position.z = height
-        pose_msg.pose.orientation = orientation
+        pose_msg.pose = current_pose
 
         self.current_pose_pub.publish(pose_msg)
 
@@ -113,25 +150,20 @@ class NovatelOem7Localizer:
 
         self.current_velocity_pub.publish(vel_msg)
 
-    def publish_odometry(self, stamp, velocity, x, y, height, orientation, angular_velocity):
+    def publish_odometry(self, stamp, velocity, current_pose, angular_velocity):
 
         odom_msg = Odometry()
         odom_msg.header.stamp = stamp
         odom_msg.header.frame_id = 'map'
         odom_msg.child_frame_id = 'base_link'
-
-        odom_msg.pose.pose.position.x = x
-        odom_msg.pose.pose.position.y = y
-        odom_msg.pose.pose.position.z = height
-
-        odom_msg.pose.pose.orientation = orientation
+        odom_msg.pose.pose = current_pose
         odom_msg.twist.twist.linear.x = velocity
         odom_msg.twist.twist.angular = angular_velocity
 
         self.odometry_pub.publish(odom_msg)
 
 
-    def publish_map_to_baselink_tf(self, stamp, x, y, height, orientation):
+    def publish_map_to_baselink_tf(self, stamp, current_pose):
             
         br = TransformBroadcaster()
         t = TransformStamped()
@@ -140,10 +172,10 @@ class NovatelOem7Localizer:
         t.header.frame_id = "map"
         t.child_frame_id = self.child_frame
 
-        t.transform.translation.x = x
-        t.transform.translation.y = y
-        t.transform.translation.z = height
-        t.transform.rotation = orientation
+        t.transform.translation.x = current_pose.position.x
+        t.transform.translation.y = current_pose.position.y
+        t.transform.translation.z = current_pose.position.z
+        t.transform.rotation = current_pose.orientation
 
         br.sendTransform(t)
 

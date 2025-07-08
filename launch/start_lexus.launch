@@ -7,19 +7,23 @@
     <arg name="detector"                default="lidar_cluster"     doc="lidar_cluster, sim, carla"/>
     <arg name="tfl_detector"            default="mqtt"              doc="mqtt, camera, mqtt_camera_fusion" />
     <arg name="tracker"                 default="ema"               doc="none, ema" />
-    <arg name="predictor"               default="none"              doc="none, naive" />
+    <arg name="predictor"               default="none"              doc="none, naive, map" />
     <arg name="follower"                default="pure_pursuit"      doc="pure_pursuit, stanley" />
     <arg name="global_planner"          default="lanelet2"          doc="waypoints, lanelet2" />
     <arg name="local_planner"           default="velocity"          doc="velocity, none"/>
     <arg name="use_path_smoothing"      default="true" />
+    <arg name="use_road_area_filter"    default="false"            doc="use road area filter"/>
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map_name"       default="tartu_demo.osm" />
-    <arg name="max_speed"               default="30" />
+    <arg name='map_name'                default='tartu_demo' />
+    <arg name="lanelet2_map_name"       default="$(arg map_name).osm" />
+    <arg name="max_speed"               default="40" />
+    <arg name="detection_range"         default=""                  doc="enter a value in meters to enable it" />
     <arg name="more_visualizations"     default="false"             doc="By default visualize only the final detections" />
     
     <!-- Localization -->
     <include file="$(find autoware_mini)/launch/localization.launch">
         <arg name="localizer"           value="$(arg localizer)" />
+        <arg name="map_name"            value="$(arg map_name)" />
     </include>
 
     <!-- Detection -->
@@ -32,6 +36,9 @@
         <arg name="tracker"             value="$(arg tracker)" />
         <arg name="predictor"           value="$(arg predictor)" />
         <arg name="more_visualizations" value="$(arg more_visualizations)" />
+        <arg name="detection_range"     value="$(arg detection_range)" />
+        <arg name="map_name"            value="$(arg map_name)" />
+        <arg name="use_road_area_filter" value="$(arg use_road_area_filter)" />
     </include>
 
     <!-- Planning -->
@@ -45,7 +52,7 @@
 
     <!-- Control -->
     <include file="$(find autoware_mini)/launch/control.launch">
-        <arg name="follower"        value="$(arg follower)" />
+        <arg name="follower"            value="$(arg follower)" />
     </include>
 
     <!-- Vehicle -->
@@ -59,7 +66,11 @@
     </include>
 
     <!-- Rviz -->
-    <include file="$(find autoware_mini)/launch/dashboard.launch" />
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
+    <include file="$(find autoware_mini)/launch/dashboard.launch">
+        <arg name="driver_status"       value="true" />
+    </include>
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz">
+        <rosparam command="load" file="$(find autoware_mini)/config/actions.yaml"/>
+    </node>
 
 </launch>

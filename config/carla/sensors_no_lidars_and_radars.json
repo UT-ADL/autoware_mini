@@ -64,41 +64,43 @@
                         {
                             "type": "sensor.other.imu",
                             "id": "lidar_center",
-                            "spawn_point": {"x": 1.02, "y": 0, "z": 1.51, "roll": -0.02879793, "pitch": 0.0003490659, "yaw": -0.0459},
+                            "spawn_point": {"x": 1.02, "y": 0, "z": 1.51, "roll": -1.650, "pitch": 0.020, "yaw": -3.151},
                             "attached_objects":
                             [
                                 {
                                     "type": "sensor.camera.rgb",
                                     "id": "camera_fr",
-                                    "spawn_point": {"x": 1.152, "y": -0.168, "z": -0.747, "roll": -1.378984, "pitch": 0.04415683, "yaw": -1.7793631},
+                                    "spawn_point": {"x": 1.152, "y": -0.168, "z": -0.747, "roll": 2.577203, "pitch": -10.9791911, "yaw": -12.4411494},
                                     "image_size_x": 2064,
                                     "image_size_y": 1544,
-                                    "fov": 32.8
+                                    "fov": 32.8,
+                                    "sensor_tick": 0.1
                                 },
                                 {
                                     "type": "sensor.camera.rgb",
                                     "id": "camera_fl",
-                                    "spawn_point": {"x": 1.131, "y": 0.338, "z": -0.747, "roll": -1.4044664, "pitch": -0.00261799, "yaw": -1.422443},
+                                    "spawn_point": {"x": 1.131, "y": 0.338, "z": -0.747, "roll": -0.1520991, "pitch": -9.5299671, "yaw": 8.5251818},
                                     "image_size_x": 2064,
                                     "image_size_y": 1544,
-                                    "fov": 25.3
+                                    "fov": 25.3,
+                                    "sensor_tick": 0.1
                                 }
                             ]
-                        },
+                        }
+                    ]
+                },
+                {
+                    "type": "sensor.camera.rgb",
+                    "id": "rgb_view",
+                    "spawn_point": {"x": -4.5, "y": 0.0, "z": 2.8, "roll": 0.0, "pitch": 20.0, "yaw": 0.0},
+                    "image_size_x": 800,
+                    "image_size_y": 600,
+                    "fov": 90.0,
+                    "attached_objects":
+                    [
                         {
-                            "type": "sensor.camera.rgb",
-                            "id": "rgb_view",
-                            "spawn_point": {"x": -4.5, "y": 0.0, "z": 2.8, "roll": 0.0, "pitch": 20.0, "yaw": 0.0},
-                            "image_size_x": 800,
-                            "image_size_y": 600,
-                            "fov": 90.0,
-                            "attached_objects":
-                            [
-                                {
-                                    "type": "actor.pseudo.control",
-                                    "id": "control"
-                                }
-                            ]
+                            "type": "actor.pseudo.control",
+                            "id": "control"
                         }
                     ]
                 },

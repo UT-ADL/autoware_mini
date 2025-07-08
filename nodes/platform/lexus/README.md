@@ -9,17 +9,20 @@ A Python ROS node for interfacing with Autoware's SSC.
 #### Parameters
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `use_adaptive_gear_ratio` | bool | `True` | Whether to use an adaptive gear ratio. |
-| `enable_reverse_motion` | bool | `False` | Whether to enable reverse motion. |
-| `command_timeout` | int | `200` | Timeout (in ms) to send a dummy command message to keep SSC alive. |
+| `~use_adaptive_gear_ratio` | bool | `True` | Whether to use an adaptive gear ratio. |
+| `~enable_reverse_motion` | bool | `False` | Whether to enable reverse motion. |
+| `~command_timeout` | int | `200` | Timeout (in ms) to send a dummy command message to keep SSC alive. |
 | `wheel_base` | float | `2.789` | Distance between front and rear axle (in meters). |
-| `ssc_gear_ratio` | float | `16.135` | Default gear ratio used in SSC. |
-| `acceleration_limit` | float | `3.0` | Maximum allowed acceleration (in m/s^2). |
-| `deceleration_limit` | float | `3.0` | Maximum allowed deceleration (in m/s^2). |
-| `max_curvature_rate` | float | `0.15` | Maximum allowed curvature rate (in rad/s), this affects the steering angle aggressiveness. |
-| `agr_coef_a` | float | `15.713` | Adaptive gear ratio coefficient a (base steering ratio). |
-| `agr_coef_b` | float | `0.053` | Adaptive gear ratio coefficient b (velocity component). |
-| `agr_coef_c` | float | `0.042` | Adaptive gear ratio coefficient c (steering angle component). |
+| `steer_ratio` | float | `16.135` | Default gear ratio used in SSC. |
+| `acceleration_limit` | float | `1.0` | Maximum allowed acceleration (in m/s^2). |
+| `deceleration_limit` | float | `5.0` | Maximum allowed deceleration (in m/s^2). |
+| `/planning/default_acceleration` | float | `1.0` | Default acceleration (in m/s^2). |
+| `/planning/default_deceleration` | float | `1.0` | Default deceleration (in m/s^2). |
+| `~max_curvature_rate` | float | `0.15` | Maximum allowed curvature rate (in rad/s), this affects the steering angle aggressiveness. |
+| `~agr_coef_a` | float | `15.713` | Adaptive gear ratio coefficient a (base steering ratio). |
+| `~agr_coef_b` | float | `0.053` | Adaptive gear ratio coefficient b (velocity component). |
+| `~agr_coef_c` | float | `0.042` | Adaptive gear ratio coefficient c (steering angle component). |
+| `~enable_emergency_braking` | bool | `False` | Block brakes when emergency braking is requested. Dangerous! |
 
 #### Subscribed Topics
 | Name | Type | Description |

@@ -2,7 +2,7 @@
 <launch>
     <arg name="tfl_detector"        default="none"      doc="carla, mqtt, camera, mqtt_camera_fusion" />
     <arg name="lanelet2_map_name"   default="tartu_demo.osm"    doc="for carla traffic light detector" />
-    <arg name="onnx_path"           default="$(find autoware_mini)/config/traffic_lights/tlr_model.onnx" doc="onnx model path" />
+    <arg name="onnx_path"           default="$(find autoware_mini)/data/models/traffic_lights/tlr_model.onnx" doc="onnx model path" />
 
     <!-- Carla's ground truth traffic lights -->
     <node if="$(eval tfl_detector=='carla')" pkg="autoware_mini" type="carla_traffic_light_detector.py" name="carla_traffic_light_detector" output="screen" required="true">

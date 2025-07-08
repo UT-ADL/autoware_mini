@@ -1,35 +1,34 @@
 <?xml version="1.0"?>
 <launch>
     
-    <arg name="use_manual_control"      default="false"                 doc="use manual control for carla"/>
+    <arg name='map_name'                default='tartu_demo'/>
+    <arg name="lanelet2_map_name"       default="$(arg map_name).osm"/>
+    <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
     <arg name="global_planner"          default="lanelet2"              doc="waypoints, lanelet2" />
     <arg name="local_planner"           default="velocity"              doc="velocity, none"/>
     <arg name="use_path_smoothing"      default="true" />
     <arg name="localizer"               default="carla"                 doc="novatel, carla" />
-    <arg name="detector"                default="carla"                 doc="cluster, carla" />
+    <arg name="detector"                default="carla"                 doc="lidar_cluster, lidar_sfa, sim, carla" />
     <arg name="tfl_detector"            default="carla"                 doc="carla, camera, mqtt_camera_fusion" />
-    <arg name="tracker"                 default="ema"                   if="$(eval detector != 'carla')" />
-    <arg name="tracker"                 default="none"                  if="$(eval detector == 'carla')" />
-    <arg name="predictor"               default="none"                  doc="none, naive" />
-    <arg name='map_name'                default='tartu'/>
+    <arg name="tracker"                 default="$(eval 'ema' if detector != 'carla' else 'none')" />
+    <arg name="predictor"               default="none"                  doc="none, naive, map" />
     <arg name="follower"                default="pure_pursuit"          doc="pure_pursuit, stanley" />
-    <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map_name"       default="$(arg map_name).osm"   if="$(eval 'tartu' not in map_name.lower())" />
-    <arg name="lanelet2_map_name"       default="tartu_demo.osm"        if="$(eval 'tartu' in map_name.lower())" />
-    <arg name='use_lexus_model'         default='true'/>
+    <arg name="detection_range"         default=""                      doc="enter a value in meters to enable it" />
+    <arg name="use_road_area_filter"    default="false"                 doc="use road area filter"/>
     <arg name='use_lidar_center'        default='true'/>
     <arg name='use_lidar_front'         default='false'/>
-    
+    <arg name='rviz'                    default='true'/>
     <!-- Scenario Runner args -->
     <arg name='use_scenario_runner'     default='false'/>
-    <arg name='scenario_runner_path'    default='$(optenv SCENARIO_RUNNER_ROOT)'/>
-    <arg name='scenario_name'           default='FollowLeadingVehicle'/>
-    <arg name='scenario_file'           default='$(find autoware_mini)/data/scenarios/$(arg map_name)/$(arg scenario_name).xosc'/>
-    <arg name='generate_traffic'        default='$(eval not use_scenario_runner)'/>
+    <arg name='scenario_name'           default=""/>
+    <arg name='route_id'                default=""/>                   <!-- Route ID to follow for running route scenario -->
+    <arg name="generate_traffic"        default="$(eval not use_scenario_runner)" />
+    <arg name="use_manual_control"      default="false"                 doc="use manual control for carla"/>
 
     <!-- Localization -->
     <include file="$(find autoware_mini)/launch/localization.launch">
         <arg name="localizer"           value="$(arg localizer)" />
+        <arg name="map_name"            value="$(arg map_name)" />
     </include>
 
     <!-- Detection -->
@@ -41,6 +40,9 @@
         <arg name='use_lidar_front'     value='$(arg use_lidar_front)'/>
         <arg name="tracker"             value="$(arg tracker)" />
         <arg name="predictor"           value="$(arg predictor)" />
+        <arg name="detection_range"     value="$(arg detection_range)" />
+        <arg name="map_name"            value="$(arg map_name)" />
+        <arg name="use_road_area_filter" value="$(arg use_road_area_filter)" />
     </include>
 
     <!-- Planning -->
@@ -65,20 +67,23 @@
     <!-- Carla platform -->
     <include file="$(find autoware_mini)/launch/platform/carla.launch">
         <arg name='map_name'                            value='$(arg map_name)'/>
-        <arg name="use_manual_control"                  value="$(arg use_manual_control)" />
         <arg name="use_lidar"                           value="$(eval 'lidar' in detector and detector != 'lidar_vella')" />
         <arg name="use_radar"                           value="$(eval 'radar' in detector)" />
         <arg name="use_gnss"                            value="$(eval localizer == 'novatel')" />
         <arg name="use_cam"                             value="$(eval 'camera' in tfl_detector)" />
+        <arg name="use_manual_control"                  value="$(arg use_manual_control)" />
         <arg name="generate_traffic"                    value="$(arg generate_traffic)" />
-        <arg name="scenario_runner_path"                value="$(arg scenario_runner_path)" />
         <arg name="use_scenario_runner"                 value="$(arg use_scenario_runner)" />
+        <arg name="route_id"                            value="$(arg route_id)" />
         <arg name="scenario_name"                       value="$(arg scenario_name)" />
-        <arg name="scenario_file"                       value="$(arg scenario_file)" />
     </include>
 
     <!-- Rviz -->
-    <include file="$(find autoware_mini)/launch/dashboard.launch" />
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
+    <group if="$(arg rviz)">
+        <include file="$(find autoware_mini)/launch/dashboard.launch" />
+        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true">
+            <rosparam command="load" file="$(find autoware_mini)/config/actions.yaml"/>
+        </node>
+    </group>
 
 </launch>

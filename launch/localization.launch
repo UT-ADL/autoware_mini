@@ -1,15 +1,24 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="localizer"   default="novatel"  doc="novatel, carla" />
+    <arg name="map_name"    default="tartu_demo" />
 
 
     <group ns="localization">
     
         <node if="$(eval localizer=='novatel')" pkg="autoware_mini" type="novatel_oem7_localizer.py" name="novatel_oem7_localizer" output="screen" required="true" />
 
-        <node if="$(eval localizer=='carla')" pkg='autoware_mini' type='carla_localizer.py' name='carla_localizer' output='screen' required="true" />
+        <group if="$(eval localizer=='carla')">
+            <node pkg='autoware_mini' type='carla_localizer.py' name='carla_localizer' output='screen' required="true" />
+            <node pkg="autoware_mini" type="carla_initialpose.py" name="carla_initialpose" output="screen" required="true" />
+        </group>
 
         <rosparam command="load" file="$(find autoware_mini)/config/localization.yaml" />
+
+        <!-- File existance check taken from https://alspitz.github.io/blog/roslaunch_import.html -->
+        <group if="$(eval eval('_' + '_import_' + '_(\'os\')').path.exists(find('autoware_mini') + '/data/maps/' + map_name + '.yaml'))">
+            <rosparam command="load" file="$(find autoware_mini)/data/maps/$(arg map_name).yaml" />
+        </group>
 
     </group>
 

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name='map_name'            default='town01'/>
+
+  <!--
+    ################
+    ## Static TFs ##
+    ################
+  -->
+  
+  <node pkg='tf' type='static_transform_publisher' name='world_to_map'             args='0 0 0 0 0 0 /world /map 50' />
+  <node pkg="tf" type="static_transform_publisher" name="ego_vehicle_to_base_link" args="-1.3945 0.0 0.6 0 0 0 /ego_vehicle /base_link 50"/>
+
+  <!--
+    ###################
+    ## Carla Commons ##
+    ###################
+    -->
+  <include file="$(find autoware_mini)/launch/platform/carla/carla_common.launch">
+    <arg name="map_name"            value="$(arg map_name)" />
+    <arg name="use_manual_control"  value="false" />
+  </include>
+  
+</launch>

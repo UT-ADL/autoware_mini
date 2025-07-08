@@ -18,7 +18,7 @@ import rospy
 from ackermann_msgs.msg import AckermannDrive
 from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
 from carla_msgs.msg import CarlaEgoVehicleInfo, CarlaEgoVehicleStatus
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Bool
 
 
 class CarlaVehicleInterface:
@@ -27,6 +27,8 @@ class CarlaVehicleInterface:
 
         # Node parameters
         self.max_steer_angle = math.radians(rospy.get_param("~max_steer_angle"))
+
+        self.manual_override = False
 
         # Publishers
         self.ackerman_cmd_pub = rospy.Publisher(
@@ -43,6 +45,8 @@ class CarlaVehicleInterface:
                          self.vehicle_info_callback, queue_size=1, tcp_nodelay=True)
         rospy.Subscriber('/carla/ego_vehicle/vehicle_status', CarlaEgoVehicleStatus,
                          self.vehicle_status_callback, queue_size=1, tcp_nodelay=True)
+        rospy.Subscriber('/carla/ego_vehicle/vehicle_control_manual_override', Bool,
+                         self.manual_override_callback, queue_size=1, tcp_nodelay=True)
         
 
     def vehicle_cmd_callback(self, data):
@@ -77,7 +81,7 @@ class CarlaVehicleInterface:
         status = VehicleStatus()
         status.header = data.header
 
-        status.angle = data.control.steer * math.degrees(self.max_steer_angle)
+        status.angle = -data.control.steer * self.max_steer_angle
         status.speed = data.velocity * 3.6  # speed is expected in km/h
 
         if data.control.reverse:
@@ -85,12 +89,15 @@ class CarlaVehicleInterface:
         else:
             status.current_gear.gear = Gear.DRIVE
 
-        if data.control.manual_gear_shift:
+        if self.manual_override:
             status.drivemode = VehicleStatus.MODE_MANUAL
         else:
             status.drivemode = VehicleStatus.MODE_AUTO
 
         self.vehicle_status_pub.publish(status)
+
+    def manual_override_callback(self, data):
+        self.manual_override = data.data
 
 
     def run(self):

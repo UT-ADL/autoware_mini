@@ -22,10 +22,13 @@ class BicycleSimulation:
         self.wheel_base = rospy.get_param("wheel_base")
         self.acceleration_limit = rospy.get_param("acceleration_limit")
         self.deceleration_limit = rospy.get_param("deceleration_limit")
+        self.default_acceleration = rospy.get_param("/planning/default_acceleration")
+        self.default_deceleration = rospy.get_param("/planning/default_deceleration")
 
         # internal state of bicycle model
         self.x = 0.0
         self.y = 0.0
+        self.z = 0.0
         self.acceleration = 0.0
         self.velocity = 0.0
         self.heading_angle = 0.0
@@ -45,6 +48,7 @@ class BicycleSimulation:
 
         # initial position and vehicle command from outside
         rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback, queue_size=None, tcp_nodelay=True)
+        rospy.Subscriber('/initialvelocity', TwistStamped, self.initialvelocity_callback, queue_size=None, tcp_nodelay=True)
         rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1, tcp_nodelay=True)
 
         rospy.loginfo("%s - initialized", rospy.get_name())
@@ -53,6 +57,7 @@ class BicycleSimulation:
         # extract position
         self.x = msg.pose.pose.position.x
         self.y = msg.pose.pose.position.y
+        self.z = msg.pose.pose.position.z
 
         # extract heading angle from orientation
         self.heading_angle = get_heading_from_orientation(msg.pose.pose.orientation)
@@ -62,19 +67,25 @@ class BicycleSimulation:
                     msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, 
                     msg.pose.pose.orientation.w, msg.header.frame_id)
 
+    def initialvelocity_callback(self, msg):
+        # extract velocity
+        self.velocity = msg.twist.linear.x
+
+        rospy.loginfo("%s - initial velocity %f", rospy.get_name(), self.velocity)
+
     def vehicle_cmd_callback(self, msg):
         self.target_velocity = msg.ctrl_cmd.linear_velocity
         # calculate acceleration based on limits
         if self.target_velocity > self.velocity:
             if msg.ctrl_cmd.linear_acceleration > 0.0:
-                self.acceleration = msg.ctrl_cmd.linear_acceleration
+                self.acceleration = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
             else:
-                self.acceleration = self.acceleration_limit
+                self.acceleration = self.default_acceleration
         elif self.target_velocity < self.velocity:
             if msg.ctrl_cmd.linear_acceleration < 0.0:
-                self.acceleration = msg.ctrl_cmd.linear_acceleration
+                self.acceleration = max(msg.ctrl_cmd.linear_acceleration, -self.deceleration_limit)
             else:
-                self.acceleration = -self.deceleration_limit
+                self.acceleration = -self.default_deceleration
         else:
             self.acceleration = 0.0
 
@@ -147,6 +158,7 @@ class BicycleSimulation:
 
         t.transform.translation.x = self.x
         t.transform.translation.y = self.y
+        t.transform.translation.z = self.z
         t.transform.rotation = self.orientation
 
         self.br.sendTransform(t)
@@ -160,7 +172,7 @@ class BicycleSimulation:
 
         pose_msg.pose.position.x = self.x
         pose_msg.pose.position.y = self.y
-        pose_msg.pose.position.z = 0
+        pose_msg.pose.position.z = self.z
         pose_msg.pose.orientation = self.orientation
 
         self.current_pose_pub.publish(pose_msg)
@@ -211,7 +223,7 @@ class BicycleSimulation:
         # the location of the marker is current pose
         marker.pose.position.x = self.x
         marker.pose.position.y = self.y
-        marker.pose.position.z = 1.0 # raise a bit above map
+        marker.pose.position.z = self.z + 1.0 # raise a bit above map
         marker.pose.orientation = self.orientation
 
         # draw wheel base
@@ -232,7 +244,7 @@ class BicycleSimulation:
         # the location of the marker is current pose
         marker.pose.position.x = self.x
         marker.pose.position.y = self.y
-        marker.pose.position.z = 1.0 # raise a bit above map
+        marker.pose.position.z = self.z + 1.0 # raise a bit above map
         marker.pose.orientation = self.orientation
 
         wheel_length = 0.4
@@ -261,7 +273,7 @@ class BicycleSimulation:
         # the location of the marker is current pose
         marker.pose.position.x = self.x
         marker.pose.position.y = self.y
-        marker.pose.position.z = 1.0 # raise a bit above map
+        marker.pose.position.z = self.z + 1.0 # raise a bit above map
         marker.pose.orientation = self.orientation
 
         # draw blinkers

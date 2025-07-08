@@ -11,6 +11,9 @@ class EMATracker:
     def __init__(self):
 
         # Parameters
+        self.enable_initial_velocity_estimate = rospy.get_param('~enable_initial_velocity_estimate')
+        self.enable_initial_acceleration_estimate = rospy.get_param('~enable_initial_acceleration_estimate')
+        self.enable_missed_detection_propagation = rospy.get_param('~enable_missed_detection_propagation')
         self.detection_counter_threshold = rospy.get_param('~detection_counter_threshold')
         self.missed_counter_threshold = rospy.get_param('~missed_counter_threshold')
         self.velocity_gain = rospy.get_param('~velocity_gain')
@@ -74,7 +77,7 @@ class EMATracker:
         if self.association_method == 'iou':
             # Calculate the IOU between the tracked objects and the detected objects
             iou = calculate_iou(tracked_object_bboxes, detected_objects_array['bbox'])
-            assert iou.shape == (len(self.tracked_objects_array), len(detected_objects_array))
+            assert iou.shape == (len(self.tracked_objects_array), len(detected_objects_array)), str(iou.shape) + ' ' + str((len(self.tracked_objects_array), len(detected_objects_array)))
 
             # Calculate the association between the tracked objects and the detected objects
             matched_track_indices, matched_detection_indicies = linear_sum_assignment(-iou)
@@ -106,11 +109,19 @@ class EMATracker:
         # update tracked object speeds with exponential moving average
         new_velocities = (detected_objects_array['centroid'][matched_detection_indicies] - self.tracked_objects_array['centroid'][matched_track_indices]) / time_delta
         old_velocities = self.tracked_objects_array['velocity'][matched_track_indices]
+        if self.enable_initial_velocity_estimate:
+            # make initial velocity of an object equal to its first velocity estimate instead of zero
+            second_time_detections = self.tracked_objects_array['detection_counter'][matched_track_indices] == 1
+            old_velocities[second_time_detections] = new_velocities[second_time_detections]
         detected_objects_array['velocity'][matched_detection_indicies] = (1 - self.velocity_gain) * old_velocities + self.velocity_gain * new_velocities
 
         # update tracked object accelerations with exponential moving average
         new_accelerations = (new_velocities - old_velocities) / time_delta
         old_accelerations = self.tracked_objects_array['acceleration'][matched_track_indices]
+        if self.enable_initial_acceleration_estimate:
+            # make initial acceleration of an object equal to its first acceleration estimate instead of zero
+            third_time_detections = self.tracked_objects_array['detection_counter'][matched_track_indices] == 2
+            old_accelerations[third_time_detections] = new_accelerations[third_time_detections]
         detected_objects_array['acceleration'][matched_detection_indicies] = (1 - self.acceleration_gain) * old_accelerations + self.acceleration_gain * new_accelerations
 
         ### 5. UPDATE TRACKED OBJECTS ###
@@ -147,6 +158,18 @@ class EMATracker:
         # increase missed counter and zero detection counter for non-matched tracks
         self.tracked_objects_array['missed_counter'][missed_track_indices] += 1
         #self.tracked_objects_array['detection_counter'][missed_track_indices] = 0
+
+        # move missed tracks forward
+        if self.enable_missed_detection_propagation:
+            assert len(self.tracked_objects) == len(self.tracked_objects_array) == len(tracked_object_centroids) == len(tracked_object_bboxes)
+            self.tracked_objects_array['centroid'][missed_track_indices] = tracked_object_centroids[missed_track_indices]
+            self.tracked_objects_array['bbox'][missed_track_indices] = tracked_object_bboxes[missed_track_indices]
+            for idx in missed_track_indices:
+                obj = self.tracked_objects[idx]
+                obj.pose.position.x, obj.pose.position.y = self.tracked_objects_array['centroid'][idx]
+                for p in obj.convex_hull.polygon.points:
+                    p.x += position_change[idx][0]
+                    p.y += position_change[idx][1]
 
         # delete stale tracks
         stale_track_indices = np.where(self.tracked_objects_array['missed_counter'] >= self.missed_counter_threshold)[0]

@@ -2,14 +2,13 @@
 
 import rospy
 import time
-from lanelet2.io import Origin, load
-from lanelet2.projection import UtmProjector
 
 from autoware_msgs.msg import TrafficLightResultArray
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
 
+from helpers.lanelet2 import load_lanelet2_map
 
 # used for traffic lights
 RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
@@ -21,6 +20,7 @@ GREY = ColorRGBA(0.4, 0.4, 0.4, 0.6)
 ORANGE = ColorRGBA(1.0, 0.5, 0.0, 0.6)
 WHITE = ColorRGBA(1.0, 1.0, 1.0, 0.6)
 CYAN = ColorRGBA(0.0, 1.0, 1.0, 0.3)
+BLUE = ColorRGBA(0.3, 0.3, 1.0, 0.3)
 WHITE100 = ColorRGBA(1.0, 1.0, 1.0, 1.0)
 
 TRAFFIC_LIGHT_STATE_TO_MARKER_COLOR = {
@@ -47,14 +47,7 @@ class Lanelet2MapVisualizer:
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
-        # Load the map using Lanelet2
-        if coordinate_transformer == "utm":
-            projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
-        else:
-            rospy.logfatal("%s - only utm and custom origin currently supported for lanelet2 map loading", rospy.get_name())
-            exit(1)
-
-        self.lanelet2_map = load(lanelet2_map_name, projector)
+        self.lanelet2_map = load_lanelet2_map(lanelet2_map_name, coordinate_transformer, use_custom_origin, utm_origin_lat, utm_origin_lon)
 
         # Visualize the Lanelet2 map
         marker_array = visualize_lanelet2_map(self.lanelet2_map)
@@ -72,6 +65,11 @@ class Lanelet2MapVisualizer:
 
     def traffic_light_status_callback(self, msg):
         marker_array = MarkerArray()
+        # delete all previous markers
+        marker = Marker()
+        marker.action = Marker.DELETEALL
+        marker_array.markers.append(marker)
+
         states = {}
         for result in msg.results:
             # check if we have already outputted the status of this stopline
@@ -164,6 +162,10 @@ def visualize_laneltLayer(map):
 
             crosswalk_marker = linestring_to_marker(points, "Crosswalk", lanelet.id, ORANGE, 0.3, stamp)
             marker_array.markers.append(crosswalk_marker)
+
+        elif lanelet.attributes["subtype"] == "bus_lane":
+            centerline_marker = linestring_to_marker(lanelet.centerline, "Centerline", lanelet.id, BLUE, 1.5, stamp)
+            marker_array.markers.append(centerline_marker)
 
     return marker_array
 

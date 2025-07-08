@@ -78,6 +78,9 @@ class SFADetector:
         self.output_frame = rospy.get_param("/detection/output_frame")  # transform detected objects from lidar frame to this frame
         self.transform_timeout = rospy.get_param('~transform_timeout') # transform timeout when waiting for transform to output frame
 
+        # warm up the model
+        self.detect(np.empty((0, 4)))
+
         # transform listener
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer)

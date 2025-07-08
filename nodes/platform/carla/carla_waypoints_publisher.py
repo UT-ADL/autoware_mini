@@ -8,7 +8,6 @@
 receive a path from carla_ros_waypoint_publisher and convert it to autoware
 """
 import rospy
-from autoware_msgs.msg import LaneArray
 from autoware_msgs.msg import Lane
 from autoware_msgs.msg import Waypoint
 from nav_msgs.msg import Path
@@ -18,7 +17,7 @@ class CarlaWaypointsPublisher():
 
     def __init__(self):
         # Publishers
-        self.waypoints_pub = rospy.Publisher('global_path', LaneArray, queue_size=10, latch=True, tcp_nodelay=True)
+        self.waypoints_pub = rospy.Publisher('global_path', Lane, queue_size=10, latch=True, tcp_nodelay=True)
 
         # Subscribers
         rospy.Subscriber('/carla/ego_vehicle/waypoints', Path, self.path_callback, queue_size=None, tcp_nodelay=True)
@@ -27,11 +26,9 @@ class CarlaWaypointsPublisher():
         """
         callback for path. Convert it to Autoware LaneArray and publish it
         """
-        msg = LaneArray()
-        lane = Lane()
-        lane.header = data.header
-        lane.waypoints = [Waypoint(pose=pose) for pose in data.poses]
-        msg.lanes.append(lane)
+        msg = Lane()
+        msg.header = data.header
+        msg.waypoints = [Waypoint(pose=pose) for pose in data.poses]
 
         self.waypoints_pub.publish(msg)
 

@@ -3,11 +3,14 @@
     <arg name="detector"            default="lidar_cluster"     doc="lidar_cluster,lidar_sfa,lidar_vella,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion,carla,sim" />
     <arg name="use_lidar_center"    default="true"              doc="use velodyne lidar"/>
     <arg name="use_lidar_front"     default="false"             doc="use ouster lidar"/>
+    <arg name="map_name"            default="tartu_demo"        doc="map name for road area filter" />
+    <arg name="use_road_area_filter" default="false"            doc="use road area filter"/>
     <arg name="tfl_detector"        default="none"              doc="carla, mqtt, camera, mqtt_camera_fusion" />
     <arg name="lanelet2_map_name"   default="tartu_demo.osm"    doc="for carla traffic light detector" />
     <arg name="tracker"             default="ema"               doc="none, ema" />
-    <arg name="predictor"           default="none"              doc="none, naive" />
+    <arg name="predictor"           default="none"              doc="none, naive, map" />
     <arg name="more_visualizations" default="false"             doc="By default only visualize final detections" />
+    <arg name="detection_range"     default=""                  doc="enter a value in meters to enable it" />
 
     <group ns="detection">
 
@@ -20,6 +23,9 @@
             <arg name="tracker"             value="$(arg tracker)" />
             <arg name="predictor"           value="$(arg predictor)" />
             <arg name="more_visualizations" value="$(arg more_visualizations)" />
+            <arg name="detection_range"     value="$(arg detection_range)" />
+            <arg name="map_name"            value="$(arg map_name)" />
+            <arg name="use_road_area_filter" value="$(arg use_road_area_filter)" />
         </include>
 
         <!-- Traffic light detection -->

@@ -70,6 +70,8 @@ A ROS node that visualizes the local path and other relevant information.
 | `car_safety_radius` | `float` | `1.3` | Safety radius of the car used for visualization |
 | `current_pose_to_car_front` | `float` | `4.0` | Distance between the current pose and the car front |
 | `braking_safety_distance` | `float` | `2.0` | Safety distance to use for braking visualization |
+| `stopping_speed_limit` | `float` | `1.0` | Speed limit (m/s) for other vehicles to consider them as stopped |
+
 
 
 #### Subscribed Topics

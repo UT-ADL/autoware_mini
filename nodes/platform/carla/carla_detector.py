@@ -39,7 +39,7 @@ class CarlaDetector:
     def __init__(self):
 
         # Node parameters
-        self.use_offset = rospy.get_param("/carla/use_offset")
+        self.use_transformer = rospy.get_param("/carla_localization/use_transformer")
         use_custom_origin = rospy.get_param("/localization/use_custom_origin")
         utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
         utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
@@ -55,7 +55,7 @@ class CarlaDetector:
             'detected_objects', DetectedObjectArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('/carla/ground_truth_objects',
+        rospy.Subscriber('/carla/ego_vehicle/objects',
                          ObjectArray, self.carla_objects_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
 
     def carla_objects_callback(self, data):
@@ -78,7 +78,7 @@ class CarlaDetector:
             object_msg.space_frame = self.output_frame
             object_msg.pose = obj.pose
 
-            if self.use_offset:
+            if self.use_transformer:
                 object_msg.pose = self.sim2utm_transformer.transform_pose(object_msg.pose)
 
             object_msg.dimensions.x = obj.shape.dimensions[0]

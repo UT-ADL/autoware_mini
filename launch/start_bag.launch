@@ -11,21 +11,36 @@
     <arg name="local_planner"           default="velocity"      doc="velocity"/>
     <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley"/>
     <arg name="use_path_smoothing"      default="true" />
+    <arg name="use_road_area_filter"    default="false"         doc="use road area filter"/>
     <arg name="tracker"                 default="ema"           doc="none, ema"/>
-    <arg name="predictor"               default="none"          doc="none, naive"/>
-    <arg name="lanelet2_map_name"       default="tartu_demo.osm" />
+    <arg name="predictor"               default="none"          doc="none, naive, map"/>
+    <arg name='map_name'                default='tartu_demo' />
+    <arg name="lanelet2_map_name"       default="$(arg map_name).osm" />
     <arg name="use_tf"                  default="true"          doc="replaces tf-s in bag with the current ones"/>
     <arg name="use_localization"        default="$(arg use_tf)" doc="replace localization topics"/>
     <arg name="use_detection"           default="true"          doc="replace object detection topics"/>
     <arg name="use_planning"            default="true"          doc="replace planning topics"/>
     <arg name="use_control"             default="true"          doc="replace control topics"/>
+    <arg name="detection_range"         default=""              doc="enter a value in meters to enable it" />
     <arg name="more_visualizations"     default="true"          doc="When debugging a bag, visualize everything by default" />
+    <arg name="bag_delay"               default="6"             doc="Delay before starting to publish messages" />
+    <arg name="record_bag"              default=""              doc="Name of the bag to record" />
+    <arg name="record_topics"           default="(/detection/detected_objects|/detection/traffic_light_status|/localization/current_pose|/localization/current_velocity|/tf)" doc="Regexp of the topics to record, 'all' to record all" />
+    <arg name="record_topics_option"    default="$(eval '--all' if record_topics == 'all' else '--regex ' + record_topics if record_topics != '' else '')" doc="rosbag record parameter" />
+    <arg name="benchmark_delay_topic"   default=""              doc="Name of the topic to benchmark" />
+    <arg name="loop"                    default="$(eval benchmark_delay_topic == '' and record_bag == '')" />
+    <arg name="loop_option"             default="$(eval '--loop' if loop else '')" doc="rosbag play parameter" />
+    <arg name="start"                   default=""              doc="Seconds from the start of the bag" />
+    <arg name="start_option"            default="$(eval '--start ' + str(start) if start != '' else '')" doc="rosbag play parameter" />
+    <arg name="duration"                default=""              doc="Seconds to play from start" />
+    <arg name="duration_option"         default="$(eval '--duration ' + str(duration) if duration != '' else '')" doc="rosbag play parameter" />
 
     <!-- Use simulation time from bag -->
     <param name="/use_sim_time" value="true" />
 
     <!-- Play back bag -->
-    <node pkg="rosbag" type="play" name="player" required="true" args="$(find autoware_mini)/data/bags/$(arg bag_file) --clock --loop --queue=1">
+    <node pkg="rosbag" type="play" name="player" required="true" output="screen"
+            args="$(find autoware_mini)/data/bags/$(arg bag_file) --clock --quiet --queue=1 --delay $(arg bag_delay) $(arg loop_option) $(arg start_option) $(arg duration_option)">
         <!-- Rename saved topics that are replaced by current ones -->
         <remap from="/tf" to="/bag/tf" if="$(arg use_tf)"/>
         <remap from="/tf_static" to="/bag/tf_static" if="$(arg use_tf)"/>
@@ -35,6 +50,7 @@
         <remap from="/detection/lidar/points_ground" to="/bag/detection/lidar/points_ground" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/points_no_ground" to="/bag/detection/lidar/points_no_ground" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/points_clustered" to="/bag/detection/lidar/points_clustered" if="$(arg use_detection)"/>
+        <remap from="/detection/lidar/points_filtered" to="/bag/detection/lidar/points_filtered" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/detected_objects" to="/bag/detection/lidar/detected_objects" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/detected_objects_markers" to="/bag/detection/lidar/detected_objects_markers" if="$(arg use_detection)"/>
         <remap from="/detection/radar/detected_objects" to="/bag/detection/radar/detected_objects" if="$(arg use_detection)"/>
@@ -77,9 +93,16 @@
         <remap from="/lidar_0/vlp32/pcl2" to="/lidar_center/points_raw"/>
     </node>
 
+    <node if="$(eval benchmark_delay_topic != '')" pkg="rostopic" type="rostopic" name="delay" required="true" output="screen"
+            args="delay $(arg benchmark_delay_topic)" />
+
+    <node if="$(eval record_bag != '')" pkg="rosbag" type="record" name="recorder" required="true" output="screen"
+            args="--output-name $(find autoware_mini)/data/bags/$(arg record_bag) $(arg record_topics_option) --exclude '(/bag/.*|/clock)'" />
+
     <!-- Localization -->
     <include if="$(arg use_localization)" file="$(find autoware_mini)/launch/localization.launch">
-        <arg name="localizer"       value="$(arg localizer)" />
+        <arg name="localizer"           value="$(arg localizer)" />
+        <arg name="map_name"            value="$(arg map_name)" />
     </include>
 
     <!-- Detection -->
@@ -92,6 +115,9 @@
         <arg name="tracker"             value="$(arg tracker)" />
         <arg name="predictor"           value="$(arg predictor)" />
         <arg name="more_visualizations" value="$(arg more_visualizations)" />
+        <arg name="detection_range"     value="$(arg detection_range)" />
+        <arg name="map_name"            value="$(arg map_name)" />
+        <arg name="use_road_area_filter" value="$(arg use_road_area_filter)" />
     </include>
 
     <!-- Planning -->
@@ -104,16 +130,20 @@
 
     <!-- Control -->
     <include if="$(arg use_control)" file="$(find autoware_mini)/launch/control.launch">
-        <arg name="follower"        value="$(arg follower)" />
+        <arg name="follower"            value="$(arg follower)" />
     </include>
 
     <!-- Bag platform -->
     <include file="$(find autoware_mini)/launch/platform/bag.launch">
-        <arg name="use_tf"          value="$(arg use_tf)" />
+        <arg name="use_tf"              value="$(arg use_tf)" />
     </include>
 
     <!-- Rviz -->
-    <include file="$(find autoware_mini)/launch/dashboard.launch" />
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
+    <include file="$(find autoware_mini)/launch/dashboard.launch">
+        <arg name="driver_status"       value="true" />
+    </include>
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true">
+        <rosparam command="load" file="$(find autoware_mini)/config/actions.yaml"/>
+    </node>
 
 </launch>

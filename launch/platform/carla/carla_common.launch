@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name='map_name'                  default='town01'/>
+  <arg name='use_manual_control'        default='false' /><!-- Toggle manual control -->
+
+  <!--
+    ###################
+    ## Control Nodes ##
+    ###################
+    -->
+
+  <!-- carla ackermann control -->
+  <include file='$(find carla_ackermann_control)/launch/carla_ackermann_control.launch' />
+
+  <!-- For control through RViz -->
+  <remap from="/carla/ego_vehicle/vehicle_control_cmd" to="/carla/ego_vehicle/vehicle_control_cmd_manual" />
+  <include file='$(find carla_twist_to_control)/launch/carla_twist_to_control.launch' />
+
+  <group if='$(arg use_manual_control)'>
+    <!-- carla manual control -->
+    <include file='$(find carla_manual_control)/launch/carla_manual_control.launch' />
+  </group>
+
+  <node pkg='autoware_mini' type='carla_vehicle_interface.py' name='carla_vehicle_interface' output='screen' required="true" />
+
+  <!--
+    ####################
+    ## Commons Params ##
+    ####################
+    -->
+
+  <rosparam command="load" file="$(find autoware_mini)/config/carla.yaml" />
+
+  <group ns="vehicle">
+    <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />
+  </group>
+
+  <group if="$(eval 'town' in map_name.lower())">
+    <param name="/carla_localization/use_transformer" type="boolean" value="false" />
+  </group>
+
+  <!-- Patch controller params because simulation does not have delay -->
+  <rosparam param="simulate_cmd_delay" ns="control/pure_pursuit_follower">0.0</rosparam>
+  <rosparam param="simulate_cmd_delay" ns="control/stanley_follower">0.0</rosparam>
+  
+</launch>

@@ -9,14 +9,14 @@ ROS node for converting ground truth detections from the CARLA simulator and pub
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `~use_offset` | `bool` | `True` | If true, will use the `localization.SimulationToUTMTransformer` class to convert the detected objects to the UTM coordinate system. |
+| `~use_transformer` | `bool` | `True` | If true, will use the `localization.SimulationToUTMTransformer` class to convert the detected objects to the UTM coordinate system. |
 
 
 #### Subscribed Topics
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `/carla/ground_truth_objects` | `derived_object_msgs::ObjectArray` | Subscribes to ground truth object detections from the CARLA simulator. |
+| `/carla/ego_vehicle/objects` | `derived_object_msgs::ObjectArray` | Subscribes to ground truth object detections from the CARLA simulator. |
 
 
 #### Published Topics
@@ -36,7 +36,7 @@ ROS node for ground truth localization.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `~use_offset` | `bool` | `True` | Whether to use an offset transformation from simulation coordinates to UTM coordinates. |
+| `~use_transformer` | `bool` | `True` | Whether to use an transformation from simulation coordinates to UTM coordinates. |
 | `/localization/use_custom_origin` | `bool` | `True` | Whether to use a custom origin for UTM coordinates. |
 | `/localization/utm_origin_lat` | `float` | | Latitude of the custom origin for UTM coordinates. |
 | `/localization/utm_origin_lon` | `float` | | Longitude of the custom origin for UTM coordinates. |
@@ -95,7 +95,7 @@ ROS node that detects traffic lights from the Carla simulator and publishes the 
 
 | Name | Type | Default value | Description |
 | ---- | ---- | ------------- | ----------- |
-| `~use_offset` | `bool` | `true` | Whether to use the UTM offset when converting the traffic light position from the simulator coordinates to the UTM coordinates. |
+| `~use_transformer` | `bool` | `true` | Whether to use transformer when converting the traffic light position from the simulator coordinates to the UTM coordinates. |
 | `/localization/coordinate_transformer` | `string` | | The coordinate transformer used to load the map. Only "utm" is currently supported. |
 | `/localization/use_custom_origin` | `bool` | `true` | Whether to use a custom origin. |
 | `/localization/utm_origin_lat` | `float` | | The latitude of the UTM origin. |

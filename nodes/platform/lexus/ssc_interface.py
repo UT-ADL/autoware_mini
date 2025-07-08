@@ -30,14 +30,17 @@ class SSCInterface:
         self.enable_reverse_motion = rospy.get_param('~enable_reverse_motion')
         self.command_timeout = rospy.get_param('~command_timeout')
         self.wheel_base = rospy.get_param('wheel_base')
-        self.ssc_gear_ratio = rospy.get_param('~ssc_gear_ratio')
+        self.ssc_gear_ratio = rospy.get_param('steer_ratio')
         self.acceleration_limit = rospy.get_param('acceleration_limit')
         self.deceleration_limit = rospy.get_param('deceleration_limit')
+        self.default_acceleration = rospy.get_param('/planning/default_acceleration')
+        self.default_deceleration = rospy.get_param('/planning/default_deceleration')
         self.max_curvature_rate = rospy.get_param('~max_curvature_rate')
         self.agr_coef_a = rospy.get_param('~agr_coef_a')
         self.agr_coef_b = rospy.get_param('~agr_coef_b')
         self.agr_coef_c = rospy.get_param('~agr_coef_c')
         self.max_speed = rospy.get_param('~max_speed')
+        self.enable_emergency_braking = rospy.get_param('~enable_emergency_braking')
 
         # initialize variables
         self.engage = False
@@ -127,20 +130,22 @@ class SSCInterface:
             pass
 
         # emergency mode stops the car
-        if msg.emergency == 1:
-            rospy.logerr("%s - emergency stopping, speed overridden to 0", rospy.get_name())
+        if msg.emergency == 1 and self.enable_emergency_braking:
+            rospy.logwarn_throttle(10, "%s - emergency stopping", rospy.get_name())
+            acceleration_limit = 0.0
+            deceleration_limit = 0.0
             desired_speed = 0.0
-
-        # calculate acceleration and deceleration limits
-        if msg.ctrl_cmd.linear_acceleration == 0.0:
-            acceleration_limit = self.acceleration_limit
-            deceleration_limit = self.deceleration_limit
-        elif msg.ctrl_cmd.linear_acceleration > 0.0:
-            acceleration_limit = msg.ctrl_cmd.linear_acceleration
-            deceleration_limit = self.deceleration_limit
-        elif msg.ctrl_cmd.linear_acceleration < 0.0:
-            acceleration_limit = self.acceleration_limit
-            deceleration_limit = -msg.ctrl_cmd.linear_acceleration
+        else:
+            # calculate acceleration and deceleration limits
+            if msg.ctrl_cmd.linear_acceleration == 0.0:
+                acceleration_limit = self.default_acceleration
+                deceleration_limit = self.default_deceleration
+            elif msg.ctrl_cmd.linear_acceleration > 0.0:
+                acceleration_limit = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
+                deceleration_limit = self.default_deceleration
+            elif msg.ctrl_cmd.linear_acceleration < 0.0:
+                acceleration_limit = self.default_acceleration
+                deceleration_limit = min(-msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
 
         # publish command messages
         header = Header()

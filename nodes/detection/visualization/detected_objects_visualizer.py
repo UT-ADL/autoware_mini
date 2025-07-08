@@ -2,12 +2,14 @@
 
 import math
 import rospy
+from shapely.geometry import Polygon
 
 from autoware_msgs.msg import DetectedObjectArray
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Point, Quaternion
 from std_msgs.msg import Header, ColorRGBA
 
+from helpers.shapely import get_polygon_width
 from helpers.geometry import get_orientation_from_heading
 
 class DetectedObjectsVisualizer:
@@ -91,15 +93,25 @@ class DetectedObjectsVisualizer:
 
             # candidate trajectories
             if len(object.candidate_trajectories.lanes) > 0:
+                # extract and visualize object width - used in object detection
+                object_polygon = Polygon([(p.x, p.y) for p in object.convex_hull.polygon.points])
+                object_heading = math.degrees(math.atan2(object.velocity.linear.y, object.velocity.linear.x))
+                object_width = get_polygon_width(object_polygon, object_heading)
                 marker = Marker(header=header)
                 marker.ns = 'candidate_trajectories'
                 marker.id = object.id
-                marker.type = marker.LINE_STRIP
+                marker.type = marker.LINE_LIST
                 marker.action = marker.ADD
                 marker.pose.orientation.w = 1.0
-                marker.scale.x = 0.1
-                marker.color = ColorRGBA(1.0, 1.0, 0.0, 1.0)
-                marker.points = [Point(wp.pose.pose.position.x, wp.pose.pose.position.y, wp.pose.pose.position.z) for wp in object.candidate_trajectories.lanes[0].waypoints]
+                marker.scale.x = object_width
+                marker.color = ColorRGBA(1.0, 1.0, 0.0, 0.5)
+                # visualize possible multiple trajectories
+                for lane in object.candidate_trajectories.lanes:
+                    for i in range(len(lane.waypoints) - 1):
+                        p1 = lane.waypoints[i].pose.pose.position
+                        p2 = lane.waypoints[i + 1].pose.pose.position
+                        marker.points.append(Point(p1.x, p1.y, p1.z))
+                        marker.points.append(Point(p2.x, p2.y, p2.z))
                 markers.markers.append(marker)
 
             # text

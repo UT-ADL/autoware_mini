@@ -1,15 +1,15 @@
 heading_angle_limit: 90.0
 lateral_error_limit: 2.0
 blinker_lookahead_time: 3.0
-blinker_lookahead_distance: 14.0
+blinker_min_lookahead_distance: 14.0
 
 pure_pursuit_follower:
-  planning_time: 1.2
+  lookahead_time: 1.2 # s           # seconds of lookahead for pure pursuit
   min_lookahead_distance: 6.0
-  nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
+  simulate_cmd_delay: 0.3           # sec
   publish_debug_info: False
 
 stanley_follower:
   cte_gain: 0.4     # gain for cross track error
-  nearest_neighbor_search: kd_tree  # kd_tree. ball_tree, brute, auto
+  simulate_cmd_delay: 0.3           # sec
   publish_debug_info: False
