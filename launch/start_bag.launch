@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<launch>
+    
+    <arg name="bag_file"            default="2023-03-14-20-34-16_vella_odom_compensation_ms.bag" doc="bag file to play" />
+    <arg name="localizer"           default="novatel"   doc="novatel, carla"/>
+    <arg name="detector"            default="cluster"   doc="cluster, sim, carla"/>
+    <arg name="planner"             default="none"      doc="waypoints, lanelet2"/>
+    <arg name="use_tf"              default="true"      doc="replaces tf-s in bag with the current ones"/>
+    <arg name="use_localization"    default="$(arg use_tf)" doc="replace localization topics"/>
+    <arg name="use_detection"       default="true"      doc="replace object detection topics"/>
+    <arg name="use_planning"        default="$(arg use_tf)" doc="replace planning topics"/>
+
+    <!-- Use simulation time from bag -->
+    <param name="/use_sim_time" value="true" />
+
+    <!-- Play back bag -->
+    <node pkg="rosbag" type="play" name="player" required="true" args="$(find autoware_mini)/data/bags/$(arg bag_file) --clock --loop">
+        <!-- Rename saved topics that are replaced by current ones -->
+        <remap from="/tf" to="/bag/tf" if="$(arg use_tf)"/>
+        <remap from="/tf_static" to="/bag/tf_static" if="$(arg use_tf)"/>
+        <remap from="/localization/current_pose" to="/bag/localization/current_pose" if="$(arg use_localization)"/>
+        <remap from="/localization/current_velocity" to="/bag/localization/current_velocity" if="$(arg use_localization)"/>
+        <remap from="/localization/odometry" to="/bag/localization/odometry" if="$(arg use_localization)"/>
+        <remap from="/detection/lidar/points_ground" to="/bag/detection/lidar/points_ground" if="$(arg use_detection)"/>
+        <remap from="/detection/lidar/points_no_ground" to="/bag/detection/lidar/points_no_ground" if="$(arg use_detection)"/>
+        <remap from="/detection/lidar/points_clustered" to="/bag/detection/lidar/points_clustered" if="$(arg use_detection)"/>
+        <remap from="/detection/detected_objects" to="/bag/detection/detected_objects" if="$(arg use_detection)"/>
+        <remap from="/detection/detected_objects_markers" to="/bag/detection/detected_objects_markers" if="$(arg use_detection)"/>
+        <remap from="/planning/lanelet2_map_markers" to="/bag/planning/lanelet2_map_markers" if="$(arg use_planning)"/>
+        <remap from="/planning/global_path" to="/bag/planning/global_path" if="$(arg use_planning)"/>
+        <remap from="/planning/global_path_markers" to="/bag/planning/global_path_markers" if="$(arg use_planning)"/>
+        <remap from="/planning/smoothed_path" to="/bag/planning/smoothed_path" if="$(arg use_planning)"/>
+        <remap from="/planning/smoothed_path_markers" to="/bag/planning/smoothed_path_markers" if="$(arg use_planning)"/>
+        <remap from="/planning/local_path" to="/bag/planning/local_path" if="$(arg use_planning)"/>
+        <remap from="/planning/local_path_markers" to="/bag/planning/local_path_markers" if="$(arg use_planning)"/>
+        <!-- For compatibility with older bags and Vella bags -->
+        <remap from="/points_raw_center" to="/lidar_center/points_raw"/>
+        <remap from="/points_raw_front" to="/lidar_front/points_raw"/>
+        <remap from="/lidar_0/vlp32/pcl2" to="/lidar_center/points_raw"/>
+    </node>
+
+    <!-- Vehicle platform -->
+    <include file="$(find vehicle_platform)/launch/platform.launch" >
+        <arg name="use_tf"          value="$(arg use_tf)" />
+        <arg name="use_lexus_model" value="true" />
+    </include>
+
+    <!-- Localization -->
+    <include if="$(arg use_tf)" file="$(find autoware_mini)/launch/localization.launch">
+        <arg name="localizer" value="$(arg localizer)" />
+    </include>
+
+    <!-- Detection -->
+    <include if="$(arg use_detection)" file="$(find autoware_mini)/launch/detection.launch">
+        <arg name="detector" value="$(arg detector)" />
+    </include>
+
+    <!-- Planning -->
+    <include if="$(arg use_planning)" file="$(find autoware_mini)/launch/planning.launch">
+        <arg name="planner" value="$(arg planner)" />
+    </include>
+
+    <!-- Rviz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true" />
+
+</launch>
