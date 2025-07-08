@@ -41704,6 +41704,7 @@
     <nd ref="20763" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20764" action="modify" visible="true" version="1">
     <nd ref="20765" />
@@ -41711,6 +41712,7 @@
     <nd ref="20767" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20768" action="modify" visible="true" version="1">
     <nd ref="20769" />
@@ -41718,6 +41720,7 @@
     <nd ref="20771" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20772" action="modify" visible="true" version="1">
     <nd ref="20773" />
@@ -41725,6 +41728,7 @@
     <nd ref="20775" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20776" action="modify" visible="true" version="1">
     <nd ref="20777" />
@@ -41732,6 +41736,7 @@
     <nd ref="20779" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20780" action="modify" visible="true" version="1">
     <nd ref="20781" />
@@ -41739,6 +41744,7 @@
     <nd ref="20783" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20784" action="modify" visible="true" version="1">
     <nd ref="20785" />
@@ -41746,6 +41752,7 @@
     <nd ref="20787" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20788" action="modify" visible="true" version="1">
     <nd ref="20789" />
@@ -41753,6 +41760,7 @@
     <nd ref="20791" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20792" action="modify" visible="true" version="1">
     <nd ref="20793" />
@@ -41760,6 +41768,7 @@
     <nd ref="20795" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20796" action="modify" visible="true" version="1">
     <nd ref="20797" />
@@ -41767,6 +41776,7 @@
     <nd ref="20799" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20800" action="modify" visible="true" version="1">
     <nd ref="20801" />
@@ -41774,6 +41784,7 @@
     <nd ref="20803" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20804" action="modify" visible="true" version="1">
     <nd ref="20805" />
@@ -41781,6 +41792,7 @@
     <nd ref="20807" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20808" action="modify" visible="true" version="1">
     <nd ref="20809" />
@@ -41788,6 +41800,7 @@
     <nd ref="20811" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20812" action="modify" visible="true" version="1">
     <nd ref="20813" />
@@ -41795,6 +41808,7 @@
     <nd ref="20815" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20816" action="modify" visible="true" version="1">
     <nd ref="20817" />
@@ -41802,6 +41816,7 @@
     <nd ref="20819" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20820" action="modify" visible="true" version="1">
     <nd ref="20821" />
@@ -41809,6 +41824,7 @@
     <nd ref="20823" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20824" action="modify" visible="true" version="1">
     <nd ref="20825" />
@@ -41816,6 +41832,7 @@
     <nd ref="20827" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20828" action="modify" visible="true" version="1">
     <nd ref="20829" />
@@ -41823,6 +41840,7 @@
     <nd ref="20831" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20832" action="modify" visible="true" version="1">
     <nd ref="20833" />
@@ -41830,6 +41848,7 @@
     <nd ref="20835" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20836" action="modify" visible="true" version="1">
     <nd ref="20837" />
@@ -41837,6 +41856,7 @@
     <nd ref="20839" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20840" action="modify" visible="true" version="1">
     <nd ref="20841" />
@@ -41844,6 +41864,7 @@
     <nd ref="20843" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20844" action="modify" visible="true" version="1">
     <nd ref="20845" />
@@ -41851,6 +41872,7 @@
     <nd ref="20847" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20848" action="modify" visible="true" version="1">
     <nd ref="20849" />
@@ -41858,6 +41880,7 @@
     <nd ref="20851" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20852" action="modify" visible="true" version="1">
     <nd ref="20853" />
@@ -41865,6 +41888,7 @@
     <nd ref="20855" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20856" action="modify" visible="true" version="1">
     <nd ref="20857" />
@@ -41872,6 +41896,7 @@
     <nd ref="20859" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20860" action="modify" visible="true" version="1">
     <nd ref="20861" />
@@ -41879,6 +41904,7 @@
     <nd ref="20863" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20864" action="modify" visible="true" version="1">
     <nd ref="20865" />
@@ -41886,6 +41912,7 @@
     <nd ref="20867" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20868" action="modify" visible="true" version="1">
     <nd ref="20869" />
@@ -41893,6 +41920,7 @@
     <nd ref="20871" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20872" action="modify" visible="true" version="1">
     <nd ref="20873" />
@@ -41900,6 +41928,7 @@
     <nd ref="20875" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20876" action="modify" visible="true" version="1">
     <nd ref="20877" />
@@ -41907,6 +41936,7 @@
     <nd ref="20879" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20880" action="modify" visible="true" version="1">
     <nd ref="20881" />
@@ -41914,6 +41944,7 @@
     <nd ref="20883" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20884" action="modify" visible="true" version="1">
     <nd ref="20885" />
@@ -41921,6 +41952,7 @@
     <nd ref="20887" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20888" action="modify" visible="true" version="1">
     <nd ref="20889" />
@@ -41928,6 +41960,7 @@
     <nd ref="20891" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20892" action="modify" visible="true" version="1">
     <nd ref="20893" />
@@ -41935,6 +41968,7 @@
     <nd ref="20895" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20896" action="modify" visible="true" version="1">
     <nd ref="20897" />
@@ -41942,6 +41976,7 @@
     <nd ref="20899" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20900" action="modify" visible="true" version="1">
     <nd ref="20901" />
@@ -41949,151 +41984,152 @@
     <nd ref="20903" />
     <tag k="subtype" v="red_yellow_green" />
     <tag k="type" v="traffic_light" />
+    <tag k="height" v="0.85" />
   </way>
   <way id="20904" action="modify" visible="true" version="1">
     <nd ref="825" />
     <nd ref="20000048" /><nd ref="20000049" /><nd ref="20000050" /><nd ref="20000051" /><nd ref="1650" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20906" action="modify" visible="true" version="1">
     <nd ref="1969" />
     <nd ref="20000124" /><nd ref="20000125" /><nd ref="20000126" /><nd ref="20000127" /><nd ref="2285" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20908" action="modify" visible="true" version="1">
     <nd ref="1654" />
     <nd ref="20000140" /><nd ref="20000141" /><nd ref="20000142" /><nd ref="20000143" /><nd ref="2604" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20910" action="modify" visible="true" version="1">
     <nd ref="2691" />
     <nd ref="20000136" /><nd ref="20000137" /><nd ref="20000138" /><nd ref="20000139" /><nd ref="2776" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20912" action="modify" visible="true" version="1">
     <nd ref="2607" />
     <nd ref="20000116" /><nd ref="20000117" /><nd ref="20000118" /><nd ref="20000119" /><nd ref="2864" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20914" action="modify" visible="true" version="1">
     <nd ref="3825" />
     <nd ref="20000044" /><nd ref="20000045" /><nd ref="20000046" /><nd ref="20000047" /><nd ref="4784" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20916" action="modify" visible="true" version="1">
     <nd ref="5236" />
     <nd ref="20000096" /><nd ref="20000097" /><nd ref="20000098" /><nd ref="20000099" /><nd ref="5685" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20918" action="modify" visible="true" version="1">
     <nd ref="4788" />
     <nd ref="20000016" /><nd ref="20000017" /><nd ref="20000018" /><nd ref="20000019" /><nd ref="6137" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20920" action="modify" visible="true" version="1">
     <nd ref="2867" />
     <nd ref="20000128" /><nd ref="20000129" /><nd ref="20000130" /><nd ref="20000131" /><nd ref="7098" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20922" action="modify" visible="true" version="1">
     <nd ref="7549" />
     <nd ref="20000056" /><nd ref="20000057" /><nd ref="20000058" /><nd ref="20000059" /><nd ref="7998" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20924" action="modify" visible="true" version="1">
     <nd ref="7101" />
     <nd ref="20000036" /><nd ref="20000037" /><nd ref="20000038" /><nd ref="20000039" /><nd ref="8450" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20926" action="modify" visible="true" version="1">
     <nd ref="1" />
     <nd ref="20000084" /><nd ref="20000085" /><nd ref="20000086" /><nd ref="20000087" /><nd ref="9277" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20928" action="modify" visible="true" version="1">
     <nd ref="9367" />
     <nd ref="20000068" /><nd ref="20000069" /><nd ref="20000070" /><nd ref="20000071" /><nd ref="9455" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20930" action="modify" visible="true" version="1">
     <nd ref="9280" />
     <nd ref="20000004" /><nd ref="20000005" /><nd ref="20000006" /><nd ref="20000007" /><nd ref="9546" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20932" action="modify" visible="true" version="1">
     <nd ref="9864" />
     <nd ref="20000076" /><nd ref="20000077" /><nd ref="20000078" /><nd ref="20000079" /><nd ref="10180" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20934" action="modify" visible="true" version="1">
     <nd ref="9549" />
     <nd ref="20000060" /><nd ref="20000061" /><nd ref="20000062" /><nd ref="20000063" /><nd ref="10499" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20936" action="modify" visible="true" version="1">
     <nd ref="10950" />
     <nd ref="20000108" /><nd ref="20000109" /><nd ref="20000110" /><nd ref="20000111" /><nd ref="11399" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20938" action="modify" visible="true" version="1">
     <nd ref="10502" />
     <nd ref="20000028" /><nd ref="20000029" /><nd ref="20000030" /><nd ref="20000031" /><nd ref="11851" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20940" action="modify" visible="true" version="1">
     <nd ref="11925" />
     <nd ref="20000072" /><nd ref="20000073" /><nd ref="20000074" /><nd ref="20000075" /><nd ref="11997" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20942" action="modify" visible="true" version="1">
     <nd ref="11854" />
     <nd ref="20000080" /><nd ref="20000081" /><nd ref="20000082" /><nd ref="20000083" /><nd ref="12072" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20944" action="modify" visible="true" version="1">
     <nd ref="12178" />
     <nd ref="20000092" /><nd ref="20000093" /><nd ref="20000094" /><nd ref="20000095" /><nd ref="12282" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20946" action="modify" visible="true" version="1">
     <nd ref="12075" />
     <nd ref="20000088" /><nd ref="20000089" /><nd ref="20000090" /><nd ref="20000091" /><nd ref="12389" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20948" action="modify" visible="true" version="1">
     <nd ref="12475" />
     <nd ref="20000104" /><nd ref="20000105" /><nd ref="20000106" /><nd ref="20000107" /><nd ref="12559" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20950" action="modify" visible="true" version="1">
     <nd ref="12392" />
     <nd ref="20000100" /><nd ref="20000101" /><nd ref="20000102" /><nd ref="20000103" /><nd ref="12646" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20952" action="modify" visible="true" version="1">
     <nd ref="12865" />
     <nd ref="20000052" /><nd ref="20000053" /><nd ref="20000054" /><nd ref="20000055" /><nd ref="13082" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20954" action="modify" visible="true" version="1">
     <nd ref="12649" />
     <nd ref="20000112" /><nd ref="20000113" /><nd ref="20000114" /><nd ref="20000115" /><nd ref="13302" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20956" action="modify" visible="true" version="1">
     <nd ref="13374" />
     <nd ref="20000008" /><nd ref="20000009" /><nd ref="20000010" /><nd ref="20000011" /><nd ref="13444" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20958" action="modify" visible="true" version="1">
     <nd ref="13305" />
     <nd ref="20000132" /><nd ref="20000133" /><nd ref="20000134" /><nd ref="20000135" /><nd ref="13517" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20960" action="modify" visible="true" version="1">
     <nd ref="13623" />
     <nd ref="20000020" /><nd ref="20000021" /><nd ref="20000022" /><nd ref="20000023" /><nd ref="13727" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20962" action="modify" visible="true" version="1">
     <nd ref="13520" />
     <nd ref="20000000" /><nd ref="20000001" /><nd ref="20000002" /><nd ref="20000003" /><nd ref="13834" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20964" action="modify" visible="true" version="1">
     <nd ref="13925" />
     <nd ref="20000032" /><nd ref="20000033" /><nd ref="20000034" /><nd ref="20000035" /><nd ref="14014" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20966" action="modify" visible="true" version="1">
     <nd ref="13837" />
     <nd ref="20000012" /><nd ref="20000013" /><nd ref="20000014" /><nd ref="20000015" /><nd ref="14106" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20968" action="modify" visible="true" version="1">
     <nd ref="14326" />
     <nd ref="20000040" /><nd ref="20000041" /><nd ref="20000042" /><nd ref="20000043" /><nd ref="14544" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20970" action="modify" visible="true" version="1">
     <nd ref="14109" />
     <nd ref="20000024" /><nd ref="20000025" /><nd ref="20000026" /><nd ref="20000027" /><nd ref="14765" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20972" action="modify" visible="true" version="1">
     <nd ref="14838" />
     <nd ref="20000064" /><nd ref="20000065" /><nd ref="20000066" /><nd ref="20000067" /><nd ref="14909" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <way id="20974" action="modify" visible="true" version="1">
     <nd ref="14768" />
     <nd ref="20000120" /><nd ref="20000121" /><nd ref="20000122" /><nd ref="20000123" /><nd ref="14983" />
-  <tag k="type" v="stop_line" /></way>
+  <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" /></way>
   <relation id="1653" action="modify" visible="true" version="1">
     <member type="way" ref="1652" role="right" />
     <member type="way" ref="1651" role="left" />
@@ -42855,469 +42891,217 @@
     <member type="way" ref="20904" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000000" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20907" action="modify" version="1" visible="true">
     <member type="way" ref="20888" role="refers" />
     <member type="way" ref="20906" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000001" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20909" action="modify" version="1" visible="true">
     <member type="way" ref="20764" role="refers" />
     <member type="way" ref="20908" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000002" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20911" action="modify" version="1" visible="true">
     <member type="way" ref="20892" role="refers" />
     <member type="way" ref="20910" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000003" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20913" action="modify" version="1" visible="true">
     <member type="way" ref="20768" role="refers" />
     <member type="way" ref="20912" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000004" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20915" action="modify" version="1" visible="true">
     <member type="way" ref="20784" role="refers" />
     <member type="way" ref="20914" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000005" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20917" action="modify" version="1" visible="true">
     <member type="way" ref="20780" role="refers" />
     <member type="way" ref="20916" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000006" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20919" action="modify" version="1" visible="true">
     <member type="way" ref="20776" role="refers" />
     <member type="way" ref="20918" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000007" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20921" action="modify" version="1" visible="true">
     <member type="way" ref="20772" role="refers" />
     <member type="way" ref="20920" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000008" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20923" action="modify" version="1" visible="true">
     <member type="way" ref="20792" role="refers" />
     <member type="way" ref="20922" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000009" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20925" action="modify" version="1" visible="true">
     <member type="way" ref="20788" role="refers" />
     <member type="way" ref="20924" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000010" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20927" action="modify" version="1" visible="true">
     <member type="way" ref="20760" role="refers" />
     <member type="way" ref="20926" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000011" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20929" action="modify" version="1" visible="true">
     <member type="way" ref="20804" role="refers" />
     <member type="way" ref="20928" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000012" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20931" action="modify" version="1" visible="true">
     <member type="way" ref="20800" role="refers" />
     <member type="way" ref="20930" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000013" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20933" action="modify" version="1" visible="true">
     <member type="way" ref="20812" role="refers" />
     <member type="way" ref="20932" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000014" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20935" action="modify" version="1" visible="true">
     <member type="way" ref="20808" role="refers" />
     <member type="way" ref="20934" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000015" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20937" action="modify" version="1" visible="true">
     <member type="way" ref="20820" role="refers" />
     <member type="way" ref="20936" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000016" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20939" action="modify" version="1" visible="true">
     <member type="way" ref="20816" role="refers" />
     <member type="way" ref="20938" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000017" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20941" action="modify" version="1" visible="true">
     <member type="way" ref="20828" role="refers" />
     <member type="way" ref="20940" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000018" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20943" action="modify" version="1" visible="true">
     <member type="way" ref="20824" role="refers" />
     <member type="way" ref="20942" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000019" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20945" action="modify" version="1" visible="true">
     <member type="way" ref="20836" role="refers" />
     <member type="way" ref="20944" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000020" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20947" action="modify" version="1" visible="true">
     <member type="way" ref="20832" role="refers" />
     <member type="way" ref="20946" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000021" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20949" action="modify" version="1" visible="true">
     <member type="way" ref="20840" role="refers" />
     <member type="way" ref="20948" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000022" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20951" action="modify" version="1" visible="true">
     <member type="way" ref="20900" role="refers" />
     <member type="way" ref="20950" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000023" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20953" action="modify" version="1" visible="true">
     <member type="way" ref="20844" role="refers" />
     <member type="way" ref="20952" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000024" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20955" action="modify" version="1" visible="true">
     <member type="way" ref="20896" role="refers" />
     <member type="way" ref="20954" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000025" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20957" action="modify" version="1" visible="true">
     <member type="way" ref="20852" role="refers" />
     <member type="way" ref="20956" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000026" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20959" action="modify" version="1" visible="true">
     <member type="way" ref="20848" role="refers" />
     <member type="way" ref="20958" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000027" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20961" action="modify" version="1" visible="true">
     <member type="way" ref="20860" role="refers" />
     <member type="way" ref="20960" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000028" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20963" action="modify" version="1" visible="true">
     <member type="way" ref="20856" role="refers" />
     <member type="way" ref="20962" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000029" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20965" action="modify" version="1" visible="true">
     <member type="way" ref="20868" role="refers" />
     <member type="way" ref="20964" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000030" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20967" action="modify" version="1" visible="true">
     <member type="way" ref="20864" role="refers" />
     <member type="way" ref="20966" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000031" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20969" action="modify" version="1" visible="true">
     <member type="way" ref="20876" role="refers" />
     <member type="way" ref="20968" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000032" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20971" action="modify" version="1" visible="true">
     <member type="way" ref="20872" role="refers" />
     <member type="way" ref="20970" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000033" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20973" action="modify" version="1" visible="true">
     <member type="way" ref="20884" role="refers" />
     <member type="way" ref="20972" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000034" role="light_bulbs" /></relation>
+  </relation>
   <relation id="20975" action="modify" version="1" visible="true">
     <member type="way" ref="20880" role="refers" />
     <member type="way" ref="20974" role="ref_line" />
     <tag k="subtype" v="traffic_light" />
     <tag k="type" v="regulatory_element" />
-  <member type="way" ref="10000035" role="light_bulbs" /></relation>
-  <way id="10000000" visible="true" version="1">
-    <nd ref="20797" />
-    <nd ref="20798" />
-    <nd ref="20799" />
-    <tag k="traffic_light_id" v="20796" />
-    <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000001" visible="true" version="1">
-      <nd ref="20889" />
-      <nd ref="20890" />
-      <nd ref="20891" />
-      <tag k="traffic_light_id" v="20888" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000002" visible="true" version="1">
-      <nd ref="20765" />
-      <nd ref="20766" />
-      <nd ref="20767" />
-      <tag k="traffic_light_id" v="20764" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000003" visible="true" version="1">
-      <nd ref="20893" />
-      <nd ref="20894" />
-      <nd ref="20895" />
-      <tag k="traffic_light_id" v="20892" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000004" visible="true" version="1">
-      <nd ref="20769" />
-      <nd ref="20770" />
-      <nd ref="20771" />
-      <tag k="traffic_light_id" v="20768" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000005" visible="true" version="1">
-      <nd ref="20785" />
-      <nd ref="20786" />
-      <nd ref="20787" />
-      <tag k="traffic_light_id" v="20784" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000006" visible="true" version="1">
-      <nd ref="20781" />
-      <nd ref="20782" />
-      <nd ref="20783" />
-      <tag k="traffic_light_id" v="20780" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000007" visible="true" version="1">
-      <nd ref="20777" />
-      <nd ref="20778" />
-      <nd ref="20779" />
-      <tag k="traffic_light_id" v="20776" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000008" visible="true" version="1">
-      <nd ref="20773" />
-      <nd ref="20774" />
-      <nd ref="20775" />
-      <tag k="traffic_light_id" v="20772" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000009" visible="true" version="1">
-      <nd ref="20793" />
-      <nd ref="20794" />
-      <nd ref="20795" />
-      <tag k="traffic_light_id" v="20792" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000010" visible="true" version="1">
-      <nd ref="20789" />
-      <nd ref="20790" />
-      <nd ref="20791" />
-      <tag k="traffic_light_id" v="20788" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000011" visible="true" version="1">
-      <nd ref="20761" />
-      <nd ref="20762" />
-      <nd ref="20763" />
-      <tag k="traffic_light_id" v="20760" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000012" visible="true" version="1">
-      <nd ref="20805" />
-      <nd ref="20806" />
-      <nd ref="20807" />
-      <tag k="traffic_light_id" v="20804" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000013" visible="true" version="1">
-      <nd ref="20801" />
-      <nd ref="20802" />
-      <nd ref="20803" />
-      <tag k="traffic_light_id" v="20800" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000014" visible="true" version="1">
-      <nd ref="20813" />
-      <nd ref="20814" />
-      <nd ref="20815" />
-      <tag k="traffic_light_id" v="20812" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000015" visible="true" version="1">
-      <nd ref="20809" />
-      <nd ref="20810" />
-      <nd ref="20811" />
-      <tag k="traffic_light_id" v="20808" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000016" visible="true" version="1">
-      <nd ref="20821" />
-      <nd ref="20822" />
-      <nd ref="20823" />
-      <tag k="traffic_light_id" v="20820" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000017" visible="true" version="1">
-      <nd ref="20817" />
-      <nd ref="20818" />
-      <nd ref="20819" />
-      <tag k="traffic_light_id" v="20816" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000018" visible="true" version="1">
-      <nd ref="20829" />
-      <nd ref="20830" />
-      <nd ref="20831" />
-      <tag k="traffic_light_id" v="20828" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000019" visible="true" version="1">
-      <nd ref="20825" />
-      <nd ref="20826" />
-      <nd ref="20827" />
-      <tag k="traffic_light_id" v="20824" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000020" visible="true" version="1">
-      <nd ref="20837" />
-      <nd ref="20838" />
-      <nd ref="20839" />
-      <tag k="traffic_light_id" v="20836" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000021" visible="true" version="1">
-      <nd ref="20833" />
-      <nd ref="20834" />
-      <nd ref="20835" />
-      <tag k="traffic_light_id" v="20832" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000022" visible="true" version="1">
-      <nd ref="20841" />
-      <nd ref="20842" />
-      <nd ref="20843" />
-      <tag k="traffic_light_id" v="20840" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000023" visible="true" version="1">
-      <nd ref="20901" />
-      <nd ref="20902" />
-      <nd ref="20903" />
-      <tag k="traffic_light_id" v="20900" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000024" visible="true" version="1">
-      <nd ref="20845" />
-      <nd ref="20846" />
-      <nd ref="20847" />
-      <tag k="traffic_light_id" v="20844" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000025" visible="true" version="1">
-      <nd ref="20897" />
-      <nd ref="20898" />
-      <nd ref="20899" />
-      <tag k="traffic_light_id" v="20896" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000026" visible="true" version="1">
-      <nd ref="20853" />
-      <nd ref="20854" />
-      <nd ref="20855" />
-      <tag k="traffic_light_id" v="20852" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000027" visible="true" version="1">
-      <nd ref="20849" />
-      <nd ref="20850" />
-      <nd ref="20851" />
-      <tag k="traffic_light_id" v="20848" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000028" visible="true" version="1">
-      <nd ref="20861" />
-      <nd ref="20862" />
-      <nd ref="20863" />
-      <tag k="traffic_light_id" v="20860" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000029" visible="true" version="1">
-      <nd ref="20857" />
-      <nd ref="20858" />
-      <nd ref="20859" />
-      <tag k="traffic_light_id" v="20856" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000030" visible="true" version="1">
-      <nd ref="20869" />
-      <nd ref="20870" />
-      <nd ref="20871" />
-      <tag k="traffic_light_id" v="20868" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000031" visible="true" version="1">
-      <nd ref="20865" />
-      <nd ref="20866" />
-      <nd ref="20867" />
-      <tag k="traffic_light_id" v="20864" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000032" visible="true" version="1">
-      <nd ref="20877" />
-      <nd ref="20878" />
-      <nd ref="20879" />
-      <tag k="traffic_light_id" v="20876" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000033" visible="true" version="1">
-      <nd ref="20873" />
-      <nd ref="20874" />
-      <nd ref="20875" />
-      <tag k="traffic_light_id" v="20872" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000034" visible="true" version="1">
-      <nd ref="20885" />
-      <nd ref="20886" />
-      <nd ref="20887" />
-      <tag k="traffic_light_id" v="20884" />
-      <tag k="type" v="light_bulbs" />
-  </way>
-  <way id="10000035" visible="true" version="1">
-      <nd ref="20881" />
-      <nd ref="20882" />
-      <nd ref="20883" />
-      <tag k="traffic_light_id" v="20880" />
-      <tag k="type" v="light_bulbs" />
-  </way>
+  </relation>
   <node id="20000000" visible="true" version="1" lat="-0.0006163277914498366" lon="0.000811900609143823">
     <tag k="ele" v="0" />
   </node>

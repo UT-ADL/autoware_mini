@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="session_id" default="" doc="Session ID for the webapp bridge" />
+
+    <!-- Webapp bridge -->
+    <group ns="webapp">
+        <node pkg="autoware_mini" type="webapp_bridge.py" name="webapp_bridge" output="screen" required="true">
+            <param name="session_id" value="$(arg session_id)" />
+        </node>
+        <rosparam command="load" file="$(find autoware_mini)/config/webapp.yaml" />
+    </group>
+
+</launch>

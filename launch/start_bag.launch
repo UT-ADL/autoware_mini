@@ -1,53 +1,93 @@
 <?xml version="1.0"?>
 <launch>
     
-    <arg name="bag_file"                default="2023-05-25-14-21-10_sensors_Raekoda.bag" doc="bag file to play" />
-    <arg name="localizer"               default="novatel"       doc="novatel, carla"/>
-    <arg name="detector"                default="lidar_cluster" doc="lidar_cluster, sim, carla"/>
-    <arg name="use_lidar_center"        default="true"          doc="use velodyne lidar"/>
-    <arg name="use_lidar_front"         default="false"         doc="use ouster lidar"/>
-    <arg name="tfl_detector"            default="camera"        doc="camera, mqtt, mqtt_camera_fusion" />
-    <arg name="global_planner"          default="lanelet2"      doc="waypoints, lanelet2"/>
-    <arg name="local_planner"           default="velocity"      doc="velocity"/>
-    <arg name="follower"                default="pure_pursuit"  doc="pure_pursuit, stanley"/>
-    <arg name="use_path_smoothing"      default="true" />
-    <arg name="use_road_area_filter"    default="false"         doc="use road area filter"/>
-    <arg name="tracker"                 default="ema"           doc="none, ema"/>
-    <arg name="predictor"               default="none"          doc="none, naive, map"/>
-    <arg name='map_name'                default='tartu_demo' />
-    <arg name="lanelet2_map_name"       default="$(arg map_name).osm" />
-    <arg name="use_tf"                  default="true"          doc="replaces tf-s in bag with the current ones"/>
-    <arg name="use_localization"        default="$(arg use_tf)" doc="replace localization topics"/>
-    <arg name="use_detection"           default="true"          doc="replace object detection topics"/>
-    <arg name="use_planning"            default="true"          doc="replace planning topics"/>
-    <arg name="use_control"             default="true"          doc="replace control topics"/>
-    <arg name="detection_range"         default=""              doc="enter a value in meters to enable it" />
-    <arg name="more_visualizations"     default="true"          doc="When debugging a bag, visualize everything by default" />
-    <arg name="bag_delay"               default="6"             doc="Delay before starting to publish messages" />
-    <arg name="record_bag"              default=""              doc="Name of the bag to record" />
-    <arg name="record_topics"           default="(/detection/detected_objects|/detection/traffic_light_status|/localization/current_pose|/localization/current_velocity|/tf)" doc="Regexp of the topics to record, 'all' to record all" />
-    <arg name="record_topics_option"    default="$(eval '--all' if record_topics == 'all' else '--regex ' + record_topics if record_topics != '' else '')" doc="rosbag record parameter" />
-    <arg name="benchmark_delay_topic"   default=""              doc="Name of the topic to benchmark" />
-    <arg name="loop"                    default="$(eval benchmark_delay_topic == '' and record_bag == '')" />
-    <arg name="loop_option"             default="$(eval '--loop' if loop else '')" doc="rosbag play parameter" />
-    <arg name="start"                   default=""              doc="Seconds from the start of the bag" />
-    <arg name="start_option"            default="$(eval '--start ' + str(start) if start != '' else '')" doc="rosbag play parameter" />
-    <arg name="duration"                default=""              doc="Seconds to play from start" />
-    <arg name="duration_option"         default="$(eval '--duration ' + str(duration) if duration != '' else '')" doc="rosbag play parameter" />
+    <!-- Map configuration -->
+    <arg name='map_name'                default='tartu_demo'                   doc="Map name to use"/>
+
+    <!-- Autonomy options -->
+    <arg name="use_tf"                  default="true"                         doc="Replace tf-s in bag with the current ones"/>
+    <arg name="use_localization"        default="$(arg use_tf)"                doc="Replace localization topics"/>
+    <arg name="use_detection"           default="true"                         doc="Replace object detection topics"/>
+    <arg name="use_planning"            default="true"                         doc="Replace planning topics"/>
+    <arg name="use_control"             default="true"                         doc="Replace control topics"/>
+    <arg name="repub_camera_info"       default="false"                        doc="Republish camera_info topics using camera intrinsics files"/>
+
+    <!-- Benchmarking -->
+    <arg name="benchmark_topic"         default=""                             doc="Name of the topic to benchmark"/>
+    <arg name="benchmark_type"          default="delay"                        doc="Type of benchmark, e.g. delay or hz"/>
+
+    <!-- Recording options -->
+    <arg name="record_bag"              default=""                             doc="Name of the bag to record"/>
+    <arg name="record_topics"           default="(/detection/detected_objects|/detection/traffic_light_status|/localization/current_pose|/localization/current_velocity|/tf)" doc="Regexp of the topics to record, 'all' to record all"/>
+    <arg name="record_topics_option"    default="$(eval '--all' if record_topics == 'all' else '--regex ' + record_topics if record_topics != '' else '')" doc="Rosbag record parameter"/>
+
+    <!-- Playback options -->
+    <arg name="bag_file"                default="2023-05-25-14-21-10_sensors_Raekoda.bag" doc="Bag file to play"/>
+    <arg name="bag_folder"              default="$(find autoware_mini)/data/bags" doc="Folder where the bag_file is located"/>
+    <arg name="bag_delay"               default="6"                            doc="Delay before starting to publish messages"/>
+    <arg name="loop"                    default="$(eval benchmark_topic == '' and record_bag == '')" doc="Loop bag playback"/>
+    <arg name="loop_option"             default="$(eval '--loop' if loop else '')" doc="Rosbag play parameter"/>
+    <arg name="start"                   default=""                             doc="Seconds from the start of the bag"/>
+    <arg name="start_option"            default="$(eval '--start ' + str(start) if start != '' else '')" doc="Rosbag play parameter"/>
+    <arg name="duration"                default=""                             doc="Seconds to play from start"/>
+    <arg name="duration_option"         default="$(eval '--duration ' + str(duration) if duration != '' else '')" doc="Rosbag play parameter"/>
+    <arg name="rate"                    default=""                             doc="Bag speed parameter, defaults to 1.0 i.e. the normal speed"/>
+    <arg name="rate_option"             default="$(eval '--rate ' + str(rate) if rate != '' else '')" doc="Rosbag play parameter"/>
+    
+    <!-- Localization -->
+    <arg name="localizer"               default="novatel"                      doc="Localizer to use (novatel, carla)"/>
+    <arg name="use_lane_matching"       default="false"                        doc="Enable lane boundary matching for localization"/>
+    
+    <!-- Detection -->
+    <arg name="detector"                default="lidar_cluster"                doc="Detector to use (lidar_cluster, lidar_cluster_fast, sim, carla)"/>
+    <arg name="use_lidar_center"        default="true"                         doc="Use Velodyne lidar"/>
+    <arg name="use_lidar_front"         default="false"                        doc="Use Ouster lidar"/>
+    <arg name="use_road_area_filter"    default="$(eval 'tartu' in map_name)"  doc="Use road area filter"/>
+    <arg name="ground_removal"          default="naive"                        doc="Ground removal method (naive, jcp)"/>
+    <arg name="tfl_detector"            default="camera"                       doc="Traffic light detector to use (camera, mqtt, mqtt_camera_fusion, yolo, mqtt_yolo_fusion)"/>
+    <arg name="tfl_cameras"             default="mako"                         doc="Cameras to use for traffic light detection (mako, nvidia)"/>
+    <arg name="use_nvidia_cameras"      default="$(eval ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='nvidia')" doc="Use nvidia cameras"/>
+    <arg name="nvidia_encoder"          default="$(eval 'jpeg' if ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='nvidia' else 'h264')" doc="Nvidia camera encoder (h264, jpeg)"/>
+    <arg name="tracker"                 default="ema"                          doc="Tracker to use (none, ema)"/>
+    <arg name="predictor"               default="map_naive"                    doc="Predictor to use (none, naive, map, map_naive)"/>
+    <arg name="detection_range"         default=""                             doc="Detection range in meters (empty for default)"/>
+    <arg name="more_visualizations"     default="true"                         doc="When debugging a bag, visualize everything by default"/>
+    
+    <!-- Planning -->
+    <arg name="global_planner"          default="lanelet2"                     doc="Global planner to use (waypoints, lanelet2)"/>
+    <arg name="local_planner"           default="rule"                         doc="Local planner to use (rule, openpilot)"/>
+    <arg name="use_path_smoothing"      default="true"                         doc="Enable path smoothing"/>
+    <arg name="enable_goal_checker"          default="true"                    doc="Enable goal checker"/>
+    <arg name="enable_object_checker"        default="true"                    doc="Enable object checker"/>
+    <arg name="enable_auto_stop_checker"     default="true"                    doc="Enable auto stop checker"/>
+    <arg name="enable_traffic_light_checker" default="true"                    doc="Enable traffic light checker"/>
+    <arg name="enable_crosswalk_checker"     default="true"                    doc="Enable crosswalk checker"/>
+    <arg name="enable_yielding_checker"      default="true"                    doc="Enable yielding checker"/>
+    <arg name="enable_trajectory_checker"    default="true"                    doc="Enable trajectory checker"/>
+    
+    <!-- Control -->
+    <arg name="controller"              default="pure_pursuit"                 doc="Controller to use (pure_pursuit, stanley)"/>
+        
+    <!-- Visualization -->
+    <arg name="launch_rviz"             default="true"                         doc="Determines if rviz is launched or not"/>
+    <arg name="use_driver_status"       default="false"                        doc="Whether to use pacmod3 msgs for additional dashboard visualization"/>
 
     <!-- Use simulation time from bag -->
     <param name="/use_sim_time" value="true" />
 
     <!-- Play back bag -->
     <node pkg="rosbag" type="play" name="player" required="true" output="screen"
-            args="$(find autoware_mini)/data/bags/$(arg bag_file) --clock --quiet --queue=1 --delay $(arg bag_delay) $(arg loop_option) $(arg start_option) $(arg duration_option)">
+            args="$(arg bag_folder)/$(arg bag_file) --clock --quiet --queue=1 --delay $(arg bag_delay) $(arg loop_option) $(arg start_option) $(arg duration_option) $(arg rate_option)">
         <!-- Rename saved topics that are replaced by current ones -->
         <remap from="/tf" to="/bag/tf" if="$(arg use_tf)"/>
         <remap from="/tf_static" to="/bag/tf_static" if="$(arg use_tf)"/>
         <remap from="/localization/current_pose" to="/bag/localization/current_pose" if="$(arg use_localization)"/>
         <remap from="/localization/current_velocity" to="/bag/localization/current_velocity" if="$(arg use_localization)"/>
         <remap from="/localization/odometry" to="/bag/localization/odometry" if="$(arg use_localization)"/>
+        <remap from="/localization/lane_boundary_matcher_markers" to="/bag/localization/lane_boundary_matcher_markers" if="$(arg use_lane_matching)"/>
         <remap from="/detection/lidar/points_ground" to="/bag/detection/lidar/points_ground" if="$(arg use_detection)"/>
+        <remap from="/detection/lidar/center/points_no_ground" to="/bag/detection/lidar/center/points_no_ground" if="$(arg use_detection)"/>
+        <remap from="/detection/lidar/front/points_no_ground" to="/bag/detection/lidar/front/points_no_ground" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/points_no_ground" to="/bag/detection/lidar/points_no_ground" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/points_clustered" to="/bag/detection/lidar/points_clustered" if="$(arg use_detection)"/>
         <remap from="/detection/lidar/points_filtered" to="/bag/detection/lidar/points_filtered" if="$(arg use_detection)"/>
@@ -57,29 +97,59 @@
         <remap from="/detection/radar/detected_objects_markers" to="/bag/detection/radar/detected_objects_markers" if="$(arg use_detection)"/>
         <remap from="/detection/detected_objects" to="/bag/detection/detected_objects" if="$(arg use_detection)"/>
         <remap from="/detection/detected_objects_markers" to="/bag/detection/detected_objects_markers" if="$(arg use_detection)"/>
+        <remap from="/detection/detected_objects_filtered" to="/bag/detection/detected_objects_filtered" if="$(arg use_detection)"/>
+        <remap from="/detection/road_area_markers" to="/bag/detection/road_area_markers" if="$(arg use_detection)"/>
         <remap from="/detection/tracked_objects" to="/bag/detection/tracked_objects" if="$(arg use_detection)"/>
         <remap from="/detection/tracked_objects_markers" to="/bag/detection/tracked_objects_markers" if="$(arg use_detection)"/>
+        <remap from="/detection/predicted_objects_map" to="/bag/detection/predicted_objects_map" if="$(arg use_detection)"/>
         <remap from="/detection/predicted_objects" to="/bag/detection/predicted_objects" if="$(arg use_detection)"/>
         <remap from="/detection/predicted_objects_markers" to="/bag/detection/predicted_objects_markers" if="$(arg use_detection)"/>
         <remap from="/detection/final_objects" to="/bag/detection/final_objects" if="$(arg use_detection)"/>
         <remap from="/detection/final_objects_markers" to="/bag/detection/final_objects_markers" if="$(arg use_detection)"/>
+        <remap from="/lidar_front/points_cleaned" to="/bag//lidar_front/points_cleaned" if="$(arg use_detection)"/>
         <remap from="/planning/lanelet2_map_markers" to="/bag/planning/lanelet2_map_markers" if="$(arg use_planning)"/>
+        <remap from="/planning/lanelet2_global_path" to="/bag/planning/lanelet2_global_path" if="$(arg use_planning)"/>
+        <remap from="/planning/lanelet2_global_path_markers" to="/bag/planning/lanelet2_global_path_markers" if="$(arg use_planning)"/>
+        <remap from="/planning/lane_change_global_path" to="/bag/planning/lane_change_global_path" if="$(arg use_planning)"/>
+        <remap from="/planning/lane_change_global_path_markers" to="/bag/planning/lane_change_global_path_markers" if="$(arg use_planning)"/>
         <remap from="/planning/global_path" to="/bag/planning/global_path" if="$(arg use_planning)"/>
         <remap from="/planning/global_path_markers" to="/bag/planning/global_path_markers" if="$(arg use_planning)"/>
-        <remap from="/planning/smoothed_path" to="/bag/planning/smoothed_path" if="$(arg use_planning)"/>
-        <remap from="/planning/smoothed_path_markers" to="/bag/planning/smoothed_path_markers" if="$(arg use_planning)"/>
+        <remap from="/planning/extracted_local_path" to="/bag/planning/extracted_local_path" if="$(arg use_planning)"/>
         <remap from="/planning/local_path" to="/bag/planning/local_path" if="$(arg use_planning)"/>
+        <remap from="/planning/extracted_local_path" to="/bag/planning/extracted_local_path" if="$(arg use_planning)"/>
+        <remap from="/planning/collision_points" to="/bag/planning/collision_points" if="$(arg use_planning)"/>
         <remap from="/planning/local_path_markers" to="/bag/planning/local_path_markers" if="$(arg use_planning)"/>
         <remap from="/planning/stop_line_markers" to="/bag/planning/stop_line_markers" if="$(arg use_planning)"/>
         <remap from="/planning/target_lane_markers" to="/bag/planning/target_lane_markers" if="$(arg use_planning)"/>
+        <remap from="/planning/goal_collision_points" to="/bag/planning/goal_collision_points" if="$(arg use_planning)"/>
+        <remap from="/planning/object_collision_points" to="/bag/planning/object_collision_points" if="$(arg use_planning)"/>
+        <remap from="/planning/yielding_collision_points" to="/bag/planning/yielding_collision_points" if="$(arg use_planning)"/>
+        <remap from="/planning/crosswalk_collision_points" to="/bag/planning/crosswalk_collision_points" if="$(arg use_planning)"/>
+        <remap from="/planning/tfl_stopline_collision_points" to="/bag/planning/tfl_stopline_collision_points" if="$(arg use_planning)"/>
+        <remap from="/planning/stop_line_collision_points" to="/bag/planning/stop_line_collision_points" if="$(arg use_planning)"/>
+        <remap from="/planning/trajectory_collision_points" to="/bag/planning/trajectory_collision_points" if="$(arg use_planning)"/>
+        <remap from="/planning/collision_points" to="/bag/planning/collision_points" if="$(arg use_planning)"/>
+        <remap from="/planning/tfl_stop_line_markers" to="/bag/planning/tfl_stop_line_markers" if="$(arg use_detection)"/>
         <remap from="/detection/traffic_light_status" to="/bag/detection/traffic_light_status" if="$(arg use_detection)"/>
         <remap from="/detection/camera_fl/traffic_light_status" to="/bag/detection/camera_fl/traffic_light_status" if="$(arg use_detection)"/>
         <remap from="/detection/camera_fl/traffic_light_roi" to="/bag/detection/camera_fl/traffic_light_roi" if="$(arg use_detection)"/>
         <remap from="/detection/camera_fr/traffic_light_status" to="/bag/detection/camera_fr/traffic_light_status" if="$(arg use_detection)"/>
         <remap from="/detection/camera_fr/traffic_light_roi" to="/bag/detection/camera_fr/traffic_light_roi" if="$(arg use_detection)"/>
+        <remap from="/detection/camera1/traffic_light_status" to="/bag/detection/camera1/traffic_light_status" if="$(arg use_detection)"/>
+        <remap from="/detection/camera1/traffic_light_roi" to="/bag/detection/camera1/traffic_light_roi" if="$(arg use_detection)"/>
+        <remap from="/detection/camera2/traffic_light_status" to="/bag/detection/camera2/traffic_light_status" if="$(arg use_detection)"/>
+        <remap from="/detection/camera2/traffic_light_roi" to="/bag/detection/camera2/traffic_light_roi" if="$(arg use_detection)"/>
         <remap from="/detection/camera/traffic_light_status" to="/bag/detection/camera/traffic_light_status" if="$(arg use_detection)"/>
         <remap from="/detection/mqtt/traffic_light_status" to="/bag/detection/mqtt/traffic_light_status" if="$(arg use_detection)"/>
         <remap from="/control/vehicle_cmd" to="/bag/control/vehicle_cmd" if="$(arg use_control)"/>
+        <remap from="/vehicle/vehicle_status" to="/bag/vehicle/vehicle_status" if="$(arg use_control)"/>
+        <remap from="/ssc/arbitrated_speed_commands" to="/bag/ssc/arbitrated_speed_commands" if="$(arg use_control)"/>
+        <remap from="/ssc/arbitrated_steering_commands" to="/bag/ssc/arbitrated_steering_commands" if="$(arg use_control)"/>
+        <remap from="/ssc/turn_signal_command" to="/bag/ssc/turn_signal_command" if="$(arg use_control)"/>
+        <remap from="/ssc/gear_select" to="/bag/ssc/gear_select" if="$(arg use_control)"/>
+        <remap from="/dashboard/planner_status" to="/bag/dashboard/planner_status" if="$(eval use_detection or use_planning)" />
+        <remap from="/dashboard/log_message" to="/bag/dashboard/log_message" if="$(eval use_detection or use_planning)" />
+        <remap from="/dashboard/log_text" to="/bag/dashboard/log_text" if="$(eval use_detection or use_planning)" />
         <remap from="/dashboard/current_speed" to="/bag/dashboard/current_speed" />
         <remap from="/dashboard/target_speed" to="/bag/dashboard/target_speed" />
         <remap from="/dashboard/closest_object_distance" to="/bag/dashboard/closest_object_distance" />
@@ -87,22 +157,36 @@
         <remap from="/dashboard/acceleration" to="/bag/dashboard/acceleration" />
         <remap from="/dashboard/acceleration_limit" to="/bag/dashboard/acceleration_limit" />
         <remap from="/dashboard/deceleration_limit" to="/bag/dashboard/deceleration_limit" />
+        <remap from="/dashboard/gnss_corrections_detailed" to="/bag/dashboard/gnss_corrections_detailed" if="$(arg use_lane_matching)"/>
+        <remap from="/dashboard/left_blinker_arrow" to="/bag/dashboard/left_blinker_arrow" />
+        <remap from="/dashboard/right_blinker_arrow" to="/bag/dashboard/right_blinker_arrow" />
         <!-- For compatibility with older bags and Vella bags -->
         <remap from="/points_raw_center" to="/lidar_center/points_raw"/>
         <remap from="/points_raw_front" to="/lidar_front/points_raw"/>
         <remap from="/lidar_0/vlp32/pcl2" to="/lidar_center/points_raw"/>
+        <remap from="/interfacea/link4/camera_info" to="/interfaceb/link0/camera_info"/>
+        <remap from="/interfacea/link4/image/h264" to="/interfaceb/link0/image/h264"/>
+        <remap from="/interfacea/link4/image/h265" to="/interfaceb/link0/image/h265"/>
+        <remap from="/interfacea/link4/image/compressed" to="/interfaceb/link0/image/compressed"/>
+        <!-- Remap camera_info's from bags to get latest intrinsics from calibration files: TODO: (Should republish mako camera infos as well ??) -->
+        <remap from="/interfacea/link0/camera_info" to="/bag/interfacea/link0/camera_info" if="$(arg repub_camera_info)"/>
+        <remap from="/interfacea/link1/camera_info" to="/bag/interfacea/link1/camera_info" if="$(arg repub_camera_info)"/>
+        <remap from="/interfacea/link2/camera_info" to="/bag/interfacea/link2/camera_info" if="$(arg repub_camera_info)"/>
+        <remap from="/interfacea/link3/camera_info" to="/bag/interfacea/link3/camera_info" if="$(arg repub_camera_info)"/>
+        <remap from="/interfaceb/link0/camera_info" to="/bag/interfaceb/link0/camera_info" if="$(arg repub_camera_info)"/>
     </node>
 
-    <node if="$(eval benchmark_delay_topic != '')" pkg="rostopic" type="rostopic" name="delay" required="true" output="screen"
-            args="delay $(arg benchmark_delay_topic)" />
+    <node if="$(eval benchmark_topic != '')" pkg="rostopic" type="rostopic" name="rostopic_benchmark" required="true" output="screen"
+            args="$(arg benchmark_type) $(arg benchmark_topic)" />
 
     <node if="$(eval record_bag != '')" pkg="rosbag" type="record" name="recorder" required="true" output="screen"
-            args="--output-name $(find autoware_mini)/data/bags/$(arg record_bag) $(arg record_topics_option) --exclude '(/bag/.*|/clock)'" />
+            args="--output-name $(arg bag_folder)/$(arg record_bag) $(arg record_topics_option) --exclude '(/bag/.*|/clock)'" />
 
     <!-- Localization -->
     <include if="$(arg use_localization)" file="$(find autoware_mini)/launch/localization.launch">
         <arg name="localizer"           value="$(arg localizer)" />
         <arg name="map_name"            value="$(arg map_name)" />
+        <arg name="use_lane_matching"   value="$(arg use_lane_matching)" />
     </include>
 
     <!-- Detection -->
@@ -111,13 +195,14 @@
         <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
         <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
-        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+        <arg name="tfl_cameras"         value="$(arg tfl_cameras)" />
         <arg name="tracker"             value="$(arg tracker)" />
         <arg name="predictor"           value="$(arg predictor)" />
         <arg name="more_visualizations" value="$(arg more_visualizations)" />
         <arg name="detection_range"     value="$(arg detection_range)" />
         <arg name="map_name"            value="$(arg map_name)" />
         <arg name="use_road_area_filter" value="$(arg use_road_area_filter)" />
+        <arg name="ground_removal"      value="$(arg ground_removal)" />
     </include>
 
     <!-- Planning -->
@@ -125,25 +210,34 @@
         <arg name="global_planner"      value="$(arg global_planner)" />
         <arg name="local_planner"       value="$(arg local_planner)" />
         <arg name="use_path_smoothing"  value="$(arg use_path_smoothing)" />
-        <arg name="lanelet2_map_name"   value="$(arg lanelet2_map_name)" />
+        <arg name="map_name"            value="$(arg map_name)" />
+        <arg name="enable_goal_checker"          value="$(arg enable_goal_checker)" />
+        <arg name="enable_object_checker"        value="$(arg enable_object_checker)" />
+        <arg name="enable_auto_stop_checker"     value="$(arg enable_auto_stop_checker)" />
+        <arg name="enable_traffic_light_checker" value="$(arg enable_traffic_light_checker)" />
+        <arg name="enable_crosswalk_checker"     value="$(arg enable_crosswalk_checker)" />
+        <arg name="enable_yielding_checker"      value="$(arg enable_yielding_checker)" />
+        <arg name="enable_trajectory_checker"    value="$(arg enable_trajectory_checker)" />
     </include>
 
     <!-- Control -->
     <include if="$(arg use_control)" file="$(find autoware_mini)/launch/control.launch">
-        <arg name="follower"            value="$(arg follower)" />
+        <arg name="controller"            value="$(arg controller)" />
     </include>
 
     <!-- Bag platform -->
     <include file="$(find autoware_mini)/launch/platform/bag.launch">
-        <arg name="use_tf"              value="$(arg use_tf)" />
+        <arg name="use_tf"               value="$(arg use_tf)" />
+        <arg name="repub_camera_info"    value="$(arg repub_camera_info)" />
+        <arg name="use_nvidia_cameras"   value="$(arg use_nvidia_cameras)" />
+        <arg name="nvidia_encoder"       value="$(arg nvidia_encoder)" />
+        <arg name="use_ssc"              value="$(arg use_control)" />
     </include>
 
     <!-- Rviz -->
-    <include file="$(find autoware_mini)/launch/dashboard.launch">
-        <arg name="driver_status"       value="true" />
+    <include if="$(arg launch_rviz)" file="$(find autoware_mini)/launch/rviz.launch">
+        <arg name="driver_status"       value="$(arg use_driver_status)" />
+        <arg name="carla_status"        value="true" />
     </include>
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" required="true">
-        <rosparam command="load" file="$(find autoware_mini)/config/actions.yaml"/>
-    </node>
 
 </launch>

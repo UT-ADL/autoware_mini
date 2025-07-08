@@ -7,22 +7,37 @@
     <arg name="use_camera_fr"       default="false" />
     <arg name="use_radar_fc"        default="false" />
     <arg name="use_nvidia_cameras"  default="false" />
+    <arg name="nvidia_encoder"      default="h264" />
+    <arg name="use_openpilot_predictions" default="false"  />
+    <arg name="use_openpilot_road_camera"   default="false"  />
+    <arg name="use_openpilot_wide_camera"   default="false"  />
+    <arg name="use_openpilot_driver_camera" default="false"  />
+    <arg name="use_openpilot_qroad_camera"  default="false"  />
 
-    <!-- remap to let /radar_fc/vehicle_motion subscribe to /localization/current_velocity      -->
-    <remap from="/radar_fc/vehicle_motion" to="/localization/current_velocity" />
-    <!-- Vehicle platform -->
-    <include file="$(find vehicle_platform)/launch/platform.launch">
-        <arg name="use_tf"              value="true" />
-        <arg name="use_lexus_model"     value="true" />
-        <arg name="use_gnss"            value="true" />
-        <arg name="use_dbw"             value="true" />
-        <arg name="use_ssc"             value="true" />
-        <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
-        <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
-        <arg name="use_camera_fl"       value="$(arg use_camera_fl)" />
-        <arg name="use_camera_fr"       value="$(arg use_camera_fr)" />
-        <arg name="use_radar_fc"        value="$(arg use_radar_fc)" />
-        <arg name="use_nvidia_cameras"  value="$(arg use_nvidia_cameras)" />
+    <!-- Transforms -->
+    <include file="$(find autoware_mini)/launch/platform/tf.launch" />
+
+    <!-- Lexus platform -->
+    <include file="$(find lexus_platform)/launch/platform.launch">
+        <arg name="use_gnss"                    value="true" />
+        <arg name="use_dbw"                     value="true" />
+        <arg name="use_ssc"                     value="true" />
+        <arg name="use_lidar_center"            value="$(arg use_lidar_center)" />
+        <arg name="use_lidar_front"             value="$(arg use_lidar_front)" />
+        <arg name="use_camera_fl"               value="$(arg use_camera_fl)" />
+        <arg name="use_camera_fr"               value="$(arg use_camera_fr)" />
+        <arg name="use_radar_fc"                value="$(arg use_radar_fc)" />
+        <arg name="use_nvidia_cameras"          value="$(arg use_nvidia_cameras)" />
+        <arg name="use_remote_nvidia_driver"    value="$(arg use_nvidia_cameras)" />
+        <!-- Rectify only nvidia camera images -->
+        <arg name="nvidia_rectify"              value="$(arg use_nvidia_cameras)" />
+        <arg name="nvidia_encoder"              value="$(arg nvidia_encoder)" />
+        <arg name="nvidia_fps"                  value="10" />
+        <arg name="use_openpilot_predictions"   value="$(arg use_openpilot_predictions)" />
+        <arg name="use_openpilot_road_camera"   value="$(arg use_openpilot_road_camera)" />
+        <arg name="use_openpilot_wide_camera"   value="$(arg use_openpilot_wide_camera)" />
+        <arg name="use_openpilot_driver_camera" value="$(arg use_openpilot_driver_camera)" />
+        <arg name="use_openpilot_qroad_camera"  value="$(arg use_openpilot_qroad_camera)" />
     </include>
 
     <group ns="vehicle">
@@ -32,8 +47,9 @@
             <param name="max_speed" value="$(arg max_speed)"/>
         </node>
 
-        <!-- Engage button panel -->
-        <node pkg="autoware_mini" type="button_panel.py" name="button_panel" output="screen" required="true"/>
+        <!-- Button panel -->
+        <node pkg="autoware_mini" type="button_panel.py" name="button_panel" output="screen" required="true" />
+
         <node pkg="joy" type="joy_node" name="joy" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />

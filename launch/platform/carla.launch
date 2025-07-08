@@ -3,12 +3,14 @@
   <!-- Map to load on startup, ideally this should match with CARLA environments (tartu_demo) is exception-->
   <arg name="map_name" />
   <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
-  <arg name="spawn_point"         default="$(eval '4.70,342.07,36,0,0,-98' if 'tartu' in map_name else '')" />
+  <arg name="spawn_point"         default="$(eval '0,0,36,0,0,-98' if 'tartu' in map_name else '')" />
   <!-- Module type -->
   <arg name="use_lidar"           default="false"/>
   <arg name="use_radar"           default="false"/>
   <arg name="use_gnss"            default="false"/>
-  <arg name="use_cam"             default="false" />
+  <!-- Cameras for tfl detection -->
+  <arg name="use_mako_cameras"                default="false" />
+  <arg name="use_nvidia_cameras"              default="false" />
   <!-- Carla Server parameters -->
   <arg name='host'                default='localhost' />
   <arg name='port'                default='2000' />
@@ -21,46 +23,46 @@
   <arg name='use_manual_control'  default='false' /><!-- Toggle manual control-->
   <arg name='generate_traffic'    default='false'/><!-- Generate Traffic -->
   <!-- CARLA Rosbridge synchronous_mode, only set to false while running route scenario-->
-  <arg name="synchronous_mode"        default="$(eval not (use_scenario_runner and type(route_id) == int))"/>
+  <arg name="synchronous_mode"    default="true" />
+  <arg name='fixed_delta_seconds' default='$(eval 0 if use_manual_control else 0.05)' />
+  <arg name="passive"             default="$(eval use_scenario_runner and type(route_id) == int)" />
   
   <!--
-    ###################
-    ## Carla Commons ##
-    ###################
+    ################
+    ## Static TFs ##
+    ################
     -->
-  <include file="$(find autoware_mini)/launch/platform/carla/carla_common.launch">
-    <arg name="map_name"              value="$(arg map_name)" />
-    <arg name="use_manual_control"    value="$(arg use_manual_control)" />
-  </include>
-
- <!--
-    ###########################
-    ## Carla Scenario Runner ##
-    ###########################
-    -->
-  <include if="$(arg use_scenario_runner)" file="$(find autoware_mini)/launch/platform/carla/carla_scenario_runner.launch">
-    <arg name='map_name'                            value='$(arg map_name)'/>
-    <arg name="scenario_name"                       value="$(arg scenario_name)" />
-    <arg name="route_id"                            value="$(arg route_id)" />
-  </include>
+  <include file="$(find autoware_mini)/launch/platform/tf.launch" />
 
   <!--
-    ################################
-    ## Carla RosBridge Essentials ##
-    ################################
+    ###################
+    ## Carla Sensors ##
+    ###################
     -->
-  <include file="$(find autoware_mini)/launch/platform/carla/carla_rosbridge.launch">
+  <include file="$(find autoware_mini)/launch/platform/carla/carla_sensors.launch">
     <arg name="map_name"                                          value="$(arg map_name)" />
     <arg name="spawn_point"                                       value="$(arg spawn_point)" />
     <arg name="use_lidar"                                         value="$(arg use_lidar)" />
     <arg name="use_radar"                                         value="$(arg use_radar)" />
     <arg name="use_gnss"                                          value="$(arg use_gnss)" />
-    <arg name="use_cam"                                           value="$(arg use_cam)" />
+    <arg name="use_mako_cameras"                                  value="$(arg use_mako_cameras)" />
+    <arg name="use_nvidia_cameras"                                value="$(arg use_nvidia_cameras)" />
     <arg name="host"                                              value="$(arg host)" />
     <arg name="port"                                              value="$(arg port)" />
     <arg name="timeout"                                           value="$(arg timeout)" />
     <arg name="synchronous_mode"                                  value="$(arg synchronous_mode)" />
-    <arg name='fixed_delta_seconds'                               value='$(eval 0 if use_manual_control else 0.05)'/>
+    <arg name='fixed_delta_seconds'                               value='$(arg fixed_delta_seconds)'/>
+    <arg name="passive"                                           value="$(arg passive)" />
+  </include>
+
+  <!--
+    ###################
+    ## Carla Control ##
+    ###################
+    -->
+  <include file="$(find autoware_mini)/launch/platform/carla/carla_control.launch">
+    <arg name="map_name"              value="$(arg map_name)" />
+    <arg name="use_manual_control"    value="$(arg use_manual_control)" />
   </include>
 
   <!--
@@ -70,6 +72,19 @@
     -->
 
   <!-- If traffic is enabled then run traffic generator -->
-  <node if="$(arg generate_traffic)" pkg="autoware_mini" type="carla_traffic_generator.sh" name="carla_traffic_generator" output="screen" required="true" />  
+  <node if="$(arg generate_traffic)" pkg="autoware_mini" type="carla_traffic_generator.sh" name="carla_traffic_generator" args="$(arg host) $(arg port)" output="screen" required="true" />  
+
+ <!--
+    ###########################
+    ## Carla Scenario Runner ##
+    ###########################
+    -->
+  <include if="$(arg use_scenario_runner)" file="$(find autoware_mini)/launch/platform/carla/carla_scenario_runner.launch">
+    <arg name="host"                                value="$(arg host)" />
+    <arg name="port"                                value="$(arg port)" />
+    <arg name='map_name'                            value='$(arg map_name)'/>
+    <arg name="scenario_name"                       value="$(arg scenario_name)" />
+    <arg name="route_id"                            value="$(arg route_id)" />
+  </include>
 
 </launch>

@@ -1,6 +1,6 @@
 wheel_base: 2.789
 steer_ratio: 16.135
-acceleration_limit: 1.0
+acceleration_limit: 5.0
 deceleration_limit: 5.0
 
 ssc_interface:
@@ -17,4 +17,8 @@ button_panel:
   cooldown: 2.0
 
 bicycle_simulation:
-  publish_rate: 50
+  publish_rate: 20
+
+scenario_metrics_calculator:
+  metrics_frequency: 10
+  transform_timeout: 0.06

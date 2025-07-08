@@ -1,0 +1,313 @@
+name: Demo route
+positions:
+- x: -153.66
+  y: -232.03
+  z: 34.6
+  delay: 20
+- x: -0.4822743295226246
+  y: -2.4188089473173022
+  z: 34.514373779296875
+---
+name: Soola route
+positions:
+- x: 195.0
+  y: -807.8
+  z: 34.6
+  delay: 20
+- x: -0.4822743295226246
+  y: -2.4188089473173022
+  z: 35.3
+---
+name: AHHAA
+positions:
+- x: 422.4329188433476
+  y: -934.0330951586366
+  z: 33.75937271118164
+---
+name: Atlantis (linna sisenev)
+positions:
+- x: 151.58393273194088
+  y: -458.72382299788296
+  z: 34.64125061035156
+---
+name: Delta tasku
+positions:
+- x: -0.4822743295226246
+  y: -2.4188089473173022
+  z: 34.514373779296875
+---
+name: Kaare (FI suunas)
+positions:
+- x: -1363.2310663750977
+  y: -2132.068435662426
+  z: 70.58875274658203
+---
+name: Kaare (Kesklinna suunas)
+positions:
+- x: -1283.0919116257573
+  y: -2086.7368357926607
+  z: 69.93562316894531
+---
+name: "Kesklinn (L\xF5pp-peatus)"
+positions:
+- x: 89.79471299267607
+  y: -904.2349332198501
+  z: 37.182498931884766
+---
+name: Kesklinn I
+positions:
+- x: 30.591732850589324
+  y: -954.4439388010651
+  z: 40.59937286376953
+---
+name: Kesklinn II
+positions:
+- x: 92.59081137360772
+  y: -901.9724659528583
+  z: 37.10874938964844
+---
+name: Kesklinn III
+positions:
+- x: 129.02043097867863
+  y: -873.6968314517289
+  z: 35.79312515258789
+---
+name: Kesklinn IV
+positions:
+- x: 92.19850680953823
+  y: -863.9169065095484
+  z: 36.48999786376953
+---
+name: Kesklinn V
+positions:
+- x: 76.22068442130694
+  y: -878.2936524003744
+  z: 37.046875
+---
+name: Kesklinn VI
+positions:
+- x: 10.133441547281109
+  y: -939.2096873149276
+  z: 40.94687271118164
+---
+name: Lembitu
+positions:
+- x: -915.7080438794801
+  y: -1783.0239919396117
+  z: 61.71999740600586
+---
+name: Linnamuuseum
+positions:
+- x: 103.8076016191626
+  y: -313.5073967287317
+  z: 34.234375
+---
+name: "L\xF5unakeskus"
+positions:
+- x: -3113.4076024662936
+  y: -2940.7412710618228
+  z: 72.8637466430664
+---
+name: "L\xF5unakeskus (L\xF5pp-peatus)"
+positions:
+- x: -3133.4858378455974
+  y: -2930.082193505019
+  z: 72.40187072753906
+---
+name: "L\xF5unakeskus III"
+positions:
+- x: -3161.474471521622
+  y: -2929.139334718697
+  z: 71.6668701171875
+---
+name: "Optika (L\xF5unakeskuse suunas)"
+positions:
+- x: -3136.6161290946184
+  y: -3244.4820498777553
+  z: 72.92687225341797
+---
+name: Optika (Riia tn. suunas)
+positions:
+- x: -3077.5417334508966
+  y: -3294.568380875513
+  z: 73.88375091552734
+---
+name: Palmihoone (Kroonuaia tn. suunas)
+positions:
+- x: -198.57809980533784
+  y: -16.79202701151371
+  z: 34.24625015258789
+---
+name: Pauluse (Kesklinna suunas)
+positions:
+- x: -631.8939926130697
+  y: -1588.2084912508726
+  z: 58.765625
+---
+name: "Pauluse (linnast v\xE4ljuv)"
+positions:
+- x: -590.5173205258325
+  y: -1535.8308870438486
+  z: 58.869998931884766
+---
+name: Puusepa
+positions:
+- x: -1332.1407586120185
+  y: -2070.314035968855
+  z: 69.34312438964844
+---
+name: Raeplats (linna)
+positions:
+- x: -29.067102130618878
+  y: -625.9113580184057
+  z: 35.46437454223633
+---
+name: Raeplats (maale)
+positions:
+- x: -89.96568412176566
+  y: -461.127799494192
+  z: 34.47312545776367
+---
+name: Raja (Kesklinna suunas)
+positions:
+- x: -2051.190751996299
+  y: -2620.814788606949
+  z: 76.3699951171875
+---
+name: "Raja (linnast v\xE4ljuv)"
+positions:
+- x: -2131.5988891668385
+  y: -2667.4807008579373
+  z: 76.52749633789062
+---
+name: Raudteejaam (Kesklinna ja Riia tn. suunas)
+positions:
+- x: -1120.8918419593247
+  y: -1287.549305576831
+  z: 62.53562545776367
+---
+name: "Raudteejaam (L\xF5pp-peatus)"
+positions:
+- x: -1146.7013985210215
+  y: -1257.1494396477938
+  z: 62.573123931884766
+---
+name: "Raudteejaam (T\xE4htvere suunas)"
+positions:
+- x: -1145.021404353669
+  y: -1259.3527030022815
+  z: 62.584999084472656
+---
+name: Raudteejaam III
+positions:
+- x: -1082.9713587907027
+  y: -1316.24675280042
+  z: 62.34187316894531
+---
+name: Riia ring (Kesklinna suunas)
+positions:
+- x: -2431.700991613674
+  y: -2953.450846218504
+  z: 79.62874603271484
+---
+name: "Riia ring (linnast v\xE4ljuv)"
+positions:
+- x: -2477.0446271019173
+  y: -2970.817662370391
+  z: 79.58562469482422
+---
+name: "Riiam\xE4e (linnast v\xE4ljuv)"
+positions:
+- x: -262.4230649819947
+  y: -1281.2391379848123
+  z: 58.49187469482422
+---
+name: Soinaste I (kesklinna suunas)
+positions:
+- x: -1590.707638368127
+  y: -2328.8417910905555
+  z: 71.17562103271484
+---
+name: "Soinaste II (linnast v\xE4ljuv)"
+positions:
+- x: -1697.0415866394178
+  y: -2381.0400482108817
+  z: 73.04374694824219
+---
+name: Soola (Tasku)
+positions:
+- x: 225.89685161103262
+  y: -878.6687371721491
+  z: 34.204376220703125
+---
+name: "Soola I (Kvartali k\xF5rval, S\xF5pruse silla suunas)"
+positions:
+- x: 217.3678741902113
+  y: -910.893110755831
+  z: 34.244998931884766
+---
+name: "Soola I (L\xF5pp-peatus)"
+positions:
+- x: 209.68820779840462
+  y: -901.7238066149876
+  z: 34.3224983215332
+---
+name: "Soola II (S\xF5pruse silla suunas)"
+positions:
+- x: 265.6329987763311
+  y: -958.6963851274922
+  z: 34.51374816894531
+---
+name: Teaduspark (linna sisenev)
+positions:
+- x: -2746.847767624655
+  y: -3360.663629646413
+  z: 78.4106216430664
+---
+name: "Teaduspark (linnast v\xE4ljuv)"
+positions:
+- x: -2771.997243775986
+  y: -3364.055948698893
+  z: 78.04437255859375
+---
+name: Turu
+positions:
+- x: 435.7371561595355
+  y: -819.4146225256845
+  z: 33.57749938964844
+---
+name: "Turu (L\xF5pp-peatus)"
+positions:
+- x: 440.1200769111165
+  y: -823.2605226226151
+  z: 33.58374786376953
+---
+name: Vabaduse puiestee (maale)
+positions:
+- x: 52.56928169092862
+  y: -693.0524366348982
+  z: 35.69062423706055
+---
+name: Vabadussild-Palmihoone (linna)
+positions:
+- x: -168.57188490580302
+  y: -194.82407138310373
+  z: 34.34562301635742
+---
+name: Vabadussild-Palmihoone (maale)
+positions:
+- x: -153.3032067301101
+  y: -219.84442568104714
+  z: 34.36249923706055
+---
+name: Vene (Kesklinna suunas)
+positions:
+- x: 7.34165538882371
+  y: 49.17870533466339
+  z: 34.65999984741211
+---
+name: "Vene (linnast v\xE4ljuv)"
+positions:
+- x: 34.712880067527294
+  y: 147.627567762509
+  z: 35.373748779296875

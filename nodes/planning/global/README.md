@@ -1,70 +1,42 @@
-# Global planning
+# Global Planning Module
 
+## Overview
+The Global Planning module in Autoware Mini is responsible for generating high-level paths from the vehicle's current position to a specified goal point. It serves as the foundation for the vehicle's navigation system by providing feasible routes that consider the road network, traffic rules, and mission objectives.
 
-## lanelet2_global_planner
+![Global planner Pipeline](/images/nodes/global_planning.png)
 
-A ROS node that implements a global planner for autonomous vehicles based on Lanelet2 map. The node subscribes to the `move_base_simple/goal` topic and publishes the global path as a sequence of waypoints to the `global_path` topic. The node uses the current position of the vehicle from the `localization/current_pose` topic and generates the global path to the goal position by finding the shortest path in the Lanelet2 map. Multiple goal points can be added.
+## Architecture
+The Global Planning module takes inputs from:
 
+- **Localization module**: Provides vehicle position (`/localization/current_pose`) and velocity (`/localization/current_velocity`) data
+- **Map data**: Uses static map data (Lanelet2 format) for route planning
+- **Goal Publisher Interface**: Provides goal points (`/move_base_simple/goal`) for navigation, either from manual input or automated scenarios
 
-#### Parameters
+It produces outputs to:
+- **Local Planning module**: Supplies the final smoothed global path (`global_path`) for local trajectory generation
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `output_frame` | `string` | `"map"` | The name of the output frame for the generated path |
-| `distance_to_goal_limit` | `float` | `2.0` | The minimum distance from the last waypoint to the goal position for the generated path |
-| `distance_to_centerline_limit` | `float` | `5.0` | The maximum distance from the centerline for a waypoint on the generated path |
-| `speed_limit` | `float` | `40.0` | The speed limit for the generated path |
-| `ego_vehicle_stopped_speed_limit` | `float` | `"0.1"` | Below this speed limit ego vehicle is considered as stopped |
+## Components
+The module consists of several specialized components:
 
+### Lanelet2 Planning
+- **Lanelet2 Global Planner**: Creates optimal global routes using the Lanelet2 map framework. It finds the shortest feasible path between current position and goal point while respecting road rules and lane connectivity.
+- **Lane Change Planner**: Generates smooth lane change trajectories when the global path requires changing lanes, using Bezier curves to create natural transitions.
+- **Lanelet2 Map Visualizer**: Provides visualization of map elements including lanelets, traffic lights, stop lines, and regulatory elements.
 
+### Waypoint Processing Utilities
+- **Waypoint Loader**: Loads pre-defined waypoints from CSV files to create a global path, useful for fixed routes or pre-recorded paths.
+- **Waypoint Saver**: Records vehicle trajectory as waypoints, allowing for manual route creation by driving the desired path.
 
-#### Subscribed Topics
+### Common Utilities
+- **Goal Publisher**: Manages goal points and publishes them to the planning system. It supports both manual goal selection and automated scenario execution.
+- **Path Smoothing**: Applies various smoothing techniques to the global path to ensure driving comfort and feasibility:
+  - Interpolates waypoints at fixed intervals
+  - Adjusts speeds for curves based on lateral acceleration limits
+  - Ensures speed profiles respect acceleration and deceleration limits
+  - Manages endpoint velocities
 
-| Name | Type | Description |
-|------|------|-------------|
-| `/move_base_simple/goal` | `geometry_msgs/PoseStamped` | The goal position of the vehicle |
-| `/localization/current_pose` | `geometry_msgs/PoseStamped` | The current position of the ego vehicle |
-| `/localization/current_velocity` | `geometry_msgs/TwistStamped` | The current velocity of the ego vehicle |
-| `/cancel_route` | `std_msgs/Bool` | A boolean flag to cancel the existing global path |
-
-#### Published Topics
-
-| Name | Type | Description |
-|------|------|-------------|
-| `global_path` | `autoware_msgs/Lane` | The generated global path |
-| `target_lane_markers` | `visualization_msgs/MarkerArray` | The markers for the target lane (mainly for debugging purpose) |
-
-
-
-## path_smoothing
-
-
-A ROS node for smoothing global path using interpolation and optional speed adjustments based on deceleration limit, path radius and lateral acceleration.
-
-#### Parameters
-
-| Name | Type | Default Value | Description |
-| --- | --- | --- | --- |
-| `~waypoint_interval` | float | `1.0` | Distance between waypoints after path smoothing (m)|
-| `~adjust_speeds_in_curves` | bool | `True` | Whether to adjust speeds based on the curvature of the path. |
-| `~adjust_speeds_using_deceleration` | bool | `True` | Whether to adjust speeds based on maximum deceleration. |
-| `~adjust_endpoint_speed_to_zero` | bool | `True` | Whether to adjust the speeds at the end of the path to decelerate to zero. |
-| `default_deceleration` | float | `1.0` | Deceleration limit used in speed adjustment (m/s2) |
-| `~speed_averaging_window` | int | `21` | Number of points used to calculate average speed. |
-| `~radius_calc_neighbour_index` | int | `4` | Index of points (+/- from center point) used to calculate radius for the path. |
-| `~lateral_acceleration_limit` | float | `3.0` | Maximum allowed lateral acceleration limit (m/s2) |
-| `~output_debug_info` | bool | `False` | Whether to output debug information. Debug information will draw graphs using a function from helpers. |
-
-
-#### Subscribed Topics
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `/global_path` | `autoware_msgs/Lane` | Subscribes to the global path to be smoothed. |
-
-
-#### Published Topics
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `/smoothed_path` | `autoware_msgs/Lane` | Publishes the smoothed path with equal distances between waypoints |
+## Data Flow
+1. Global planner module receives current vehicle position from localizer module and goal destination from goal publisher
+2. Lanelet2-based planning generates a coarse global path
+3. (Optional) The path undergoes lane change planning and smoothing
+4. A detailed global path with speed profiles and lane information is published to local planning module for further processing

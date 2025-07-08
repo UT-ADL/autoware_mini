@@ -4,15 +4,17 @@ import threading
 import math
 
 import rospy
-from tf2_ros import TransformBroadcaster
+from tf2_ros import TransformBroadcaster, Buffer, TransformListener
 
 from geometry_msgs.msg import TransformStamped, PoseStamped, TwistStamped, PoseWithCovarianceStamped, Quaternion, Point
-from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
+from autoware_mini.msg import VehicleCmd, VehicleStatus, Gear
 
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import ColorRGBA
 
-from helpers.geometry import get_orientation_from_heading, get_heading_from_orientation
+from autoware_mini.geometry import get_orientation_from_heading, get_heading_from_orientation
+from autoware_mini.lanelet2 import load_lanelet2_map, get_height_at_position
+from autoware_mini.transform import transform_point
 
 class BicycleSimulation:
 
@@ -24,6 +26,7 @@ class BicycleSimulation:
         self.deceleration_limit = rospy.get_param("deceleration_limit")
         self.default_acceleration = rospy.get_param("/planning/default_acceleration")
         self.default_deceleration = rospy.get_param("/planning/default_deceleration")
+        self.lanelet2_map = load_lanelet2_map(rospy.get_param("~lanelet2_map_path"))
 
         # internal state of bicycle model
         self.x = 0.0
@@ -41,6 +44,9 @@ class BicycleSimulation:
         self.current_pose_pub = rospy.Publisher('/localization/current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
         self.current_velocity_pub = rospy.Publisher('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
         self.vehicle_status_pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1, tcp_nodelay=True)
+        
+        tf_buffer = Buffer()
+        tf_listener = TransformListener(tf_buffer)
         self.br = TransformBroadcaster()
 
         # visualization of the bicycle model
@@ -51,6 +57,8 @@ class BicycleSimulation:
         rospy.Subscriber('/initialvelocity', TwistStamped, self.initialvelocity_callback, queue_size=None, tcp_nodelay=True)
         rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1, tcp_nodelay=True)
 
+        self.base_link_to_base_foorprint_tf = tf_buffer.lookup_transform("base_footprint", "base_link", rospy.Time(0), rospy.Duration(1.0))
+
         rospy.loginfo("%s - initialized", rospy.get_name())
 
     def initialpose_callback(self, msg):
@@ -58,6 +66,9 @@ class BicycleSimulation:
         self.x = msg.pose.pose.position.x
         self.y = msg.pose.pose.position.y
         self.z = msg.pose.pose.position.z
+
+        # set z coordinate from nearest lanelet
+        self.z = get_height_at_position(self.lanelet2_map, self.x, self.y, self.z)
 
         # extract heading angle from orientation
         self.heading_angle = get_heading_from_orientation(msg.pose.pose.orientation)
@@ -121,6 +132,9 @@ class BicycleSimulation:
         self.y += y_dot * delta_t
         self.heading_angle += heading_angle_dot * delta_t
 
+        # set z coordinate from nearest lanelets, check up to 3 lanelets and choose the first one that has height within 3 meters of current z
+        self.z = get_height_at_position(self.lanelet2_map, self.x, self.y, self.z, num_lanelets=3, max_height_difference=3)
+
         # create quaternion from heading angle to be used later in tf and pose and marker messages
         self.orientation = get_orientation_from_heading(self.heading_angle)
 
@@ -146,7 +160,10 @@ class BicycleSimulation:
             self.publish_vehicle_status(stamp)
             self.publish_bicycle_markers(stamp)
 
-            rate.sleep()
+            try:
+                rate.sleep()
+            except (rospy.ROSTimeMovedBackwardsException, rospy.exceptions.ROSInterruptException):
+                pass
 
     def publish_base_link_to_map_tf(self, stamp):
             
@@ -156,9 +173,12 @@ class BicycleSimulation:
         t.header.frame_id = "map"
         t.child_frame_id = "base_link"
 
-        t.transform.translation.x = self.x
-        t.transform.translation.y = self.y
-        t.transform.translation.z = self.z
+        # transform translation from base_footprint to base_link
+        transformed_point = transform_point(Point(self.x, self.y, self.z), self.base_link_to_base_foorprint_tf)
+
+        t.transform.translation.x = transformed_point.x
+        t.transform.translation.y = transformed_point.y
+        t.transform.translation.z = transformed_point.z
         t.transform.rotation = self.orientation
 
         self.br.sendTransform(t)
@@ -263,7 +283,10 @@ class BicycleSimulation:
         marker.header.frame_id = "map"
         marker.header.stamp = stamp
         marker.type = marker.SPHERE_LIST
-        marker.action = marker.ADD
+        if self.blinkers in (VehicleStatus.LAMP_HAZARD, VehicleStatus.LAMP_LEFT, VehicleStatus.LAMP_RIGHT):
+            marker.action = marker.ADD
+        else:
+            marker.action = marker.DELETE
         marker.id = 2
         marker.scale.x = 0.3
         marker.scale.y = 0.3

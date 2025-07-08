@@ -13,10 +13,10 @@
     <arg name='scenario_file'           default='$(find autoware_mini)/data/scenarios/$(arg map_name)/$(arg scenario_name).xosc'/>
     <arg name='scenario_path'           default='$(find autoware_mini)/data/scenarios/$(arg map_name)'/>
     <!-- Route scenario args-->
-    <arg name='routes_file'             default='$(find autoware_mini)/data/routes/routes_devtest.xml'/>
-    <arg name='route_scenarios_file'    default='$(find autoware_mini)/data/routes/all_towns_traffic_scenarios_public.json'/>
+    <arg name='routes_file'             default='$(find autoware_mini)/data/routes/$(arg map_name).xml'/>
     <arg name='route_id'                default=''/>
     <arg name='agent_file'              default='$(find autoware_mini)/nodes/platform/carla/carla_minimal_agent.py'/>
+    <arg name='additional_scenarios'    default='$(find autoware_mini)/data/routes/$(arg map_name).py'/>
 
     <!--
     ###############################
@@ -24,7 +24,7 @@
     ###############################
     -->
     <group if='$(eval type(route_id) == int)'>
-        <node pkg='autoware_mini' type='carla_route_scenario.sh' name='carla_route_scenario' args='$(arg routes_file) $(arg route_scenarios_file) $(arg route_id) $(arg agent_file)' output='screen' required="true"/>
+        <node pkg='autoware_mini' type='carla_route_scenario.sh' name='carla_route_scenario' args='$(arg host) $(arg port) $(arg routes_file) $(arg route_id) $(arg agent_file) $(arg additional_scenarios)' output='screen' required="true"/>
     </group>
 
     <!--

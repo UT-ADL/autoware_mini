@@ -2,8 +2,7 @@
 
 import rospy
 import math
-from std_msgs.msg import ColorRGBA
-from novatel_oem7_msgs.msg import INSPVA, BESTPOS
+from novatel_oem7_msgs.msg import INSPVAX, BESTPOS
 from jsk_rviz_plugins.msg import OverlayText
 
 INSPVA_STATUS = {
@@ -73,37 +72,46 @@ class NovatelOem7Visualizer:
         self.gnss_detailed_pub = rospy.Publisher('gnss_detailed', OverlayText, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('/novatel/oem7/inspva', INSPVA, self.inspva_callback, queue_size=1)
+        rospy.Subscriber('/novatel/oem7/inspvax', INSPVAX, self.inspvax_callback, queue_size=1)
         rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback, queue_size=1)
 
         # Internal parameters
-        self.inspva_status_text = ""
+        self.inspvax_status_text = "INS Status: <span style='color: red;'>{}</span>\n".format("No INS status received")
+        self.location_stdev_text = "Location stdev: <span style='color: red;'>{}</span>\n".format("No INS status received")
+        self.location_stdev = float('inf')
 
-    def inspva_callback(self, msg):
+    def inspvax_callback(self, msg):
 
-        if msg.status.status == INS_SOLUTION_GOOD:
-            inspva_status_text = "<span style='color: white;'>{}</span>\n".format(INSPVA_STATUS[msg.status.status])
+        ################# inspva_status
+        inspvax_status_text = "INS Status: "
+        if msg.ins_status.status == INS_SOLUTION_GOOD:
+            inspvax_status_text += "<span style='color: white;'>{}</span>\n".format(INSPVA_STATUS[msg.ins_status.status])
         else:
-            if msg.status.status not in INSPVA_STATUS:
-                inspva_status_text = "<span style='color: red;'>{}</span>\n".format("Unknown: " + str(msg.status.status))
+            if msg.ins_status.status not in INSPVA_STATUS:
+                inspvax_status_text += "<span style='color: red;'>{}</span>\n".format("Unknown: " + str(msg.ins_status.status))
             else:
-                inspva_status_text = "<span style='color: yellow;'>{}</span>\n".format(INSPVA_STATUS[msg.status.status])
+                inspvax_status_text += "<span style='color: yellow;'>{}</span>\n".format(INSPVA_STATUS[msg.ins_status.status])
 
-        self.inspva_status_text = inspva_status_text
+        self.inspvax_status_text = inspvax_status_text
+
+        ################# loc_stdev
+        location_stdev_text = "Location stdev: "
+        location_stdev = math.sqrt(msg.latitude_stdev**2 + msg.longitude_stdev**2)
+
+        if location_stdev <= self.location_accuracy_stdev_good:
+            location_stdev_text += "<span style='color: white;'>{:.2f} m</span>\n".format(location_stdev)
+        elif location_stdev > self.location_accuracy_stdev_bad:
+            location_stdev_text += "<span style='color: red;'>{:.2f} m</span>\n".format(location_stdev)
+        else:
+            location_stdev_text += "<span style='color: yellow;'>{:.2f} m</span>\n".format(location_stdev)
+
+        self.location_stdev_text = location_stdev_text
+        self.location_stdev = location_stdev
 
 
     def bestpos_callback(self, msg):
 
-        ################# inspva_status
-
-        inspva_status_text = "INS Status: "
-        if self.inspva_status_text == "":
-            inspva_status_text += "<span style='color: red;'>{}</span>\n".format("No INS status received")
-        else:
-            inspva_status_text += self.inspva_status_text
-        
         ################# bestpos_pos_type
-
         bestpos_pos_type_text = "Position type: "
         if msg.pos_type.type == INS_RTKFIXED:
             bestpos_pos_type_text += "<span style='color: white;'>{}</span>\n".format(BESTPOS_POS_TYPE[msg.pos_type.type])
@@ -122,17 +130,6 @@ class NovatelOem7Visualizer:
         else:
             num_sol_svs_text += "<span style='color: yellow;'>{}</span>\n".format(msg.num_sol_svs)
 
-        ################# loc_stdev
-        location_stdev_text = "Location stdev: "
-        location_stdev = math.sqrt(msg.lat_stdev**2 + msg.lon_stdev**2)
-
-        if location_stdev <= self.location_accuracy_stdev_good:
-            location_stdev_text += "<span style='color: white;'>{:.2f} m</span>\n".format(location_stdev)
-        elif location_stdev > self.location_accuracy_stdev_bad:
-            location_stdev_text += "<span style='color: red;'>{:.2f} m</span>\n".format(location_stdev)
-        else:
-            location_stdev_text += "<span style='color: yellow;'>{:.2f} m</span>\n".format(location_stdev)
-
         ################# diff_age
         diff_age_text = "Differential age: "
 
@@ -143,16 +140,15 @@ class NovatelOem7Visualizer:
         else:
             diff_age_text += "<span style='color: yellow;'>{:.2f} s</span>\n".format(msg.diff_age)
 
-
         ################# gnss_general status
-        if msg.pos_type.type == INS_RTKFIXED and location_stdev < self.location_accuracy_stdev_good and msg.diff_age < self.differential_age_bad and msg.num_sol_svs > self.number_of_satellites_bad:
+        if msg.pos_type.type == INS_RTKFIXED and self.location_stdev < self.location_accuracy_stdev_good and msg.diff_age < self.differential_age_bad and msg.num_sol_svs > self.number_of_satellites_bad:
             gnss_general_text = "<span style='color: white;'>OK</span>"
         else:
             gnss_general_text = "<span style='color: yellow;'>Warning</span>"
         
 
         self.publish_gnss_general(gnss_general_text)
-        self.publish_gnss_detailed(inspva_status_text + bestpos_pos_type_text + num_sol_svs_text + location_stdev_text + diff_age_text)
+        self.publish_gnss_detailed(self.inspvax_status_text + bestpos_pos_type_text + num_sol_svs_text + self.location_stdev_text + diff_age_text)
 
 
     def publish_gnss_general(self, gnss_general_text):

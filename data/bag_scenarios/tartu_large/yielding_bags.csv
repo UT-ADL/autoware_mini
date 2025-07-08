@@ -1,0 +1,22 @@
+# bag_name, start, duration, scenario_number, regenerate
+2023-11-03-13-56-06_tiksoja_ride_20_sfa_split_2.bag, 339, 22, 01, true
+2023-11-03-13-56-06_tiksoja_ride_20_sfa_split_2.bag, 744, 27, 02, true
+2023-11-03-13-56-06_tiksoja_ride_20_sfa_split_2.bag, 1033, 26, 03, true
+2024-03-01-14-12-02_auto_cluster_Soola_r2.bag, 246, 29, 04, true
+2023-10-16-14-07-19_tiksoja_ride_06_sfa.bag, 625, 28, 05, true
+2023-10-13-12-51-29_tiksoja_ride_01.bag, 2239, 31, 06, true
+2024-03-21-14-52-57_test_drive_car_demo_branch_Soola.bag, 541, 21, 07, true
+2023-10-16-14-39-15_tiksoja_ride_07_sfa.bag, 300, 25, 08, true
+2023-09-22-12-23-51_path_goal_Lai_street_circle.bag, 217, 30, 09, true
+2023-10-16-15-23-20_tiksoja_ride_08_cluster.bag, 397, 21, 10, true
+2023-10-30-14-28-38_tiksoja_ride_12_sfa_split_1.bag, 189, 30, 11, true
+2023-10-30-14-28-38_tiksoja_ride_12_sfa_split_1.bag, 362, 24, 12, true
+2023-10-30-15-19-32_tiksoja_ride_13_cluster_split_2.bag, 1039, 25, 13, true
+2023-09-22-12-23-51_path_goal_Lai_street_circle.bag, 631, 22, 14, true
+2023-10-31-10-17-12_tiksoja_ride_14_sfa_split_2.bag, 1018, 25, 15, true
+2023-11-03-10-59-56_tiksoja_ride_19_cluster_split_1.bag, 144, 22, 16, true
+2024-05-20-11-40-24_shapely_local_planner_soola_route_run_15.bag, 341, 41, 17, true
+2024-05-20-11-40-24_shapely_local_planner_soola_route_run_15.bag, 387, 20, 18, true
+2024-04-18-12-00-28_demo_Soola_tasku.bag, 290, 21, 19, true
+2024-04-18-12-00-28_demo_Soola_tasku.bag, 643, 40, 20, true
+2023-11-03-11-14-53_tiksoja_ride_19_cluster_split_2.bag, 286, 39, 21, true

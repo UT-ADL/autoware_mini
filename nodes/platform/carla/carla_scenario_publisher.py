@@ -22,7 +22,7 @@ class CarlaScenarioPublisher:
 
     def run(self):
         # Read all scenario files from the given path
-        scenario_files = glob.glob(os.path.join(self.scenario_path, '*.xosc'))
+        scenario_files = sorted(glob.glob(os.path.join(self.scenario_path, '*.xosc')))
 
         # Publish scenarios
         scenario_list = CarlaScenarioList()

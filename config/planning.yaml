@@ -1,26 +1,34 @@
-current_pose_to_car_front: 4.0  # m
-braking_reaction_time: 1.6
-stopping_lateral_distance: 1.35           # m
-slowdown_lateral_distance: 1.60       # m
+local_path_length: 100          # m
+braking_reaction_time: 1.6      # s
+safety_box_width: 2.7           # m
+safety_box_length: 5.0          # m
 waypoint_interval: 1.0          # m
-default_acceleration: 1.0
-default_deceleration: 1.0
-max_deceleration: 10.0
-stopping_speed_limit: 1.0
+default_acceleration: 1.0       # m/s2
+default_deceleration: 1.0       # m/s2
+max_deceleration: 10.0          # m/s2
+stopped_speed_limit: 1.0        # m/s
+lane_change_base_length: 10.0   # m
+lane_change_perlane_length: 5.0 # m
+speed_limit: 50.0               # max velocity for route (km/h), will be replaced by speed taken from map
+output_frame: map
+distance_to_goal_limit: 5.0     # m
+ego_vehicle_stopped_speed_limit: 0.1
+use_object_width: True          # use object width for predictions and collision checks in trajectory_collision_checker and pedestrian_crosswalk_checker
+default_left_width: 1.4         # m
+default_right_width: 1.4        # m
 
 lanelet2_global_planner:
-  output_frame: map
-  distance_to_goal_limit: 5.0
   distance_to_centerline_limit: 5.0
-  speed_limit: 50.0                 # max velocity for route (km/h), will be replaced by speed taken from map
-  ego_vehicle_stopped_speed_limit: 0.1
   lane_change: False
-  lanelet_search_radius: 1.0
+  lanelet_search_radius: 0.5
+  routing_cost: travel_time
+
+lanelet2_map_visualizer:
+  use_map_extraction: False     # extract smaller map area around the ego vehicle for visualization
+  map_extraction_distance: 500  # m - distance from ego vehicle to extract map data
 
 waypoint_loader:
   output_frame: map
-  wp_left_width: 1.4
-  wp_right_width: 1.4
 
 waypoint_saver:
   interval: 1.0
@@ -34,11 +42,43 @@ path_smoothing:
   lateral_acceleration_limit: 1.5         # m/s2
   output_debug_info: False
 
-velocity_local_planner:
-  local_path_length: 100
-  transform_timeout: 0.06
-  tfl_maximum_deceleration: 2.8
+local_path_extractor:
+  publish_rate: 10                        # Hz 
+  lookahead_distance: 10                  # m
+  distance_to_lookahead_path_limit: 2.5   # m
+  after_goal_obstacle_check_distance: 4.0 # m
+goal_stop_checker:
+  braking_safety_distance_goal: 0.1       # m
+traffic_light_stopline_checker:
+  braking_safety_distance_stopline: 2     # m
   tfl_force_stop_speed_limit: 5.0         # km/h
-  braking_safety_distance_obstacle: 4.0
-  braking_safety_distance_stopline: 2.0
-  braking_safety_distance_goal: 0.1
+  tfl_maximum_deceleration: 2.8           # m/s2
+object_collision_checker:
+  braking_safety_distance_obstacle: 4     # m
+pedestrian_crosswalk_checker:
+  braking_safety_distance_crosswalk: 6    # m
+  crossing_angle_max_limit: 60            # degrees
+  ignore_static_obstacles: True
+  crosswalk_maximum_deceleration: 3.0     # m/s2
+  prediction_counter_min_limit: 4         # int
+yielding_checker:
+  braking_safety_distance_yield: 1.0      # m
+  yielding_distance_limit: 40.0           # m
+  heading_alignment_limit: 30.0           # degrees
+  yielding_maximum_deceleration: 2.8      # m/s2
+trajectory_collision_checker:
+  braking_safety_distance_trajectory: 4   # m
+  heading_alignment_limit: 30.0           # degrees
+  safety_time_ego_front: 2.0              # s
+  safety_time_ego_rear: 1.0               # s
+automatic_stop_checker:
+  braking_safety_distance_stop_line: 0.95     # m
+  keep_stop_line_for: 15.0                    # s
+collision_points_merger:
+  synchronization_queue_size: 4
+  synchronization_slop: 0.15
+speed_planner:
+  synchronization_queue_size: 4
+  synchronization_slop: 0.15
+openpilot_local_planner:
+  transform_timeout: 0.06

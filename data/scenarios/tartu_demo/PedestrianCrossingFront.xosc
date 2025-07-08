@@ -4,7 +4,7 @@
   <ParameterDeclarations/>
   <CatalogLocations/>
   <RoadNetwork>
-    <LogicFile filepath="Tartu"/>
+    <LogicFile filepath="tartu_demo"/>
     <SceneGraphFile filepath=""/>
   </RoadNetwork>
   <Entities>
@@ -59,7 +59,7 @@
           <PrivateAction>
             <TeleportAction>
               <Position>
-                <WorldPosition x="124.5" y="50.07" z="37" h="1.15"/>
+                <WorldPosition x="-1.782490" y="72.065437" z="34.568905" h="1.5"/>
               </Position>
             </TeleportAction>
           </PrivateAction>
@@ -88,7 +88,7 @@
             <TeleportAction>
               <Position>
                 <!-- <WorldPosition x="139.70" y="90.07" z="36" h="-0.07"/> -->
-                <WorldPosition x="137.70" y="88.07" z="36" h="-0.07"/>
+                <WorldPosition h="-0.281958" p="-0.000833366" r="0.000245086" x="5.0" y="116.939396" z="34.140800" />
               </Position>
             </TeleportAction>
           </PrivateAction>
@@ -107,9 +107,9 @@
                 <PrivateAction>
                   <LongitudinalAction>
                     <SpeedAction>
-                      <SpeedActionDynamics dynamicsShape="step" value="1.5" dynamicsDimension="distance"/>
+                      <SpeedActionDynamics dynamicsShape="step" value="2.5" dynamicsDimension="distance"/>
                       <SpeedActionTarget>
-                        <AbsoluteTargetSpeed value="10.0"/>
+                        <AbsoluteTargetSpeed value="5.0"/>
                       </SpeedActionTarget>
                     </SpeedAction>
                   </LongitudinalAction>
@@ -123,10 +123,10 @@
                         <EntityRef entityRef="ego_vehicle"/>
                       </TriggeringEntities>
                       <EntityCondition>
-                        <ReachPositionCondition tolerance="8.5">
+                        <ReachPositionCondition tolerance="20.0">
                           <Position>
                             <!-- <WorldPosition x="146.70" y="86.07" z="36" h="-0.07"/> -->
-                            <WorldPosition x="139.70" y="90.07" z="36" h="-0.07"/>
+                            <WorldPosition h="-0.281958" p="-0.000833366" r="0.000245086" x="5.0" y="116.939396" z="34.140800" />
                           </Position>
                         </ReachPositionCondition>
                       </EntityCondition>
@@ -140,7 +140,7 @@
                 <PrivateAction>
                   <LongitudinalAction>
                     <SpeedAction>
-                      <SpeedActionDynamics dynamicsShape="step" value="10" dynamicsDimension="time"/>
+                      <SpeedActionDynamics dynamicsShape="step" value="2" dynamicsDimension="time"/>
                       <SpeedActionTarget>
                         <AbsoluteTargetSpeed value="0.0"/>
                       </SpeedActionTarget>
@@ -163,7 +163,7 @@
                 <PrivateAction>
                   <LongitudinalAction>
                     <SpeedAction>
-                      <SpeedActionDynamics dynamicsShape="step" value="6.5" dynamicsDimension="distance"/>
+                      <SpeedActionDynamics dynamicsShape="step" value="12.0" dynamicsDimension="distance"/>
                       <SpeedActionTarget>
                         <AbsoluteTargetSpeed value="2.0"/>
                       </SpeedActionTarget>

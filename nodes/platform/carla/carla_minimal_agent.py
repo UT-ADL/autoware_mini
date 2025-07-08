@@ -16,15 +16,13 @@ import rospy
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Path
 
-from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
-
 from tf.transformations import quaternion_from_euler
 
 from srunner.autoagents.autonomous_agent import AutonomousAgent
 from srunner.scenariomanager.timer import GameTime
 from srunner.tools.route_manipulation import downsample_route
 
-from helpers.geometry import  get_point_using_heading_and_distance, get_heading_from_orientation
+from autoware_mini.geometry import  get_point_using_heading_and_distance, get_heading_from_orientation
 
 
 def get_entry_point():
@@ -47,15 +45,6 @@ class CarlaMinimalAgent(AutonomousAgent):
         self.init_goal_delay = rospy.get_param("~init_goal_delay")
         self.downsampling_interval = rospy.get_param("~downsampling_interval")
 
-        # Sim2UTM transformer used for Tartu map
-        self.use_transformer = rospy.get_param("/carla_localization/use_transformer")
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
-        utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
-        utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
-
-        self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
-                                                        origin_lat=utm_origin_lat,
-                                                        origin_lon=utm_origin_lon)
         # Waypoints are used for Path visualisation in RVIZ
         self.waypoint_publisher = rospy.Publisher(
             '/carla/ego_vehicle/waypoints', Path, queue_size=1, tcp_nodelay=True, latch=True)
@@ -146,8 +135,5 @@ class CarlaMinimalAgent(AutonomousAgent):
         pose.pose.orientation.y = y
         pose.pose.orientation.z = z
         pose.pose.orientation.w = w
-
-        if self.use_transformer:
-            pose.pose = self.sim2utm_transformer.transform_pose(pose.pose)
 
         return pose

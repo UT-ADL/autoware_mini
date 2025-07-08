@@ -1,0 +1,4 @@
+scenario_name,ade_threshold,speed_smoothness_threshold
+tartu_demo_01,10,1
+tartu_demo_02,10,1
+tartu_demo_03,10,1

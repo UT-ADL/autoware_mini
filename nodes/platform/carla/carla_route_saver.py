@@ -7,7 +7,7 @@ import rospy
 from nav_msgs.msg import Odometry
 import xml.etree.ElementTree as ET
 
-from helpers.geometry import get_heading_from_orientation
+from autoware_mini.geometry import get_heading_from_orientation
 
 
 class CarlaRouteSaver:

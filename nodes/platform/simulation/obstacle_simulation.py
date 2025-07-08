@@ -4,7 +4,7 @@ import rospy
 import threading
 
 from geometry_msgs.msg import PointStamped, Point32
-from autoware_msgs.msg import DetectedObjectArray, DetectedObject
+from autoware_mini.msg import DetectedObjectArray, DetectedObject
 from std_msgs.msg import ColorRGBA
 
 class ObstacleSimulation:
@@ -27,40 +27,32 @@ class ObstacleSimulation:
     def point_callback(self, msg):
         # check if clicked on an existing object
         for o in self.objects:
-            if o.pose.position.x - o.dimensions.x / 2.0 <= msg.point.x <= o.pose.position.x + o.dimensions.x / 2.0 and \
-                    o.pose.position.y - o.dimensions.y / 2.0 <= msg.point.y <= o.pose.position.y + o.dimensions.y / 2.0:
+            if o.center.x - o.dimensions.x / 2.0 <= msg.point.x <= o.center.x + o.dimensions.x / 2.0 and \
+                    o.center.y - o.dimensions.y / 2.0 <= msg.point.y <= o.center.y + o.dimensions.y / 2.0:
                 self.objects.remove(o)
                 rospy.loginfo("%s - removed obstacle %d", rospy.get_name(), o.id)
                 return
 
         # if not, create a new 
         obj = DetectedObject()
-        obj.header.frame_id = msg.header.frame_id
-
         obj.id = self.id
         obj.label = 'unknown'
         obj.color = ColorRGBA(1.0, 1.0, 1.0, 0.8)
         obj.valid = True
 
-        obj.space_frame = msg.header.frame_id
-        obj.pose.position.x = msg.point.x
-        obj.pose.position.y = msg.point.y
-        obj.pose.position.z = msg.point.z
-        obj.pose.orientation.x = 0.0
-        obj.pose.orientation.y = 0.0
-        obj.pose.orientation.z = 0.0
-        obj.pose.orientation.w = 1.0
+        obj.center.x = obj.centroid.x = msg.point.x
+        obj.center.y = obj.centroid.y = msg.point.y
+        obj.center.z = obj.centroid.z = msg.point.z
+        obj.heading = 0.0
         obj.dimensions.x = 1.0
         obj.dimensions.y = 1.0
         obj.dimensions.z = 1.0
-        obj.pose_reliable = True
+        obj.position_reliable = True
 
-        obj.convex_hull.polygon.points = [
-            Point32(msg.point.x - 0.5, msg.point.y - 0.5, msg.point.z),
-            Point32(msg.point.x - 0.5, msg.point.y + 0.5, msg.point.z),
-            Point32(msg.point.x + 0.5, msg.point.y + 0.5, msg.point.z),
-            Point32(msg.point.x + 0.5, msg.point.y - 0.5, msg.point.z)
-        ]
+        obj.convex_hull = [msg.point.x - 0.5, msg.point.y - 0.5, msg.point.z,
+                           msg.point.x - 0.5, msg.point.y + 0.5, msg.point.z,
+                           msg.point.x + 0.5, msg.point.y + 0.5, msg.point.z,
+                           msg.point.x + 0.5, msg.point.y - 0.5, msg.point.z]
 
         self.objects.append(obj)
         rospy.loginfo("%s - added obstacle %d at (%f, %f, %f) in %s frame", rospy.get_name(), self.id, msg.point.x, msg.point.y, msg.point.z, msg.header.frame_id)
@@ -77,7 +69,10 @@ class ObstacleSimulation:
 
         while not rospy.is_shutdown():
             self.publish_detected_objects()
-            rate.sleep()
+            try:
+                rate.sleep()
+            except (rospy.ROSTimeMovedBackwardsException, rospy.exceptions.ROSInterruptException):
+                pass
 
     def publish_detected_objects(self):
         stamp = rospy.Time.now()
@@ -87,12 +82,6 @@ class ObstacleSimulation:
         msg.header.stamp = stamp
         msg.header.frame_id = 'map'
         msg.objects = self.objects
-
-        # overwrite object timestamp
-        for o in msg.objects:
-            o.header.stamp = stamp
-            assert o.header.frame_id == msg.header.frame_id, "object frame_id does not match message frame_id"
-
         self.objects_pub.publish(msg)
 
 if __name__ == '__main__':

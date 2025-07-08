@@ -1,0 +1,110 @@
+<routes>
+   <route id="0" town="tartu_demo">
+      <weathers>
+         <weather route_percentage="0"
+            cloudiness="5.0" precipitation="0.0" precipitation_deposits="0.0" wetness="0.0"
+            wind_intensity="10.0" sun_azimuth_angle="-1.0" sun_altitude_angle="90.0" fog_density="2.0"/>
+         <weather route_percentage="100"
+            cloudiness="5.0" precipitation="0.0" precipitation_deposits="0.0" wetness="0.0"
+            wind_intensity="10.0" sun_azimuth_angle="-1.0" sun_altitude_angle="15.0" fog_density="2.0"/>
+      </weathers>
+      <ego_vehicle x="-28" y="51" z="36" yaw="0" rolename="ego_vehicle" model="vehicle.lexus.utlexus" />
+      <waypoints>
+         <position pitch="0.0" x="-28" y="51" z="36" yaw="0" />
+         <position pitch="0.0" x="56.475670" y="237.405640" z="34.568905" yaw="109.52626800537111" />
+         <position pitch="0.0" x="133" y="423" z="35" yaw="109.52626800537111" />
+         <position pitch="0.0" x="218.305878" y="552.472778" z="34.568905" yaw="109.52626800537111" />
+         <position pitch="0.0" x="110" y="761" z="36" yaw="109.52626800537111" />
+         <position pitch="0.0" x="0" y="0" z="36" yaw="0" />
+      </waypoints>
+      <scenarios>
+      	 <scenario name="TrafficLightForcingScenario" type="TrafficLightForcingScenario">
+            <trigger_point x="-28" y="51" z="36" yaw="0"/>
+         </scenario>
+         <scenario name="StandingPedestrian" type="StandingPedestrian">
+            <trigger_point x="-23.889200" y="50.840630" z="34.928333" yaw="0"/>
+         </scenario>
+         <scenario name="LeftTurnPedestrianCrossing" type="LeftTurnPedestrianCrossing">
+            <trigger_point x="-23.889200" y="50.840630" z="34.928333" yaw="0"/>
+         </scenario>
+         <scenario name="WalkingPedestrianCrossing" type="WalkingPedestrianCrossing">
+            <trigger_point x="-0.793965" y="80.109550" z="34.568905" yaw="90.45"/>
+         </scenario>
+         <scenario name="StandingPedestrianCrossing" type="StandingPedestrianCrossing">
+            <trigger_point x="0.819503" y="87.055496" z="34.568905" yaw="90.45"/>
+         </scenario>
+         <scenario name="VehicleFromTheLeft_1" type="VehicleFromTheLeft1">
+            <trigger_point x="9.233038" y="119.123688" z="34.568905" yaw="90.45"/>
+         </scenario>
+         <scenario name="VehicleFromTheLeft_2" type="VehicleFromTheLeft2">
+            <trigger_point x="54.475670" y="235.405640" z="34.568905" yaw="90.45"/>
+         </scenario>
+         <scenario name="VehicleFromTheLeft_3" type="VehicleFromTheLeft3">
+            <trigger_point x="133" y="423" z="35" yaw="90.45"/>
+         </scenario>
+         <scenario name="BusFromTheRight1" type="BusFromTheRight1">
+            <trigger_point x="145.748108" y="443.184631" z="34.574802" yaw="90.45"/>
+         </scenario>
+         <scenario name="StandingPedestrianCrossing2" type="StandingPedestrianCrossing2">
+            <trigger_point x="187.176865" y="505.696838" z="34.643303" yaw="90.45"/>
+         </scenario>
+         <scenario name="WalkingPedestrianCrossing2" type="WalkingPedestrianCrossing2">
+            <trigger_point x="187.176865" y="505.696838" z="34.643303" yaw="90.45"/>
+         </scenario>
+         <scenario name="PedestrianCrossingKaubamaja1" type="PedestrianCrossingKaubamaja1">
+            <trigger_point x="155.749832" y="801.735046" z="35.369835" yaw="90.45"/>
+         </scenario>
+         <scenario name="PedestrianCrossingKaubamaja2" type="PedestrianCrossingKaubamaja2">
+            <trigger_point x="155.749832" y="801.735046" z="35.369835" yaw="90.45"/>
+         </scenario>
+         <scenario name="PedestrianCrossingKaubamaja3" type="PedestrianCrossingKaubamaja3">
+            <trigger_point x="155.749832" y="801.735046" z="35.369835" yaw="90.45"/>
+         </scenario>
+         <scenario name="RollerFromTheRight1" type="RollerFromTheRight1">
+            <trigger_point x="155.749832" y="801.735046" z="35.369835" yaw="90.45"/>
+         </scenario>
+         <scenario name="BusFromTheRight2" type="BusFromTheRight2">
+            <trigger_point x="77.602119" y="724.942017" z="35.844406" yaw="90.45"/>
+         </scenario>
+         <scenario name="RollerFromTheRight2" type="RollerFromTheRight2">
+            <trigger_point x="6" y="645" z="36" yaw="90.45"/>
+         </scenario>
+         <scenario name="RollerFromTheRight3" type="RollerFromTheRight3">
+            <trigger_point x="6" y="645" z="36" yaw="90.45"/>
+         </scenario>
+         <scenario name="VehicleFromTheLeft_4" type="VehicleFromTheLeft4">
+            <trigger_point x="-100.445564" y="432.941162" z="34.759109" yaw="90.45"/>
+         </scenario>
+         <scenario name="VehicleRoundabout1" type="VehicleRoundabout1">
+            <trigger_point x="-39.280468" y="-109.915543" z="35.391987" yaw="90.45"/>
+         </scenario>
+         <scenario name="VehicleRoundabout2" type="VehicleRoundabout2">
+            <trigger_point x="-39.280468" y="-109.915543" z="35.391987" yaw="90.45"/>
+         </scenario>
+         <scenario name="VehicleRoundabout3" type="VehicleRoundabout3">
+            <trigger_point x="-39.280468" y="-109.915543" z="35.391987" yaw="90.45"/>
+         </scenario>
+         <scenario name="VehicleRoundabout4" type="VehicleRoundabout4">
+            <trigger_point x="-39.280468" y="-109.915543" z="35.391987" yaw="90.45"/>
+         </scenario>
+         <scenario name="RightTurnPedestrianCrossing1" type="RightTurnPedestrianCrossing1">
+            <trigger_point x="-144.944336" y="34.583801" z="36.255657" yaw="90.45"/>
+         </scenario>
+         <scenario name="RightTurnPedestrianCrossing2" type="RightTurnPedestrianCrossing2">
+            <trigger_point x="-144.944336" y="34.583801" z="36.255657" yaw="90.45"/>
+         </scenario>
+         <scenario name="RightTurnPedestrianCrossing3" type="RightTurnPedestrianCrossing3">
+            <trigger_point x="-39.280468" y="-109.915543" z="35.391987" yaw="90.45"/>
+         </scenario>
+         <scenario name="LeftTurnPedestrianCrossing2" type="LeftTurnPedestrianCrossing2">
+            <trigger_point x="-100.050301" y="-43.229050" z="36.394352" yaw="90.45"/>
+         </scenario>
+         <scenario name="StandingPedestrianCrossing3" type="StandingPedestrianCrossing3">
+            <trigger_point x="-49.476536" y="-103.697754" z="35.422729" yaw="90.45"/>
+         </scenario>
+         <scenario name="StandingPedestrianCrossing4" type="StandingPedestrianCrossing4">
+            <trigger_point x="-19.879143" y="-113.797272" z="35.322948" yaw="90.45"/>
+         </scenario>
+      </scenarios>
+   </route>
+</routes>

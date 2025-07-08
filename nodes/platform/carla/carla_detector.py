@@ -6,16 +6,15 @@
 # For a copy, see <https://opensource.org/licenses/MIT>.
 """
 ground truth detections. Publishes the following topics:
-    receive :derived_object_msgs::ObjectArray and publishes autoware_msgs::DetectedObjectArray
+    receive :derived_object_msgs::ObjectArray and publishes autoware_mini::DetectedObjectArray
 """
 import rospy
 
 from std_msgs.msg import ColorRGBA
-from geometry_msgs.msg import PolygonStamped, Point
-from autoware_msgs.msg import DetectedObjectArray, DetectedObject
+from autoware_mini.msg import DetectedObjectArray, DetectedObject
 from derived_object_msgs.msg import ObjectArray, Object
-from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
-from helpers.detection import create_hull
+from autoware_mini.detection import create_hull
+from autoware_mini.geometry import get_heading_from_orientation
 
 CLASS_ID_TO_LABEL = {
     Object.CLASSIFICATION_UNKNOWN: 'unknown',
@@ -32,23 +31,14 @@ CLASS_ID_TO_LABEL = {
     Object.CLASSIFICATION_SIGN: 'sign'
 }
 
-YELLOW80P = ColorRGBA(1.0, 1.0, 0.0, 0.8)
+YELLOW = ColorRGBA(1.0, 1.0, 0.0, 0.5)
 
 class CarlaDetector:
 
     def __init__(self):
 
         # Node parameters
-        self.use_transformer = rospy.get_param("/carla_localization/use_transformer")
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
-        utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
-        utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
         self.output_frame = rospy.get_param("/detection/output_frame")
-
-        # Internal parameters
-        self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
-                                                              origin_lat=utm_origin_lat,
-                                                              origin_lon=utm_origin_lon)
 
         # Publishers
         self.detected_objects_pub = rospy.Publisher(
@@ -69,28 +59,25 @@ class CarlaDetector:
         for obj in data.objects:
 
             object_msg = DetectedObject()
-            object_msg.header = obj.header
             object_msg.id = obj.id
             object_msg.label = CLASS_ID_TO_LABEL[obj.classification] 
-            object_msg.color = YELLOW80P
+            object_msg.color = YELLOW
             object_msg.score = 1
             object_msg.valid = True
-            object_msg.space_frame = self.output_frame
-            object_msg.pose = obj.pose
+            
+            pose = obj.pose
 
-            if self.use_transformer:
-                object_msg.pose = self.sim2utm_transformer.transform_pose(object_msg.pose)
-
+            object_msg.centroid = object_msg.center = pose.position
+            object_msg.heading = get_heading_from_orientation(pose.orientation)
             object_msg.dimensions.x = obj.shape.dimensions[0]
             object_msg.dimensions.y = obj.shape.dimensions[1]
             object_msg.dimensions.z = obj.shape.dimensions[2]
-            object_msg.velocity = obj.twist
-            object_msg.acceleration = obj.accel
-            object_msg.convex_hull = create_hull(object_msg, self.output_frame, object_msg.header.stamp)
-            object_msg.pose_reliable = True
+            object_msg.velocity = obj.twist.linear
+            object_msg.acceleration = obj.accel.linear
+            object_msg.convex_hull = create_hull(object_msg)
+            object_msg.position_reliable = True
             object_msg.velocity_reliable = True
             object_msg.acceleration_reliable = True
-            object_msg.valid = True
 
             objects_msg.objects.append(object_msg)
 

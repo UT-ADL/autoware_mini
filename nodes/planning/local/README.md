@@ -1,40 +1,69 @@
-# Local plannning
+# Local Planning Module
 
+## Overview
+The Local Planning module in Autoware Mini is responsible for generating safe, comfortable, and dynamically feasible trajectories for the vehicle to follow in real-time. It translates high-level global paths into precise motion plans while accounting for the vehicle's dynamics, traffic conditions, and obstacles in the immediate environment.
 
-## velocity_local_planner
+![Local planner Pipeline](/images/nodes/local_planning.png)
 
-The `velocity_local_planner` node is responsible for generating a local path that can be followed by the vehicle, using the smoothed_path as a reference. The local path is generated based on the current position of the vehicle and the surrounding environment, such as detected objects, traffic lights, and stop lines. `velocity_local_planner` changes only the speeds of the smoothed_path depending on the detected objects and traffic lights.
+## Architecture
+The Local Planning module takes inputs from:
 
+- **Global Planning module**: Receives reference path (`global_path`) to follow
+- **Detection module**: Obtains final detected obstacles (`predicted objects`) for collision avoidance
+- **Localization module**: Uses vehicle current pose and velocity data
+- **Map data**: Uses static map data (Lanelet2 format) for traffic rules and road geometry
 
-#### Parameters
+It produces outputs to:
+- **Control module**: Provides optimized, collision-free trajectory (`local_path`) with velocity profiles for each waypoint
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-|`~local_path_length` | double | `100` | The maximum length of the local path in meters (m) |
-|`braking_safety_distance_obstacle` | double | `4.0` | Determines the stopping point (m) of the ego vehicle before the obstacle |
-|`braking_safety_distance_stopline` | double | `2.0` | Determines the stopping point (m) of the ego vehicle before the stop line |
-|`braking_safety_distance_goal` | double | `0.0` | Determines the stopping point (m) of the ego vehicle before the goal point |
-|`braking_reaction_time` | double | `1.6` | The time it takes the vehicle to react to an object in front of it  (s) |
-|`stopping_lateral_distance` | double | `1.35` | Obstacles within this with (m) are considered on the path and blocking |
-|`slowdown_lateral_distance` | double | `1.60` | Obstacles outside `stopping_laterl_distance`, but inside this width (m) are affecting ego vehicle speed by causing slowing down the target speed depending how close they are to the path |
-|`current_pose_to_car_front` | double | `4.0` | The distance from the current pose of the vehicle to the front of the car (m) |
-|`default_deceleration` | double | `1.0` | The maximum rate at which the vehicle can decelerate (m/s2) |
-|`tfl_maximum_deceleration` | double | `2.7` | If deceleration needed to stop behind the stop line exceeds this value then traffic light is ignored (m/s2) |
+## Components
 
+The module consists of several specialized components:
 
-#### Subscribed Topics
+### Local Path Extractor 
 
-| Name | Type | Description |
-|------|------|-------------|
-|`smoothed_path` | `autoware_msgs/Lane` | The smoothed global path |
-|`/localization/current_pose` | `geometry_msgs/PoseStamped` | The current pose of the vehicle |
-|`/localization/current_velocity` | `geometry_msgs/TwistStamped` | The current velocity of the vehicle |
-|`/detection/detected_objects` | `autoware_msgs/DetectedObjectArray` | Detected objects |
-|`/detection/traffic_light_status` | `autoware_msgs/TrafficLightResultArray` | Traffic light status |
+The local path extractor extracts a portion of the global path around the vehicle's current position. It uses the vehicle's localization data to determine the relevant segment of the global path that needs to be followed. This segment is then used for further processing in the local planner.
 
+### Rule-Based Planning
+The local planner uses a rule-based approach that identifies potential collision points through specialized checker nodes. Each checker examines specific scenarios:
 
-#### Published Topics
+- **Goal Stop Checker**: Ensures the vehicle stops at the goal point of the global path.
+- **Automatic Stop Checker**: Detects stop lines and manages stops until manual override.
+- **Object Collision Checker**: Identifies potential collisions with obstacles on the path.
+- **Pedestrian Crosswalk Checker**: Handles crosswalks and checks for crossing pedestrians.
+- **Traffic Light Stopline Checker**: Monitors traffic light states and creates collision points at red lights.
+- **Trajectory Collision Checker**: Checks for potential collisions with other vehicles' predicted trajectories.
+- **Yielding Checker**: Handles yielding situations at yield signs or intersections.
+- **Collision Points Merger**: Merges all collision points from various checkers into a single point cloud.
+- **Speed Planner**: Generates the final trajectory by adjusting speeds based on all collision points.
 
-| Name | Type | Description |
-|------|------|-------------|
-|`/local_path` | `autoware_msgs/Lane` | The local path generated by the node |
+### Collision Points Merger
+
+Collision Points Merger merges all collision points from various checkers into a single point cloud. The merger ensures that the speed planner has a comprehensive view of all obstacles and traffic rules that need to be considered when generating the trajectory.
+
+### Speed Planner
+
+The speed planner generates the final trajectory by adjusting speeds based on all merged collision points. It creates safe deceleration profiles for the vehicle, ensuring that the trajectory is both comfortable and safe to follow. The speed planner takes into account the required stopping distance, maximum deceleration allowed, and other metadata associated with each collision point.
+
+### Openpilot-Based Planning
+
+As an alternative to the rule-based approach, Autoware Mini also supports a local planner powered by Openpilot's end-to-end trajectory prediction:
+
+- Component receives position and velocity predictions from Openpilot end-to-end neural network
+- Transforms predictions into the appropriate coordinate frame
+- Constructs waypoints with proper position, heading, velocity, and blinker states
+- Outputs a final collision-free trajectory that preserves Openpilot's motion planning characteristics
+
+## Data Flow
+1. Local planner receives the global path from Global Planning module and current vehicle state from Localization module
+2. The local path extractor extracts a portion of the global path around the vehicle's current position
+3. Various rule-based checkers identify potential collision points for specific scenarios (stop lines, traffic lights, other vehicles and their candidate trajectories, pedestrian on crosswalks, etc.)
+4. Collision points from all checkers are merged into a single point cloud
+5. The speed planner adjusts the trajectory waypoint velocities 
+6. The final optimized trajectory is published to the Control module for execution
+
+Alternatively, when using the Openpilot-based planner:
+1. Local planner receives the global path from Global Planning module and current vehicle state from Localization module
+2. Openpilot generates trajectory and velocity predictions from comma.ai end-to-end neural network
+3. Local planner transforms these predictions and generates a local path with appropriate waypoint attributes
+4. The final trajectory is published to the Control module for execution

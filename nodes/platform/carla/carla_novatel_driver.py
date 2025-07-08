@@ -17,6 +17,7 @@ from novatel_oem7_msgs.msg import INSPVA, BESTPOS, InertialSolutionStatus
 from nav_msgs.msg import Odometry
 import pyproj
 
+from autoware_mini.geometry import get_speed_from_velocity
 
 class CarlaNovatelDriver():
     def __init__(self):
@@ -31,7 +32,7 @@ class CarlaNovatelDriver():
         # Subscribers
         gnss_sub = message_filters.Subscriber('/gps/fix', NavSatFix, queue_size=2, tcp_nodelay=True)
         gnss_forward_sub = message_filters.Subscriber('/gps/fix_forward', NavSatFix, queue_size=2, tcp_nodelay=True)
-        odometry_sub = message_filters.Subscriber('/carla/odometry', Odometry, queue_size=2, tcp_nodelay=True)
+        odometry_sub = message_filters.Subscriber('/carla/ego_vehicle/odometry', Odometry, queue_size=2, tcp_nodelay=True)
         ts = message_filters.ApproximateTimeSynchronizer([gnss_sub, gnss_forward_sub, odometry_sub], queue_size=10, slop=0.05)
         ts.registerCallback(self.sync_callback)
 
@@ -51,7 +52,7 @@ class CarlaNovatelDriver():
             msg.height = gnss_data.altitude
             msg.roll = 0
             msg.pitch = 0 
-            msg.north_velocity = math.sqrt(odometry_data.twist.twist.linear.x**2 + odometry_data.twist.twist.linear.y**2 + odometry_data.twist.twist.linear.z**2)
+            msg.north_velocity = get_speed_from_velocity(odometry_data.twist.twist.linear)
             msg.east_velocity = 0.0
 
             lat_init = math.radians(gnss_data.latitude)

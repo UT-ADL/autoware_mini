@@ -8,20 +8,20 @@ import rospy
 import message_filters
 
 from std_msgs.msg import Bool, Header
-from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
+from autoware_mini.msg import VehicleCmd, VehicleStatus, Gear
 from automotive_platform_msgs.msg import SpeedMode, SteerMode, TurnSignalCommand, GearCommand,\
      CurvatureFeedback, ThrottleFeedback, BrakeFeedback, GearFeedback, SteeringFeedback, VelocityAccelCov
 from automotive_navigation_msgs.msg import ModuleState
-from pacmod3_msgs.msg import SystemRptInt
+# from pacmod3_msgs.msg import SystemRptInt
 
 LOW_SPEED_THRESH = 0.01
 
-TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP = {
-    SystemRptInt.TURN_NONE: 0,
-    SystemRptInt.TURN_LEFT: VehicleStatus.LAMP_LEFT,
-    SystemRptInt.TURN_RIGHT: VehicleStatus.LAMP_RIGHT,
-    SystemRptInt.TURN_HAZARDS: VehicleStatus.LAMP_HAZARD
-}
+# TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP = {
+#     SystemRptInt.TURN_NONE: 0,
+#     SystemRptInt.TURN_LEFT: VehicleStatus.LAMP_LEFT,
+#     SystemRptInt.TURN_RIGHT: VehicleStatus.LAMP_RIGHT,
+#     SystemRptInt.TURN_HAZARDS: VehicleStatus.LAMP_HAZARD
+# }
 
 class SSCInterface:
     def __init__(self):
@@ -41,13 +41,13 @@ class SSCInterface:
         self.agr_coef_c = rospy.get_param('~agr_coef_c')
         self.max_speed = rospy.get_param('~max_speed')
         self.enable_emergency_braking = rospy.get_param('~enable_emergency_braking')
+        # self.turn_signals = SystemRptInt.TURN_NONE
 
         # initialize variables
         self.engage = False
         self.dbw_enabled = False
         self.adaptive_gear_ratio = self.ssc_gear_ratio
-        self.turn_signals = SystemRptInt.TURN_NONE
-        
+
         # initialize SSC command publishers
         self.speed_mode_pub = rospy.Publisher('/ssc/arbitrated_speed_commands', SpeedMode, queue_size=1, tcp_nodelay=True)
         self.steer_mode_pub = rospy.Publisher('/ssc/arbitrated_steering_commands', SteerMode, queue_size=1, tcp_nodelay=True)
@@ -71,8 +71,8 @@ class SSCInterface:
                 message_filters.Subscriber('/ssc/steering_feedback', SteeringFeedback, queue_size=1, tcp_nodelay=True),
                 message_filters.Subscriber('/ssc/velocity_accel_cov', VelocityAccelCov, queue_size=1, tcp_nodelay=True)
             ], queue_size=2, slop=1.0/30.0).registerCallback(self.ssc_feedbacks_callback)
-        # take turn signal info from Pacmod, because it is not available from SSC
-        rospy.Subscriber('/pacmod/turn_rpt', SystemRptInt, self.turn_rpt_callback, queue_size=1, tcp_nodelay=True)
+        # # take turn signal info from Pacmod, because it is not available from SSC (not used for now, to remove pacmod3_msgs dependency)
+        # rospy.Subscriber('/pacmod/turn_rpt', SystemRptInt, self.turn_rpt_callback, queue_size=1, tcp_nodelay=True)
 
         # initialize timeout timer
         self.alive = False
@@ -225,7 +225,8 @@ class SSCInterface:
             vehicle_status.current_gear.gear = gear_msg.current_gear.gear
 
             # turn signals
-            vehicle_status.lamp = TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP[self.turn_signals]
+            #vehicle_status.lamp = TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP[self.turn_signals]
+            vehicle_status.lamp = 0
 
             # publish the status message
             self.vehicle_status_pub.publish(vehicle_status)
@@ -233,8 +234,9 @@ class SSCInterface:
         except Exception as e:
             rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
-    def turn_rpt_callback(self, turn_rpt_msg):
-        self.turn_signals = turn_rpt_msg.output
+    # def turn_rpt_callback(self, turn_rpt_msg):
+    #     self.turn_signals = turn_rpt_msg.output
+
 
     def publish_speed_command(self, header, desired_mode, desired_speed, acceleration_limit=0.0, deceleration_limit=0.0):
         # publish speed command

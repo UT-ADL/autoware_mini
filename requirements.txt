@@ -1,7 +1,8 @@
 pyproj >= 2.6
 numpy >= 1.19, < 1.24
-simple-pid < 2.0
-scikit-learn-intelex
-onnxruntime-gpu
-lapsolver
 shapely >= 2.0
+onnxruntime-gpu
+simple-pid < 2.0
+lapsolver
+mapbox-earcut
+python-dotenv

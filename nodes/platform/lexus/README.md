@@ -4,20 +4,22 @@ Nodes related to running the autonomy stack in the real vehicle.
 
 ## ssc_interface
 
-A Python ROS node for interfacing with Autoware's SSC. 
+A Python ROS node for interfacing with Autoware's SSC.
 
 #### Parameters
-| Name | Type | Default | Description |
+
+| Name | Type | Default Value | Description |
 | --- | --- | --- | --- |
-| `~use_adaptive_gear_ratio` | bool | `True` | Whether to use an adaptive gear ratio. |
-| `~enable_reverse_motion` | bool | `False` | Whether to enable reverse motion. |
-| `~command_timeout` | int | `200` | Timeout (in ms) to send a dummy command message to keep SSC alive. |
+| `max_speed` | float | `-` | Maximum allowed speed in km/h. |
 | `wheel_base` | float | `2.789` | Distance between front and rear axle (in meters). |
 | `steer_ratio` | float | `16.135` | Default gear ratio used in SSC. |
 | `acceleration_limit` | float | `1.0` | Maximum allowed acceleration (in m/s^2). |
 | `deceleration_limit` | float | `5.0` | Maximum allowed deceleration (in m/s^2). |
 | `/planning/default_acceleration` | float | `1.0` | Default acceleration (in m/s^2). |
 | `/planning/default_deceleration` | float | `1.0` | Default deceleration (in m/s^2). |
+| `~use_adaptive_gear_ratio` | bool | `True` | Whether to use an adaptive gear ratio. |
+| `~enable_reverse_motion` | bool | `False` | Whether to enable reverse motion. |
+| `~command_timeout` | int | `200` | Timeout (in ms) to send a dummy command message to keep SSC alive. |
 | `~max_curvature_rate` | float | `0.15` | Maximum allowed curvature rate (in rad/s), this affects the steering angle aggressiveness. |
 | `~agr_coef_a` | float | `15.713` | Adaptive gear ratio coefficient a (base steering ratio). |
 | `~agr_coef_b` | float | `0.053` | Adaptive gear ratio coefficient b (velocity component). |
@@ -25,10 +27,11 @@ A Python ROS node for interfacing with Autoware's SSC.
 | `~enable_emergency_braking` | bool | `False` | Block brakes when emergency braking is requested. Dangerous! |
 
 #### Subscribed Topics
+
 | Name | Type | Description |
 | --- | --- | --- |
-| `engage` | `std_msgs/Bool` | Command to engage/disengage. |
-| `vehicle_cmd` | `autoware_msgs/VehicleCmd` | Command for vehicle motion. |
+| `engage` | `std_msgs/Bool` | Command to engage/disengage autonomy. |
+| `/control/vehicle_cmd` | `autoware_mini/VehicleCmd` | Command for vehicle motion. |
 | `/ssc/module_states` | `automotive_navigation_msgs/ModuleState` | Module states feedback. Used to check the active state of SSC. |
 | `/ssc/curvature_feedback` | `automotive_platform_msgs/CurvatureFeedback` | Curvature feedback. |
 | `/ssc/throttle_feedback` | `automotive_platform_msgs/ThrottleFeedback` | Throttle feedback. |
@@ -36,38 +39,65 @@ A Python ROS node for interfacing with Autoware's SSC.
 | `/ssc/gear_feedback` | `automotive_platform_msgs/GearFeedback` | Gear feedback. |
 | `/ssc/steering_feedback` | `automotive_platform_msgs/SteeringFeedback` | Steering feedback. |
 | `/ssc/velocity_accel_cov` | `automotive_platform_msgs/VelocityAccelCov` | Velocity, acceleration, covariance feedback. |
-| `/pacmod/parsed_tx/turn_rpt` | `pacmod_msgs/SystemRptInt` | Turn signal feedback from Pacmod (SSC does not provide turn signal info). |
+| `/pacmod/turn_rpt` | `pacmod3_msgs/SystemRptInt` | Turn signal feedback from Pacmod (SSC does not provide turn signal info). |
 
 #### Published Topics
+
 | Name | Type | Description |
 | --- | --- | --- |
 | `/ssc/arbitrated_speed_commands` | `automotive_platform_msgs/SpeedMode` | Speed command (including acceleration/deceleration limits) to SSC. |
 | `/ssc/arbitrated_steering_commands` | `automotive_platform_msgs/SteerMode` | Steering command to SSC. |
 | `/ssc/turn_signal_command` | `automotive_platform_msgs/TurnSignalCommand` | Turn signal command to SSC. |
 | `/ssc/gear_select` | `automotive_platform_msgs/GearCommand` | Gear commands to SSC. |
-| `vehicle_status` | `autoware_msgs/VehicleStatus` | Status information from SSC. |
+| `vehicle_status` | `autoware_mini/VehicleStatus` | Status information from SSC. |
 
 ## button_panel
 
 Reacts to engage button in the car. Also logs marker button presses.
 
-
 #### Parameters
 
-| Name              | Type  | Default | Description |
-|-------------------|-------|---------|-------------|
-| `cooldown`          | `float` |   `2.0` | Cooldown period (in seconds) after pressing the engage button. Prevents infinitely delaying the engagement by pressing the button repeatedly. |
+| Name | Type | Default Value | Description |
+| --- | --- | --- | --- |
+| `~cooldown` | float | `2.0` | Cooldown period (in seconds) after pressing the engage button. Prevents infinitely delaying the engagement by pressing the button repeatedly. |
 
 #### Subscribed Topics
 
-| Name           | Type                      | Description |
-|----------------|---------------------------|-------------|
-| `current_pose`   | `geometry_msgs/PoseStamped` | The current pose of the vehicle. Used to set the pose of markers. |
-| `joy`            | `sensor_msgs/Joy`            | The joystick input for button presses. |
+| Name | Type | Description |
+| --- | --- | --- |
+| `/localization/current_pose` | `geometry_msgs/PoseStamped` | The current pose of the vehicle. Used to set the pose of markers. |
+| `/pacmod/enabled` | `std_msgs/Bool` | Status indicating if Pacmod is enabled. |
+| `joy` | `sensor_msgs/Joy` | The joystick input for button presses. |
 
 #### Published Topics
 
-| Name              | Type                | Description |
-|-------------------|---------------------|-------------|
-| `engage`            | `std_msgs/Bool`       | Sends a signal to engage the autonomy. |
-| `log`/markers       | `visualization_msgs/Marker` | Marker messages to log a button press. |
+| Name | Type | Description |
+| --- | --- | --- |
+| `engage` | `std_msgs/Bool` | Sends a signal to engage the autonomy. |
+| `/log/markers` | `visualization_msgs/Marker` | Marker messages to log a button press. |
+
+#### Services
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `/planning/service_lets_go` | `std_srvs/Empty` | Service to disable forced stop on stop lines. |
+
+## pacmod_state_visualizer
+
+ROS node for visualizing Pacmod and SSC states in RViz using overlay text.
+
+#### Subscribed Topics
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `/ssc/module_states` | `automotive_navigation_msgs/ModuleState` | Module states from SSC components. |
+| `/pacmod/global_rpt` | `pacmod3_msgs/GlobalRpt` | Global status report from Pacmod. |
+
+#### Published Topics
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `pacmod_detailed` | `jsk_rviz_plugins/OverlayText` | Detailed status information for Pacmod. |
+| `pacmod_general` | `jsk_rviz_plugins/OverlayText` | General status summary for Pacmod. |
+| `ssc_general` | `jsk_rviz_plugins/OverlayText` | General status summary for SSC. |
+| `ssc_detailed` | `jsk_rviz_plugins/OverlayText` | Detailed status information for SSC components. |

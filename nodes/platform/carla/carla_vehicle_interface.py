@@ -5,18 +5,18 @@
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
 """
-receive autoware_msgs::VehicleCmd
+receive autoware_mini::VehicleCmd
         carla_msgs::CarlaEgoVehicleInfo
         carla_msgs::CarlaEgoVehicleStatus
         
 publish ackermann_msgs::AckermannDrive
-        autoware_msgs::VehicleStatus
+        autoware_mini::VehicleStatus
         std_msgs::Float64
 """
 import math
 import rospy
 from ackermann_msgs.msg import AckermannDrive
-from autoware_msgs.msg import VehicleCmd, VehicleStatus, Gear
+from autoware_mini.msg import VehicleCmd, VehicleStatus, Gear
 from carla_msgs.msg import CarlaEgoVehicleInfo, CarlaEgoVehicleStatus
 from std_msgs.msg import Float64, Bool
 

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='utf-8'?>
 <osm version="0.6" generator="lanelet2">
   <node id="1002" visible="true" version="1" lat="-0.00048359661" lon="-0.00129710956">
     <tag k="ele" v="0.000000" />
@@ -34473,131 +34473,131 @@
   <way id="1000" visible="true" version="1">
     <nd ref="1002" />
     <nd ref="1004" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1001" visible="true" version="1">
     <nd ref="1003" />
     <nd ref="1005" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1007" visible="true" version="1">
     <nd ref="1009" />
     <nd ref="1011" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1008" visible="true" version="1">
     <nd ref="1010" />
     <nd ref="1012" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1014" visible="true" version="1">
     <nd ref="1016" />
     <nd ref="1018" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1015" visible="true" version="1">
     <nd ref="1017" />
     <nd ref="1019" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1021" visible="true" version="1">
     <nd ref="1023" />
     <nd ref="1025" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1022" visible="true" version="1">
     <nd ref="1024" />
     <nd ref="1026" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1028" visible="true" version="1">
     <nd ref="1030" />
     <nd ref="1032" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1029" visible="true" version="1">
     <nd ref="1031" />
     <nd ref="1033" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1035" visible="true" version="1">
     <nd ref="1037" />
     <nd ref="1039" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1036" visible="true" version="1">
     <nd ref="1038" />
     <nd ref="1040" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1042" visible="true" version="1">
     <nd ref="1044" />
     <nd ref="1046" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1043" visible="true" version="1">
     <nd ref="1045" />
     <nd ref="1047" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1049" visible="true" version="1">
     <nd ref="1051" />
     <nd ref="1053" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1050" visible="true" version="1">
     <nd ref="1052" />
     <nd ref="1054" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1056" visible="true" version="1">
     <nd ref="1058" />
     <nd ref="1044" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1057" visible="true" version="1">
     <nd ref="1059" />
     <nd ref="1045" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1063" visible="true" version="1">
     <nd ref="1053" />
     <nd ref="1067" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1064" visible="true" version="1">
     <nd ref="1054" />
     <nd ref="1068" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1070" visible="true" version="1">
     <nd ref="1072" />
     <nd ref="1074" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1071" visible="true" version="1">
     <nd ref="1073" />
     <nd ref="1075" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1077" visible="true" version="1">
     <nd ref="1079" />
     <nd ref="1081" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1078" visible="true" version="1">
     <nd ref="1080" />
     <nd ref="1082" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1084" visible="true" version="1">
     <nd ref="1086" />
     <nd ref="1088" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1085" visible="true" version="1">
     <nd ref="1087" />
     <nd ref="1089" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1091" visible="true" version="1">
     <nd ref="1093" />
     <nd ref="1095" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1092" visible="true" version="1">
     <nd ref="1094" />
     <nd ref="1096" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1098" visible="true" version="1">
     <nd ref="1100" />
     <nd ref="1086" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1099" visible="true" version="1">
     <nd ref="1101" />
     <nd ref="1087" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1105" visible="true" version="1">
     <nd ref="1095" />
     <nd ref="1109" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1106" visible="true" version="1">
     <nd ref="1096" />
     <nd ref="1110" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1112" visible="true" version="1">
     <nd ref="1114" />
     <nd ref="1116" />
@@ -34613,7 +34613,7 @@
     <nd ref="1136" />
     <nd ref="1138" />
     <nd ref="1140" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1113" visible="true" version="1">
     <nd ref="1115" />
     <nd ref="1117" />
@@ -34629,7 +34629,7 @@
     <nd ref="1137" />
     <nd ref="1139" />
     <nd ref="1141" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1143" visible="true" version="1">
     <nd ref="1145" />
     <nd ref="1147" />
@@ -34645,7 +34645,7 @@
     <nd ref="1167" />
     <nd ref="1169" />
     <nd ref="1114" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1144" visible="true" version="1">
     <nd ref="1146" />
     <nd ref="1148" />
@@ -34661,135 +34661,135 @@
     <nd ref="1168" />
     <nd ref="1170" />
     <nd ref="1115" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1174" visible="true" version="1">
     <nd ref="1176" />
     <nd ref="1178" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1175" visible="true" version="1">
     <nd ref="1177" />
     <nd ref="1179" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1181" visible="true" version="1">
     <nd ref="1183" />
     <nd ref="1185" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1182" visible="true" version="1">
     <nd ref="1184" />
     <nd ref="1186" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1188" visible="true" version="1">
     <nd ref="1190" />
     <nd ref="1192" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1189" visible="true" version="1">
     <nd ref="1191" />
     <nd ref="1193" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1195" visible="true" version="1">
     <nd ref="1197" />
     <nd ref="1199" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1196" visible="true" version="1">
     <nd ref="1198" />
     <nd ref="1200" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1202" visible="true" version="1">
     <nd ref="1204" />
     <nd ref="1206" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1203" visible="true" version="1">
     <nd ref="1205" />
     <nd ref="1207" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1209" visible="true" version="1">
     <nd ref="1211" />
     <nd ref="1213" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1210" visible="true" version="1">
     <nd ref="1212" />
     <nd ref="1214" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1216" visible="true" version="1">
     <nd ref="1218" />
     <nd ref="1220" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1217" visible="true" version="1">
     <nd ref="1219" />
     <nd ref="1221" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1223" visible="true" version="1">
     <nd ref="1225" />
     <nd ref="1227" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1224" visible="true" version="1">
     <nd ref="1226" />
     <nd ref="1228" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1230" visible="true" version="1">
     <nd ref="1232" />
     <nd ref="1234" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1231" visible="true" version="1">
     <nd ref="1233" />
     <nd ref="1235" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1237" visible="true" version="1">
     <nd ref="1239" />
     <nd ref="1241" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1238" visible="true" version="1">
     <nd ref="1240" />
     <nd ref="1242" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1244" visible="true" version="1">
     <nd ref="1246" />
     <nd ref="1248" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1245" visible="true" version="1">
     <nd ref="1247" />
     <nd ref="1249" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1251" visible="true" version="1">
     <nd ref="1253" />
     <nd ref="1255" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1252" visible="true" version="1">
     <nd ref="1254" />
     <nd ref="1256" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1258" visible="true" version="1">
     <nd ref="1260" />
     <nd ref="1246" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1259" visible="true" version="1">
     <nd ref="1261" />
     <nd ref="1247" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1265" visible="true" version="1">
     <nd ref="1255" />
     <nd ref="1269" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1266" visible="true" version="1">
     <nd ref="1256" />
     <nd ref="1270" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1272" visible="true" version="1">
     <nd ref="1274" />
     <nd ref="1260" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1273" visible="true" version="1">
     <nd ref="1275" />
     <nd ref="1261" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1279" visible="true" version="1">
     <nd ref="1269" />
     <nd ref="1283" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1280" visible="true" version="1">
     <nd ref="1270" />
     <nd ref="1284" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1286" visible="true" version="1">
     <nd ref="1288" />
     <nd ref="1290" />
@@ -35008,7 +35008,7 @@
     <nd ref="1716" />
     <nd ref="1718" />
     <nd ref="1720" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1287" visible="true" version="1">
     <nd ref="1289" />
     <nd ref="1291" />
@@ -35227,7 +35227,7 @@
     <nd ref="1717" />
     <nd ref="1719" />
     <nd ref="1721" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1723" visible="true" version="1">
     <nd ref="1725" />
     <nd ref="1727" />
@@ -35446,7 +35446,7 @@
     <nd ref="2153" />
     <nd ref="2155" />
     <nd ref="2157" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="1724" visible="true" version="1">
     <nd ref="1726" />
     <nd ref="1728" />
@@ -35665,7 +35665,7 @@
     <nd ref="2154" />
     <nd ref="2156" />
     <nd ref="2158" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2160" visible="true" version="1">
     <nd ref="2162" />
     <nd ref="2164" />
@@ -35821,7 +35821,7 @@
     <nd ref="2464" />
     <nd ref="2466" />
     <nd ref="2468" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2161" visible="true" version="1">
     <nd ref="2163" />
     <nd ref="2165" />
@@ -35977,7 +35977,7 @@
     <nd ref="2465" />
     <nd ref="2467" />
     <nd ref="2469" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2471" visible="true" version="1">
     <nd ref="2473" />
     <nd ref="2475" />
@@ -36133,7 +36133,7 @@
     <nd ref="2775" />
     <nd ref="2777" />
     <nd ref="2779" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2472" visible="true" version="1">
     <nd ref="2474" />
     <nd ref="2476" />
@@ -36289,7 +36289,7 @@
     <nd ref="2776" />
     <nd ref="2778" />
     <nd ref="2780" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2782" visible="true" version="1">
     <nd ref="2784" />
     <nd ref="2786" />
@@ -36299,7 +36299,7 @@
     <nd ref="2794" />
     <nd ref="2796" />
     <nd ref="2798" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2783" visible="true" version="1">
     <nd ref="2785" />
     <nd ref="2787" />
@@ -36309,7 +36309,7 @@
     <nd ref="2795" />
     <nd ref="2797" />
     <nd ref="2799" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2801" visible="true" version="1">
     <nd ref="2803" />
     <nd ref="2805" />
@@ -36320,7 +36320,7 @@
     <nd ref="2815" />
     <nd ref="2817" />
     <nd ref="2819" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2802" visible="true" version="1">
     <nd ref="2804" />
     <nd ref="2806" />
@@ -36331,7 +36331,7 @@
     <nd ref="2816" />
     <nd ref="2818" />
     <nd ref="2820" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2822" visible="true" version="1">
     <nd ref="2824" />
     <nd ref="2826" />
@@ -36387,7 +36387,7 @@
     <nd ref="2926" />
     <nd ref="2928" />
     <nd ref="2930" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2823" visible="true" version="1">
     <nd ref="2825" />
     <nd ref="2827" />
@@ -36443,7 +36443,7 @@
     <nd ref="2927" />
     <nd ref="2929" />
     <nd ref="2931" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2933" visible="true" version="1">
     <nd ref="2935" />
     <nd ref="2937" />
@@ -36499,7 +36499,7 @@
     <nd ref="3037" />
     <nd ref="3039" />
     <nd ref="3041" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="2934" visible="true" version="1">
     <nd ref="2936" />
     <nd ref="2938" />
@@ -36555,7 +36555,7 @@
     <nd ref="3038" />
     <nd ref="3040" />
     <nd ref="3042" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3044" visible="true" version="1">
     <nd ref="3046" />
     <nd ref="3048" />
@@ -36571,7 +36571,7 @@
     <nd ref="3068" />
     <nd ref="3070" />
     <nd ref="3072" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3045" visible="true" version="1">
     <nd ref="3047" />
     <nd ref="3049" />
@@ -36587,7 +36587,7 @@
     <nd ref="3069" />
     <nd ref="3071" />
     <nd ref="3073" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3075" visible="true" version="1">
     <nd ref="3077" />
     <nd ref="3079" />
@@ -36604,7 +36604,7 @@
     <nd ref="3101" />
     <nd ref="3103" />
     <nd ref="3105" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3076" visible="true" version="1">
     <nd ref="3078" />
     <nd ref="3080" />
@@ -36621,7 +36621,7 @@
     <nd ref="3102" />
     <nd ref="3104" />
     <nd ref="3106" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3108" visible="true" version="1">
     <nd ref="3110" />
     <nd ref="3112" />
@@ -36631,7 +36631,7 @@
     <nd ref="3120" />
     <nd ref="3122" />
     <nd ref="3046" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3109" visible="true" version="1">
     <nd ref="3111" />
     <nd ref="3113" />
@@ -36641,7 +36641,7 @@
     <nd ref="3121" />
     <nd ref="3123" />
     <nd ref="3047" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3127" visible="true" version="1">
     <nd ref="3105" />
     <nd ref="3131" />
@@ -36650,7 +36650,7 @@
     <nd ref="3137" />
     <nd ref="3139" />
     <nd ref="3141" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3128" visible="true" version="1">
     <nd ref="3106" />
     <nd ref="3132" />
@@ -36659,7 +36659,7 @@
     <nd ref="3138" />
     <nd ref="3140" />
     <nd ref="3142" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3144" visible="true" version="1">
     <nd ref="3146" />
     <nd ref="3148" />
@@ -36673,7 +36673,7 @@
     <nd ref="3164" />
     <nd ref="3166" />
     <nd ref="3168" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3145" visible="true" version="1">
     <nd ref="3147" />
     <nd ref="3149" />
@@ -36687,53 +36687,53 @@
     <nd ref="3165" />
     <nd ref="3167" />
     <nd ref="3169" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3171" visible="true" version="1">
     <nd ref="3173" />
     <nd ref="3175" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3172" visible="true" version="1">
     <nd ref="3174" />
     <nd ref="3176" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3178" visible="true" version="1">
     <nd ref="3180" />
     <nd ref="3182" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3179" visible="true" version="1">
     <nd ref="3181" />
     <nd ref="3183" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3185" visible="true" version="1">
     <nd ref="3187" />
     <nd ref="3189" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3186" visible="true" version="1">
     <nd ref="3188" />
     <nd ref="3190" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3192" visible="true" version="1">
     <nd ref="3194" />
     <nd ref="3196" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3193" visible="true" version="1">
     <nd ref="3195" />
     <nd ref="3197" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3199" visible="true" version="1">
     <nd ref="3201" />
     <nd ref="3203" />
     <nd ref="3205" />
     <nd ref="3207" />
     <nd ref="3209" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3200" visible="true" version="1">
     <nd ref="3202" />
     <nd ref="3204" />
     <nd ref="3206" />
     <nd ref="3208" />
     <nd ref="3210" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3212" visible="true" version="1">
     <nd ref="3214" />
     <nd ref="3216" />
@@ -36747,7 +36747,7 @@
     <nd ref="3232" />
     <nd ref="3234" />
     <nd ref="3236" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3213" visible="true" version="1">
     <nd ref="3215" />
     <nd ref="3217" />
@@ -36761,7 +36761,7 @@
     <nd ref="3233" />
     <nd ref="3235" />
     <nd ref="3237" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3239" visible="true" version="1">
     <nd ref="3241" />
     <nd ref="3243" />
@@ -36775,7 +36775,7 @@
     <nd ref="3259" />
     <nd ref="3261" />
     <nd ref="3263" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3240" visible="true" version="1">
     <nd ref="3242" />
     <nd ref="3244" />
@@ -36789,55 +36789,55 @@
     <nd ref="3260" />
     <nd ref="3262" />
     <nd ref="3264" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3266" visible="true" version="1">
     <nd ref="3268" />
     <nd ref="3270" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3267" visible="true" version="1">
     <nd ref="3269" />
     <nd ref="3271" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3273" visible="true" version="1">
     <nd ref="3275" />
     <nd ref="3277" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3274" visible="true" version="1">
     <nd ref="3276" />
     <nd ref="3278" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3280" visible="true" version="1">
     <nd ref="3282" />
     <nd ref="3284" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3281" visible="true" version="1">
     <nd ref="3283" />
     <nd ref="3285" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3287" visible="true" version="1">
     <nd ref="3289" />
     <nd ref="3291" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3288" visible="true" version="1">
     <nd ref="3290" />
     <nd ref="3292" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3294" visible="true" version="1">
     <nd ref="3296" />
     <nd ref="3298" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3295" visible="true" version="1">
     <nd ref="3297" />
     <nd ref="3299" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3301" visible="true" version="1">
     <nd ref="3303" />
     <nd ref="3305" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3302" visible="true" version="1">
     <nd ref="3304" />
     <nd ref="3306" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3308" visible="true" version="1">
     <nd ref="3310" />
     <nd ref="3312" />
@@ -36854,7 +36854,7 @@
     <nd ref="3334" />
     <nd ref="3336" />
     <nd ref="2803" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3309" visible="true" version="1">
     <nd ref="3311" />
     <nd ref="3313" />
@@ -36871,7 +36871,7 @@
     <nd ref="3335" />
     <nd ref="3337" />
     <nd ref="2804" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3341" visible="true" version="1">
     <nd ref="2798" />
     <nd ref="3345" />
@@ -36889,7 +36889,7 @@
     <nd ref="3369" />
     <nd ref="3371" />
     <nd ref="3373" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3342" visible="true" version="1">
     <nd ref="2799" />
     <nd ref="3346" />
@@ -36907,7 +36907,7 @@
     <nd ref="3370" />
     <nd ref="3372" />
     <nd ref="3374" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3376" visible="true" version="1">
     <nd ref="3378" />
     <nd ref="3380" />
@@ -36926,7 +36926,7 @@
     <nd ref="3406" />
     <nd ref="3408" />
     <nd ref="2162" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3377" visible="true" version="1">
     <nd ref="3379" />
     <nd ref="3381" />
@@ -36945,7 +36945,7 @@
     <nd ref="3407" />
     <nd ref="3409" />
     <nd ref="2163" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3413" visible="true" version="1">
     <nd ref="2779" />
     <nd ref="3417" />
@@ -36963,7 +36963,7 @@
     <nd ref="3441" />
     <nd ref="3443" />
     <nd ref="3445" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3414" visible="true" version="1">
     <nd ref="2780" />
     <nd ref="3418" />
@@ -36981,7 +36981,7 @@
     <nd ref="3442" />
     <nd ref="3444" />
     <nd ref="3446" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3448" visible="true" version="1">
     <nd ref="3450" />
     <nd ref="3452" />
@@ -36989,7 +36989,7 @@
     <nd ref="3456" />
     <nd ref="3458" />
     <nd ref="3460" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3449" visible="true" version="1">
     <nd ref="3451" />
     <nd ref="3453" />
@@ -36997,7 +36997,7 @@
     <nd ref="3457" />
     <nd ref="3459" />
     <nd ref="3461" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3463" visible="true" version="1">
     <nd ref="3465" />
     <nd ref="3467" />
@@ -37006,7 +37006,7 @@
     <nd ref="3473" />
     <nd ref="3475" />
     <nd ref="3477" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3464" visible="true" version="1">
     <nd ref="3466" />
     <nd ref="3468" />
@@ -37015,59 +37015,59 @@
     <nd ref="3474" />
     <nd ref="3476" />
     <nd ref="3478" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3480" visible="true" version="1">
     <nd ref="3482" />
     <nd ref="3484" />
     <nd ref="3486" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3481" visible="true" version="1">
     <nd ref="3483" />
     <nd ref="3485" />
     <nd ref="3487" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3489" visible="true" version="1">
     <nd ref="3491" />
     <nd ref="3493" />
     <nd ref="3495" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3490" visible="true" version="1">
     <nd ref="3492" />
     <nd ref="3494" />
     <nd ref="3496" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3498" visible="true" version="1">
     <nd ref="3500" />
     <nd ref="3502" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3499" visible="true" version="1">
     <nd ref="3501" />
     <nd ref="3503" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3505" visible="true" version="1">
     <nd ref="3507" />
     <nd ref="3509" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3506" visible="true" version="1">
     <nd ref="3508" />
     <nd ref="3510" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3512" visible="true" version="1">
     <nd ref="3514" />
     <nd ref="3516" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3513" visible="true" version="1">
     <nd ref="3515" />
     <nd ref="3517" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3519" visible="true" version="1">
     <nd ref="3521" />
     <nd ref="3523" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3520" visible="true" version="1">
     <nd ref="3522" />
     <nd ref="3524" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3526" visible="true" version="1">
     <nd ref="3528" />
     <nd ref="3530" />
@@ -37079,7 +37079,7 @@
     <nd ref="3542" />
     <nd ref="3544" />
     <nd ref="3546" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3527" visible="true" version="1">
     <nd ref="3529" />
     <nd ref="3531" />
@@ -37091,7 +37091,7 @@
     <nd ref="3543" />
     <nd ref="3545" />
     <nd ref="3547" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3549" visible="true" version="1">
     <nd ref="3551" />
     <nd ref="3553" />
@@ -37104,7 +37104,7 @@
     <nd ref="3567" />
     <nd ref="3569" />
     <nd ref="3571" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3550" visible="true" version="1">
     <nd ref="3552" />
     <nd ref="3554" />
@@ -37117,7 +37117,7 @@
     <nd ref="3568" />
     <nd ref="3570" />
     <nd ref="3572" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3574" visible="true" version="1">
     <nd ref="3576" />
     <nd ref="3578" />
@@ -37151,7 +37151,7 @@
     <nd ref="3634" />
     <nd ref="3636" />
     <nd ref="3638" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3575" visible="true" version="1">
     <nd ref="3577" />
     <nd ref="3579" />
@@ -37185,7 +37185,7 @@
     <nd ref="3635" />
     <nd ref="3637" />
     <nd ref="3639" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3641" visible="true" version="1">
     <nd ref="3643" />
     <nd ref="3645" />
@@ -37219,7 +37219,7 @@
     <nd ref="3701" />
     <nd ref="3703" />
     <nd ref="3705" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3642" visible="true" version="1">
     <nd ref="3644" />
     <nd ref="3646" />
@@ -37253,141 +37253,141 @@
     <nd ref="3702" />
     <nd ref="3704" />
     <nd ref="3706" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3708" visible="true" version="1">
     <nd ref="3710" />
     <nd ref="3712" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3709" visible="true" version="1">
     <nd ref="3711" />
     <nd ref="3713" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3715" visible="true" version="1">
     <nd ref="3717" />
     <nd ref="3719" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3716" visible="true" version="1">
     <nd ref="3718" />
     <nd ref="3720" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3722" visible="true" version="1">
     <nd ref="3724" />
     <nd ref="3726" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3723" visible="true" version="1">
     <nd ref="3725" />
     <nd ref="3727" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3729" visible="true" version="1">
     <nd ref="3731" />
     <nd ref="3733" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3730" visible="true" version="1">
     <nd ref="3732" />
     <nd ref="3734" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3736" visible="true" version="1">
     <nd ref="3209" />
     <nd ref="3740" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3737" visible="true" version="1">
     <nd ref="3210" />
     <nd ref="3741" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3743" visible="true" version="1">
     <nd ref="3745" />
     <nd ref="3747" />
     <nd ref="3749" />
     <nd ref="3751" />
     <nd ref="1145" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3744" visible="true" version="1">
     <nd ref="3746" />
     <nd ref="3748" />
     <nd ref="3750" />
     <nd ref="3752" />
     <nd ref="1146" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3756" visible="true" version="1">
     <nd ref="3758" />
     <nd ref="3760" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3757" visible="true" version="1">
     <nd ref="3759" />
     <nd ref="3761" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3763" visible="true" version="1">
     <nd ref="3765" />
     <nd ref="3767" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3764" visible="true" version="1">
     <nd ref="3766" />
     <nd ref="3768" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3770" visible="true" version="1">
     <nd ref="3772" />
     <nd ref="3774" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3771" visible="true" version="1">
     <nd ref="3773" />
     <nd ref="3775" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3777" visible="true" version="1">
     <nd ref="3779" />
     <nd ref="3781" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3778" visible="true" version="1">
     <nd ref="3780" />
     <nd ref="3782" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3784" visible="true" version="1">
     <nd ref="3786" />
     <nd ref="3788" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3785" visible="true" version="1">
     <nd ref="3787" />
     <nd ref="3789" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3791" visible="true" version="1">
     <nd ref="3793" />
     <nd ref="3795" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3792" visible="true" version="1">
     <nd ref="3794" />
     <nd ref="3796" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3798" visible="true" version="1">
     <nd ref="3800" />
     <nd ref="3802" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3799" visible="true" version="1">
     <nd ref="3801" />
     <nd ref="3803" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3805" visible="true" version="1">
     <nd ref="3807" />
     <nd ref="3809" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3806" visible="true" version="1">
     <nd ref="3808" />
     <nd ref="3810" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3812" visible="true" version="1">
     <nd ref="3373" />
     <nd ref="3816" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3813" visible="true" version="1">
     <nd ref="3374" />
     <nd ref="3817" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3819" visible="true" version="1">
     <nd ref="3821" />
     <nd ref="3310" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3820" visible="true" version="1">
     <nd ref="3822" />
     <nd ref="3311" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3826" visible="true" version="1">
     <nd ref="3828" />
     <nd ref="3830" />
@@ -37409,7 +37409,7 @@
     <nd ref="3862" />
     <nd ref="3864" />
     <nd ref="3378" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3827" visible="true" version="1">
     <nd ref="3829" />
     <nd ref="3831" />
@@ -37431,7 +37431,7 @@
     <nd ref="3863" />
     <nd ref="3865" />
     <nd ref="3379" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3869" visible="true" version="1">
     <nd ref="3445" />
     <nd ref="3873" />
@@ -37452,7 +37452,7 @@
     <nd ref="3903" />
     <nd ref="3905" />
     <nd ref="3907" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3870" visible="true" version="1">
     <nd ref="3446" />
     <nd ref="3874" />
@@ -37473,7 +37473,7 @@
     <nd ref="3904" />
     <nd ref="3906" />
     <nd ref="3908" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3910" visible="true" version="1">
     <nd ref="3912" />
     <nd ref="3914" />
@@ -37483,7 +37483,7 @@
     <nd ref="3922" />
     <nd ref="3924" />
     <nd ref="3926" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3911" visible="true" version="1">
     <nd ref="3913" />
     <nd ref="3915" />
@@ -37493,7 +37493,7 @@
     <nd ref="3923" />
     <nd ref="3925" />
     <nd ref="3927" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3929" visible="true" version="1">
     <nd ref="3931" />
     <nd ref="3933" />
@@ -37504,7 +37504,7 @@
     <nd ref="3943" />
     <nd ref="3945" />
     <nd ref="3947" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3930" visible="true" version="1">
     <nd ref="3932" />
     <nd ref="3934" />
@@ -37515,7 +37515,7 @@
     <nd ref="3944" />
     <nd ref="3946" />
     <nd ref="3948" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3950" visible="true" version="1">
     <nd ref="3952" />
     <nd ref="3954" />
@@ -37581,7 +37581,7 @@
     <nd ref="4074" />
     <nd ref="4076" />
     <nd ref="4078" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="3951" visible="true" version="1">
     <nd ref="3953" />
     <nd ref="3955" />
@@ -37647,7 +37647,7 @@
     <nd ref="4075" />
     <nd ref="4077" />
     <nd ref="4079" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4081" visible="true" version="1">
     <nd ref="4083" />
     <nd ref="4085" />
@@ -37713,7 +37713,7 @@
     <nd ref="4205" />
     <nd ref="4207" />
     <nd ref="4209" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4082" visible="true" version="1">
     <nd ref="4084" />
     <nd ref="4086" />
@@ -37779,7 +37779,7 @@
     <nd ref="4206" />
     <nd ref="4208" />
     <nd ref="4210" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4212" visible="true" version="1">
     <nd ref="4214" />
     <nd ref="4216" />
@@ -37794,7 +37794,7 @@
     <nd ref="4234" />
     <nd ref="4236" />
     <nd ref="4238" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4213" visible="true" version="1">
     <nd ref="4215" />
     <nd ref="4217" />
@@ -37809,7 +37809,7 @@
     <nd ref="4235" />
     <nd ref="4237" />
     <nd ref="4239" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4241" visible="true" version="1">
     <nd ref="4243" />
     <nd ref="4245" />
@@ -37824,7 +37824,7 @@
     <nd ref="4263" />
     <nd ref="4265" />
     <nd ref="4267" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4242" visible="true" version="1">
     <nd ref="4244" />
     <nd ref="4246" />
@@ -37839,7 +37839,7 @@
     <nd ref="4264" />
     <nd ref="4266" />
     <nd ref="4268" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4270" visible="true" version="1">
     <nd ref="4272" />
     <nd ref="4274" />
@@ -37849,7 +37849,7 @@
     <nd ref="4282" />
     <nd ref="4284" />
     <nd ref="4286" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4271" visible="true" version="1">
     <nd ref="4273" />
     <nd ref="4275" />
@@ -37859,7 +37859,7 @@
     <nd ref="4283" />
     <nd ref="4285" />
     <nd ref="4287" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4289" visible="true" version="1">
     <nd ref="4291" />
     <nd ref="4293" />
@@ -37869,7 +37869,7 @@
     <nd ref="4301" />
     <nd ref="4303" />
     <nd ref="4305" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4290" visible="true" version="1">
     <nd ref="4292" />
     <nd ref="4294" />
@@ -37879,7 +37879,7 @@
     <nd ref="4302" />
     <nd ref="4304" />
     <nd ref="4306" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4308" visible="true" version="1">
     <nd ref="4310" />
     <nd ref="4312" />
@@ -38044,7 +38044,7 @@
     <nd ref="4630" />
     <nd ref="4632" />
     <nd ref="4634" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4309" visible="true" version="1">
     <nd ref="4311" />
     <nd ref="4313" />
@@ -38209,7 +38209,7 @@
     <nd ref="4631" />
     <nd ref="4633" />
     <nd ref="4635" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4637" visible="true" version="1">
     <nd ref="4639" />
     <nd ref="4641" />
@@ -38375,7 +38375,7 @@
     <nd ref="4961" />
     <nd ref="4963" />
     <nd ref="4965" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4638" visible="true" version="1">
     <nd ref="4640" />
     <nd ref="4642" />
@@ -38541,7 +38541,7 @@
     <nd ref="4962" />
     <nd ref="4964" />
     <nd ref="4966" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4968" visible="true" version="1">
     <nd ref="4970" />
     <nd ref="4972" />
@@ -38550,7 +38550,7 @@
     <nd ref="4978" />
     <nd ref="4980" />
     <nd ref="4982" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4969" visible="true" version="1">
     <nd ref="4971" />
     <nd ref="4973" />
@@ -38559,7 +38559,7 @@
     <nd ref="4979" />
     <nd ref="4981" />
     <nd ref="4983" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4985" visible="true" version="1">
     <nd ref="4982" />
     <nd ref="4989" />
@@ -38568,7 +38568,7 @@
     <nd ref="4995" />
     <nd ref="4997" />
     <nd ref="4999" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="4986" visible="true" version="1">
     <nd ref="4983" />
     <nd ref="4990" />
@@ -38577,15 +38577,15 @@
     <nd ref="4996" />
     <nd ref="4998" />
     <nd ref="5000" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5002" visible="true" version="1">
     <nd ref="4999" />
     <nd ref="5006" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5003" visible="true" version="1">
     <nd ref="5000" />
     <nd ref="5007" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5009" visible="true" version="1">
     <nd ref="5006" />
     <nd ref="5013" />
@@ -38595,7 +38595,7 @@
     <nd ref="5021" />
     <nd ref="5023" />
     <nd ref="5025" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5010" visible="true" version="1">
     <nd ref="5007" />
     <nd ref="5014" />
@@ -38605,7 +38605,7 @@
     <nd ref="5022" />
     <nd ref="5024" />
     <nd ref="5026" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5028" visible="true" version="1">
     <nd ref="5025" />
     <nd ref="5032" />
@@ -38615,7 +38615,7 @@
     <nd ref="5040" />
     <nd ref="5042" />
     <nd ref="5044" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5029" visible="true" version="1">
     <nd ref="5026" />
     <nd ref="5033" />
@@ -38625,7 +38625,7 @@
     <nd ref="5041" />
     <nd ref="5043" />
     <nd ref="5045" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5047" visible="true" version="1">
     <nd ref="3571" />
     <nd ref="5051" />
@@ -38639,7 +38639,7 @@
     <nd ref="5067" />
     <nd ref="5069" />
     <nd ref="1009" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5048" visible="true" version="1">
     <nd ref="3572" />
     <nd ref="5052" />
@@ -38653,7 +38653,7 @@
     <nd ref="5068" />
     <nd ref="5070" />
     <nd ref="1010" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5074" visible="true" version="1">
     <nd ref="1004" />
     <nd ref="5078" />
@@ -38668,7 +38668,7 @@
     <nd ref="5096" />
     <nd ref="5098" />
     <nd ref="3528" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5075" visible="true" version="1">
     <nd ref="1005" />
     <nd ref="5079" />
@@ -38683,7 +38683,7 @@
     <nd ref="5097" />
     <nd ref="5099" />
     <nd ref="3529" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5103" visible="true" version="1">
     <nd ref="3638" />
     <nd ref="5107" />
@@ -38705,7 +38705,7 @@
     <nd ref="5139" />
     <nd ref="5141" />
     <nd ref="3528" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5104" visible="true" version="1">
     <nd ref="3639" />
     <nd ref="5108" />
@@ -38727,7 +38727,7 @@
     <nd ref="5140" />
     <nd ref="5142" />
     <nd ref="3529" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5146" visible="true" version="1">
     <nd ref="3571" />
     <nd ref="5150" />
@@ -38749,7 +38749,7 @@
     <nd ref="5182" />
     <nd ref="5184" />
     <nd ref="3643" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5147" visible="true" version="1">
     <nd ref="3572" />
     <nd ref="5151" />
@@ -38771,7 +38771,7 @@
     <nd ref="5183" />
     <nd ref="5185" />
     <nd ref="3644" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5189" visible="true" version="1">
     <nd ref="3571" />
     <nd ref="5193" />
@@ -38789,7 +38789,7 @@
     <nd ref="5217" />
     <nd ref="5219" />
     <nd ref="3807" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5190" visible="true" version="1">
     <nd ref="3572" />
     <nd ref="5194" />
@@ -38807,7 +38807,7 @@
     <nd ref="5218" />
     <nd ref="5220" />
     <nd ref="3808" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5224" visible="true" version="1">
     <nd ref="3802" />
     <nd ref="5228" />
@@ -38827,7 +38827,7 @@
     <nd ref="5256" />
     <nd ref="5258" />
     <nd ref="3528" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5225" visible="true" version="1">
     <nd ref="3803" />
     <nd ref="5229" />
@@ -38847,7 +38847,7 @@
     <nd ref="5257" />
     <nd ref="5259" />
     <nd ref="3529" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5263" visible="true" version="1">
     <nd ref="3638" />
     <nd ref="5267" />
@@ -38866,7 +38866,7 @@
     <nd ref="5293" />
     <nd ref="5295" />
     <nd ref="1009" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5264" visible="true" version="1">
     <nd ref="3639" />
     <nd ref="5268" />
@@ -38885,7 +38885,7 @@
     <nd ref="5294" />
     <nd ref="5296" />
     <nd ref="1010" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5300" visible="true" version="1">
     <nd ref="1004" />
     <nd ref="5304" />
@@ -38904,7 +38904,7 @@
     <nd ref="5330" />
     <nd ref="5332" />
     <nd ref="3643" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5301" visible="true" version="1">
     <nd ref="1005" />
     <nd ref="5305" />
@@ -38923,7 +38923,7 @@
     <nd ref="5331" />
     <nd ref="5333" />
     <nd ref="3644" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5337" visible="true" version="1">
     <nd ref="1004" />
     <nd ref="5341" />
@@ -38942,7 +38942,7 @@
     <nd ref="5367" />
     <nd ref="5369" />
     <nd ref="3807" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5338" visible="true" version="1">
     <nd ref="1005" />
     <nd ref="5342" />
@@ -38961,7 +38961,7 @@
     <nd ref="5368" />
     <nd ref="5370" />
     <nd ref="3808" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5374" visible="true" version="1">
     <nd ref="3802" />
     <nd ref="5378" />
@@ -38980,7 +38980,7 @@
     <nd ref="5404" />
     <nd ref="5406" />
     <nd ref="1009" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5375" visible="true" version="1">
     <nd ref="3803" />
     <nd ref="5379" />
@@ -38999,7 +38999,7 @@
     <nd ref="5405" />
     <nd ref="5407" />
     <nd ref="1010" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5411" visible="true" version="1">
     <nd ref="3802" />
     <nd ref="5415" />
@@ -39016,7 +39016,7 @@
     <nd ref="5437" />
     <nd ref="5439" />
     <nd ref="3643" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5412" visible="true" version="1">
     <nd ref="3803" />
     <nd ref="5416" />
@@ -39033,7 +39033,7 @@
     <nd ref="5438" />
     <nd ref="5440" />
     <nd ref="3644" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5444" visible="true" version="1">
     <nd ref="3638" />
     <nd ref="5448" />
@@ -39051,7 +39051,7 @@
     <nd ref="5472" />
     <nd ref="5474" />
     <nd ref="3807" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5445" visible="true" version="1">
     <nd ref="3639" />
     <nd ref="5449" />
@@ -39069,23 +39069,23 @@
     <nd ref="5473" />
     <nd ref="5475" />
     <nd ref="3808" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5479" visible="true" version="1">
     <nd ref="1018" />
     <nd ref="1002" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5480" visible="true" version="1">
     <nd ref="1019" />
     <nd ref="1003" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5486" visible="true" version="1">
     <nd ref="1011" />
     <nd ref="1023" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5487" visible="true" version="1">
     <nd ref="1012" />
     <nd ref="1024" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5493" visible="true" version="1">
     <nd ref="3305" />
     <nd ref="5497" />
@@ -39099,7 +39099,7 @@
     <nd ref="5513" />
     <nd ref="5515" />
     <nd ref="1002" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5494" visible="true" version="1">
     <nd ref="3306" />
     <nd ref="5498" />
@@ -39113,7 +39113,7 @@
     <nd ref="5514" />
     <nd ref="5516" />
     <nd ref="1003" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5520" visible="true" version="1">
     <nd ref="1011" />
     <nd ref="5524" />
@@ -39126,7 +39126,7 @@
     <nd ref="5538" />
     <nd ref="5540" />
     <nd ref="3296" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5521" visible="true" version="1">
     <nd ref="1012" />
     <nd ref="5525" />
@@ -39139,7 +39139,7 @@
     <nd ref="5539" />
     <nd ref="5541" />
     <nd ref="3297" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5545" visible="true" version="1">
     <nd ref="1018" />
     <nd ref="5549" />
@@ -39153,7 +39153,7 @@
     <nd ref="5565" />
     <nd ref="5567" />
     <nd ref="3296" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5546" visible="true" version="1">
     <nd ref="1019" />
     <nd ref="5550" />
@@ -39167,7 +39167,7 @@
     <nd ref="5566" />
     <nd ref="5568" />
     <nd ref="3297" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5572" visible="true" version="1">
     <nd ref="3305" />
     <nd ref="5576" />
@@ -39181,7 +39181,7 @@
     <nd ref="5592" />
     <nd ref="5594" />
     <nd ref="1023" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5573" visible="true" version="1">
     <nd ref="3306" />
     <nd ref="5577" />
@@ -39195,7 +39195,7 @@
     <nd ref="5593" />
     <nd ref="5595" />
     <nd ref="1024" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5599" visible="true" version="1">
     <nd ref="4209" />
     <nd ref="5603" />
@@ -39210,7 +39210,7 @@
     <nd ref="5621" />
     <nd ref="5623" />
     <nd ref="1016" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5600" visible="true" version="1">
     <nd ref="4210" />
     <nd ref="5604" />
@@ -39225,7 +39225,7 @@
     <nd ref="5622" />
     <nd ref="5624" />
     <nd ref="1017" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5628" visible="true" version="1">
     <nd ref="1025" />
     <nd ref="5632" />
@@ -39241,7 +39241,7 @@
     <nd ref="5652" />
     <nd ref="5654" />
     <nd ref="3952" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5629" visible="true" version="1">
     <nd ref="1026" />
     <nd ref="5633" />
@@ -39257,7 +39257,7 @@
     <nd ref="5653" />
     <nd ref="5655" />
     <nd ref="3953" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5659" visible="true" version="1">
     <nd ref="1025" />
     <nd ref="5663" />
@@ -39273,7 +39273,7 @@
     <nd ref="5683" />
     <nd ref="5685" />
     <nd ref="4243" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5660" visible="true" version="1">
     <nd ref="1026" />
     <nd ref="5664" />
@@ -39289,7 +39289,7 @@
     <nd ref="5684" />
     <nd ref="5686" />
     <nd ref="4244" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5690" visible="true" version="1">
     <nd ref="4238" />
     <nd ref="5694" />
@@ -39305,7 +39305,7 @@
     <nd ref="5714" />
     <nd ref="5716" />
     <nd ref="1016" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5691" visible="true" version="1">
     <nd ref="4239" />
     <nd ref="5695" />
@@ -39321,7 +39321,7 @@
     <nd ref="5715" />
     <nd ref="5717" />
     <nd ref="1017" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5721" visible="true" version="1">
     <nd ref="4238" />
     <nd ref="5725" />
@@ -39340,7 +39340,7 @@
     <nd ref="5751" />
     <nd ref="5753" />
     <nd ref="3952" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5722" visible="true" version="1">
     <nd ref="4239" />
     <nd ref="5726" />
@@ -39359,7 +39359,7 @@
     <nd ref="5752" />
     <nd ref="5754" />
     <nd ref="3953" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5758" visible="true" version="1">
     <nd ref="4209" />
     <nd ref="5762" />
@@ -39378,7 +39378,7 @@
     <nd ref="5788" />
     <nd ref="5790" />
     <nd ref="4243" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5759" visible="true" version="1">
     <nd ref="4210" />
     <nd ref="5763" />
@@ -39397,23 +39397,23 @@
     <nd ref="5789" />
     <nd ref="5791" />
     <nd ref="4244" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5795" visible="true" version="1">
     <nd ref="3298" />
     <nd ref="3282" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5796" visible="true" version="1">
     <nd ref="3299" />
     <nd ref="3283" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5802" visible="true" version="1">
     <nd ref="3291" />
     <nd ref="3303" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5803" visible="true" version="1">
     <nd ref="3292" />
     <nd ref="3304" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5809" visible="true" version="1">
     <nd ref="3291" />
     <nd ref="5813" />
@@ -39429,7 +39429,7 @@
     <nd ref="5833" />
     <nd ref="5835" />
     <nd ref="3731" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5810" visible="true" version="1">
     <nd ref="3292" />
     <nd ref="5814" />
@@ -39445,7 +39445,7 @@
     <nd ref="5834" />
     <nd ref="5836" />
     <nd ref="3732" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5840" visible="true" version="1">
     <nd ref="3726" />
     <nd ref="5844" />
@@ -39461,7 +39461,7 @@
     <nd ref="5864" />
     <nd ref="5866" />
     <nd ref="3282" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5841" visible="true" version="1">
     <nd ref="3727" />
     <nd ref="5845" />
@@ -39477,7 +39477,7 @@
     <nd ref="5865" />
     <nd ref="5867" />
     <nd ref="3283" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5871" visible="true" version="1">
     <nd ref="3719" />
     <nd ref="5875" />
@@ -39493,7 +39493,7 @@
     <nd ref="5895" />
     <nd ref="5897" />
     <nd ref="3282" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5872" visible="true" version="1">
     <nd ref="3720" />
     <nd ref="5876" />
@@ -39509,7 +39509,7 @@
     <nd ref="5896" />
     <nd ref="5898" />
     <nd ref="3283" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5902" visible="true" version="1">
     <nd ref="3291" />
     <nd ref="5906" />
@@ -39525,7 +39525,7 @@
     <nd ref="5926" />
     <nd ref="5928" />
     <nd ref="3710" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5903" visible="true" version="1">
     <nd ref="3292" />
     <nd ref="5907" />
@@ -39541,7 +39541,7 @@
     <nd ref="5927" />
     <nd ref="5929" />
     <nd ref="3711" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5933" visible="true" version="1">
     <nd ref="3298" />
     <nd ref="5937" />
@@ -39557,7 +39557,7 @@
     <nd ref="5957" />
     <nd ref="5959" />
     <nd ref="3731" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5934" visible="true" version="1">
     <nd ref="3299" />
     <nd ref="5938" />
@@ -39573,7 +39573,7 @@
     <nd ref="5958" />
     <nd ref="5960" />
     <nd ref="3732" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5964" visible="true" version="1">
     <nd ref="3726" />
     <nd ref="5968" />
@@ -39589,7 +39589,7 @@
     <nd ref="5988" />
     <nd ref="5990" />
     <nd ref="3303" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5965" visible="true" version="1">
     <nd ref="3727" />
     <nd ref="5969" />
@@ -39605,7 +39605,7 @@
     <nd ref="5989" />
     <nd ref="5991" />
     <nd ref="3304" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5995" visible="true" version="1">
     <nd ref="3719" />
     <nd ref="5999" />
@@ -39621,7 +39621,7 @@
     <nd ref="6019" />
     <nd ref="6021" />
     <nd ref="3303" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="5996" visible="true" version="1">
     <nd ref="3720" />
     <nd ref="6000" />
@@ -39637,7 +39637,7 @@
     <nd ref="6020" />
     <nd ref="6022" />
     <nd ref="3304" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6026" visible="true" version="1">
     <nd ref="3298" />
     <nd ref="6030" />
@@ -39653,7 +39653,7 @@
     <nd ref="6050" />
     <nd ref="6052" />
     <nd ref="3710" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6027" visible="true" version="1">
     <nd ref="3299" />
     <nd ref="6031" />
@@ -39669,23 +39669,23 @@
     <nd ref="6051" />
     <nd ref="6053" />
     <nd ref="3711" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6057" visible="true" version="1">
     <nd ref="3719" />
     <nd ref="3731" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6058" visible="true" version="1">
     <nd ref="3720" />
     <nd ref="3732" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6064" visible="true" version="1">
     <nd ref="3726" />
     <nd ref="3710" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6065" visible="true" version="1">
     <nd ref="3727" />
     <nd ref="3711" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6071" visible="true" version="1">
     <nd ref="3816" />
     <nd ref="6075" />
@@ -39702,7 +39702,7 @@
     <nd ref="6097" />
     <nd ref="6099" />
     <nd ref="1232" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6072" visible="true" version="1">
     <nd ref="3817" />
     <nd ref="6076" />
@@ -39719,7 +39719,7 @@
     <nd ref="6098" />
     <nd ref="6100" />
     <nd ref="1233" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6104" visible="true" version="1">
     <nd ref="1241" />
     <nd ref="6108" />
@@ -39734,7 +39734,7 @@
     <nd ref="6126" />
     <nd ref="6128" />
     <nd ref="3821" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6105" visible="true" version="1">
     <nd ref="1242" />
     <nd ref="6109" />
@@ -39749,23 +39749,23 @@
     <nd ref="6127" />
     <nd ref="6129" />
     <nd ref="3822" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6133" visible="true" version="1">
     <nd ref="3809" />
     <nd ref="3821" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6134" visible="true" version="1">
     <nd ref="3810" />
     <nd ref="3822" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6140" visible="true" version="1">
     <nd ref="3816" />
     <nd ref="3800" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6141" visible="true" version="1">
     <nd ref="3817" />
     <nd ref="3801" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6147" visible="true" version="1">
     <nd ref="3809" />
     <nd ref="6151" />
@@ -39780,7 +39780,7 @@
     <nd ref="6169" />
     <nd ref="6171" />
     <nd ref="1232" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6148" visible="true" version="1">
     <nd ref="3810" />
     <nd ref="6152" />
@@ -39795,7 +39795,7 @@
     <nd ref="6170" />
     <nd ref="6172" />
     <nd ref="1233" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6176" visible="true" version="1">
     <nd ref="1241" />
     <nd ref="6180" />
@@ -39812,7 +39812,7 @@
     <nd ref="6202" />
     <nd ref="6204" />
     <nd ref="3800" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6177" visible="true" version="1">
     <nd ref="1242" />
     <nd ref="6181" />
@@ -39829,7 +39829,7 @@
     <nd ref="6203" />
     <nd ref="6205" />
     <nd ref="3801" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6209" visible="true" version="1">
     <nd ref="1192" />
     <nd ref="6213" />
@@ -39844,7 +39844,7 @@
     <nd ref="6231" />
     <nd ref="6233" />
     <nd ref="1037" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6210" visible="true" version="1">
     <nd ref="1193" />
     <nd ref="6214" />
@@ -39859,7 +39859,7 @@
     <nd ref="6232" />
     <nd ref="6234" />
     <nd ref="1038" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6238" visible="true" version="1">
     <nd ref="1032" />
     <nd ref="6242" />
@@ -39876,7 +39876,7 @@
     <nd ref="6264" />
     <nd ref="6266" />
     <nd ref="1197" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6239" visible="true" version="1">
     <nd ref="1033" />
     <nd ref="6243" />
@@ -39893,7 +39893,7 @@
     <nd ref="6265" />
     <nd ref="6267" />
     <nd ref="1198" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6271" visible="true" version="1">
     <nd ref="1032" />
     <nd ref="6275" />
@@ -39908,7 +39908,7 @@
     <nd ref="6293" />
     <nd ref="6295" />
     <nd ref="1176" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6272" visible="true" version="1">
     <nd ref="1033" />
     <nd ref="6276" />
@@ -39923,7 +39923,7 @@
     <nd ref="6294" />
     <nd ref="6296" />
     <nd ref="1177" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6300" visible="true" version="1">
     <nd ref="1185" />
     <nd ref="6304" />
@@ -39940,7 +39940,7 @@
     <nd ref="6326" />
     <nd ref="6328" />
     <nd ref="1037" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6301" visible="true" version="1">
     <nd ref="1186" />
     <nd ref="6305" />
@@ -39957,39 +39957,39 @@
     <nd ref="6327" />
     <nd ref="6329" />
     <nd ref="1038" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6333" visible="true" version="1">
     <nd ref="1185" />
     <nd ref="1197" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6334" visible="true" version="1">
     <nd ref="1186" />
     <nd ref="1198" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6340" visible="true" version="1">
     <nd ref="1192" />
     <nd ref="1176" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6341" visible="true" version="1">
     <nd ref="1193" />
     <nd ref="1177" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6347" visible="true" version="1">
     <nd ref="3767" />
     <nd ref="3779" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6348" visible="true" version="1">
     <nd ref="3768" />
     <nd ref="3780" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6354" visible="true" version="1">
     <nd ref="3774" />
     <nd ref="3758" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6355" visible="true" version="1">
     <nd ref="3775" />
     <nd ref="3759" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6361" visible="true" version="1">
     <nd ref="5044" />
     <nd ref="6365" />
@@ -40004,7 +40004,7 @@
     <nd ref="6383" />
     <nd ref="6385" />
     <nd ref="3758" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6362" visible="true" version="1">
     <nd ref="5045" />
     <nd ref="6366" />
@@ -40019,7 +40019,7 @@
     <nd ref="6384" />
     <nd ref="6386" />
     <nd ref="3759" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6390" visible="true" version="1">
     <nd ref="2819" />
     <nd ref="6394" />
@@ -40035,7 +40035,7 @@
     <nd ref="6414" />
     <nd ref="6416" />
     <nd ref="4310" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6391" visible="true" version="1">
     <nd ref="2820" />
     <nd ref="6395" />
@@ -40051,7 +40051,7 @@
     <nd ref="6415" />
     <nd ref="6417" />
     <nd ref="4311" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6421" visible="true" version="1">
     <nd ref="4965" />
     <nd ref="6425" />
@@ -40067,7 +40067,7 @@
     <nd ref="6445" />
     <nd ref="6447" />
     <nd ref="2784" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6422" visible="true" version="1">
     <nd ref="4966" />
     <nd ref="6426" />
@@ -40083,7 +40083,7 @@
     <nd ref="6446" />
     <nd ref="6448" />
     <nd ref="2785" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6452" visible="true" version="1">
     <nd ref="2930" />
     <nd ref="6456" />
@@ -40099,7 +40099,7 @@
     <nd ref="6476" />
     <nd ref="6478" />
     <nd ref="2784" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6453" visible="true" version="1">
     <nd ref="2931" />
     <nd ref="6457" />
@@ -40115,7 +40115,7 @@
     <nd ref="6477" />
     <nd ref="6479" />
     <nd ref="2785" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6483" visible="true" version="1">
     <nd ref="2819" />
     <nd ref="6487" />
@@ -40131,7 +40131,7 @@
     <nd ref="6507" />
     <nd ref="6509" />
     <nd ref="2935" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6484" visible="true" version="1">
     <nd ref="2820" />
     <nd ref="6488" />
@@ -40147,7 +40147,7 @@
     <nd ref="6508" />
     <nd ref="6510" />
     <nd ref="2936" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6514" visible="true" version="1">
     <nd ref="4965" />
     <nd ref="6518" />
@@ -40163,7 +40163,7 @@
     <nd ref="6538" />
     <nd ref="6540" />
     <nd ref="2935" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6515" visible="true" version="1">
     <nd ref="4966" />
     <nd ref="6519" />
@@ -40179,7 +40179,7 @@
     <nd ref="6539" />
     <nd ref="6541" />
     <nd ref="2936" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6545" visible="true" version="1">
     <nd ref="2930" />
     <nd ref="6549" />
@@ -40193,7 +40193,7 @@
     <nd ref="6565" />
     <nd ref="6567" />
     <nd ref="4310" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6546" visible="true" version="1">
     <nd ref="2931" />
     <nd ref="6550" />
@@ -40207,7 +40207,7 @@
     <nd ref="6566" />
     <nd ref="6568" />
     <nd ref="4311" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6572" visible="true" version="1">
     <nd ref="3277" />
     <nd ref="6576" />
@@ -40221,7 +40221,7 @@
     <nd ref="6592" />
     <nd ref="6594" />
     <nd ref="3450" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6573" visible="true" version="1">
     <nd ref="3278" />
     <nd ref="6577" />
@@ -40235,7 +40235,7 @@
     <nd ref="6593" />
     <nd ref="6595" />
     <nd ref="3451" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6599" visible="true" version="1">
     <nd ref="3477" />
     <nd ref="6603" />
@@ -40248,7 +40248,7 @@
     <nd ref="6617" />
     <nd ref="6619" />
     <nd ref="3268" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6600" visible="true" version="1">
     <nd ref="3478" />
     <nd ref="6604" />
@@ -40261,7 +40261,7 @@
     <nd ref="6618" />
     <nd ref="6620" />
     <nd ref="3269" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6624" visible="true" version="1">
     <nd ref="3486" />
     <nd ref="6628" />
@@ -40278,7 +40278,7 @@
     <nd ref="6650" />
     <nd ref="6652" />
     <nd ref="3450" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6625" visible="true" version="1">
     <nd ref="3487" />
     <nd ref="6629" />
@@ -40295,7 +40295,7 @@
     <nd ref="6651" />
     <nd ref="6653" />
     <nd ref="3451" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6657" visible="true" version="1">
     <nd ref="3477" />
     <nd ref="6661" />
@@ -40311,7 +40311,7 @@
     <nd ref="6681" />
     <nd ref="6683" />
     <nd ref="3491" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6658" visible="true" version="1">
     <nd ref="3478" />
     <nd ref="6662" />
@@ -40327,7 +40327,7 @@
     <nd ref="6682" />
     <nd ref="6684" />
     <nd ref="3492" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6688" visible="true" version="1">
     <nd ref="3277" />
     <nd ref="6692" />
@@ -40339,7 +40339,7 @@
     <nd ref="6704" />
     <nd ref="6706" />
     <nd ref="3491" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6689" visible="true" version="1">
     <nd ref="3278" />
     <nd ref="6693" />
@@ -40351,7 +40351,7 @@
     <nd ref="6705" />
     <nd ref="6707" />
     <nd ref="3492" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6711" visible="true" version="1">
     <nd ref="3486" />
     <nd ref="6715" />
@@ -40368,7 +40368,7 @@
     <nd ref="6737" />
     <nd ref="6739" />
     <nd ref="3268" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6712" visible="true" version="1">
     <nd ref="3487" />
     <nd ref="6716" />
@@ -40385,7 +40385,7 @@
     <nd ref="6738" />
     <nd ref="6740" />
     <nd ref="3269" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6744" visible="true" version="1">
     <nd ref="1213" />
     <nd ref="6748" />
@@ -40402,7 +40402,7 @@
     <nd ref="6770" />
     <nd ref="6772" />
     <nd ref="1253" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6745" visible="true" version="1">
     <nd ref="1214" />
     <nd ref="6749" />
@@ -40419,7 +40419,7 @@
     <nd ref="6771" />
     <nd ref="6773" />
     <nd ref="1254" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6777" visible="true" version="1">
     <nd ref="1248" />
     <nd ref="6781" />
@@ -40434,7 +40434,7 @@
     <nd ref="6799" />
     <nd ref="6801" />
     <nd ref="1204" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6778" visible="true" version="1">
     <nd ref="1249" />
     <nd ref="6782" />
@@ -40449,23 +40449,23 @@
     <nd ref="6800" />
     <nd ref="6802" />
     <nd ref="1205" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6806" visible="true" version="1">
     <nd ref="1220" />
     <nd ref="1204" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6807" visible="true" version="1">
     <nd ref="1221" />
     <nd ref="1205" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6813" visible="true" version="1">
     <nd ref="1213" />
     <nd ref="1225" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6814" visible="true" version="1">
     <nd ref="1214" />
     <nd ref="1226" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6820" visible="true" version="1">
     <nd ref="1220" />
     <nd ref="6824" />
@@ -40481,7 +40481,7 @@
     <nd ref="6844" />
     <nd ref="6846" />
     <nd ref="1253" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6821" visible="true" version="1">
     <nd ref="1221" />
     <nd ref="6825" />
@@ -40497,7 +40497,7 @@
     <nd ref="6845" />
     <nd ref="6847" />
     <nd ref="1254" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6851" visible="true" version="1">
     <nd ref="1248" />
     <nd ref="6855" />
@@ -40514,7 +40514,7 @@
     <nd ref="6877" />
     <nd ref="6879" />
     <nd ref="1225" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6852" visible="true" version="1">
     <nd ref="1249" />
     <nd ref="6856" />
@@ -40531,7 +40531,7 @@
     <nd ref="6878" />
     <nd ref="6880" />
     <nd ref="1226" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6884" visible="true" version="1">
     <nd ref="3947" />
     <nd ref="6888" />
@@ -40546,7 +40546,7 @@
     <nd ref="6906" />
     <nd ref="6908" />
     <nd ref="3717" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6885" visible="true" version="1">
     <nd ref="3948" />
     <nd ref="6889" />
@@ -40561,7 +40561,7 @@
     <nd ref="6907" />
     <nd ref="6909" />
     <nd ref="3718" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6913" visible="true" version="1">
     <nd ref="3712" />
     <nd ref="6917" />
@@ -40578,7 +40578,7 @@
     <nd ref="6939" />
     <nd ref="6941" />
     <nd ref="3912" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6914" visible="true" version="1">
     <nd ref="3713" />
     <nd ref="6918" />
@@ -40595,7 +40595,7 @@
     <nd ref="6940" />
     <nd ref="6942" />
     <nd ref="3913" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6946" visible="true" version="1">
     <nd ref="3712" />
     <nd ref="6950" />
@@ -40612,7 +40612,7 @@
     <nd ref="6972" />
     <nd ref="6974" />
     <nd ref="4083" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6947" visible="true" version="1">
     <nd ref="3713" />
     <nd ref="6951" />
@@ -40629,7 +40629,7 @@
     <nd ref="6973" />
     <nd ref="6975" />
     <nd ref="4084" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6979" visible="true" version="1">
     <nd ref="4078" />
     <nd ref="6983" />
@@ -40647,7 +40647,7 @@
     <nd ref="7007" />
     <nd ref="7009" />
     <nd ref="3717" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="6980" visible="true" version="1">
     <nd ref="4079" />
     <nd ref="6984" />
@@ -40665,7 +40665,7 @@
     <nd ref="7008" />
     <nd ref="7010" />
     <nd ref="3718" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7014" visible="true" version="1">
     <nd ref="4078" />
     <nd ref="7018" />
@@ -40686,7 +40686,7 @@
     <nd ref="7048" />
     <nd ref="7050" />
     <nd ref="3912" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7015" visible="true" version="1">
     <nd ref="4079" />
     <nd ref="7019" />
@@ -40707,7 +40707,7 @@
     <nd ref="7049" />
     <nd ref="7051" />
     <nd ref="3913" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7055" visible="true" version="1">
     <nd ref="3947" />
     <nd ref="7059" />
@@ -40728,7 +40728,7 @@
     <nd ref="7089" />
     <nd ref="7091" />
     <nd ref="4083" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7056" visible="true" version="1">
     <nd ref="3948" />
     <nd ref="7060" />
@@ -40749,23 +40749,23 @@
     <nd ref="7090" />
     <nd ref="7092" />
     <nd ref="4084" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7096" visible="true" version="1">
     <nd ref="4267" />
     <nd ref="4291" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7097" visible="true" version="1">
     <nd ref="4268" />
     <nd ref="4292" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7103" visible="true" version="1">
     <nd ref="4286" />
     <nd ref="4214" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7104" visible="true" version="1">
     <nd ref="4287" />
     <nd ref="4215" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7110" visible="true" version="1">
     <nd ref="3041" />
     <nd ref="7114" />
@@ -40780,7 +40780,7 @@
     <nd ref="7132" />
     <nd ref="7134" />
     <nd ref="1725" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7111" visible="true" version="1">
     <nd ref="3042" />
     <nd ref="7115" />
@@ -40795,7 +40795,7 @@
     <nd ref="7133" />
     <nd ref="7135" />
     <nd ref="1726" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7139" visible="true" version="1">
     <nd ref="1720" />
     <nd ref="7143" />
@@ -40810,7 +40810,7 @@
     <nd ref="7161" />
     <nd ref="7163" />
     <nd ref="2824" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7140" visible="true" version="1">
     <nd ref="1721" />
     <nd ref="7144" />
@@ -40825,7 +40825,7 @@
     <nd ref="7162" />
     <nd ref="7164" />
     <nd ref="2825" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7168" visible="true" version="1">
     <nd ref="3072" />
     <nd ref="7172" />
@@ -40845,7 +40845,7 @@
     <nd ref="7200" />
     <nd ref="7202" />
     <nd ref="2824" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7169" visible="true" version="1">
     <nd ref="3073" />
     <nd ref="7173" />
@@ -40865,7 +40865,7 @@
     <nd ref="7201" />
     <nd ref="7203" />
     <nd ref="2825" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7207" visible="true" version="1">
     <nd ref="3041" />
     <nd ref="7211" />
@@ -40884,7 +40884,7 @@
     <nd ref="7237" />
     <nd ref="7239" />
     <nd ref="3077" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7208" visible="true" version="1">
     <nd ref="3042" />
     <nd ref="7212" />
@@ -40903,7 +40903,7 @@
     <nd ref="7238" />
     <nd ref="7240" />
     <nd ref="3078" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7244" visible="true" version="1">
     <nd ref="3072" />
     <nd ref="7248" />
@@ -40920,7 +40920,7 @@
     <nd ref="7270" />
     <nd ref="7272" />
     <nd ref="1725" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7245" visible="true" version="1">
     <nd ref="3073" />
     <nd ref="7249" />
@@ -40937,7 +40937,7 @@
     <nd ref="7271" />
     <nd ref="7273" />
     <nd ref="1726" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7277" visible="true" version="1">
     <nd ref="1720" />
     <nd ref="7281" />
@@ -40955,7 +40955,7 @@
     <nd ref="7305" />
     <nd ref="7307" />
     <nd ref="3077" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7278" visible="true" version="1">
     <nd ref="1721" />
     <nd ref="7282" />
@@ -40973,23 +40973,23 @@
     <nd ref="7306" />
     <nd ref="7308" />
     <nd ref="3078" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7312" visible="true" version="1">
     <nd ref="1074" />
     <nd ref="1058" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7313" visible="true" version="1">
     <nd ref="1075" />
     <nd ref="1059" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7319" visible="true" version="1">
     <nd ref="1067" />
     <nd ref="1079" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7320" visible="true" version="1">
     <nd ref="1068" />
     <nd ref="1080" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7326" visible="true" version="1">
     <nd ref="3270" />
     <nd ref="7330" />
@@ -41012,7 +41012,7 @@
     <nd ref="7364" />
     <nd ref="7366" />
     <nd ref="3786" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7327" visible="true" version="1">
     <nd ref="3271" />
     <nd ref="7331" />
@@ -41035,7 +41035,7 @@
     <nd ref="7365" />
     <nd ref="7367" />
     <nd ref="3787" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7371" visible="true" version="1">
     <nd ref="3795" />
     <nd ref="7375" />
@@ -41064,7 +41064,7 @@
     <nd ref="7421" />
     <nd ref="7423" />
     <nd ref="3275" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7372" visible="true" version="1">
     <nd ref="3796" />
     <nd ref="7376" />
@@ -41093,7 +41093,7 @@
     <nd ref="7422" />
     <nd ref="7424" />
     <nd ref="3276" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7428" visible="true" version="1">
     <nd ref="3263" />
     <nd ref="7432" />
@@ -41118,7 +41118,7 @@
     <nd ref="7470" />
     <nd ref="7472" />
     <nd ref="3275" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7429" visible="true" version="1">
     <nd ref="3264" />
     <nd ref="7433" />
@@ -41143,7 +41143,7 @@
     <nd ref="7471" />
     <nd ref="7473" />
     <nd ref="3276" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7477" visible="true" version="1">
     <nd ref="3270" />
     <nd ref="7481" />
@@ -41168,7 +41168,7 @@
     <nd ref="7519" />
     <nd ref="7521" />
     <nd ref="3214" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7478" visible="true" version="1">
     <nd ref="3271" />
     <nd ref="7482" />
@@ -41193,7 +41193,7 @@
     <nd ref="7520" />
     <nd ref="7522" />
     <nd ref="3215" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7526" visible="true" version="1">
     <nd ref="3795" />
     <nd ref="7530" />
@@ -41213,7 +41213,7 @@
     <nd ref="7558" />
     <nd ref="7560" />
     <nd ref="3214" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7527" visible="true" version="1">
     <nd ref="3796" />
     <nd ref="7531" />
@@ -41233,7 +41233,7 @@
     <nd ref="7559" />
     <nd ref="7561" />
     <nd ref="3215" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7565" visible="true" version="1">
     <nd ref="3263" />
     <nd ref="7569" />
@@ -41256,7 +41256,7 @@
     <nd ref="7603" />
     <nd ref="7605" />
     <nd ref="3786" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7566" visible="true" version="1">
     <nd ref="3264" />
     <nd ref="7570" />
@@ -41279,7 +41279,7 @@
     <nd ref="7604" />
     <nd ref="7606" />
     <nd ref="3787" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7610" visible="true" version="1">
     <nd ref="4634" />
     <nd ref="7614" />
@@ -41297,7 +41297,7 @@
     <nd ref="7638" />
     <nd ref="7640" />
     <nd ref="3576" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7611" visible="true" version="1">
     <nd ref="4635" />
     <nd ref="7615" />
@@ -41315,7 +41315,7 @@
     <nd ref="7639" />
     <nd ref="7641" />
     <nd ref="3577" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7645" visible="true" version="1">
     <nd ref="3705" />
     <nd ref="7649" />
@@ -41330,7 +41330,7 @@
     <nd ref="7667" />
     <nd ref="7669" />
     <nd ref="4639" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7646" visible="true" version="1">
     <nd ref="3706" />
     <nd ref="7650" />
@@ -41345,23 +41345,23 @@
     <nd ref="7668" />
     <nd ref="7670" />
     <nd ref="4640" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7674" visible="true" version="1">
     <nd ref="4305" />
     <nd ref="4639" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7675" visible="true" version="1">
     <nd ref="4306" />
     <nd ref="4640" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7681" visible="true" version="1">
     <nd ref="4634" />
     <nd ref="4272" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7682" visible="true" version="1">
     <nd ref="4635" />
     <nd ref="4273" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7688" visible="true" version="1">
     <nd ref="3705" />
     <nd ref="7692" />
@@ -41377,7 +41377,7 @@
     <nd ref="7712" />
     <nd ref="7714" />
     <nd ref="4272" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7689" visible="true" version="1">
     <nd ref="3706" />
     <nd ref="7693" />
@@ -41393,7 +41393,7 @@
     <nd ref="7713" />
     <nd ref="7715" />
     <nd ref="4273" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7719" visible="true" version="1">
     <nd ref="4305" />
     <nd ref="7723" />
@@ -41409,7 +41409,7 @@
     <nd ref="7743" />
     <nd ref="7745" />
     <nd ref="3576" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7720" visible="true" version="1">
     <nd ref="4306" />
     <nd ref="7724" />
@@ -41425,7 +41425,7 @@
     <nd ref="7744" />
     <nd ref="7746" />
     <nd ref="3577" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7750" visible="true" version="1">
     <nd ref="3926" />
     <nd ref="7754" />
@@ -41442,7 +41442,7 @@
     <nd ref="7776" />
     <nd ref="7778" />
     <nd ref="1100" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7751" visible="true" version="1">
     <nd ref="3927" />
     <nd ref="7755" />
@@ -41459,7 +41459,7 @@
     <nd ref="7777" />
     <nd ref="7779" />
     <nd ref="1101" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7783" visible="true" version="1">
     <nd ref="1109" />
     <nd ref="7787" />
@@ -41474,7 +41474,7 @@
     <nd ref="7805" />
     <nd ref="7807" />
     <nd ref="3931" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7784" visible="true" version="1">
     <nd ref="1110" />
     <nd ref="7788" />
@@ -41489,23 +41489,23 @@
     <nd ref="7806" />
     <nd ref="7808" />
     <nd ref="3932" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7812" visible="true" version="1">
     <nd ref="3907" />
     <nd ref="3931" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7813" visible="true" version="1">
     <nd ref="3908" />
     <nd ref="3932" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7819" visible="true" version="1">
     <nd ref="3926" />
     <nd ref="3828" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7820" visible="true" version="1">
     <nd ref="3927" />
     <nd ref="3829" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7826" visible="true" version="1">
     <nd ref="3907" />
     <nd ref="7830" />
@@ -41520,7 +41520,7 @@
     <nd ref="7848" />
     <nd ref="7850" />
     <nd ref="1100" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7827" visible="true" version="1">
     <nd ref="3908" />
     <nd ref="7831" />
@@ -41535,7 +41535,7 @@
     <nd ref="7849" />
     <nd ref="7851" />
     <nd ref="1101" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7855" visible="true" version="1">
     <nd ref="1109" />
     <nd ref="7859" />
@@ -41552,7 +41552,7 @@
     <nd ref="7881" />
     <nd ref="7883" />
     <nd ref="3828" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7856" visible="true" version="1">
     <nd ref="1110" />
     <nd ref="7860" />
@@ -41569,7 +41569,7 @@
     <nd ref="7882" />
     <nd ref="7884" />
     <nd ref="3829" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7888" visible="true" version="1">
     <nd ref="3236" />
     <nd ref="7892" />
@@ -41577,7 +41577,7 @@
     <nd ref="7896" />
     <nd ref="7898" />
     <nd ref="7900" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7889" visible="true" version="1">
     <nd ref="3237" />
     <nd ref="7893" />
@@ -41585,7 +41585,7 @@
     <nd ref="7897" />
     <nd ref="7899" />
     <nd ref="7901" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7903" visible="true" version="1">
     <nd ref="7905" />
     <nd ref="7907" />
@@ -41594,7 +41594,7 @@
     <nd ref="7913" />
     <nd ref="7915" />
     <nd ref="3241" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7904" visible="true" version="1">
     <nd ref="7906" />
     <nd ref="7908" />
@@ -41603,7 +41603,7 @@
     <nd ref="7914" />
     <nd ref="7916" />
     <nd ref="3242" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7920" visible="true" version="1">
     <nd ref="3546" />
     <nd ref="7924" />
@@ -41620,7 +41620,7 @@
     <nd ref="7946" />
     <nd ref="7948" />
     <nd ref="3187" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7921" visible="true" version="1">
     <nd ref="3547" />
     <nd ref="7925" />
@@ -41637,7 +41637,7 @@
     <nd ref="7947" />
     <nd ref="7949" />
     <nd ref="3188" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7953" visible="true" version="1">
     <nd ref="3196" />
     <nd ref="7957" />
@@ -41653,7 +41653,7 @@
     <nd ref="7977" />
     <nd ref="7979" />
     <nd ref="3551" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7954" visible="true" version="1">
     <nd ref="3197" />
     <nd ref="7958" />
@@ -41669,23 +41669,23 @@
     <nd ref="7978" />
     <nd ref="7980" />
     <nd ref="3552" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7984" visible="true" version="1">
     <nd ref="3523" />
     <nd ref="3551" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7985" visible="true" version="1">
     <nd ref="3524" />
     <nd ref="3552" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7991" visible="true" version="1">
     <nd ref="3546" />
     <nd ref="3514" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7992" visible="true" version="1">
     <nd ref="3547" />
     <nd ref="3515" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7998" visible="true" version="1">
     <nd ref="3523" />
     <nd ref="8002" />
@@ -41700,7 +41700,7 @@
     <nd ref="8020" />
     <nd ref="8022" />
     <nd ref="3187" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="7999" visible="true" version="1">
     <nd ref="3524" />
     <nd ref="8003" />
@@ -41715,7 +41715,7 @@
     <nd ref="8021" />
     <nd ref="8023" />
     <nd ref="3188" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8027" visible="true" version="1">
     <nd ref="3196" />
     <nd ref="8031" />
@@ -41732,7 +41732,7 @@
     <nd ref="8053" />
     <nd ref="8055" />
     <nd ref="3514" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8028" visible="true" version="1">
     <nd ref="3197" />
     <nd ref="8032" />
@@ -41749,7 +41749,7 @@
     <nd ref="8054" />
     <nd ref="8056" />
     <nd ref="3515" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8060" visible="true" version="1">
     <nd ref="3460" />
     <nd ref="8064" />
@@ -41760,7 +41760,7 @@
     <nd ref="8074" />
     <nd ref="8076" />
     <nd ref="3745" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8061" visible="true" version="1">
     <nd ref="3461" />
     <nd ref="8065" />
@@ -41771,7 +41771,7 @@
     <nd ref="8075" />
     <nd ref="8077" />
     <nd ref="3746" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8081" visible="true" version="1">
     <nd ref="3740" />
     <nd ref="8085" />
@@ -41781,7 +41781,7 @@
     <nd ref="8093" />
     <nd ref="8095" />
     <nd ref="3465" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8082" visible="true" version="1">
     <nd ref="3741" />
     <nd ref="8086" />
@@ -41791,23 +41791,23 @@
     <nd ref="8094" />
     <nd ref="8096" />
     <nd ref="3466" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8100" visible="true" version="1">
     <nd ref="1046" />
     <nd ref="1030" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8101" visible="true" version="1">
     <nd ref="1047" />
     <nd ref="1031" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8107" visible="true" version="1">
     <nd ref="1039" />
     <nd ref="1051" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8108" visible="true" version="1">
     <nd ref="1040" />
     <nd ref="1052" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8114" visible="true" version="1">
     <nd ref="1039" />
     <nd ref="8118" />
@@ -41824,7 +41824,7 @@
     <nd ref="8140" />
     <nd ref="8142" />
     <nd ref="8144" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8115" visible="true" version="1">
     <nd ref="1040" />
     <nd ref="8119" />
@@ -41841,7 +41841,7 @@
     <nd ref="8141" />
     <nd ref="8143" />
     <nd ref="8145" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8147" visible="true" version="1">
     <nd ref="8149" />
     <nd ref="8151" />
@@ -41859,7 +41859,7 @@
     <nd ref="8175" />
     <nd ref="8177" />
     <nd ref="1030" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8148" visible="true" version="1">
     <nd ref="8150" />
     <nd ref="8152" />
@@ -41877,7 +41877,7 @@
     <nd ref="8176" />
     <nd ref="8178" />
     <nd ref="1031" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8182" visible="true" version="1">
     <nd ref="8184" />
     <nd ref="8186" />
@@ -41894,7 +41894,7 @@
     <nd ref="8208" />
     <nd ref="8210" />
     <nd ref="1051" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8183" visible="true" version="1">
     <nd ref="8185" />
     <nd ref="8187" />
@@ -41911,7 +41911,7 @@
     <nd ref="8209" />
     <nd ref="8211" />
     <nd ref="1052" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8215" visible="true" version="1">
     <nd ref="1046" />
     <nd ref="8219" />
@@ -41931,7 +41931,7 @@
     <nd ref="8247" />
     <nd ref="8249" />
     <nd ref="8251" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8216" visible="true" version="1">
     <nd ref="1047" />
     <nd ref="8220" />
@@ -41951,23 +41951,23 @@
     <nd ref="8248" />
     <nd ref="8250" />
     <nd ref="8252" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8254" visible="true" version="1">
     <nd ref="1088" />
     <nd ref="1072" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8255" visible="true" version="1">
     <nd ref="1089" />
     <nd ref="1073" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8261" visible="true" version="1">
     <nd ref="1081" />
     <nd ref="1093" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8262" visible="true" version="1">
     <nd ref="1082" />
     <nd ref="1094" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8268" visible="true" version="1">
     <nd ref="3788" />
     <nd ref="8272" />
@@ -41984,7 +41984,7 @@
     <nd ref="8294" />
     <nd ref="8296" />
     <nd ref="4970" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8269" visible="true" version="1">
     <nd ref="3789" />
     <nd ref="8273" />
@@ -42001,47 +42001,47 @@
     <nd ref="8295" />
     <nd ref="8297" />
     <nd ref="4971" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8301" visible="true" version="1">
     <nd ref="3781" />
     <nd ref="8305" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8302" visible="true" version="1">
     <nd ref="3782" />
     <nd ref="8306" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8308" visible="true" version="1">
     <nd ref="8305" />
     <nd ref="3793" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8309" visible="true" version="1">
     <nd ref="8306" />
     <nd ref="3794" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8315" visible="true" version="1">
     <nd ref="3788" />
     <nd ref="3772" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8316" visible="true" version="1">
     <nd ref="3789" />
     <nd ref="3773" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8322" visible="true" version="1">
     <nd ref="1234" />
     <nd ref="1218" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8323" visible="true" version="1">
     <nd ref="1235" />
     <nd ref="1219" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8329" visible="true" version="1">
     <nd ref="1227" />
     <nd ref="1239" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8330" visible="true" version="1">
     <nd ref="1228" />
     <nd ref="1240" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8336" visible="true" version="1">
     <nd ref="1227" />
     <nd ref="8340" />
@@ -42059,7 +42059,7 @@
     <nd ref="8364" />
     <nd ref="8366" />
     <nd ref="3110" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8337" visible="true" version="1">
     <nd ref="1228" />
     <nd ref="8341" />
@@ -42077,7 +42077,7 @@
     <nd ref="8365" />
     <nd ref="8367" />
     <nd ref="3111" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8371" visible="true" version="1">
     <nd ref="3168" />
     <nd ref="8375" />
@@ -42094,7 +42094,7 @@
     <nd ref="8397" />
     <nd ref="8399" />
     <nd ref="1218" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8372" visible="true" version="1">
     <nd ref="3169" />
     <nd ref="8376" />
@@ -42111,7 +42111,7 @@
     <nd ref="8398" />
     <nd ref="8400" />
     <nd ref="1219" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8404" visible="true" version="1">
     <nd ref="8406" />
     <nd ref="8408" />
@@ -42130,7 +42130,7 @@
     <nd ref="8434" />
     <nd ref="8436" />
     <nd ref="1218" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8405" visible="true" version="1">
     <nd ref="8407" />
     <nd ref="8409" />
@@ -42149,7 +42149,7 @@
     <nd ref="8435" />
     <nd ref="8437" />
     <nd ref="1219" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8441" visible="true" version="1">
     <nd ref="1227" />
     <nd ref="8445" />
@@ -42169,7 +42169,7 @@
     <nd ref="8473" />
     <nd ref="8475" />
     <nd ref="8477" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8442" visible="true" version="1">
     <nd ref="1228" />
     <nd ref="8446" />
@@ -42189,7 +42189,7 @@
     <nd ref="8474" />
     <nd ref="8476" />
     <nd ref="8478" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8480" visible="true" version="1">
     <nd ref="3141" />
     <nd ref="8484" />
@@ -42205,7 +42205,7 @@
     <nd ref="8504" />
     <nd ref="8506" />
     <nd ref="1239" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8481" visible="true" version="1">
     <nd ref="3142" />
     <nd ref="8485" />
@@ -42221,7 +42221,7 @@
     <nd ref="8505" />
     <nd ref="8507" />
     <nd ref="1240" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8511" visible="true" version="1">
     <nd ref="1234" />
     <nd ref="8515" />
@@ -42238,7 +42238,7 @@
     <nd ref="8537" />
     <nd ref="8539" />
     <nd ref="3110" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8512" visible="true" version="1">
     <nd ref="1235" />
     <nd ref="8516" />
@@ -42255,7 +42255,7 @@
     <nd ref="8538" />
     <nd ref="8540" />
     <nd ref="3111" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8544" visible="true" version="1">
     <nd ref="1234" />
     <nd ref="8548" />
@@ -42272,7 +42272,7 @@
     <nd ref="8570" />
     <nd ref="8572" />
     <nd ref="8574" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8545" visible="true" version="1">
     <nd ref="1235" />
     <nd ref="8549" />
@@ -42289,7 +42289,7 @@
     <nd ref="8571" />
     <nd ref="8573" />
     <nd ref="8575" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8577" visible="true" version="1">
     <nd ref="8579" />
     <nd ref="8581" />
@@ -42306,7 +42306,7 @@
     <nd ref="8603" />
     <nd ref="8605" />
     <nd ref="1239" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8578" visible="true" version="1">
     <nd ref="8580" />
     <nd ref="8582" />
@@ -42323,39 +42323,39 @@
     <nd ref="8604" />
     <nd ref="8606" />
     <nd ref="1240" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8610" visible="true" version="1">
     <nd ref="8612" />
     <nd ref="3110" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8611" visible="true" version="1">
     <nd ref="8613" />
     <nd ref="3111" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8617" visible="true" version="1">
     <nd ref="3141" />
     <nd ref="8621" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8618" visible="true" version="1">
     <nd ref="3142" />
     <nd ref="8622" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8624" visible="true" version="1">
     <nd ref="1206" />
     <nd ref="1190" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8625" visible="true" version="1">
     <nd ref="1207" />
     <nd ref="1191" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8631" visible="true" version="1">
     <nd ref="1199" />
     <nd ref="1211" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8632" visible="true" version="1">
     <nd ref="1200" />
     <nd ref="1212" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8638" visible="true" version="1">
     <nd ref="1199" />
     <nd ref="8642" />
@@ -42372,7 +42372,7 @@
     <nd ref="8664" />
     <nd ref="8666" />
     <nd ref="3765" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8639" visible="true" version="1">
     <nd ref="1200" />
     <nd ref="8643" />
@@ -42389,7 +42389,7 @@
     <nd ref="8665" />
     <nd ref="8667" />
     <nd ref="3766" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8671" visible="true" version="1">
     <nd ref="3760" />
     <nd ref="8675" />
@@ -42404,7 +42404,7 @@
     <nd ref="8693" />
     <nd ref="8695" />
     <nd ref="1190" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8672" visible="true" version="1">
     <nd ref="3761" />
     <nd ref="8676" />
@@ -42419,7 +42419,7 @@
     <nd ref="8694" />
     <nd ref="8696" />
     <nd ref="1191" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8700" visible="true" version="1">
     <nd ref="1206" />
     <nd ref="8704" />
@@ -42435,7 +42435,7 @@
     <nd ref="8724" />
     <nd ref="8726" />
     <nd ref="3765" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8701" visible="true" version="1">
     <nd ref="1207" />
     <nd ref="8705" />
@@ -42451,7 +42451,7 @@
     <nd ref="8725" />
     <nd ref="8727" />
     <nd ref="3766" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8731" visible="true" version="1">
     <nd ref="3760" />
     <nd ref="8735" />
@@ -42468,7 +42468,7 @@
     <nd ref="8757" />
     <nd ref="8759" />
     <nd ref="1211" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8732" visible="true" version="1">
     <nd ref="3761" />
     <nd ref="8736" />
@@ -42485,7 +42485,7 @@
     <nd ref="8758" />
     <nd ref="8760" />
     <nd ref="1212" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8764" visible="true" version="1">
     <nd ref="3502" />
     <nd ref="8768" />
@@ -42502,7 +42502,7 @@
     <nd ref="8790" />
     <nd ref="8792" />
     <nd ref="1274" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8765" visible="true" version="1">
     <nd ref="3503" />
     <nd ref="8769" />
@@ -42519,7 +42519,7 @@
     <nd ref="8791" />
     <nd ref="8793" />
     <nd ref="1275" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8797" visible="true" version="1">
     <nd ref="1283" />
     <nd ref="8801" />
@@ -42535,7 +42535,7 @@
     <nd ref="8821" />
     <nd ref="8823" />
     <nd ref="3507" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8798" visible="true" version="1">
     <nd ref="1284" />
     <nd ref="8802" />
@@ -42551,23 +42551,23 @@
     <nd ref="8822" />
     <nd ref="8824" />
     <nd ref="3508" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8828" visible="true" version="1">
     <nd ref="3495" />
     <nd ref="3507" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8829" visible="true" version="1">
     <nd ref="3496" />
     <nd ref="3508" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8835" visible="true" version="1">
     <nd ref="3502" />
     <nd ref="3482" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8836" visible="true" version="1">
     <nd ref="3503" />
     <nd ref="3483" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8842" visible="true" version="1">
     <nd ref="3495" />
     <nd ref="8846" />
@@ -42583,7 +42583,7 @@
     <nd ref="8866" />
     <nd ref="8868" />
     <nd ref="1274" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8843" visible="true" version="1">
     <nd ref="3496" />
     <nd ref="8847" />
@@ -42599,7 +42599,7 @@
     <nd ref="8867" />
     <nd ref="8869" />
     <nd ref="1275" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8873" visible="true" version="1">
     <nd ref="1283" />
     <nd ref="8877" />
@@ -42616,7 +42616,7 @@
     <nd ref="8899" />
     <nd ref="8901" />
     <nd ref="3482" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8874" visible="true" version="1">
     <nd ref="1284" />
     <nd ref="8878" />
@@ -42633,7 +42633,7 @@
     <nd ref="8900" />
     <nd ref="8902" />
     <nd ref="3483" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8906" visible="true" version="1">
     <nd ref="3509" />
     <nd ref="8910" />
@@ -42645,7 +42645,7 @@
     <nd ref="8922" />
     <nd ref="8924" />
     <nd ref="3724" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8907" visible="true" version="1">
     <nd ref="3510" />
     <nd ref="8911" />
@@ -42657,7 +42657,7 @@
     <nd ref="8923" />
     <nd ref="8925" />
     <nd ref="3725" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8929" visible="true" version="1">
     <nd ref="3733" />
     <nd ref="8933" />
@@ -42669,7 +42669,7 @@
     <nd ref="8945" />
     <nd ref="8947" />
     <nd ref="3500" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8930" visible="true" version="1">
     <nd ref="3734" />
     <nd ref="8934" />
@@ -42681,23 +42681,23 @@
     <nd ref="8946" />
     <nd ref="8948" />
     <nd ref="3501" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8952" visible="true" version="1">
     <nd ref="3516" />
     <nd ref="3500" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8953" visible="true" version="1">
     <nd ref="3517" />
     <nd ref="3501" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8959" visible="true" version="1">
     <nd ref="3509" />
     <nd ref="3521" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8960" visible="true" version="1">
     <nd ref="3510" />
     <nd ref="3522" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8966" visible="true" version="1">
     <nd ref="3733" />
     <nd ref="8970" />
@@ -42709,7 +42709,7 @@
     <nd ref="8982" />
     <nd ref="8984" />
     <nd ref="3521" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8967" visible="true" version="1">
     <nd ref="3734" />
     <nd ref="8971" />
@@ -42721,7 +42721,7 @@
     <nd ref="8983" />
     <nd ref="8985" />
     <nd ref="3522" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8989" visible="true" version="1">
     <nd ref="3516" />
     <nd ref="8993" />
@@ -42733,7 +42733,7 @@
     <nd ref="9005" />
     <nd ref="9007" />
     <nd ref="3724" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="8990" visible="true" version="1">
     <nd ref="3517" />
     <nd ref="8994" />
@@ -42745,7 +42745,7 @@
     <nd ref="9006" />
     <nd ref="9008" />
     <nd ref="3725" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9012" visible="true" version="1">
     <nd ref="2468" />
     <nd ref="9016" />
@@ -42777,7 +42777,7 @@
     <nd ref="9068" />
     <nd ref="9070" />
     <nd ref="1288" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9013" visible="true" version="1">
     <nd ref="2469" />
     <nd ref="9017" />
@@ -42809,7 +42809,7 @@
     <nd ref="9069" />
     <nd ref="9071" />
     <nd ref="1289" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9075" visible="true" version="1">
     <nd ref="2157" />
     <nd ref="9079" />
@@ -42841,7 +42841,7 @@
     <nd ref="9131" />
     <nd ref="9133" />
     <nd ref="2473" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9076" visible="true" version="1">
     <nd ref="2158" />
     <nd ref="9080" />
@@ -42873,7 +42873,7 @@
     <nd ref="9132" />
     <nd ref="9134" />
     <nd ref="2474" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9138" visible="true" version="1">
     <nd ref="2468" />
     <nd ref="9142" />
@@ -42897,7 +42897,7 @@
     <nd ref="9178" />
     <nd ref="9180" />
     <nd ref="1183" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9139" visible="true" version="1">
     <nd ref="2469" />
     <nd ref="9143" />
@@ -42921,7 +42921,7 @@
     <nd ref="9179" />
     <nd ref="9181" />
     <nd ref="1184" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9185" visible="true" version="1">
     <nd ref="1178" />
     <nd ref="9189" />
@@ -42945,7 +42945,7 @@
     <nd ref="9225" />
     <nd ref="9227" />
     <nd ref="2473" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9186" visible="true" version="1">
     <nd ref="1179" />
     <nd ref="9190" />
@@ -42969,7 +42969,7 @@
     <nd ref="9226" />
     <nd ref="9228" />
     <nd ref="2474" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9232" visible="true" version="1">
     <nd ref="1178" />
     <nd ref="9236" />
@@ -42995,7 +42995,7 @@
     <nd ref="9276" />
     <nd ref="9278" />
     <nd ref="1288" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9233" visible="true" version="1">
     <nd ref="1179" />
     <nd ref="9237" />
@@ -43021,7 +43021,7 @@
     <nd ref="9277" />
     <nd ref="9279" />
     <nd ref="1289" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9283" visible="true" version="1">
     <nd ref="2157" />
     <nd ref="9287" />
@@ -43047,7 +43047,7 @@
     <nd ref="9327" />
     <nd ref="9329" />
     <nd ref="1183" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9284" visible="true" version="1">
     <nd ref="2158" />
     <nd ref="9288" />
@@ -43073,39 +43073,39 @@
     <nd ref="9328" />
     <nd ref="9330" />
     <nd ref="1184" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9334" visible="true" version="1">
     <nd ref="3175" />
     <nd ref="9338" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9335" visible="true" version="1">
     <nd ref="3176" />
     <nd ref="9339" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9341" visible="true" version="1">
     <nd ref="9343" />
     <nd ref="3180" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9342" visible="true" version="1">
     <nd ref="9344" />
     <nd ref="3181" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9348" visible="true" version="1">
     <nd ref="3189" />
     <nd ref="3173" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9349" visible="true" version="1">
     <nd ref="3190" />
     <nd ref="3174" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9355" visible="true" version="1">
     <nd ref="3182" />
     <nd ref="3194" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9356" visible="true" version="1">
     <nd ref="3183" />
     <nd ref="3195" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9362" visible="true" version="1">
     <nd ref="1140" />
     <nd ref="9366" />
@@ -43116,7 +43116,7 @@
     <nd ref="9376" />
     <nd ref="9378" />
     <nd ref="3289" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9363" visible="true" version="1">
     <nd ref="1141" />
     <nd ref="9367" />
@@ -43127,7 +43127,7 @@
     <nd ref="9377" />
     <nd ref="9379" />
     <nd ref="3290" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9383" visible="true" version="1">
     <nd ref="3284" />
     <nd ref="9387" />
@@ -43141,7 +43141,7 @@
     <nd ref="9403" />
     <nd ref="9405" />
     <nd ref="3201" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <way id="9384" visible="true" version="1">
     <nd ref="3285" />
     <nd ref="9388" />
@@ -43155,7 +43155,7 @@
     <nd ref="9404" />
     <nd ref="9406" />
     <nd ref="3202" />
-  </way>
+  <tag k="subtype" v="dashed" /><tag k="type" v="line_thin" /></way>
   <relation id="1006" visible="true" version="1">
     <member type="way" ref="1001" role="left" />
     <member type="way" ref="1000" role="right" />

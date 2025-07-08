@@ -2,20 +2,19 @@
 
 import math
 import rospy
-import message_filters
+import traceback
 from tf.transformations import quaternion_from_euler
 from tf2_ros import TransformBroadcaster
 
 from novatel_oem7_msgs.msg import INSPVA, BESTPOS
 from geometry_msgs.msg import PoseStamped, TwistStamped, Quaternion, TransformStamped, PoseWithCovarianceStamped, Pose
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import Imu
 from std_srvs.srv import Empty, EmptyResponse
 from ros_numpy import numpify, msgify
 import numpy as np
 
-from localization.WGS84ToUTMTransformer import WGS84ToUTMTransformer
-from localization.WGS84ToLest97Transformer import WGS84ToLest97Transformer
+from autoware_mini.localization import WGS84ToUTMTransformer
+from autoware_mini.localization import WGS84ToLest97Transformer
 
 
 class NovatelOem7Localizer:
@@ -29,6 +28,11 @@ class NovatelOem7Localizer:
         self.lest97_origin_northing = rospy.get_param("lest97_origin_northing")
         self.lest97_origin_easting = rospy.get_param("lest97_origin_easting")
         self.use_msl_height = rospy.get_param("~use_msl_height")
+        self.offline_height = rospy.get_param("~offline_height")
+        self.offline_azimuth = rospy.get_param("~offline_azimuth")
+        self.offline_lat = rospy.get_param("~offline_lat")
+        self.offline_lon = rospy.get_param("~offline_lon")
+        self.parent_frame = rospy.get_param("~parent_frame")
         self.child_frame = rospy.get_param("~child_frame")
 
         # variable to store undulation value from bestpos message
@@ -54,12 +58,7 @@ class NovatelOem7Localizer:
         rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback, queue_size=1, tcp_nodelay=True)
         if self.use_msl_height:
             self.bestpos_sub = rospy.Subscriber('/novatel/oem7/bestpos', BESTPOS, self.bestpos_callback, queue_size=1, tcp_nodelay=True)
-
-        inspva_sub = message_filters.Subscriber('/novatel/oem7/inspva', INSPVA, queue_size=1, tcp_nodelay=True)
-        imu_sub = message_filters.Subscriber('/gps/imu', Imu, queue_size=1, tcp_nodelay=True)
-
-        ts = message_filters.ApproximateTimeSynchronizer([inspva_sub, imu_sub], queue_size=5, slop=0.03)
-        ts.registerCallback(self.synchronized_callback)
+        rospy.Subscriber('/novatel/oem7/inspva', INSPVA, self.inspva_callback, queue_size=1, tcp_nodelay=True)
 
         # Services
         rospy.Service('cancel_pose', Empty, self.cancel_pose_callback)
@@ -76,7 +75,7 @@ class NovatelOem7Localizer:
         initialpose_matrix = numpify(pose_msg.pose.pose)
         current_pose_matrix = numpify(self.current_pose)
         # get the difference between initialpose and current_pose
-        self.relative_pose_matrix = initialpose_matrix.dot(np.linalg.inv(current_pose_matrix))
+        self.relative_pose_matrix = initialpose_matrix.dot(np.linalg.pinv(current_pose_matrix))
 
 
     def cancel_pose_callback(self, req):
@@ -84,46 +83,57 @@ class NovatelOem7Localizer:
         return EmptyResponse()
 
 
-    def synchronized_callback(self, inspva_msg, imu_msg):
+    def inspva_callback(self, inspva_msg):
+        try:
+            stamp = inspva_msg.header.stamp
 
-        stamp = inspva_msg.header.stamp
+            # transform GNSS coordinates and correct azimuth, if lat=lon=0 from INSPVA message use offline values
+            if inspva_msg.latitude == 0 and inspva_msg.longitude == 0:
+                rospy.logwarn_throttle(30, "Received 0 Latitude and Longitude from INSPVA message, using offline values")
+                latitude = self.offline_lat
+                longitude = self.offline_lon
+                azimuth = self.offline_azimuth
+                # offline_height uses msl height
+                height = self.offline_height
+            else:
+                latitude = inspva_msg.latitude
+                longitude = inspva_msg.longitude
+                azimuth = inspva_msg.azimuth
+                # inspva_msg contains ellipsoid height if msl (mean sea level) height is wanted then undulation is subtracted
+                height = inspva_msg.height
+                if self.use_msl_height:
+                    height -= self.undulation
 
-        # transform GNSS coordinates and correct azimuth
-        x, y = self.transformer.transform_lat_lon(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.height)
-        azimuth = self.transformer.correct_azimuth(inspva_msg.latitude, inspva_msg.longitude, inspva_msg.azimuth)
+            x, y = self.transformer.transform_lat_lon(latitude, longitude, height)
+            azimuth = self.transformer.correct_azimuth(latitude, longitude, azimuth)
+            linear_velocity = math.sqrt(inspva_msg.east_velocity**2 + inspva_msg.north_velocity**2)
 
-        linear_velocity = math.sqrt(inspva_msg.east_velocity**2 + inspva_msg.north_velocity**2)
-        angular_velocity = imu_msg.angular_velocity
+            # angles from GNSS (degrees) need to be converted to orientation (quaternion) in map frame
+            orientation = convert_angles_to_orientation(inspva_msg.roll, inspva_msg.pitch, azimuth)
 
-        # angles from GNSS (degrees) need to be converted to orientation (quaternion) in map frame
-        orientation = convert_angles_to_orientation(inspva_msg.roll, inspva_msg.pitch, azimuth)
+            current_pose = Pose()
+            current_pose.position.x = x
+            current_pose.position.y = y
+            current_pose.position.z = height
+            current_pose.orientation = orientation
 
-        # inspva_msg contains ellipsoid height if msl (mean sea level) height is wanted then undulation is subtracted
-        height = inspva_msg.height
-        if self.use_msl_height:
-            height -= self.undulation
+            # set true current_pose (from GNSS) to class variable
+            self.current_pose = current_pose
 
-        current_pose = Pose()
-        current_pose.position.x = x
-        current_pose.position.y = y
-        current_pose.position.z = height
-        current_pose.orientation = orientation
+            # if initalpose is set reposition car
+            if self.relative_pose_matrix is not None:
+                current_pose_matrix = numpify(self.current_pose)
+                new_current_pose_matrix = self.relative_pose_matrix.dot(current_pose_matrix)
+                # replace current_pose with new_current_pose
+                current_pose = msgify(Pose, new_current_pose_matrix)
 
-        # set true current_pose (from GNSS) to class variable
-        self.current_pose = current_pose
-
-        # if initalpose is set reposition car
-        if self.relative_pose_matrix is not None:
-            current_pose_matrix = numpify(self.current_pose)
-            new_current_pose_matrix = self.relative_pose_matrix.dot(current_pose_matrix)
-            # replace current_pose with new_current_pose
-            current_pose = msgify(Pose, new_current_pose_matrix)
-
-        # Publish 
-        self.publish_current_pose(stamp, current_pose)
-        self.publish_current_velocity(stamp, linear_velocity, angular_velocity)
-        self.publish_map_to_baselink_tf(stamp, current_pose)
-        self.publish_odometry(stamp, linear_velocity, current_pose, angular_velocity)
+            # Publish 
+            self.publish_current_pose(stamp, current_pose)
+            self.publish_current_velocity(stamp, linear_velocity)
+            self.publish_map_to_baselink_tf(stamp, current_pose)
+            self.publish_odometry(stamp, linear_velocity, current_pose)
+        except Exception as e:
+            rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
     def bestpos_callback(self, bestpos_msg):
         self.undulation = bestpos_msg.undulation
@@ -139,18 +149,17 @@ class NovatelOem7Localizer:
         self.current_pose_pub.publish(pose_msg)
 
 
-    def publish_current_velocity(self, stamp, linear_velocity, angular_velocity):
+    def publish_current_velocity(self, stamp, linear_velocity):
         
         vel_msg = TwistStamped()
 
         vel_msg.header.stamp = stamp
         vel_msg.header.frame_id = self.child_frame
         vel_msg.twist.linear.x = linear_velocity
-        vel_msg.twist.angular = angular_velocity
 
         self.current_velocity_pub.publish(vel_msg)
 
-    def publish_odometry(self, stamp, velocity, current_pose, angular_velocity):
+    def publish_odometry(self, stamp, velocity, current_pose):
 
         odom_msg = Odometry()
         odom_msg.header.stamp = stamp
@@ -158,7 +167,6 @@ class NovatelOem7Localizer:
         odom_msg.child_frame_id = 'base_link'
         odom_msg.pose.pose = current_pose
         odom_msg.twist.twist.linear.x = velocity
-        odom_msg.twist.twist.angular = angular_velocity
 
         self.odometry_pub.publish(odom_msg)
 
@@ -169,7 +177,7 @@ class NovatelOem7Localizer:
         t = TransformStamped()
 
         t.header.stamp = stamp
-        t.header.frame_id = "map"
+        t.header.frame_id = self.parent_frame
         t.child_frame_id = self.child_frame
 
         t.transform.translation.x = current_pose.position.x

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
-from autoware_msgs.msg import VehicleStatus, VehicleCmd
+from autoware_mini.msg import VehicleStatus, VehicleCmd
 from jsk_rviz_plugins.msg import OverlayText
 from sensor_msgs.msg import Image
 from std_msgs.msg import ColorRGBA

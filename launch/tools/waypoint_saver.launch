@@ -12,7 +12,7 @@
             <param name="waypoints_file"    value="$(find autoware_mini)/data/trajectories/$(arg waypoints_file)" />
         </node> 
 
-        <node if="$(arg launch_rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/rviz/autoware_mini.rviz" />
+        <node if="$(arg launch_rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find autoware_mini)/config/rviz/autoware_mini.rviz" />
     </group>
 
 </launch>

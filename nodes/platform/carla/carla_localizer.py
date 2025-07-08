@@ -17,22 +17,11 @@ from tf2_ros import TransformBroadcaster, TransformListener, Buffer, TransformEx
 
 from geometry_msgs.msg import PoseStamped, TwistStamped, TransformStamped, Pose
 from nav_msgs.msg import Odometry
-from localization.SimulationToUTMTransformer import SimulationToUTMTransformer
 
 class CarlaLocalizer:
 
     def __init__(self):
-
-        # Node parameters
-        self.use_transformer = rospy.get_param("/carla_localization/use_transformer")
-        use_custom_origin = rospy.get_param("/localization/use_custom_origin")
-        utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
-        utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
-
-        # Internal parameters
-        self.sim2utm_transformer = SimulationToUTMTransformer(use_custom_origin=use_custom_origin,
-                                                              origin_lat=utm_origin_lat,
-                                                              origin_lon=utm_origin_lon)
+        
         # Publishers
         self.pose_pub = rospy.Publisher('current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
         self.twist_pub = rospy.Publisher('current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
@@ -56,10 +45,7 @@ class CarlaLocalizer:
         callback odometry
         """
 
-        if self.use_transformer:
-            new_pose = self.sim2utm_transformer.transform_pose(msg.pose.pose)
-        else:
-            new_pose = msg.pose.pose
+        new_pose = msg.pose.pose
 
         map_transform = TransformStamped()
         map_transform.header.stamp = msg.header.stamp

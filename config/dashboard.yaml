@@ -5,3 +5,7 @@ novatel_oem7_visualizer:
   location_accuracy_stdev_bad: 0.5
   differential_age_good: 2.0
   differential_age_bad: 5.0
+
+logger:
+  throttle: 2.0  # seconds to wait to publish the same message again
+  history_length: 5  # number of messages to keep in history

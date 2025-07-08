@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import math
 from collections import defaultdict
 import traceback
 
@@ -8,14 +9,14 @@ import message_filters
 from tf2_ros import Buffer, TransformListener, TransformException
 
 from geometry_msgs.msg import TwistStamped
-from autoware_msgs.msg import DetectedObject, DetectedObjectArray
+from autoware_mini.msg import DetectedObject, DetectedObjectArray
 from radar_msgs.msg import RadarTracks
 from std_msgs.msg import ColorRGBA
 
-from helpers.detection import create_hull
-from helpers.transform import transform_point, transform_vector3
+from autoware_mini.detection import create_hull
+from autoware_mini.transform import transform_point, transform_vector3
 
-RED = ColorRGBA(1.0, 0.0, 0.0, 0.8)
+RED = ColorRGBA(1.0, 0.0, 0.0, 0.5)
 RADAR_CLASSIFICATION = {0:'unknown', 1:'static', 2:'dynamic'}
 
 
@@ -38,26 +39,24 @@ class RadarDetector:
         # Dynamic transform listener
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer)
-        # allow time for tf buffer to fill
-        rospy.sleep(0.5)
 
         # Static transform, fetch once
-        self.base_link_to_radar_tf = self.tf_buffer.lookup_transform('radar_fc', 'base_link', rospy.Time(0))
+        self.base_link_to_radar_tf = self.tf_buffer.lookup_transform('radar_fc', 'base_link', rospy.Time(0), rospy.Duration(1.0))
 
         # Subscribers
         tracks_sub = message_filters.Subscriber('/radar_fc/radar_tracks', RadarTracks, queue_size=1, buff_size=2**20, tcp_nodelay=True)
-        ego_speed_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
+        current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
 
         # Strict Time Sync
-        ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, ego_speed_sub], queue_size=5, slop=0.02)
+        ts = message_filters.ApproximateTimeSynchronizer([tracks_sub, current_velocity_sub], queue_size=5, slop=0.02)
         ts.registerCallback(self.syncronised_callback)
 
         rospy.loginfo("%s - initialized", rospy.get_name())
 
-    def syncronised_callback(self, tracks, ego_speed):
+    def syncronised_callback(self, tracks, current_velocity):
         """
         tracks: radar_msgs/RadarTracks
-        ego_speed: geometry_msgs/TwistStamped
+        current_velocity: geometry_msgs/TwistStamped
         publish: DetectedObjectArray
         """
         try:
@@ -90,21 +89,19 @@ class RadarDetector:
 
                 # Detected object
                 detected_object = DetectedObject()
-                detected_object.header.frame_id = self.output_frame
-                detected_object.header.stamp = tracks.header.stamp
                 detected_object.id = integer_id
                 detected_object.label = RADAR_CLASSIFICATION[track.classification]
                 detected_object.color = RED
                 detected_object.valid = True
-                detected_object.pose.position = transform_point(track.position, source_frame_to_output_tf)
-                detected_object.pose.orientation.w = 1.0
-                detected_object.pose_reliable = True
-                detected_object.velocity.linear = self.transform_velocity(track.velocity, ego_speed.twist.linear, source_frame_to_output_tf)
+                detected_object.centroid = detected_object.center = transform_point(track.position, source_frame_to_output_tf)
+                detected_object.heading = 0.0
+                detected_object.position_reliable = True
+                detected_object.velocity = self.transform_velocity(track, current_velocity.twist.linear, source_frame_to_output_tf)
                 detected_object.velocity_reliable = True
-                detected_object.acceleration.linear = transform_vector3(track.acceleration, source_frame_to_output_tf)
+                detected_object.acceleration = transform_vector3(track.acceleration, source_frame_to_output_tf)
                 detected_object.acceleration_reliable = True
                 detected_object.dimensions = track.size
-                detected_object.convex_hull = create_hull(detected_object, self.output_frame, tracks.header.stamp)
+                detected_object.convex_hull = create_hull(detected_object)
 
                 detected_objects_array.objects.append(detected_object)
 
@@ -113,13 +110,15 @@ class RadarDetector:
         except Exception as e:
             rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
-    def transform_velocity(self, track_velocity, ego_velocity, source_frame_to_output_tf):
+    def transform_velocity(self, track, ego_velocity, source_frame_to_output_tf):
         # compute ego_velocity in radar_fc frame
         velocity = transform_vector3(ego_velocity, self.base_link_to_radar_tf)
+        # heading towards the object
+        heading = math.atan2(track.position.y, track.position.x)
         # Computing speed relative to map.
-        velocity.x += track_velocity.x
-        velocity.y += track_velocity.y # this value is zero for track velocity
-        velocity.z += track_velocity.z # this value is zero for track velocity
+        velocity.x += track.velocity.x / math.cos(heading) # correct for heading
+        velocity.y += track.velocity.y # this value is zero for track velocity
+        velocity.z += track.velocity.z # this value is zero for track velocity
         # transforming the velocity vector to the output frame
         return transform_vector3(velocity, source_frame_to_output_tf)
 

@@ -1,0 +1,5 @@
+scenario_name,ade_score,ade_rating,speed_smoothness,speed_smoothness_rating
+tartu_demo_01,5.76,SUCCESS,0.39,SUCCESS
+tartu_demo_02,4.84,SUCCESS,0.27,SUCCESS
+tartu_demo_03,28.92,FAILURE,0.41,SUCCESS
+AVERAGE,13.17,0.67,0.36,1.00

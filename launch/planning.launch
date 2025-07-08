@@ -1,17 +1,33 @@
 <?xml version="1.0"?>
 <launch>
-
-    <arg name="global_planner"          default="lanelet2"  doc="waypoints, lanelet2, carla" />
-    <arg name="local_planner"           default="velocity"  doc="none, velocity" />
-    <arg name="use_path_smoothing"      default="true" />
-    <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv" />
-    <arg name="lanelet2_map_name"       default="tartu_demo.osm" />
+    <!-- Map configuration -->
+    <arg name="map_name"                    default="tartu_demo" />
+    <arg name="lanelet2_map_path"           default="$(find autoware_mini)/data/maps/$(arg map_name).osm" />
+    
+    <!-- Global planning -->
+    <arg name="global_planner"              default="lanelet2"  doc="waypoints, lanelet2, carla" />
+    <arg name="waypoints_file"              default="waypoints_erm_utm_1m.csv" />
+    <arg name="use_path_smoothing"          default="true" />
+    <arg name="load_goals"                  default="true" />
+    <arg name="goals_file"                  default="$(find autoware_mini)/data/maps/$(arg map_name)_goals.yaml" />
+    
+    <!-- Local planning -->
+    <arg name="local_planner"               default="rule"      doc="none, rule, openpilot" />
+    <arg name="enable_goal_checker"         default="true" />
+    <arg name="enable_object_checker"       default="true" />
+    <arg name="enable_auto_stop_checker"    default="true" />
+    <arg name="enable_traffic_light_checker" default="true" />
+    <arg name="enable_crosswalk_checker"    default="true" />
+    <arg name="enable_yielding_checker"     default="true" />
+    <arg name="enable_trajectory_checker"   default="true" />
+    <arg name="synchronization_method"      default="$(eval 'approximate' if 'openpilot' in local_planner else 'exact')" />
 
     <group ns="planning">
 
         <!-- Lanelet2 map visualizer -->
         <node pkg="autoware_mini" type="lanelet2_map_visualizer.py" name="lanelet2_map_visualizer" output="screen" required="true">
-            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/maps/$(arg lanelet2_map_name)" />
+            <param name="lanelet2_map_path" value="$(arg lanelet2_map_path)" />
+            <param name="enable_auto_stop_checker" value="$(arg enable_auto_stop_checker)" />
         </node>
 
         <!-- Waypoint loader -->
@@ -20,34 +36,85 @@
         </node>
 
         <!-- Lanelet2 global planner -->
-        <node if="$(eval global_planner=='lanelet2')" pkg="autoware_mini" type="lanelet2_global_planner.py" name="lanelet2_global_planner" output="screen" required="true">
-            <param name="lanelet2_map_name" value="$(find autoware_mini)/data/maps/$(arg lanelet2_map_name)" />
-        </node>
+        <group if="$(eval global_planner=='lanelet2')">
+            <node pkg="autoware_mini" type="lanelet2_global_planner.py" name="lanelet2_global_planner" output="screen" required="true">
+                <param name="lanelet2_map_path" value="$(arg lanelet2_map_path)" />
+            </node>
+            <node pkg="autoware_mini" type="global_path_visualizer.py" name="lanelet2_global_path_visualizer" output="screen" required="true">
+                <remap from="global_path" to="lanelet2_global_path"/>
+                <remap from="global_path_markers" to="lanelet2_global_path_markers"/>
+            </node>
+            <node pkg="autoware_mini" type="lane_change_planner.py" name="lane_change_planner" output="screen" required="true" />
+            <node pkg="autoware_mini" type="global_path_visualizer.py" name="lane_change_global_path_visualizer" output="screen" required="true">
+                <remap from="global_path" to="lane_change_global_path"/>
+                <remap from="global_path_markers" to="lane_change_global_path_markers"/>
+            </node>
+        </group>
 
         <!-- Carla waypoints publisher -->
-        <node if="$(eval global_planner=='carla')" pkg='autoware_mini' type='carla_waypoints_publisher.py' name='carla_waypoints_publisher' output='screen' required="true" />
+        <group if="$(eval global_planner=='carla')">
+            <node pkg='autoware_mini' type='carla_waypoints_publisher.py' name='carla_waypoints_publisher' output='screen' required="true" />
+            <include file="$(find carla_waypoint_publisher)/launch/carla_waypoint_publisher.launch">
+                <arg name='timeout'   value='100'/>
+            </include>
+        </group>
+
+        <!-- Path smoothing -->
+        <node if="$(arg use_path_smoothing)" pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true" />
+        <node unless="$(arg use_path_smoothing)" pkg="topic_tools" type="relay" args="/planning/lane_change_global_path /planning/global_path" name="global_path_relay" output="screen" required="true" />
 
         <!-- Global path visualizer -->
         <node pkg="autoware_mini" type="global_path_visualizer.py" name="global_path_visualizer" output="screen" required="true"/>
 
-        <!-- Path smoothing -->
-        <group if="$(arg use_path_smoothing)">
-            <node pkg="autoware_mini" type="path_smoothing.py" name="path_smoothing" output="screen" required="true" />
-            <node pkg="autoware_mini" type="global_path_visualizer.py" name="smoothed_path_visualizer" output="screen" required="true">
-                <remap from="global_path" to="smoothed_path"/>
-                <remap from="global_path_markers" to="smoothed_path_markers"/>
-            </node>
-        </group>
-        <node unless="$(arg use_path_smoothing)" pkg="topic_tools" type="relay" args="/planning/global_path /planning/smoothed_path" name="smoothed_path_relay" output="screen" required="true" />
+        <!-- Goal publisher -->
+        <node if="$(eval load_goals and eval('_' + '_import_' + '_(\'os\')').path.exists(goals_file))" pkg="autoware_mini" type="goal_publisher.py" name="goal_publisher" output="screen" required="true">
+            <param name="goals_file" value="$(arg goals_file)" />
+        </node>
 
-        <!-- Local planner -->
-        <group if="$(eval local_planner=='velocity')">
-            <node pkg="autoware_mini" type="velocity_local_planner.py" name="velocity_local_planner" output="screen" required="true" >
-                <param name="lanelet2_map_name" value="$(find autoware_mini)/data/maps/$(arg lanelet2_map_name)" />
+        <!-- Rule-based local planner -->
+        <group if="$(eval 'rule' in local_planner)">
+            <node pkg="autoware_mini" type="local_path_extractor.py" name="local_path_extractor" output="screen" required="true" />
+            <node if="$(arg enable_goal_checker)" pkg="autoware_mini" type="goal_stop_checker.py" name="goal_stop_checker" output="screen" required="true" />
+            <node if="$(arg enable_object_checker)" pkg="autoware_mini" type="object_collision_checker.py" name="object_collision_checker" output="screen" required="true" >
+                <remap if="$(eval 'openpilot' in local_planner)" from="extracted_local_path" to="openpilot_local_path"/>
             </node>
-            <node pkg="autoware_mini" type="local_path_visualizer.py" name="local_path_visualizer" output="screen" required="true"/>
+            <node if="$(arg enable_traffic_light_checker)" pkg="autoware_mini" type="traffic_light_stopline_checker.py" name="traffic_light_stopline_checker" output="screen" required="true" >
+                <param name="lanelet2_map_path" value="$(arg lanelet2_map_path)" />
+            </node>
+            <node if="$(arg enable_crosswalk_checker)" pkg="autoware_mini" type="pedestrian_crosswalk_checker.py" name="pedestrian_crosswalk_checker" output="screen" required="true" >
+                <param name="lanelet2_map_path" value="$(arg lanelet2_map_path)" />
+            </node>
+            <node if="$(arg enable_yielding_checker)" pkg="autoware_mini" type="yielding_checker.py" name="yielding_checker" output="screen" required="true" >
+                <param name="lanelet2_map_path" value="$(arg lanelet2_map_path)" />
+            </node>
+            <node if="$(arg enable_trajectory_checker)" pkg="autoware_mini" type="trajectory_collision_checker.py" name="trajectory_collision_checker" output="screen" required="true" />
+            <node if="$(arg enable_auto_stop_checker)" pkg="autoware_mini" type="automatic_stop_checker.py" name="automatic_stop_checker" output="screen" required="true" >
+                <param name="lanelet2_map_path" value="$(arg lanelet2_map_path)" />
+            </node>
+            <node pkg="autoware_mini" type="collision_points_merger.py" name="collision_points_merger" output="screen" required="true" >
+                <param name="synchronization_method"        value="$(arg synchronization_method)" />
+                <param name="enable_goal_checker"           value="$(arg enable_goal_checker)"/>
+                <param name="enable_object_checker"         value="$(arg enable_object_checker)"/>
+                <param name="enable_auto_stop_checker"      value="$(arg enable_auto_stop_checker)"/>
+                <param name="enable_traffic_light_checker"  value="$(arg enable_traffic_light_checker)"/>
+                <param name="enable_crosswalk_checker"      value="$(arg enable_crosswalk_checker)"/>
+                <param name="enable_yielding_checker"       value="$(arg enable_yielding_checker)"/>
+                <param name="enable_trajectory_checker"     value="$(arg enable_trajectory_checker)"/>
+            </node>
+            <node pkg="autoware_mini" type="speed_planner.py" name="speed_planner" output="screen" required="true" >
+                <remap if="$(eval 'openpilot' in local_planner)" from="extracted_local_path" to="openpilot_local_path"/>
+                <param name="synchronization_method" value="$(arg synchronization_method)" />
+            </node>
         </group>
-        <node if="$(eval local_planner=='none')" pkg="topic_tools" type="relay" args="/planning/smoothed_path /planning/local_path" name="local_path_relay" output="screen" required="true" />
+
+        <!-- Openpilot local planner -->
+        <node if="$(eval 'openpilot' in local_planner)" pkg="autoware_mini" type="openpilot_local_planner.py" name="openpilot_local_planner" output="screen" required="true" >
+            <remap unless="$(eval 'rule' in local_planner)" from="openpilot_local_path" to="local_path"/>
+        </node>
+
+        <node if="$(eval 'rule' in local_planner or 'openpilot' in local_planner)" pkg="autoware_mini" type="local_path_visualizer.py" name="local_path_visualizer" output="screen" required="true"/>
+
+        <node if="$(eval local_planner=='none')" pkg="topic_tools" type="relay" args="/planning/global_path /planning/local_path" name="local_path_relay" output="screen" required="true" />
 
         <!-- Config -->
         <rosparam command="load" file="$(find autoware_mini)/config/planning.yaml" />

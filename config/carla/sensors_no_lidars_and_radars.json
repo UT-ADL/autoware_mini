@@ -84,6 +84,24 @@
                                     "image_size_y": 1544,
                                     "fov": 25.3,
                                     "sensor_tick": 0.1
+                                },
+                                {
+                                    "type": "sensor.camera.rgb",
+                                    "id": "interfacea_link1",
+                                    "spawn_point": {"x": 0.83, "y": -0.51, "z": -0.49, "roll": 0.1102298, "pitch": 3.6999932, "yaw": -72.9728863},
+                                    "image_size_x": 1928,
+                                    "image_size_y": 1208,
+                                    "fov": 120,
+                                    "sensor_tick": 0.1
+                                },
+                                {
+                                    "type": "sensor.camera.rgb",
+                                    "id": "interfacea_link2",
+                                    "spawn_point": {"x": 0.89, "y": 0.04, "z": -0.49, "roll": 1.9309309, "pitch": 1.7789899, "yaw": 2.1799671},
+                                    "image_size_x": 1928,
+                                    "image_size_y": 1208,
+                                    "fov": 120,
+                                    "sensor_tick": 0.1
                                 }
                             ]
                         }

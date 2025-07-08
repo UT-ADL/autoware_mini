@@ -1,0 +1,169 @@
+<robot name="lexus_platform">
+  <!-- Frames -->
+  <link name="base_link" />
+  <link name="base_footprint" />
+  <link name="lidar_center" />
+  <link name="lidar_front/os_sensor" />
+  <link name="car_front" />
+  <link name="radar_fc" />
+  <link name="imu_link" />
+  <link name="lidar" />
+  <link name="lidar_0" />
+  <link name="camera_fr" />
+  <link name="camera_fl" />
+  <link name="interfaceb_link0" />
+  <link name="interfacea_link0" />
+  <link name="interfacea_link1" />
+  <link name="interfacea_link2" />
+  <link name="interfacea_link3" />
+  <link name="camera0" />
+  <link name="camera1" />
+  <link name="camera2" />
+  <link name="camera3" />
+  <link name="camera4" />
+  <link name="openpilot" />
+  
+  <!-- Sensor Transforms -->
+
+  <!-- base_footprint -->
+  <joint name="base_footprint" type="fixed" >
+    <parent link="base_link" />
+    <child link="base_footprint" />
+    <origin xyz="0 0 -0.6" rpy="0 0 0" />
+  </joint>
+
+  <!-- Lidar_center -->
+  <joint name="lidar_center" type="fixed" >
+    <parent link="base_link" />
+    <child link="lidar_center" />
+    <origin xyz="1.02 0 1.51" rpy="-0.0050194 -0.0047068 -0.055" />
+  </joint>
+
+  <!-- Lidar -->
+  <joint name="lidar" type="fixed" >
+    <parent link="lidar_center" />
+    <child link="lidar" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <!-- Lidar for Vella -->
+  <joint name="lidar_0" type="fixed" >
+    <parent link="lidar_center" />
+    <child link="lidar_0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <!-- Lidar Front -->
+  <joint name="lidar_front/os_sensor" type="fixed" >
+    <parent link="lidar_center" />
+    <child link="lidar_front/os_sensor" />
+    <origin xyz="0.8559 0.0642 -0.4051" rpy="0.003995038 -0.009182 0.8641542"/>
+  </joint>
+
+  <!-- Car front -->
+  <joint name="car_front" type="fixed" >
+    <parent link="radar_fc" />
+    <child link="car_front" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <!-- Front Center Radar -->
+  <joint name="radar_fc" type="fixed" >
+    <parent link="base_link" />
+    <child link="radar_fc" />
+    <origin xyz="4 0 -0.12" rpy="0 0 0" />
+  </joint>
+
+  <!-- Imu -->
+  <joint name="imu_link" type="fixed" >
+    <parent link="base_link" />
+    <child link="imu_link" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <!-- Mako Cameras -->
+  <joint name="camera_fr" type="fixed" >
+    <parent link="interfaceb_link0" />
+    <child link="camera_fr" />
+    <origin xyz="0.254 0.184 0.190" rpy="0.22484 0.24415 -0.02373" />
+  </joint>
+
+  <joint name="camera_fl" type="fixed" >
+    <parent link="interfaceb_link0" />
+    <child link="camera_fl" />
+    <origin xyz="-0.200 0.201 0.160" rpy="0.19831 -0.12529 -0.07869" />
+  </joint> 
+
+  <!-- Nvidia Cameras -->
+  <!-- Front 60 -->
+  <joint name="interfaceb_link0" type="fixed" >
+    <parent link="lidar_center" />
+    <child link="interfaceb_link0" />
+    <origin xyz="0.89 0.09 -0.34" rpy="-1.6083209 0.02426008 -1.5470598" />
+  </joint> 
+
+  <!-- left 120 -->
+  <joint name="interfacea_link0" type="fixed" >
+    <parent link="interfaceb_link0" />
+    <child link="interfacea_link0" />
+    <origin xyz="-0.568 0.010 -0.123" rpy="-0.020944 -1.338668 -0.01239184" />
+  </joint>
+
+  <!-- right 120 -->
+  <joint name="interfacea_link1" type="fixed" >
+    <parent link="interfaceb_link0" />
+    <child link="interfacea_link1" />
+    <origin xyz="0.620 0.001 -0.074" rpy="0.0 1.3000958 0.0471239" />
+  </joint>
+
+  <!-- front 120 -->
+  <joint name="interfacea_link2" type="fixed" >
+    <parent link="interfaceb_link0" />
+    <child link="interfacea_link2" />
+    <origin xyz="0.043 0.003 0.002" rpy="-0.01501 -0.00390 0.01019" />
+  </joint>
+
+  <!-- back 120 -->
+  <joint name="interfacea_link3" type="fixed" >
+    <parent link="interfaceb_link0" />
+    <child link="interfacea_link3" />
+    <origin xyz="0.080 0.03 -1.752" rpy="3.0490902 0.0523599 3.117158" />
+  </joint>
+
+  <joint name="camera0" type="fixed" >
+    <parent link="interfacea_link0" />
+    <child link="camera0" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <joint name="camera1" type="fixed" >
+    <parent link="interfacea_link1" />
+    <child link="camera1" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <joint name="camera2" type="fixed" >
+    <parent link="interfacea_link2" />
+    <child link="camera2" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <joint name="camera3" type="fixed" >
+    <parent link="interfacea_link3" />
+    <child link="camera3" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <joint name="camera4" type="fixed" >
+    <parent link="interfaceb_link0" />
+    <child link="camera4" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <joint name="openpilot" type="fixed" >
+    <parent link="base_link" />
+    <child link="openpilot" />
+    <origin xyz="2.41 0.09 0.77" rpy="3.14159 -0.01 0" />
+  </joint>
+
+</robot>
