@@ -64,7 +64,7 @@ Here are couple of (slightly outdated) short videos introducing the Autoware Min
 3. Install system dependencies (ignore the errors for missing Carla packages if not using Carla)
 
    ```
-   rosdep update
+   rosdep update --include-eol-distros
    rosdep install --include-eol-distros --from-paths . --ignore-src -r -y
    ```
 

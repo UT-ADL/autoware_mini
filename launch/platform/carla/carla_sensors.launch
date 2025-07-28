@@ -33,7 +33,6 @@
     ## Carla topic remaps ##
     ########################
   -->
-  <remap from="/carla/ego_vehicle/base_link/lidar_center" to="/lidar_center/pointcloud" />
   <remap from="/carla/ego_vehicle/base_link/lidar_center/lidar_front/os_sensor" to="/lidar_front/points" />
   <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fl/camera_info" to="/camera_fl/camera_info" />
   <remap from="/carla/ego_vehicle/base_link/lidar_center/camera_fr/camera_info" to="/camera_fr/camera_info" />
@@ -47,6 +46,11 @@
   <remap from="/carla/ego_vehicle/base_link/gnss" to="/gps/fix" />
   <remap from="/carla/ego_vehicle/base_link/imu" to="/gps/imu" />
 
+  <!-- Crop out vehicle own points in Carla -->
+  <node ns="/detection/lidar/center" pkg="nodelet" type="nodelet" name="crop_box" args="standalone pcl/CropBox" output="screen" required="true">
+      <remap from="~input" to="/carla/ego_vehicle/base_link/lidar_center" />
+      <remap from="~output" to="/lidar_center/points_raw" />
+  </node>
   <!-- ====================================================================================================== -->
 
   <!--

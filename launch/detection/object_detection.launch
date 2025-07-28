@@ -32,11 +32,6 @@
                 </node>
                 <group unless="$(eval 'fast' in detector)">
                     <group if="$(arg use_lidar_center)" ns="center">
-                        <!-- Only functional in Carla simulation -->
-                        <node pkg="nodelet" type="nodelet" name="crop_box" args="standalone pcl/CropBox" output="screen" required="true">
-                            <remap from="~input" to="/lidar_center/pointcloud" />
-                            <remap from="~output" to="/lidar_center/points_raw" />
-                        </node>
                         <remap from="points_raw" to="/lidar_center/points_raw" />
                         <remap unless="$(arg use_lidar_front)" from="points_ground" to="/detection/lidar/points_ground" />
                         <remap unless="$(arg use_lidar_front)" from="points_no_ground" to="/detection/lidar/points_no_ground" />
