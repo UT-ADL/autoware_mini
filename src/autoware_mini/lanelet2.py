@@ -1,4 +1,4 @@
-from lanelet2.io import Origin, load
+from lanelet2.io import Origin, loadRobust
 from lanelet2.projection import UtmProjector
 from lanelet2.core import GPSPoint, BasicPoint2d, BoundingBox2d, BasicPoint3d
 from lanelet2.geometry import length2d, findNearest, project, findWithin2d
@@ -30,7 +30,7 @@ def load_lanelet2_map(lanelet2_map_path):
     else:
         raise ValueError('Unknown coordinate_transformer for loading the Lanelet2 map ("utm" should be used): ' + coordinate_transformer)
 
-    lanelet2_map = load(lanelet2_map_path, projector)
+    lanelet2_map, errors = loadRobust(lanelet2_map_path, projector)
 
     return lanelet2_map
 
@@ -144,7 +144,7 @@ def get_traffic_light_stop_lines(lanelet2_map):
 
     lines = {}
     for reg_el in lanelet2_map.regulatoryElementLayer:
-        if reg_el.attributes["subtype"] == "traffic_light":
+        if reg_el.attributes["subtype"] == "traffic_light" and "ref_line" in reg_el.parameters:
             for line in reg_el.parameters["ref_line"]:
                 lines[line.id] = shapely.linestrings([(p.x, p.y, p.z) for p in line])
     return lines

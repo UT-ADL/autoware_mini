@@ -33,7 +33,7 @@ class PathWrapper:
 
         if blinkers:
             b = np.array([(waypoint.blinker_state) for waypoint in self.waypoints])
-            distance_to_blinker_interpolator = interp1d(self._distances, (b).astype(np.float) , kind='previous', bounds_error=False, fill_value=Waypoint.STR_STRAIGHT)
+            distance_to_blinker_interpolator = interp1d(self._distances, (b).astype(float) , kind='previous', bounds_error=False, fill_value=Waypoint.STR_STRAIGHT)
             self._distance_to_blinker_interpolator = distance_to_blinker_interpolator
 
         if boundaries:
