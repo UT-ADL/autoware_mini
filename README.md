@@ -142,7 +142,7 @@ To see the camera traffic light detections enable **Detections** > **Traffic lig
 4. Copy `tartu_demo_v0.9.15.2.tar.gz` inside the `Import` folder under `<CARLA ROOT>` directory.
 5. Run `./ImportAssets.sh` from the `<CARLA ROOT>` directory. This will install the `tartu_demo` map.
 6. Delete the `tartu_demo_v0.9.15.2.tar.gz` file from the `Import` folder.
-7. Download [utlexus.tar.gz](https://github.com/UT-ADL/carla_lexus/releases/download/v0.9.15.tar.gz/carla_lexus-0.9.15.tar.gz).
+7. Download [utlexus.tar.gz](https://github.com/UT-ADL/carla_lexus/releases/download/v0.9.15/utlexus.tar.gz).
 8. Copy `carla_lexus-0.9.15.tar.gz` inside the `Import` folder under `<CARLA ROOT>` directory.
 9. Run `./ImportAssets.sh` from the `<CARLA ROOT>` directory. This will install the UT Lexus vehicle model.
 10. Delete the `carla_lexus-0.9.15.tar.gz` file from the `Import` folder.
