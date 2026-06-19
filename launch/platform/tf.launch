@@ -1,6 +1,18 @@
 <launch>
-  <group ns="vehicle_platform_frames">
-    <param name="robot_description" textfile="$(find autoware_mini)/config/urdf/lexus.urdf" />
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="vehicle_platform_frames_publisher" />
+  <arg name="lexus_shadow"        default="false"/>
+
+  <group ns="vehicle">
+    <group ns="lexus_frames">
+      <param name="robot_description" textfile="$(find autoware_mini)/config/urdf/lexus.urdf" />
+      <node pkg="robot_state_publisher" type="robot_state_publisher" name="lexus_frames" output="screen" required="true" />
+    </group>
+    <group ns="lexus_model">
+      <param name="robot_description" textfile="$(find autoware_mini)/config/urdf/lexus_model.urdf" />
+      <node pkg="robot_state_publisher" type="robot_state_publisher" name="lexus_model" output="screen" required="true" />
+    </group>
+    <group if="$(arg lexus_shadow)" ns="lexus_shadow">
+      <param name="robot_description" textfile="$(find autoware_mini)/config/urdf/lexus_shadow.urdf" />
+      <node pkg="robot_state_publisher" type="robot_state_publisher" name="lexus_shadow" output="screen" required="true" />
+    </group>
   </group>
 </launch>

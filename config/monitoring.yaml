@@ -1,0 +1,42 @@
+autonomy_overlay:
+  components: &autonomy_components
+    "Localization": ""
+    "Object Detection": ""
+    "Traffic Lights": ""
+    "Local Planner": ""
+    "Control": ""
+
+detailed_overlay:
+  components: &detailed_components
+    "GNSS": "/dashboard/gnss_detailed"
+    "PACMOD": "/dashboard/pacmod_detailed"
+    "SSC": "/dashboard/ssc_detailed"
+    "CPU": "/dashboard/cpu_detailed"
+    "RAM Information": "/dashboard/ram_detailed"
+
+diagnostics_overlay:
+  components: &other_components
+    "camera_fl": "Mako Camera Left"
+    "camera_fr": "Mako Camera Right"
+    "velodyne_points topic status": "Velodyne Lidar"
+    "ouster": "Ouster Lidar"
+    "Joystick Driver Status": "Button Panel"
+    "NTP offset": "NTP Time"
+    "sensors_monitor": "PC Sensors"
+
+diagnostics_player:
+  sound_loop_rate: 20 # Hz, nonzero
+  components:
+    - *autonomy_components
+    - *detailed_components
+    - *other_components
+
+cpu_monitor:
+  warning_load_average: 26 # "auto" will use the number of logical CPU cores as warning threshold
+
+ram_monitor:
+  warning_percentage: 90
+
+topic_monitor:
+  ema_gain: 0.2
+  hardware_id: "topic_monitor"

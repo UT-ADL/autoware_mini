@@ -1,0 +1,43 @@
+{
+  "_comment": "Per-vendor wheel-tester defaults loaded by wheel_ffb.py. Edit values to retune; the daemon reads this on every run. `match` is a list of substrings checked against the evdev device name (case-insensitive) to pick the vendor preset. Booleans (e.g. \"invert\") — set true to enable. Numeric keys map to --flag=N when applied. Keys starting with '_' are ignored.",
+
+  "fanatec": {
+    "_comment": "Fanatec CSL Elite WB via hid-fanatecff. hz=100 because hid-fanatecff's USB output saturates at the daemon default of 500. target-lpf-hz=8 smooths the incoming target stream; friction-deadband=0.020 prevents friction-comp limit-cycling near zero.",
+    "match": ["fanatec", "clubsport", "csl", "podium"],
+    "invert": true,
+    "kp": 7.0,
+    "ki": 0.1,
+    "kd": 0.60,
+    "max-gain": 0.7,
+    "friction-comp": 0.12,
+    "friction-deadband": 0.020,
+    "target-lpf-hz": 8,
+    "hz": 100
+  },
+
+  "thrustmaster": {
+    "_comment": "T300 + hid-tmff2. Belt-driven, ~0.08 stiction. Motor sign opposite encoder, hence invert. PID gains untested in the field — kept at the daemon defaults. target-lpf-hz and friction-deadband added by analogy with the Fanatec tuning (LPF kills slider-drag buzz; deadband prevents friction-comp limit-cycle near zero, scaled smaller than Fanatec's because friction-comp is smaller).",
+    "match": ["thrustmaster", "t300", "t150", "t248", "t500", "t-gt", "tx"],
+    "invert": true,
+    "kp": 1.0,
+    "ki": 0.1,
+    "kd": 0.20,
+    "max-gain": 0.6,
+    "friction-comp": 0.08,
+    "friction-deadband": 0.012,
+    "target-lpf-hz": 10
+  },
+
+  "logitech": {
+    "_comment": "G29/G920/G923/etc. Gear-driven. Native-evdev FF_CONSTANT comes out sign-flipped, hence invert. ki=3.0 (vs. ~0.1 elsewhere) winds the integrator quickly enough to clear gear stiction at the end of a move. kd=0.45 (half the original 0.85): the higher value chattered audibly during braking and on small target changes because gear backlash made d_current spike. friction-deadband=0.005 keeps steady-state offset under ~2° on a 900° G29. friction-comp reduced from 0.18 to 0.12 because the integrator now does most of the work — the leftover role of friction-comp is just to step through stiction at the deadband boundary, and a smaller value makes the on/off transition less audible.",
+    "match": ["logitech", "g29", "g920", "g923", "g25", "g27", "driving force"],
+    "invert": true,
+    "kp": 12.0,
+    "ki": 3.0,
+    "kd": 0.45,
+    "max-gain": 1.0,
+    "friction-comp": 0.12,
+    "friction-deadband": 0.005,
+    "target-lpf-hz": 8
+  }
+}

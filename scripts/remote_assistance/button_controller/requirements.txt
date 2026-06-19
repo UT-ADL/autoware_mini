@@ -1,0 +1,6 @@
+# Python dependencies for the StreamDeck button controller (button_controller.py).
+# Installed by this folder's setup.sh, or directly: pip install -r requirements.txt
+#   streamdeck - talk to the Elgato StreamDeck device (enumerate, set key images)
+#   pillow     - render the button key images fed to the StreamDeck
+streamdeck
+pillow

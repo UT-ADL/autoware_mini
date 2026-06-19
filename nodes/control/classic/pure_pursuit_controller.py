@@ -6,13 +6,13 @@ import message_filters
 import threading
 import traceback
 import shapely
-from autoware_mini.geometry import get_heading_from_orientation, normalize_heading_error, get_heading_between_two_points
+from autoware_mini.geometry import get_heading_from_orientation, normalize_angle, get_heading_between_two_points
 from autoware_mini.transform import get_distance_to_car_front
 from autoware_mini.path import PathWrapper
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Pose, PoseStamped, TwistStamped, Point
 from std_msgs.msg import ColorRGBA, Float32MultiArray
-from autoware_mini.msg import Path, VehicleCmd, Gear
+from autoware_mini.msg import LocalPath, VehicleCommand
 
 
 class PurePursuitController:
@@ -24,31 +24,30 @@ class PurePursuitController:
         self.wheel_base = rospy.get_param("/vehicle/wheel_base")
         self.heading_angle_limit = rospy.get_param("heading_angle_limit")
         self.lateral_error_limit = rospy.get_param("lateral_error_limit")
-        self.blinker_lookahead_time = rospy.get_param("blinker_lookahead_time")
-        self.blinker_min_lookahead_distance = rospy.get_param("blinker_min_lookahead_distance")
-        self.publish_debug_info = rospy.get_param("~publish_debug_info")
+        self.turn_signal_lookahead_time = rospy.get_param("turn_signal_lookahead_time")
+        self.turn_signal_min_lookahead_distance = rospy.get_param("turn_signal_min_lookahead_distance")
         self.default_acceleration = rospy.get_param("/planning/default_acceleration")
         self.default_deceleration = rospy.get_param("/planning/default_deceleration")
         self.max_deceleration = rospy.get_param("/planning/max_deceleration")
         self.stopping_speed_limit = rospy.get_param("stopping_speed_limit")
-        self.simulate_cmd_delay = rospy.get_param("~simulate_cmd_delay")
+        self.steer_cmd_delay = rospy.get_param("~steer_cmd_delay")
+        self.speed_cmd_delay = rospy.get_param("~speed_cmd_delay")
 
         # Variables - init
         self.path = None
         self.is_blocked = False
-        self.closest_object_velocity = 0.0
+        self.target_object_speed = 0.0
         self.stopping_point_distance = 0.0
         self.lock = threading.Lock()
         self.distance_to_car_front = get_distance_to_car_front()
 
         # Publishers
-        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=1, tcp_nodelay=True)
-        if self.publish_debug_info:
-            self.pure_pursuit_markers_pub = rospy.Publisher('controller_markers', MarkerArray, queue_size=1, tcp_nodelay=True)
-            self.controller_debug_pub = rospy.Publisher('controller_debug', Float32MultiArray, queue_size=1, tcp_nodelay=True)
+        self.vehicle_command_pub = rospy.Publisher('vehicle_cmd', VehicleCommand, queue_size=1, tcp_nodelay=True)
+        self.pure_pursuit_markers_pub = rospy.Publisher('controller_markers', MarkerArray, queue_size=1, tcp_nodelay=True)
+        self.controller_debug_pub = rospy.Publisher('controller_debug', Float32MultiArray, queue_size=1, tcp_nodelay=True)
 
         # Subscribers
-        rospy.Subscriber('/planning/local_path', Path, self.path_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
+        rospy.Subscriber('/planning/local_path', LocalPath, self.path_callback, queue_size=1, buff_size=2**20, tcp_nodelay=True)
         current_pose_sub = message_filters.Subscriber('/localization/current_pose', PoseStamped, queue_size=1, tcp_nodelay=True)
         current_velocity_sub = message_filters.Subscriber('/localization/current_velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
         ts = message_filters.TimeSynchronizer([current_pose_sub, current_velocity_sub], queue_size=2)
@@ -59,34 +58,33 @@ class PurePursuitController:
 
     def path_callback(self, path_msg):
 
-        if len(path_msg.waypoints) == 0:
+        if not path_msg.waypoints:
             # if path is cancelled and empty waypoints received
             path = None
             is_blocked = False
-            closest_object_velocity = 0.0
+            target_object_speed = 0.0
             stopping_point_distance = 0.0
         else:
-            path = PathWrapper(path_msg.waypoints, velocities=True, blinkers=True)
+            path = PathWrapper(path_msg.waypoints)
             is_blocked = path_msg.is_blocked
-            closest_object_velocity = path_msg.closest_object_velocity
+            target_object_speed = path_msg.target_object_speed
             stopping_point_distance = path_msg.stopping_point_distance
 
         with self.lock:
             self.path = path
             self.is_blocked = is_blocked
-            self.closest_object_velocity = closest_object_velocity
+            self.target_object_speed = target_object_speed
             self.stopping_point_distance = stopping_point_distance
 
     def current_status_callback(self, current_pose_msg, current_velocity_msg):
 
         try:
-            if self.publish_debug_info:
-                start_time = rospy.get_time()
+            start_time = rospy.get_time()
 
             with self.lock:
                 path = self.path
                 is_blocked = self.is_blocked
-                closest_object_velocity = self.closest_object_velocity
+                target_object_speed = self.target_object_speed
                 stopping_point_distance = self.stopping_point_distance
 
             stamp = current_pose_msg.header.stamp
@@ -98,14 +96,14 @@ class PurePursuitController:
 
             current_position = current_pose_msg.pose.position
             current_heading = get_heading_from_orientation(current_pose_msg.pose.orientation)
-            current_velocity = current_velocity_msg.twist.linear.x
+            current_speed = current_velocity_msg.twist.linear.x
 
             cross_track_error = path.get_cross_track_error(current_position)
 
             # simulate delay in vehicle command. Project car into future location and use it to calculate current steering command
-            if self.simulate_cmd_delay > 0.0:
-                current_position.x += math.cos(current_heading) * current_velocity * self.simulate_cmd_delay
-                current_position.y += math.sin(current_heading) * current_velocity * self.simulate_cmd_delay
+            if self.steer_cmd_delay > 0.0:
+                current_position.x += math.cos(current_heading) * current_speed * self.steer_cmd_delay
+                current_position.y += math.sin(current_heading) * current_speed * self.steer_cmd_delay
 
             current_position_shapely = shapely.Point(current_position.x, current_position.y)
 
@@ -118,7 +116,7 @@ class PurePursuitController:
                 rospy.logwarn_throttle(10, "%s - end of path reached", rospy.get_name())
                 return
 
-            lookahead_distance = current_velocity * self.lookahead_time
+            lookahead_distance = current_speed * self.lookahead_time
             lookahead_distance = max(lookahead_distance, self.min_lookahead_distance)
 
             # find lookahead_point on path
@@ -129,7 +127,7 @@ class PurePursuitController:
             lookahead_heading = get_heading_between_two_points(current_position, lookahead_point)
             heading_differenece = lookahead_heading - current_heading
 
-            heading_angle_difference = normalize_heading_error(heading_differenece)
+            heading_angle_difference = normalize_angle(heading_differenece)
 
             if abs(cross_track_error) > self.lateral_error_limit or abs(math.degrees(heading_angle_difference)) > self.heading_angle_limit:
                 # stop vehicle if cross track error or heading angle difference is over limit
@@ -141,58 +139,57 @@ class PurePursuitController:
             curvature = 2 * math.sin(heading_differenece) / ego_distance_to_lookahead_point
             steering_angle = math.atan(self.wheel_base * curvature)
 
-            # find velocity at current position
-            target_velocity = path.get_velocity_at_distance(ego_distance_from_path_start)
-            if target_velocity < self.stopping_speed_limit:
-                target_velocity = 0.0
+            # calculate target speed
+            target_speed = path.get_speed_at_distance(ego_distance_from_path_start + self.speed_cmd_delay * current_speed)
+            if target_speed < self.stopping_speed_limit:
+                target_speed = 0.0
 
             # if decelerating because of obstacle then calculate necessary deceleration
             emergency = 0
-            if is_blocked and target_velocity < current_velocity:
+            if is_blocked and target_speed < current_speed:
                 # calculate distance from car front to stopping point
                 car_front_to_stopping_point_distance = stopping_point_distance - ego_distance_from_path_start - self.distance_to_car_front
                 if car_front_to_stopping_point_distance > 0:
                     # always allow minimum deceleration, to be able to adapt to map speeds
-                    acceleration = min(0.5 * (closest_object_velocity**2 - current_velocity**2) / car_front_to_stopping_point_distance, -self.default_deceleration)
+                    # for approaching objects (v < 0), correction accounts for the object closing distance during ego braking
+                    correction = min(target_object_speed, 0.0)
+                    acceleration = min(0.5 * (target_object_speed**2 - (current_speed - correction)**2) / car_front_to_stopping_point_distance, -self.default_deceleration)
                 else:
                     # emergency braking - car front over the stopping point
                     acceleration = -self.max_deceleration
                     emergency = 1
             else:
                 # use the default acceleration/deceleration limits
-                if target_velocity > current_velocity:
+                if target_speed > current_speed:
                     acceleration = self.default_acceleration
                 else:
                     acceleration = -self.default_deceleration
 
-            blinker_lookahead_distance = max(self.blinker_min_lookahead_distance, self.blinker_lookahead_time * current_velocity)
-            left_blinker, right_blinker = path.get_blinker_state_with_lookahead(ego_distance_from_path_start, blinker_lookahead_distance)
+            turn_signal_lookahead_distance = max(self.turn_signal_min_lookahead_distance, self.turn_signal_lookahead_time * current_speed)
+            turn_signal = path.get_turn_signal_with_lookahead(ego_distance_from_path_start, turn_signal_lookahead_distance)
 
             # Publish
-            self.publish_vehicle_command(stamp, steering_angle, target_velocity, acceleration, left_blinker, right_blinker, emergency)
-            if self.publish_debug_info:
+            self.publish_vehicle_command(stamp, steering_angle, target_speed, acceleration, turn_signal, emergency)
+            if self.pure_pursuit_markers_pub.get_num_connections() > 0:
                 # convert lookahead_point from shpely 2d point to geometry_msg/Point
                 lookahead_point = Point(x=lookahead_point.x, y=lookahead_point.y, z=current_pose_msg.pose.position.z)
                 self.publish_pure_pursuit_markers(current_pose_msg.header, current_pose_msg.pose.position, lookahead_point, heading_angle_difference)
-                self.controller_debug_pub.publish(Float32MultiArray(data=[(rospy.get_time() - start_time), current_heading, lookahead_heading, heading_angle_difference, cross_track_error, target_velocity]))
+            if self.controller_debug_pub.get_num_connections() > 0:
+                self.controller_debug_pub.publish(Float32MultiArray(data=[rospy.get_time() - start_time, current_heading, lookahead_heading, heading_angle_difference, cross_track_error, target_speed]))
 
         except Exception as e:
             rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
 
-    def publish_vehicle_command(self, stamp, steering_angle=0.0, target_velocity=0.0, acceleration=0.0, left_blinker=0, right_blinker=0, emergency=0):
-        vehicle_cmd = VehicleCmd()
+    def publish_vehicle_command(self, stamp, steering_angle=0.0, target_speed=0.0, acceleration=0.0, turn_signal=VehicleCommand.TURN_STRAIGHT, emergency=0):
+        vehicle_cmd = VehicleCommand()
         vehicle_cmd.header.stamp = stamp
-        vehicle_cmd.header.frame_id =  "base_link"
-        # blinkers
-        vehicle_cmd.lamp_cmd.l = left_blinker
-        vehicle_cmd.lamp_cmd.r = right_blinker
-        # gear
-        vehicle_cmd.gear_cmd.gear = Gear.DRIVE
-        # velocity and steering
-        vehicle_cmd.ctrl_cmd.linear_velocity = target_velocity
-        vehicle_cmd.ctrl_cmd.linear_acceleration = acceleration
-        vehicle_cmd.ctrl_cmd.steering_angle = steering_angle
+        vehicle_cmd.header.frame_id = "base_link"
+        vehicle_cmd.turn_signal = turn_signal
+        vehicle_cmd.gear = VehicleCommand.GEAR_DRIVE
+        vehicle_cmd.speed = float(target_speed)
+        vehicle_cmd.acceleration = float(acceleration)
+        vehicle_cmd.steering_angle = float(steering_angle)
         vehicle_cmd.emergency = emergency
         self.vehicle_command_pub.publish(vehicle_cmd)
 

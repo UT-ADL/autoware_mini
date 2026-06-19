@@ -1,0 +1,52 @@
+stages:
+  - ai
+
+.claude_base:
+  stage: ai
+  image: registry.hpc.ut.ee/mirror/library/node:24-alpine3.21
+  variables:
+    GIT_STRATEGY: fetch
+  before_script:
+    - apk update
+    - apk add --no-cache git curl bash
+    - npm install -g @anthropic-ai/claude-code
+    # Configure third-party GitLab MCP server (uses PAT instead of OAuth)
+    - >
+      claude mcp add-json gitlab
+      '{"command":"npx","args":["-y","@zereight/mcp-gitlab"],"env":{"GITLAB_PERSONAL_ACCESS_TOKEN":"'"${GITLAB_TOKEN}"'","GITLAB_API_URL":"'"${CI_API_V4_URL}"'"}}'
+  # Claude Code will use ANTHROPIC_API_KEY from CI/CD variables
+  # GitLab MCP requires GITLAB_TOKEN (PAT with api scope) from CI/CD variables
+
+# Manual MR review from web UI with fixed prompt
+review:
+  extends: .claude_base
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+  script:
+    - |
+      claude -p "Project: ${CI_PROJECT_PATH}, MR: !${CI_MERGE_REQUEST_IID}. Review this MR and post your response as a comment using mcp__gitlab__create_merge_request_note." \
+        --permission-mode acceptEdits \
+        --allowedTools "Bash(*) Read(*) Edit(*) Write(*) mcp__gitlab__*" \
+        --debug
+
+# Triggered by @claude mention in comments via webhook
+# Expects webhook variables: PROJECT_PATH, AI_FLOW_INPUT, and MR_IID or ISSUE_IID
+comment:
+  extends: .claude_base
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "trigger" && $AI_FLOW_INPUT'
+  script:
+    - |
+      if [ -n "$MR_IID" ]; then
+        CONTEXT="Project: ${PROJECT_PATH}, MR: !${MR_IID}. After completing the task, post your response as a comment on the MR using mcp__gitlab__create_merge_request_note."
+      elif [ -n "$ISSUE_IID" ]; then
+        CONTEXT="Project: ${PROJECT_PATH}, Issue: #${ISSUE_IID}. After completing the task, post your response as a comment on the issue using mcp__gitlab__create_issue_note."
+      else
+        CONTEXT="Project: ${PROJECT_PATH}."
+      fi
+
+      claude -p "${CONTEXT} User request: ${AI_FLOW_INPUT}" \
+        --permission-mode acceptEdits \
+        --allowedTools "Bash(*) Read(*) Edit(*) Write(*) mcp__gitlab__*" \
+        --debug

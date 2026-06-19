@@ -1,43 +1,141 @@
-import math
 import shapely
 import numpy as np
-from scipy.interpolate import interp1d
-import shapely.ops
+from copy import deepcopy
+from functools import cached_property
+import scipy.interpolate
 from autoware_mini.msg import Waypoint
 from geometry_msgs.msg import Point, Pose
-from autoware_mini.geometry import get_heading_between_two_points, get_orientation_from_heading
+from autoware_mini.geometry import get_heading_between_two_points, get_orientation_from_heading, calculate_headings
+from autoware_mini.shapely import calculate_cross_track_error
 
 class PathWrapper:
-    def __init__(self, waypoints, distances=False, velocities=False, blinkers=False, boundaries=False):
+    def __init__(self, waypoints):
 
         if len(waypoints) == 1:
-            ValueError("PathWrapper - waypoints array must be empty or have more than 1 waypoint ")
+            raise ValueError("Path must have 0 or at least 2 waypoints")
 
         self.waypoints = waypoints
-        self._waypoints_xyz = np.array([(waypoint.position.x, waypoint.position.y, waypoint.position.z) for waypoint in self.waypoints])
 
-        self.linestring = shapely.LineString(self._waypoints_xyz)
+        if waypoints:
+            self.centerline_array = np.array([(waypoint.position.x, waypoint.position.y, waypoint.position.z) for waypoint in waypoints])
+        else:
+            self.centerline_array = np.empty((0, 3))
+
+        self.linestring = shapely.linestrings(self.centerline_array)
         shapely.prepare(self.linestring)
 
-        if distances or velocities or blinkers:
-            d = np.cumsum(np.sqrt(np.sum(np.diff(self._waypoints_xyz[:, :2], axis=0)**2, axis=1)))
-            self._distances = np.insert(d, 0, 0)
+    @cached_property
+    def distances(self):
+        d = np.cumsum(np.sqrt(np.sum(np.diff(self.centerline_array[:, :2], axis=0)**2, axis=1)))
+        return np.insert(d, 0, 0)
 
-        self.left_boundary = None
-        self.right_boundary = None
+    @cached_property
+    def left_boundary_array(self):
+        return np.array([(waypoint.left_boundary_point.x, waypoint.left_boundary_point.y, waypoint.left_boundary_point.z) for waypoint in self.waypoints])
 
-        if velocities:
-            v = np.array([waypoint.speed for waypoint in self.waypoints])
-            distance_to_velocity_interpolator = interp1d(self._distances, v, kind='linear', bounds_error=False, fill_value=0.0)
-            self._distance_to_velocity_interpolator = distance_to_velocity_interpolator
+    @cached_property
+    def right_boundary_array(self):
+        return np.array([(waypoint.right_boundary_point.x, waypoint.right_boundary_point.y, waypoint.right_boundary_point.z) for waypoint in self.waypoints])
 
-        if blinkers:
-            b = np.array([(waypoint.blinker_state) for waypoint in self.waypoints])
-            distance_to_blinker_interpolator = interp1d(self._distances, (b).astype(np.float) , kind='previous', bounds_error=False, fill_value=Waypoint.STR_STRAIGHT)
-            self._distance_to_blinker_interpolator = distance_to_blinker_interpolator
+    @cached_property
+    def left_boundary_distances(self):
+        d = np.cumsum(np.sqrt(np.sum(np.diff(self.left_boundary_array[:, :2], axis=0)**2, axis=1)))
+        return np.insert(d, 0, 0)
 
-        if boundaries:
-            self._generate_boundaries()
+    @cached_property
+    def right_boundary_distances(self):
+        d = np.cumsum(np.sqrt(np.sum(np.diff(self.right_boundary_array[:, :2], axis=0)**2, axis=1)))
+        return np.insert(d, 0, 0)
+
+    @cached_property
+    def speeds(self):
+        return np.array([waypoint.speed for waypoint in self.waypoints])
+
+    @cached_property
+    def speed_limits(self):
+        return np.array([waypoint.speed_limit for waypoint in self.waypoints])
+
+    @cached_property
+    def turn_signals(self):
+        return np.array([waypoint.turn_signal for waypoint in self.waypoints])
+
+    @cached_property
+    def priorities(self):
+        return np.array([waypoint.priority for waypoint in self.waypoints])
+
+    @cached_property
+    def boundary_types(self):
+        return np.array([(waypoint.left_boundary_type, waypoint.right_boundary_type) for waypoint in self.waypoints])
+
+    @cached_property
+    def stop_line_ids(self):
+        return np.array([waypoint.stop_line_id for waypoint in self.waypoints])
+
+    @cached_property
+    def stop_line_types(self):
+        return np.array([waypoint.stop_line_type for waypoint in self.waypoints])
+
+    @cached_property
+    def left_boundary(self):
+        left_boundary = shapely.linestrings(self.left_boundary_array)
+        shapely.prepare(left_boundary)
+        return left_boundary
+
+    @cached_property
+    def right_boundary(self):
+        right_boundary = shapely.linestrings(self.right_boundary_array)
+        shapely.prepare(right_boundary)
+        return right_boundary
+
+    @cached_property
+    def _distance_to_heading_interpolator(self):
+        h = calculate_headings(self.centerline_array)
+        return scipy.interpolate.interp1d(self.distances, h , kind='previous', bounds_error=False, fill_value="extrapolate")
+
+    @cached_property
+    def _distance_to_speed_interpolator(self):
+        return scipy.interpolate.interp1d(self.distances, self.speeds, kind='linear', bounds_error=False, fill_value=0.0)
+
+    @cached_property
+    def _distance_to_speed_limit_interpolator(self):
+        return scipy.interpolate.interp1d(self.distances, self.speed_limits, kind='previous', bounds_error=False, fill_value=0.0)
+
+    @cached_property
+    def _distance_to_turn_signal_interpolator(self):
+        return scipy.interpolate.interp1d(self.distances, self.turn_signals, kind='previous', bounds_error=False, fill_value=Waypoint.TURN_STRAIGHT)
+
+    @cached_property
+    def _distance_to_priority_interpolator(self):
+        return scipy.interpolate.interp1d(self.distances, self.priorities.astype(float) , kind='previous', bounds_error=False, fill_value=0.0)
+
+    @cached_property
+    def _distance_to_lane_change_interpolator(self):
+        lane_change_states = np.array([waypoint.lanechange_state for waypoint in self.waypoints])
+        return scipy.interpolate.interp1d(self.distances, lane_change_states, kind='nearest', bounds_error=False, fill_value=0.0)
+
+    @cached_property
+    def _left_type_interpolator(self):
+        return scipy.interpolate.interp1d(self.distances, self.boundary_types[:, 0] , kind='previous', bounds_error=False, fill_value=Waypoint.VIRTUAL)
+
+    @cached_property
+    def _right_type_interpolator(self):
+        return scipy.interpolate.interp1d(self.distances, self.boundary_types[:, 1] , kind='previous', bounds_error=False, fill_value=Waypoint.VIRTUAL)
+
+    @cached_property
+    def _centerline_to_left_boundary_distance(self):
+        return scipy.interpolate.interp1d(self.distances, self.left_boundary_distances, kind='linear', bounds_error=False, fill_value='extrapolate')
+
+    @cached_property
+    def _centerline_to_right_boundary_distance(self):
+        return scipy.interpolate.interp1d(self.distances, self.right_boundary_distances, kind='linear', bounds_error=False, fill_value='extrapolate')
+
+    def get_stop_lines(self, target_types, exclude_ids=None):
+        # get stop lines of certain types, optionally excluding specific ids
+        mask = np.isin(self.stop_line_types, target_types)
+        if exclude_ids:
+            mask &= ~np.isin(self.stop_line_ids, exclude_ids)
+        # return distances, ids, types and indices of stop lines matching the criteria
+        return self.distances[mask], self.stop_line_ids[mask], self.stop_line_types[mask], np.where(mask)[0]
 
     def get_waypoint_index_at_distance(self, distance, side="left"):
         """
@@ -46,8 +144,7 @@ class PathWrapper:
         :param side: side to search for the distance
         :return: waypoint
         """
-        assert hasattr(self, '_distances'), "Waypoint distances not available, check that path was initialized with distances=True"
-        return np.searchsorted(self._distances, distance, side)
+        return np.searchsorted(self.distances, distance, side)
 
     def _extract_waypoints(self, index_start, index_end, copy=False):
         """
@@ -62,87 +159,21 @@ class PathWrapper:
             # for each new waypoint copy only the necessary parts
             for waypoint in self.waypoints[index_start:index_end]:
                 new_waypoint = Waypoint(position=waypoint.position,
-                                        heading=waypoint.heading,
-                                        speed=waypoint.speed, 
-                                        left_width=waypoint.left_width,
-                                        right_width=waypoint.right_width,
+                                        speed=waypoint.speed,
+                                        left_boundary_point=waypoint.left_boundary_point,
+                                        right_boundary_point=waypoint.right_boundary_point,
+                                        left_boundary_type=waypoint.left_boundary_type,
+                                        right_boundary_type=waypoint.right_boundary_type,
                                         lanechange_state=waypoint.lanechange_state,
-                                        blinker_state=waypoint.blinker_state)
+                                        turn_signal=waypoint.turn_signal,
+                                        priority=waypoint.priority,
+                                        stop_line_id=waypoint.stop_line_id,
+                                        stop_line_type=waypoint.stop_line_type)
                 waypoints.append(new_waypoint)
         else:
             waypoints = self.waypoints[index_start:index_end]
 
         return waypoints
-    
-    def _generate_boundaries(self):
-        if len(self.waypoints) < 2:
-            return
-        
-        elif len(self.waypoints) == 2:
-            left_offsets = [self.waypoints[0].left_width, self.waypoints[1].left_width]
-            right_offsets = [self.waypoints[0].right_width, self.waypoints[1].right_width]
-
-            left_offset_lines = shapely.offset_curve([self.linestring, self.linestring], left_offsets)
-            right_offset_lines = shapely.offset_curve([self.linestring, self.linestring], right_offsets)
-
-            left_boundary_coords = [(left_offset_lines[0].coords[0][0], left_offset_lines[0].coords[0][1], self.waypoints[0].position.z),
-                                    (left_offset_lines[1].coords[1][0], left_offset_lines[1].coords[1][1], self.waypoints[1].position.z)]
-            right_boundary_coords = [(right_offset_lines[0].coords[0][0], right_offset_lines[0].coords[0][1], self.waypoints[0].position.z),
-                                    (right_offset_lines[1].coords[1][0], right_offset_lines[1].coords[0][1], self.waypoints[1].position.z)]
-            
-        else:
-            three_point_lines = []
-            left_offsets = []
-            right_offsets = []
-
-            # create three-point linestring segments for every waypoint
-            for i in range(len(self.waypoints)):
-                left_offsets.append(self.waypoints[i].left_width)
-                right_offsets.append(-self.waypoints[i].right_width)
-
-                # the first and last waypoints cannot be in the middle
-                if i == 0:
-                    j = i + 1
-                elif i == len(self.waypoints) - 1:
-                    j = i - 1
-                else:
-                    j = i
-
-                three_point_lines.append([[self.waypoints[j-1].position.x, self.waypoints[j-1].position.y],
-                                        [self.waypoints[j].position.x, self.waypoints[j].position.y],
-                                        [self.waypoints[j+1].position.x, self.waypoints[j+1].position.y]])
-
-            three_point_linestrings = shapely.linestrings(three_point_lines)
-            
-            left_offset_lines = shapely.offset_curve(three_point_linestrings, left_offsets, join_style="mitre")
-            right_offset_lines = shapely.offset_curve(three_point_linestrings, right_offsets, join_style="mitre")
-
-            assert len(three_point_linestrings) == len(left_offsets) == len(right_offsets)
-
-            left_boundary_coords = []
-            right_boundary_coords = []
-            for i in range(len(three_point_linestrings)):
-                z_coord = self.waypoints[i].position.z
-
-                if i == 0: # use the first point of the first segment as the first lane boundary point 
-                    j = 0
-                elif i == len(three_point_linestrings) - 1: # use the third point of the last segment as the last lane boundary point 
-                    j = 2
-                else: # take the second point from every other segment
-                    j = 1
-                    
-                left_offset_point = left_offset_lines[i].coords[j]
-                right_offset_point = right_offset_lines[i].coords[j]
-
-                left_boundary_coords.append((left_offset_point[0], left_offset_point[1], z_coord))
-                right_boundary_coords.append((right_offset_point[0], right_offset_point[1], z_coord))
-
-        left_boundary, right_boundary = shapely.linestrings([left_boundary_coords, right_boundary_coords])
-        shapely.prepare(left_boundary)
-        shapely.prepare(right_boundary)
-
-        self.left_boundary = left_boundary
-        self.right_boundary = right_boundary
 
     def extract_waypoints(self, distance_start, distance_end, trim=False, copy=False):
         """
@@ -159,27 +190,40 @@ class PathWrapper:
         # extend the path by one waypoint backwards
         index_start = max(0, index_start - 1)
 
-        # if indices differ by 1, then 1 waypoint is returnd and a linestring cannot be created. Therefore return empty list instead
-        if abs(index_start - index_end) == 1:
+        # there must be at least two waypoints for a valid path
+        if index_end <= index_start + 1:
             return []
 
         waypoints = self._extract_waypoints(index_start, index_end, copy=copy)
 
         if trim:
-            # modify start and end of the path by shifting waypoints to exact locations determined by distances
-            waypoints[0].speed = float(self._distance_to_velocity_interpolator(distance_start))
-            waypoints[0].blinker_state = int(self._distance_to_blinker_interpolator(distance_start))
+            if not copy:
+                # if not copy, we need to create new waypoints
+                waypoints[0] = deepcopy(waypoints[0])
+                waypoints[-1] = deepcopy(waypoints[-1])
+
             start_wp_pose = self.linestring.interpolate(distance_start)
-            # z will remain the same
             waypoints[0].position.x = start_wp_pose.x
             waypoints[0].position.y = start_wp_pose.y
 
-            waypoints[-1].speed = float(self._distance_to_velocity_interpolator(distance_end))
-            waypoints[-1].blinker_state = int(self._distance_to_blinker_interpolator(distance_end))
             end_wp_pose = self.linestring.interpolate(distance_end)
-            # z will remain the same
             waypoints[-1].position.x = end_wp_pose.x
             waypoints[-1].position.y = end_wp_pose.y
+
+            waypoints[0].speed = float(self.get_speed_at_distance(distance_start))
+            waypoints[-1].speed = float(self.get_speed_at_distance(distance_end))
+
+            waypoints[0].speed_limit = float(self.get_speed_limit_at_distance(distance_start))
+            waypoints[-1].speed_limit = float(self.get_speed_limit_at_distance(distance_end))
+
+            waypoints[0].turn_signal = int(self.get_turn_signal_at_distance(distance_start))
+            waypoints[-1].turn_signal = int(self.get_turn_signal_at_distance(distance_end))
+
+            waypoints[0].left_boundary_point = self.get_left_boundary_point_at_distance(distance_start)
+            waypoints[-1].left_boundary_point = self.get_left_boundary_point_at_distance(distance_end)
+
+            waypoints[0].right_boundary_point = self.get_right_boundary_point_at_distance(distance_start)
+            waypoints[-1].right_boundary_point = self.get_right_boundary_point_at_distance(distance_end)
 
         return waypoints
 
@@ -194,8 +238,8 @@ class PathWrapper:
         index_start = self.get_waypoint_index_at_distance(distance_start, side="right")
         index_end = self.get_waypoint_index_at_distance(distance_end, side="left")
 
-        distances = self._distances[index_start:index_end]
-        points = self._waypoints_xyz[index_start:index_end]
+        distances = self.distances[index_start:index_end]
+        points = self.centerline_array[index_start:index_end]
         points = shapely.points(points)
 
         # interpolate and add start and end points
@@ -206,49 +250,82 @@ class PathWrapper:
 
         return points, distances
 
-
-    def get_velocity_at_distance(self, distance):
+    def get_speed_at_distance(self, distance):
         """
-        Get the target velocity at a certain distance along the path.
+        Get the target speed at a certain distance along the path.
+        :param distance: array of distances or a single distance from the path start (m)
+        :return: target speed
+        """
+        return self._distance_to_speed_interpolator(distance)
+
+    def get_speed_limit_at_distance(self, distance):
+        """
+        Get the speed limit at a certain distance along the path.
+        :param distance: array of distances or a single distance from the path start (m)
+        :return: speed limit
+        """
+        return self._distance_to_speed_limit_interpolator(distance)
+
+    def get_turn_signal_with_lookahead(self, ego_distance_from_path_start, turn_signal_lookahead_distance):
+        """
+        Get turn signal with lookahead.
+        :param ego_distance_from_path_start: distance from path start (m)
+        :param turn_signal_lookahead_distance: distance to look ahead point for turn signals (m)
+        :return: Waypoint turn signal constant (TURN_LEFT, TURN_RIGHT, TURN_STRAIGHT)
+        """
+        wapoints = self.extract_waypoints(ego_distance_from_path_start, ego_distance_from_path_start + turn_signal_lookahead_distance, trim=False, copy=False)
+        # iterate over waypoints and return first non-straight turn signal
+        for waypoint in wapoints:
+            if waypoint.turn_signal != Waypoint.TURN_STRAIGHT:
+                return waypoint.turn_signal
+        return Waypoint.TURN_STRAIGHT
+
+    def get_turn_signal_at_distance(self, distance):
+        """
+        Get turn signal state.
+        :param distance: array of distances or a single distance from path start (m)
+        :return: turn signal state
+        """
+        return self._distance_to_turn_signal_interpolator(distance)
+
+    def get_lane_change_state_at_distance(self, distance):
+        """
+        Get lane change state.
+        :param ego_distance_from_path_start: array of distances or a single distance from path start (m)
+        :return: lane change state
+        """
+        return self._distance_to_lane_change_interpolator(distance).astype(int)
+
+    def check_turn_signal_in_range(self, distance_start, distance_end, turn_signal):
+        """
+        Check if a certain turn signal is present in a certain distance range along the path
+        :param distance_start: start distance along the path (m)
+        :param distance_end: end distance along the path (m)
+        :param turn_signal: turn signal to check for
+        :return: True if turn signal is found, False otherwise
+        """
+
+        waypoints = self.extract_waypoints(distance_start, distance_end, trim=False, copy=False)
+        for waypoint in waypoints:
+            if waypoint.turn_signal == turn_signal:
+                return True
+        return False
+
+    def get_priority_at_distance(self, distance):
+        """
+        Get priority at a certain distance along the path.
         :param distance: distance from the path start (m)
-        :return: target velocity
+        :return: priority
         """
-        assert hasattr(self, '_distance_to_velocity_interpolator'), "Velocity interpolator not available, check that path was initialized with velocities=True"
-        return float(self._distance_to_velocity_interpolator(distance))
+        return self._distance_to_priority_interpolator(distance)
 
-    def get_blinker_state_with_lookahead(self, ego_distance_from_path_start, blinker_lookahead_distance):
-        """
-        Get blinker state. 
-        :param ego_distance_from_path_start: distance from path start (m)
-        :param blinker_lookahead_d: distance to look ahead point for blinkers (m)
-        :return: LampCmd (l, r) included in VehicleCmd
-        """
-        assert hasattr(self, '_distance_to_blinker_interpolator'), "Blinker interpolator not available, check that path was initialized with blinkers=True"
-        current_pose_blinker_state = int(self._distance_to_blinker_interpolator(ego_distance_from_path_start))
-
-        if current_pose_blinker_state != Waypoint.STR_STRAIGHT:
-            return get_blinker_state(current_pose_blinker_state)
-        else:
-            lookahead_blinker_state = int(self._distance_to_blinker_interpolator(blinker_lookahead_distance))
-            return get_blinker_state(lookahead_blinker_state)
-        
-    def get_blinker_at_distance(self, distance):
-        """
-        Get blinker steering state. 
-        :param ego_distance_from_path_start: distance from path start (m)
-        :return: steering state
-        """
-        assert hasattr(self, '_distance_to_blinker_interpolator'), "Blinker interpolator not available, check that path was initialized with blinkers=True"
-        return int(self._distance_to_blinker_interpolator(distance))
-    
     def get_elevation_at_distance(self, distance):
         """
         Get the elevation at a certain distance along the path.
         :param distance: distance from the path start (m)
         :return: elevation
         """
-        point_location = self.linestring.interpolate(distance)
-        return point_location.z
+        return self.linestring.interpolate(distance).z
 
     def get_pose_at_distance(self, distance):
         """
@@ -261,22 +338,71 @@ class PathWrapper:
         point = self.linestring.interpolate(distance)
         heading = self.get_heading_at_distance(distance)
 
-        return Pose(position = Point(x = point.x, y = point.y, z = point.z),
+        return Pose(position = Point(x=point.x, y=point.y, z=point.z),
                     orientation = get_orientation_from_heading(heading))
+
+    def get_point_at_distance(self, distance):
+        """
+        Get a path point at a certain distance along the path.
+        :param distance: array of distances or a single distance from the path start (m)
+        :return: list of Points or Point
+        """
+        point = self.linestring.interpolate(distance)
+        if isinstance(point, shapely.Point):
+            return Point(x=point.x, y=point.y, z=point.z)
+        else:
+            return [Point(x=p.x, y=p.y, z=p.z) for p in point]
 
     def get_heading_at_distance(self, distance):
         """
         Get heading of the path at a given distance
-        :param distance: distance along the path
+        :param distance: array of distances or a single distance along the path
         :return: heading angle in radians
         """
+        return self._distance_to_heading_interpolator(distance)
 
-        point_after_object = self.linestring.interpolate(distance + 0.1)
-        # if distance is negative it is measured from the end of the linestring in reverse direction
-        point_before_object = self.linestring.interpolate(max(0, distance - 0.1))
+    def get_left_boundary_point_at_distance(self, distance):
+        """
+        Get the left boundary point at a certain distance along the centerline.
+        :param distance: array of distances or a single distance from the path start (m)
+        :return: left boundary point(s)
+        """
+        boundary_distance = np.nan_to_num(self._centerline_to_left_boundary_distance(distance), nan=0.0)
+        point = self.left_boundary.interpolate(boundary_distance)
+        if isinstance(point, shapely.Point):
+            return Point(x=point.x, y=point.y, z=point.z)
+        else:
+            return [Point(x=p.x, y=p.y, z=p.z) for p in point]
 
-        # get heading between two points
-        return get_heading_between_two_points(point_before_object, point_after_object)
+    def get_right_boundary_point_at_distance(self, distance):
+        """
+        Get the right boundary point at a certain distance along the centerline.
+        :param distance: array of distances or a single distance from the path start (m)
+        :return: right boundary point(s)
+        """
+        boundary_distance = np.nan_to_num(self._centerline_to_right_boundary_distance(distance), nan=0.0)
+        point = self.right_boundary.interpolate(boundary_distance)
+        if isinstance(point, shapely.Point):
+            return Point(x=point.x, y=point.y, z=point.z)
+        else:
+            return [Point(x=p.x, y=p.y, z=p.z) for p in point]
+
+
+    def get_left_boundary_type_at_distance(self, distance):
+        """
+        Get left boundary type state at a certain distance along the path.
+        :param ego_distance_from_path_start: array of distances or a single distance from path start (m)
+        :return: left boundary type
+        """
+        return self._left_type_interpolator(distance)
+
+    def get_right_boundary_type_at_distance(self, distance):
+        """
+        Get right boundary type state at a certain distance along the path.
+        :param ego_distance_from_path_start: distance from path start (m)
+        :return: right boundary type
+        """
+        return self._right_type_interpolator(distance)
 
     def get_cross_track_error(self, current_position):
         """
@@ -284,55 +410,15 @@ class PathWrapper:
         :param current_pose: current pose
         :return: cross track error
         """
-
         current_position = shapely.Point(current_position.x, current_position.y, current_position.z)
-        return calculate_cross_track_error(self.linestring, current_position)
-    
+        return float(calculate_cross_track_error(self.linestring, current_position))
+
     def get_heading_towards_path(self, point):
         """
         Get heading from point towards the closest point on path
         :param point: Shapely point
         :return: heading angle in radians
         """
-
         distance = self.linestring.project(point)
         location = self.linestring.interpolate(distance)
         return get_heading_between_two_points(point, location)
-
-
-def get_blinker_state(steering_state):
-    """
-    Get blinker state  from WaypointState/steering_state
-    :param steering_state: steering state
-    :return: LampCmd (l, r) included in VehicleCmd
-    """
-
-    if steering_state == Waypoint.STR_LEFT:
-        return 1, 0
-    elif steering_state == Waypoint.STR_RIGHT:
-        return 0, 1
-    elif steering_state == Waypoint.STR_STRAIGHT:
-        return 0, 0
-    else:
-        return 0, 0
-
-def calculate_cross_track_error(linestring, position):
-    """
-    Calculate cross track error - calc distance from track and get the sign
-    https://robotics.stackexchange.com/questions/22989/what-is-wrong-with-my-stanley-controller-for-car-steering-control
-
-    :param linsetring: shapely linestring
-    :param position: current position
-    :return: cross track error
-    """
-
-    distance_from_path_start = linestring.project(position)
-
-    # if distance is negative it is measured from the end of the linestring in reverse direction
-    pos1 = linestring.interpolate(max(0, distance_from_path_start - 0.1))
-    pos2 = linestring.interpolate(distance_from_path_start + 0.1)
-
-    numerator = (pos2.x - pos1.x) * (pos1.y - position.y) - (pos1.x - position.x) * (pos2.y - pos1.y)
-    denominator = math.sqrt((pos2.x - pos1.x) ** 2 + (pos2.y - pos1.y) ** 2)
-
-    return numerator / denominator

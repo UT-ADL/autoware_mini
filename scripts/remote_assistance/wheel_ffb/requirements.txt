@@ -1,0 +1,8 @@
+# Python dependencies for the wheel force-feedback daemon (wheel_ffb.py).
+# Installed by this folder's setup.sh, or directly: pip install -r requirements.txt
+#   evdev    - read the wheel axis + write FF_CONSTANT force effects
+#   aiohttp  - localhost WebSocket server
+#   docopt   - CLI parsing from the daemon's module docstring
+evdev
+aiohttp
+docopt

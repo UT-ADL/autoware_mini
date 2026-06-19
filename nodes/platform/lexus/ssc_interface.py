@@ -8,7 +8,7 @@ import rospy
 import message_filters
 
 from std_msgs.msg import Bool, Header
-from autoware_mini.msg import VehicleCmd, VehicleStatus, Gear
+from autoware_mini.msg import VehicleCommand, VehicleStatus
 from automotive_platform_msgs.msg import SpeedMode, SteerMode, TurnSignalCommand, GearCommand,\
      CurvatureFeedback, ThrottleFeedback, BrakeFeedback, GearFeedback, SteeringFeedback, VelocityAccelCov
 from automotive_navigation_msgs.msg import ModuleState
@@ -16,12 +16,11 @@ from automotive_navigation_msgs.msg import ModuleState
 
 LOW_SPEED_THRESH = 0.01
 
-# TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP = {
-#     SystemRptInt.TURN_NONE: 0,
-#     SystemRptInt.TURN_LEFT: VehicleStatus.LAMP_LEFT,
-#     SystemRptInt.TURN_RIGHT: VehicleStatus.LAMP_RIGHT,
-#     SystemRptInt.TURN_HAZARDS: VehicleStatus.LAMP_HAZARD
-# }
+TURN_SIGNAL_TO_SSC = {
+    VehicleCommand.TURN_STRAIGHT: TurnSignalCommand.NONE,
+    VehicleCommand.TURN_LEFT: TurnSignalCommand.LEFT,
+    VehicleCommand.TURN_RIGHT: TurnSignalCommand.RIGHT,
+}
 
 class SSCInterface:
     def __init__(self):
@@ -59,12 +58,12 @@ class SSCInterface:
 
         # initialize command subscribers
         rospy.Subscriber('engage', Bool, self.engage_callback, queue_size=None, tcp_nodelay=True)
-        rospy.Subscriber('/control/vehicle_cmd', VehicleCmd, self.vehicle_cmd_callback, queue_size=1, tcp_nodelay=True)
+        rospy.Subscriber('/control/vehicle_cmd', VehicleCommand, self.vehicle_cmd_callback, queue_size=1, tcp_nodelay=True)
 
         # initialize SSC feedback subscribers
         rospy.Subscriber('/ssc/module_states', ModuleState, self.module_states_callback, queue_size=1, tcp_nodelay=True)
         message_filters.ApproximateTimeSynchronizer([
-                message_filters.Subscriber('/ssc/curvature_feedback', CurvatureFeedback, queue_size=1, tcp_nodelay=True), 
+                message_filters.Subscriber('/ssc/curvature_feedback', CurvatureFeedback, queue_size=1, tcp_nodelay=True),
                 message_filters.Subscriber('/ssc/throttle_feedback', ThrottleFeedback, queue_size=1, tcp_nodelay=True),
                 message_filters.Subscriber('/ssc/brake_feedback', BrakeFeedback, queue_size=1, tcp_nodelay=True),
                 message_filters.Subscriber('/ssc/gear_feedback', GearFeedback, queue_size=1, tcp_nodelay=True),
@@ -84,16 +83,16 @@ class SSCInterface:
 
     def vehicle_cmd_callback(self, msg):
         # check for valid combinations of gear and velocity
-        is_valid_cmd = (msg.gear_cmd.gear in [Gear.DRIVE, Gear.LOW] and msg.ctrl_cmd.linear_velocity >= 0.0) or \
-                       (msg.gear_cmd.gear == Gear.REVERSE and msg.ctrl_cmd.linear_velocity <= 0.0) or \
-                       (msg.gear_cmd.gear == Gear.PARK and -LOW_SPEED_THRESH <= msg.ctrl_cmd.linear_velocity <= LOW_SPEED_THRESH) or \
-                        msg.gear_cmd.gear == Gear.NONE
+        is_valid_cmd = (msg.gear in [VehicleCommand.GEAR_DRIVE, VehicleCommand.GEAR_LOW] and msg.speed >= 0.0) or \
+                       (msg.gear == VehicleCommand.GEAR_REVERSE and msg.speed <= 0.0) or \
+                       (msg.gear == VehicleCommand.GEAR_PARK and -LOW_SPEED_THRESH <= msg.speed <= LOW_SPEED_THRESH) or \
+                        msg.gear == VehicleCommand.GEAR_NONE
         if is_valid_cmd:
             # if valid command, set speed and engage
             desired_mode = int(self.engage)
-            desired_speed = min(self.max_speed / 3.6, abs(msg.ctrl_cmd.linear_velocity))
+            desired_speed = min(self.max_speed / 3.6, abs(msg.speed))
         else:
-            rospy.logwarn("%s - invalid vehicle command: gear = %d, velocity = %lf", rospy.get_name(), msg.gear_cmd.gear, msg.ctrl_cmd.linear_velocity)
+            rospy.logwarn("%s - invalid vehicle command: gear = %d, speed = %lf", rospy.get_name(), msg.gear, msg.speed)
             rospy.logwarn("%s - disengaging autonomy", rospy.get_name())
             # if not valid command then disengage
             desired_mode = 0
@@ -101,33 +100,24 @@ class SSCInterface:
 
         # calculate desired steering angle
         if self.use_adaptive_gear_ratio:
-            desired_steering_angle = msg.ctrl_cmd.steering_angle * self.ssc_gear_ratio / self.adaptive_gear_ratio
+            desired_steering_angle = msg.steering_angle * self.ssc_gear_ratio / self.adaptive_gear_ratio
         else:
-            desired_steering_angle = msg.ctrl_cmd.steering_angle
+            desired_steering_angle = msg.steering_angle
 
         # calculate desired curvature for SSC
         desired_curvature = math.tan(desired_steering_angle) / self.wheel_base
 
         # set desired gear only when valid
-        desired_gear = Gear.NONE
+        desired_gear = VehicleCommand.GEAR_NONE
         if self.engage and is_valid_cmd:
-            desired_gear = msg.gear_cmd.gear
+            desired_gear = msg.gear
             # refuse REVERSE gear when not enabled
-            if desired_gear == Gear.REVERSE and not self.enable_reverse_motion:
+            if desired_gear == VehicleCommand.GEAR_REVERSE and not self.enable_reverse_motion:
                 rospy.logerr("%s - reverse gear ignored, reverse motion not enabled", rospy.get_name())
-                desired_gear = Gear.NONE
+                desired_gear = VehicleCommand.GEAR_NONE
 
         # calculate desired turn signal for SSC
-        desired_turn_signal = TurnSignalCommand.NONE
-        if msg.lamp_cmd.l == 0 and msg.lamp_cmd.r == 0:
-            desired_turn_signal = TurnSignalCommand.NONE
-        elif msg.lamp_cmd.l == 1 and msg.lamp_cmd.r == 0:
-            desired_turn_signal = TurnSignalCommand.LEFT
-        elif msg.lamp_cmd.l == 0 and msg.lamp_cmd.r == 1:
-            desired_turn_signal = TurnSignalCommand.RIGHT
-        elif msg.lamp_cmd.l == 1 and msg.lamp_cmd.r == 1:
-            # HAZARD signal cannot be ised in TurnSignalCommand
-            pass
+        desired_turn_signal = TURN_SIGNAL_TO_SSC.get(msg.turn_signal, TurnSignalCommand.NONE)
 
         # emergency mode stops the car
         if msg.emergency == 1 and self.enable_emergency_braking:
@@ -137,15 +127,15 @@ class SSCInterface:
             desired_speed = 0.0
         else:
             # calculate acceleration and deceleration limits
-            if msg.ctrl_cmd.linear_acceleration == 0.0:
+            if msg.acceleration == 0.0:
                 acceleration_limit = self.default_acceleration
                 deceleration_limit = self.default_deceleration
-            elif msg.ctrl_cmd.linear_acceleration > 0.0:
-                acceleration_limit = min(msg.ctrl_cmd.linear_acceleration, self.acceleration_limit)
+            elif msg.acceleration > 0.0:
+                acceleration_limit = min(msg.acceleration, self.acceleration_limit)
                 deceleration_limit = self.default_deceleration
-            elif msg.ctrl_cmd.linear_acceleration < 0.0:
+            elif msg.acceleration < 0.0:
                 acceleration_limit = self.default_acceleration
-                deceleration_limit = min(-msg.ctrl_cmd.linear_acceleration, self.deceleration_limit)
+                deceleration_limit = min(-msg.acceleration, self.deceleration_limit)
 
         # publish command messages
         header = Header()
@@ -172,7 +162,7 @@ class SSCInterface:
             self.publish_speed_command(header, 0, 0.0)
             self.publish_steer_command(header, 0, 0.0)
             self.publish_turn_command(header, 0, TurnSignalCommand.NONE)
-            self.publish_gear_command(header, Gear.NONE)
+            self.publish_gear_command(header, VehicleCommand.GEAR_NONE)
 
         self.alive = False
 
@@ -211,22 +201,21 @@ class SSCInterface:
                 vehicle_status.drivemode = VehicleStatus.MODE_MANUAL
             vehicle_status.steeringmode = vehicle_status.drivemode
 
-            # current speed km/h
-            vehicle_status.speed = velocity_accel_msg.velocity * 3.6
-            
-            # current pedal positions [0,1000]
-            vehicle_status.drivepedal = int(1000 * throttle_msg.throttle_pedal)
-            vehicle_status.brakepedal = int(1000 * brake_msg.brake_pedal)
+            # current speed m/s
+            vehicle_status.speed = velocity_accel_msg.velocity
+
+            # current pedal positions [0,1]
+            vehicle_status.drivepedal = throttle_msg.throttle_pedal
+            vehicle_status.brakepedal = brake_msg.brake_pedal
 
             # steering angle in radians
             vehicle_status.angle = math.atan(curvature * self.wheel_base)
 
             # current gear
-            vehicle_status.current_gear.gear = gear_msg.current_gear.gear
+            vehicle_status.gear = gear_msg.current_gear.gear
 
             # turn signals
-            #vehicle_status.lamp = TURN_RPT_TO_VEHICLE_STATUS_LAMP_MAP[self.turn_signals]
-            vehicle_status.lamp = 0
+            vehicle_status.turn_signal = VehicleStatus.TURN_STRAIGHT
 
             # publish the status message
             self.vehicle_status_pub.publish(vehicle_status)

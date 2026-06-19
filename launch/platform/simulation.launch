@@ -2,16 +2,21 @@
 <launch>
     <arg name="map_name"            default="tartu_demo" />
     <arg name="lanelet2_map_path"   default="$(find autoware_mini)/data/maps/$(arg map_name).osm" />
+    <arg name="broadcast_tf"        default="true" />
     <arg name="max_speed"           default="30" />
+    <arg name="lexus_shadow"        default="false" />
 
     <!-- Transforms -->
-    <include file="$(find autoware_mini)/launch/platform/tf.launch" />
+    <include file="$(find autoware_mini)/launch/platform/tf.launch">
+        <arg name="lexus_shadow"    value="$(arg lexus_shadow)" />
+    </include>
 
     <group ns="vehicle">
 
         <!-- Bicycle_model simulator -->
         <node pkg="autoware_mini" type="bicycle_simulation.py" name="bicycle_simulation" output="screen" required="true">
             <param name="lanelet2_map_path" value="$(arg lanelet2_map_path)"/>
+            <param name="broadcast_tf" value="$(arg broadcast_tf)" />
         </node>
 
         <!-- SSC interface for the sake of visualization of acceleration limits -->

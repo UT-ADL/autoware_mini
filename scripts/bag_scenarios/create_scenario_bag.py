@@ -64,9 +64,9 @@ def process_rosbags(args):
                     last_pose = None
                     
                 if topic == args.detected_objects_topic:
-                    topic = '/detection/detected_objects'
+                    topic = '/perception/detected_objects'
                 elif topic == args.traffic_light_status_topic:
-                    topic = '/detection/traffic_light_status'
+                    topic = '/perception/traffic_light_status'
                 elif topic == '/tf':
                     for transform in msg.transforms:
                         if transform.child_frame_id == 'base_link':
@@ -81,9 +81,9 @@ if __name__ == '__main__':
     parser.add_argument("--start_time", type=float, help="Start time in seconds (optional)")
     parser.add_argument("--end_time", type=float, help="End time in seconds (optional)")
     parser.add_argument("--end_to_goal_time", type=float, help="Time from end to the goal point in seconds")
-    parser.add_argument("--goal_delay", type=float, default=0.1, help="Delay goal from start time (default: 0.1)")
-    parser.add_argument("--detected_objects_topic", default="/detection/detected_objects")
-    parser.add_argument("--traffic_light_status_topic", default="/detection/traffic_light_status")
+    parser.add_argument("--goal_delay", type=float, default=0.2, help="Delay goal from start time (default: 0.2)")
+    parser.add_argument("--detected_objects_topic", default="/perception/detected_objects")
+    parser.add_argument("--traffic_light_status_topic", default="/perception/traffic_light_status")
     
     args = parser.parse_args()
     process_rosbags(args)

@@ -1,36 +1,31 @@
-from lanelet2.io import Origin, load
-from lanelet2.projection import UtmProjector
-from lanelet2.core import GPSPoint, BasicPoint2d, BoundingBox2d, BasicPoint3d
-from lanelet2.geometry import length2d, findNearest, project, findWithin2d
+import lanelet2
+from collections import defaultdict
 import shapely
 import numpy as np
+import math
 import rospy
+import warnings
 
 
-def load_lanelet2_map(lanelet2_map_path):
+def load_lanelet2_map(lanelet2_map_path, print_errors=False):
     """
-    Load a lanelet2 map from a file and return it
+    Load a lanelet2 map from a file and return it.
     :param lanelet2_map_path: name of the lanelet2 map file
-    :param coordinate_transformer: coordinate transformer
-    :param use_custom_origin: use custom origin
-    :param utm_origin_lat: utm origin latitude
-    :param utm_origin_lon: utm origin longitude
+    :param print_errors: print errors if True
     :return: lanelet2 map
     """
 
-    # get parameters
-    coordinate_transformer = rospy.get_param("/localization/coordinate_transformer")
     use_custom_origin = rospy.get_param("/localization/use_custom_origin")
     utm_origin_lat = rospy.get_param("/localization/utm_origin_lat")
     utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
-    # Load the map using Lanelet2
-    if coordinate_transformer == "utm":
-        projector = UtmProjector(Origin(utm_origin_lat, utm_origin_lon), use_custom_origin, False)
-    else:
-        raise ValueError('Unknown coordinate_transformer for loading the Lanelet2 map ("utm" should be used): ' + coordinate_transformer)
+    origin = lanelet2.io.Origin(utm_origin_lat, utm_origin_lon)
+    projector = lanelet2.projection.UtmProjector(origin, use_custom_origin, False)
 
-    lanelet2_map = load(lanelet2_map_path, projector)
+    lanelet2_map, errors = lanelet2.io.loadRobust(lanelet2_map_path, projector)
+    if errors and print_errors:
+        for error in errors:
+            rospy.logwarn(rospy.get_name() + ": " + error)
 
     return lanelet2_map
 
@@ -46,10 +41,10 @@ def utm_origin():
     utm_origin_lon = rospy.get_param("/localization/utm_origin_lon")
 
     # origin point of the UTM35N coordinate system
-    origin = Origin(utm_origin_lat, utm_origin_lon)
-    projector = UtmProjector(origin, False, False)
+    origin = lanelet2.io.Origin(utm_origin_lat, utm_origin_lon)
+    projector = lanelet2.projection.UtmProjector(origin, False, False)
 
-    gps_point = GPSPoint(utm_origin_lat, utm_origin_lon, 0)
+    gps_point = lanelet2.core.GPSPoint(utm_origin_lat, utm_origin_lon, 0)
     utm_point = projector.forward(gps_point)
     return utm_point.x, utm_point.y
 
@@ -63,93 +58,111 @@ def get_linestrings_in_area(lanelet2_map, x, y, extent):
     :return: {line_id: line, ...}
     """
 
-    search_box = BoundingBox2d(BasicPoint2d(x - extent, y - extent), BasicPoint2d(x + extent, y + extent))
+    search_box = lanelet2.core.BoundingBox2d(lanelet2.core.BasicPoint2d(x - extent, y - extent), lanelet2.core.BasicPoint2d(x + extent, y + extent))
     return lanelet2_map.lineStringLayer.search(search_box)
 
-def get_lanelets_in_range(lanelet2_map, x, y, radius, subtypes=None):
+def get_lanelets_in_range(lanelet2_map, x, y, z, radius, subtypes=None, max_height_difference=0):
     """
-    Get all lanelets within a given radius, optionally filtering by subtype.
+    Get all lanelets within a given radius, optionally filtering by subtype and height.
     :param lanelet2_map: lanelet2 map
     :param x: x-coordinate of the point
     :param y: y-coordinate of the point
+    :param z: z-coordinate of the point for height filtering
     :param radius: maximum distance between geometries. If zero, only primitives containing the element are returned.
     :param subtypes: (optional) list of subtypes to filter by
+    :param max_height_difference: maximum allowed height above lanelet centerline
     :return: list of lanelets
     """
 
-    lanelets = findWithin2d(lanelet2_map.laneletLayer, BasicPoint2d(x, y), radius)
+    # Find lanelets within range
+    lanelets = lanelet2.geometry.findWithin2d(lanelet2_map.laneletLayer, lanelet2.core.BasicPoint2d(x, y), radius)
 
+    # Apply height filtering if z coordinate is valid (z=0 means unknown, e.g. in bag scenarios)
+    if z > 0:
+        point3d = lanelet2.core.BasicPoint3d(x, y, z)
+        lanelets = [(dist, lanelet) for dist, lanelet in lanelets
+                    if abs(z - lanelet2.geometry.project(lanelet.centerline, point3d).z) < max_height_difference]
+
+    # Apply subtype filtering and extract lanelet objects
     if subtypes is not None:
-        return [lanelet for _, lanelet in lanelets if "subtype" in lanelet.attributes and lanelet.attributes["subtype"] in subtypes]
+        lanelets = [lanelet for _, lanelet in lanelets
+                    if "subtype" in lanelet.attributes and lanelet.attributes["subtype"] in subtypes]
     else:
-        return [lanelet for _, lanelet in lanelets]
+        lanelets = [lanelet for _, lanelet in lanelets]
 
-def get_stop_lines_in_area(lanelet2_map, x, y, extent, subtypes=None):
+    return lanelets
+
+def get_crosswalks(lanelet2_map, segment_length):
     """
-    Get all stop lines within a given area, optionally filtering by subtype.
+    Find all crosswalks on map, convert to shapely geometries, and return as arrays.
     :param lanelet2_map: lanelet2 map
-    :param x: x-coordinate of the point
-    :param y: y-coordinate of the point
-    :param extent: the half-length of the bounding box in both x and y directions
-    :param subtype: (optional) list of subtypes to filter by
-    :return: list of stopline linestrings
-    """
-
-    linestrings = get_linestrings_in_area(lanelet2_map, x, y, extent)
-    stop_lines = []
-    for line in linestrings:
-        if "type" in line.attributes and line.attributes["type"] == "stop_line":
-            if subtypes is not None:
-                if "subtype" not in line.attributes or line.attributes["subtype"] not in subtypes:
-                    continue
-            stop_lines.append(shapely.linestrings([(p.x, p.y, p.z) for p in line]))
-    return stop_lines
-
-def get_crosswalks(lanelet2_map):
-    """
-    Find all crosswalks on map and return as a list 
-    :param lanelet2_map: lanelet2 map
-    :return: crosswalk lanelets
+    :param segment_length: max segment length for boundary densification
+    :return: (crosswalks, crosswalk_polygons) numpy arrays
     """
 
     crosswalks = []
+    polygons = []
     for lanelet in lanelet2_map.laneletLayer:
         if lanelet.attributes:
             if lanelet.attributes["subtype"] == "crosswalk":
-                crosswalks.append(lanelet)
+                polygon = shapely.polygons([(p.x, p.y) for p in lanelet.polygon2d()])
+                shapely.prepare(polygon)
+                left_boundary = shapely.linestrings([(p.x, p.y) for p in lanelet.leftBound])
+                right_boundary = shapely.linestrings([(p.x, p.y) for p in lanelet.rightBound])
+                left_boundary = shapely.segmentize(left_boundary, max_segment_length=segment_length)
+                right_boundary = shapely.segmentize(right_boundary, max_segment_length=segment_length)
+                crosswalks.append({
+                    'polygon': polygon,
+                    'left_coords': shapely.get_coordinates(left_boundary),
+                    'right_coords': shapely.get_coordinates(right_boundary),
+                    'left_centroid': left_boundary.centroid,
+                    'right_centroid': right_boundary.centroid,
+                })
+                polygons.append(polygon)
 
-    return crosswalks
+    return np.array(crosswalks), np.array(polygons)
 
-def get_stop_lines_using_subtype(lanelet2_map, subtypes):
+def get_stop_lines(lanelet2_map, x=None, y=None, extent=None, subtypes=None, return_subtypes=False, return_speeds=False):
     """
-    Get all stop lines with a specific subtype
+    Get stop lines from the map, optionally within a bounding box and/or filtered by subtype.
     :param lanelet2_map: lanelet2 map
-    :param subtype: list of subtype's to search for
-    :return: {line_id: linestring, ...}
+    :param x: (optional) x-coordinate of the bounding box center
+    :param y: (optional) y-coordinate of the bounding box center
+    :param extent: (optional) half-length of the bounding box in both x and y directions
+    :param subtypes: (optional) list of subtypes to filter by
+    :param return_subtypes: if True, also return a dict mapping stop_line_id to subtype
+    :param return_speeds: if True, also return a dict mapping stop_line_id to speed (km/h) or NaN
+    :return: {stop_line_id: linestring, ...}, optionally {stop_line_id: subtype, ...}, optionally {stop_line_id: speed, ...}
     """
 
-    filtered_lines = {}
-    for line in lanelet2_map.lineStringLayer:
-        if "type" in line.attributes and line.attributes["type"] == "stop_line":
-            if "subtype" in line.attributes and line.attributes["subtype"] in subtypes:
-                filtered_lines[line.id] = shapely.linestrings([(p.x, p.y, p.z) for p in line])
-    return filtered_lines
+    if x is None or y is None or extent is None:
+        linestrings = lanelet2_map.lineStringLayer
+    else:
+        linestrings = get_linestrings_in_area(lanelet2_map, x, y, extent)
 
-def get_traffic_light_stop_lines(lanelet2_map):
-    """
-    Get all stop lines that are associated with traffic lights
-    :param lanelet2_map: lanelet2 map
-    :return: {line_id: line, ...}
-    """
+    filtered_linestrings = {}
+    if return_subtypes:
+        filtered_subtypes = {}
+    if return_speeds:
+        filtered_speeds = {}
 
-    lines = {}
-    for reg_el in lanelet2_map.regulatoryElementLayer:
-        if reg_el.attributes["subtype"] == "traffic_light":
-            for line in reg_el.parameters["ref_line"]:
-                lines[line.id] = shapely.linestrings([(p.x, p.y, p.z) for p in line])
-    return lines
+    for line in linestrings:
+        if "type" not in line.attributes or line.attributes["type"] != "stop_line":
+            continue
+        if subtypes is not None and ("subtype" not in line.attributes or line.attributes["subtype"] not in subtypes):
+            continue
+        filtered_linestrings[line.id] = shapely.linestrings([(p.x, p.y, p.z) for p in line])
+        if return_subtypes:
+            filtered_subtypes[line.id] = line.attributes["subtype"]
+        if return_speeds:
+            filtered_speeds[line.id] = float(line.attributes["speed"]) if "speed" in line.attributes else np.nan
 
-# TODO: Add function to get all stop lines that are associated with traffic lights join with next function
+    result = (filtered_linestrings,)
+    if return_subtypes:
+        result += (filtered_subtypes,)
+    if return_speeds:
+        result += (filtered_speeds,)
+    return result if len(result) > 1 else result[0]
 
 def get_stop_lines_api_id(lanelet2_map, x = None, y = None, extent = None):
     """
@@ -158,7 +171,7 @@ def get_stop_lines_api_id(lanelet2_map, x = None, y = None, extent = None):
     :param x: x-coordinate of the given point
     :param y: y-coordinate of the given point
     :param extent: the half-length of the bounding box in both x and y directions
-    :return: A dictionary of stopline ids and api keys that fall within the search area
+    :return: A dictionary of stop line ids and api keys that fall within the search area
     """
     if x is None or y is None or extent is None:
         linestrings = lanelet2_map.lineStringLayer
@@ -172,62 +185,122 @@ def get_stop_lines_api_id(lanelet2_map, x = None, y = None, extent = None):
 
     return stop_line_ids
 
-def get_stoplines_trafficlights(lanelet2_map):
+def get_traffic_light_stop_lines(lanelet2_map):
     """
-    Iterate over all regulatory_elements with subtype traffic light and extract the stoplines and sinals.
-    Organize the data into dictionary indexed by stopline id that contains a traffic_light id and the four coners of the traffic light.
+    Iterate over all regulatory_elements with subtype traffic light and extract only the stop lines 
+    and their geometries that have traffic light associated to them.
+    Organize the data into a dictionary indexed by stop line id.
     :param lanelet2_map: lanelet2 map
-    :return: {stopline_id: {traffic_light_id: {'top_left': [x, y, z], 'top_right': [...], 'bottom_left': [...], 'bottom_right': [...]}, ...}, ...}
+    :return: {stop_line_id: linestring, ...}
     """
 
-    signals = {}
+    stop_lines = {}
 
     for reg_el in lanelet2_map.regulatoryElementLayer:
         if reg_el.attributes["subtype"] == "traffic_light":
-            # ref_line is the stop line and there is only 1 stopline per traffic light reg_el
-            linkId = reg_el.parameters["ref_line"][0].id
-            
+            # ref_line is the stop line and there is only 1 stop line per traffic light reg_el
+            if "ref_line" not in reg_el.parameters:
+                warnings.warn(f"Traffic light regulatory element {reg_el.id} has no ref_line parameter.")
+                continue
+
+            stop_line_id = reg_el.parameters["ref_line"][0].id
+            stop_lines[stop_line_id] = shapely.linestrings([(p.x, p.y, p.z) for p in reg_el.parameters["ref_line"][0]])
+
+    return stop_lines
+
+def get_right_of_way_regulatory_elements(lanelet2_map):
+    """
+    Iterate over all regulatory_elements with subtype right_of_way and extract all linked right_of_way lanelets with their end line polygons and headings.
+    :param lanelet2_map: lanelet2 map
+    :return: {stop_line_id: [polygons], ...}, {stop_line_id: [headings], ...}
+    """
+
+    right_of_way_polygons = {}
+    right_of_way_headings = {}
+
+    for reg_el in lanelet2_map.regulatoryElementLayer:
+        if reg_el.attributes["subtype"] == "right_of_way":
+            # skip if no ref_line (stop line) is defined or no right_of_way lanelets are defined
+            if "ref_line" not in reg_el.parameters or "right_of_way" not in reg_el.parameters:
+                warnings.warn(f"Right of way regulatory element {reg_el.id} is missing ref_line or right_of_way parameters.")
+                continue
+
+            # collect all the stop line ids (usually only one)
+            stop_line_ids = []
+            for stop_line in reg_el.parameters["ref_line"]:
+                stop_line_ids.append(stop_line.id)
+
+            # create following arrays for each right_of_way lanelet
+            lanelet_polygons = []
+            lanelet_headings = []
+            for lanelet in reg_el.parameters["right_of_way"]:
+                # TODO possibly could additionally check if lanelet is of subtype right_of_way (applies after map changes)
+                coords = [(p.x, p.y, p.z) for p in lanelet.polygon3d()]
+                lanelet_polygons.append(shapely.polygons(coords))
+
+                centerline = lanelet.centerline
+                heading = math.atan2(centerline[-1].y - centerline[-2].y, centerline[-1].x - centerline[-2].x)
+                lanelet_headings.append(heading)
+
+            # for every stop line part of right of way regulatory element store all lanelet data
+            for stop_line_id in stop_line_ids:
+                right_of_way_polygons[stop_line_id] = np.array(lanelet_polygons)
+                right_of_way_headings[stop_line_id] = np.array(lanelet_headings)
+
+    return right_of_way_polygons, right_of_way_headings
+
+def get_traffic_light_bboxes(lanelet2_map):
+    """
+    Iterate over all regulatory_elements with subtype traffic light and extract all linked traffic lights with their four corners.
+    :param lanelet2_map: lanelet2 map
+    :return: {stop_line_id: {traffic_light_id: [(tlx, tly, tlz), (trx, try, trz), (blx, bly, blz), (brx, bry, brz)], ...}, ...}
+    """
+
+    traffic_lights = defaultdict(dict)
+
+    for reg_el in lanelet2_map.regulatoryElementLayer:
+        if reg_el.attributes["subtype"] == "traffic_light":
+            # ref_line is the stop line and there is only 1 stop line per traffic light reg_el
+            stop_line_id = reg_el.parameters["ref_line"][0].id
+
             for tfl in reg_el.parameters["refers"]:
                 tfl_height = float(tfl.attributes["height"])
-                # plId represents the traffic light (pole), one stop line can be associated with multiple traffic lights
-                plId = tfl.id
+                traffic_light_id = tfl.id
 
-                traffic_light_data = {'top_left': [tfl[0].x, tfl[0].y, tfl[0].z + tfl_height], 
-                                      'top_right': [tfl[1].x, tfl[1].y, tfl[1].z + tfl_height], 
-                                      'bottom_left': [tfl[0].x, tfl[0].y, tfl[0].z], 
-                                      'bottom_right': [tfl[1].x, tfl[1].y, tfl[1].z]}
+                # data stored in order of: top_left, top_right, bottom_left, bottom_right
+                traffic_light_data = [(tfl[0].x, tfl[0].y, tfl[0].z + tfl_height),
+                                      (tfl[1].x, tfl[1].y, tfl[1].z + tfl_height),
+                                      (tfl[0].x, tfl[0].y, tfl[0].z),
+                                      (tfl[1].x, tfl[1].y, tfl[1].z)]
 
+                traffic_lights[stop_line_id][traffic_light_id] = traffic_light_data
 
-                # signals is a dictionary indexed by stopline id and contains dictionary of traffic lights indexed by pole id
-                # which in turn contains a dictionary of traffic light corners
-                signals.setdefault(linkId, {}).setdefault(plId, traffic_light_data)
+    return traffic_lights
 
-    return signals
-
-def get_stoplines_center(lanelet2_map):
+def get_stop_lines_center(lanelet2_map):
     """
-    Iterate over all regulatory_elements with subtype traffic light and extract the stoplines centers.
-    Organize the data into dictionary indexed by stopline id that contains stopline center coordinates and respective traffic light ids
+    Iterate over all regulatory_elements with subtype traffic light and extract the stop lines centers.
+    Organize the data into dictionary indexed by stop line id that contains stop line center coordinates and respective traffic light ids
     :param lanelet2_map: lanelet2 map
-    :return: {stopline_id: [[(center_x, center_y), [PlIds]], ...], ...}
+    :return: {stop_line_id: [[(center_x, center_y), [PlIds]], ...], ...}
     """
 
-    stopline_centers = {}
+    stop_line_centers = {}
 
     for reg_el in lanelet2_map.regulatoryElementLayer:
         if reg_el.attributes["subtype"] == "traffic_light":
-            # ref_line is the stop line and there is only 1 stopline per traffic light reg_el
+            # ref_line is the stop line and there is only 1 stop line per traffic light reg_el
             link = reg_el.parameters["ref_line"][0]
-            # Get all geometry points of the stopline
+            # Get all geometry points of the stop line
             line_points = [[point.x, point.y] for point in link]
-            # Extract center point from stopline
+            # Extract center point from stop line
             center_x, center_y = np.mean(line_points, axis=0)
-            # Extract traffic light (Pole) ids for the same stopline
+            # Extract traffic light (Pole) ids for the same stop line
             plIds = [tfl.id for tfl in reg_el.parameters["refers"]]
 
-            stopline_centers[link.id] = [(center_x, center_y), plIds] 
+            stop_line_centers[link.id] = [(center_x, center_y), plIds] 
 
-    return stopline_centers
+    return stop_line_centers
 
 def find_following_lane_change_lanelet(lanelet, route, is_left_side):
     """
@@ -279,7 +352,7 @@ def follow_lanelets(routing_graph, current_lanelet, remaining_distance):
     :return: list of possible trajectories
     """
 
-    current_lanelet_length = length2d(current_lanelet)
+    current_lanelet_length = lanelet2.geometry.length2d(current_lanelet)
 
     if remaining_distance <= current_lanelet_length:
         return [[current_lanelet]]  # Base case: return a single-lanelet trajectory
@@ -299,25 +372,25 @@ def follow_lanelets(routing_graph, current_lanelet, remaining_distance):
 
     return trajectories
 
-def get_height_at_position(lanelet2_map, x, y, z, num_lanelets=1, max_height_difference=3):
+def get_height_at_position(lanelet2_map, x, y, z, search_radius=0.0, max_height_difference=None):
     """
     Get the height at a given position on the lanelet2 map
     :param lanelet2_map: lanelet2 map
     :param x: x-coordinate of the point
     :param y: y-coordinate of the point
     :param z: z-coordinate of the point
-    :param num_lanelets: number of lanelets to consider (default is 1)
-    :param max_height_difference: maximum height difference allowed
-    :return: height at the given position
+    :param search_radius: 2D radius (m) within which to search for lanelets; 0 matches only lanelets containing (x, y)
+    :param max_height_difference: skip lanelets whose centerline height differs from z by more than this many meters; None disables the check (e.g. when input z is unknown, as with an RViz-set initial pose)
+    :return: height at the given position, or input z if no matching lanelet is found
     """
 
-    point2d = BasicPoint2d(x, y)
-    nearest = findNearest(lanelet2_map.laneletLayer, point2d, num_lanelets) #TODO: currently handles initialization only in 2d space
+    point2d = lanelet2.core.BasicPoint2d(x, y)
+    nearest = lanelet2.geometry.findWithin2d(lanelet2_map.laneletLayer, point2d, search_radius)
     for _, lanelet in nearest:
-        point3d = BasicPoint3d(x, y, z)
-        projected_point = project(lanelet.centerline, point3d)
-        # Avoid matching with lanelets that have large height difference compared to the current position
-        if num_lanelets != 1 and abs(projected_point.z - z) > max_height_difference: 
+        point3d = lanelet2.core.BasicPoint3d(x, y, z)
+        projected_point = lanelet2.geometry.project(lanelet.centerline, point3d)
+        # Skip overlapping lanelets at a clearly different height (e.g. bridge above the road)
+        if max_height_difference is not None and abs(projected_point.z - z) > max_height_difference:
             continue
         return projected_point.z
 

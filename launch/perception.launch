@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Map configuration -->
+    <arg name="map_name"            default="tartu_demo"        doc="Map name for road area filter" />
+    
+    <!-- Object detection -->
+    <arg name="detector"            default="lidar_cluster"     doc="lidar_cluster,lidar_cluster_gpu,lidar_sfa,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion,carla,sim" />
+    <arg name="use_lidar_center"    default="true"              doc="Use velodyne lidar"/>
+    <arg name="use_lidar_front"     default="false"             doc="Use ouster lidar"/>
+    <arg name="use_road_area_filter" default="false"            doc="Use road area filter"/>
+    <arg name="ground_removal"      default="naive"             doc="naive, jcp" />
+    <arg name="detection_range"     default=""                  doc="Enter a value in meters to enable it" />
+    
+    <!-- Tracking and Prediction -->
+    <arg name="tracker"             default="ema"               doc="none, ema" />
+    <arg name="predictor"           default="none"              doc="none, naive, map, map_naive" />
+    <arg name="use_ignored_objects_filter" default="true"       doc="Enable filter that suppresses operator-selected objects from tracked_objects" />
+
+    <!-- Traffic light detection -->
+    <arg name="tfl_detector"        default="none"              doc="carla, mqtt, camera, mqtt_camera_fusion, yolo, mqtt_yolo_fusion" />
+    <arg name="tfl_cameras"         default="mako"              doc="mako, nvidia" />
+
+    <!-- Visualization and Debug -->
+    <arg name="more_visualizations" default="false"             doc="By default only visualize final detections" />
+    <arg name="use_python_visualizers" default="false"          doc="Use Python visualizer nodes instead of RViz plugins" />
+
+    <group ns="perception">
+
+        <rosparam command="load" file="$(find autoware_mini)/config/perception.yaml"/>
+
+        <!-- Obstacle detection -->
+        <include file="$(find autoware_mini)/launch/perception/object_detection.launch">
+            <arg name="detector"            value="$(arg detector)" />
+            <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
+            <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
+            <arg name="tracker"             value="$(arg tracker)" />
+            <arg name="predictor"           value="$(arg predictor)" />
+            <arg name="more_visualizations" value="$(arg more_visualizations)" />
+            <arg name="use_python_visualizers" value="$(arg use_python_visualizers)" />
+            <arg name="detection_range"     value="$(arg detection_range)" />
+            <arg name="map_name"            value="$(arg map_name)" />
+            <arg name="use_road_area_filter" value="$(arg use_road_area_filter)" />
+            <arg name="ground_removal"      value="$(arg ground_removal)" />
+            <arg name="use_ignored_objects_filter" value="$(arg use_ignored_objects_filter)" />
+        </include>
+
+        <!-- Traffic light detection -->
+        <include file="$(find autoware_mini)/launch/perception/traffic_light_detection.launch">
+            <arg name="tfl_detector"        value="$(arg tfl_detector)" />
+            <arg name="tfl_cameras"         value="$(arg tfl_cameras)" />
+            <arg name="map_name"            value="$(arg map_name)" />
+        </include>
+
+    </group>
+
+</launch>

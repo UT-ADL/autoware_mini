@@ -38,7 +38,7 @@ class CarlaDetector:
     def __init__(self):
 
         # Node parameters
-        self.output_frame = rospy.get_param("/detection/output_frame")
+        self.output_frame = rospy.get_param("/perception/output_frame")
 
         # Publishers
         self.detected_objects_pub = rospy.Publisher(

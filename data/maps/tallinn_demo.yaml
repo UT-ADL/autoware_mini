@@ -1,0 +1,14 @@
+utm_origin_lat: 59.4240387
+utm_origin_lon: 24.7472923
+
+# Optional
+initial_position:
+  position:
+    x: 300.43756103515625
+    y: -769.1679077148438
+    z: 24.657814342963842
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.8438423447131251
+    w: 0.5365911826232846

@@ -13,12 +13,6 @@ from std_msgs.msg import ColorRGBA
 
 from autoware_mini.geometry import get_heading_from_orientation
 
-VEHICLE_STATUS_LAMP_TO_WAYPOINT_STATE_MAP = {
-    0: Waypoint.STR_STRAIGHT,
-    VehicleStatus.LAMP_LEFT: Waypoint.STR_LEFT,
-    VehicleStatus.LAMP_RIGHT: Waypoint.STR_RIGHT,
-    VehicleStatus.LAMP_HAZARD: 5
-}
 
 class WaypointSaver:
     def __init__(self):
@@ -57,7 +51,7 @@ class WaypointSaver:
 
 
     def vehicle_status_callback(self, vehicle_status_msg):
-        self.turn_signal = VEHICLE_STATUS_LAMP_TO_WAYPOINT_STATE_MAP[vehicle_status_msg.lamp]
+        self.turn_signal = vehicle_status_msg.turn_signal
 
     def data_callback(self, current_pose, current_velocity):
         
@@ -95,9 +89,9 @@ class WaypointSaver:
 
     def publish_wp_marker(self, current_pose, v):
 
-        if self.turn_signal == Waypoint.STR_LEFT:
+        if self.turn_signal == Waypoint.TURN_LEFT:
             color = ColorRGBA(1.0, 0.0, 0.0, 1.0)
-        elif self.turn_signal == Waypoint.STR_RIGHT:
+        elif self.turn_signal == Waypoint.TURN_RIGHT:
             color = ColorRGBA(0.0, 0.0, 1.0, 1.0)
         else:
             color = ColorRGBA(0.0, 1.0, 0.0, 1.0)

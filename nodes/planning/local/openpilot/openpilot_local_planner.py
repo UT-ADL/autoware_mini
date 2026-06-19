@@ -7,11 +7,13 @@ import tf2_ros
 import threading
 import message_filters
 from ros_numpy import numpify
-from autoware_mini.msg import Path, Waypoint
+
 from lexus_platform.msg import Float32MultiArrayStamped
 from geometry_msgs.msg import PoseStamped
+
+from autoware_mini.msg import Path, Waypoint
 from autoware_mini.path import PathWrapper
-from autoware_mini.geometry import get_heading_between_two_points
+from autoware_mini.messages import float32_multiarray_to_numpy
 
 class OpenpilotLocalPlanner:
 
@@ -19,8 +21,6 @@ class OpenpilotLocalPlanner:
 
         # parameters
         self.transform_timeout = rospy.get_param('~transform_timeout')
-        self.default_left_width = rospy.get_param("default_left_width")
-        self.default_right_width = rospy.get_param("default_right_width")
 
         # variables
         self.current_position = None
@@ -41,7 +41,8 @@ class OpenpilotLocalPlanner:
 
         openpilot_position_sub = message_filters.Subscriber('/openpilot/position', Float32MultiArrayStamped, queue_size=1, tcp_nodelay=True)
         openpilot_velocity_sub = message_filters.Subscriber('/openpilot/velocity', Float32MultiArrayStamped, queue_size=1, tcp_nodelay=True)
-        ts = message_filters.TimeSynchronizer([openpilot_position_sub, openpilot_velocity_sub], queue_size=2)
+        openpilot_lane_lines_sub = message_filters.Subscriber('/openpilot/lane_lines', Float32MultiArrayStamped, queue_size=1, tcp_nodelay=True)
+        ts = message_filters.TimeSynchronizer([openpilot_position_sub, openpilot_velocity_sub, openpilot_lane_lines_sub], queue_size=3)
 
         ts.registerCallback(self.openpilot_prediction_callback)
 
@@ -51,20 +52,23 @@ class OpenpilotLocalPlanner:
     def global_path_callback(self, msg):
         output_frame = msg.header.frame_id
 
-        if len(msg.waypoints) == 0:
+        if not msg.waypoints:
             global_path = None
             rospy.loginfo("%s - Empty global path received", rospy.get_name())
         else:
-            global_path = PathWrapper(msg.waypoints, velocities=True, blinkers=True)
+            global_path = PathWrapper(msg.waypoints)
             rospy.loginfo("%s - Global path received with %i waypoints", rospy.get_name(), len(global_path.waypoints))
 
         with self.global_path_lock:
             self.output_frame = output_frame
             self.global_path = global_path
 
-    def openpilot_prediction_callback(self, position_msg, velocity_msg):
+    def openpilot_prediction_callback(self, position_msg, velocity_msg, lane_lines_msg):
         openpilot_plan = float32_multiarray_to_numpy(position_msg).T
         openpilot_velocity = float32_multiarray_to_numpy(velocity_msg).T
+        openpilot_lane_lines = float32_multiarray_to_numpy(lane_lines_msg)
+        openpilot_lane_lines = np.transpose(openpilot_lane_lines, (0, 2, 1))
+
         current_position = self.current_position
 
         with self.global_path_lock:
@@ -92,51 +96,52 @@ class OpenpilotLocalPlanner:
         openpilot_plan_homogeneous = openpilot_plan @ tf_matrix.T
         openpilot_plan = openpilot_plan_homogeneous[:, :3]
 
+        # transform openpilot lane lines to the given output frame
+        openpilot_lane_lines = openpilot_lane_lines[1:3, :, :] # take only the two center lane lines
+        flattened_openpilot_lane_lines = openpilot_lane_lines.reshape(-1, 4) # flatten to (2*n_points, 4)
+        flattened_openpilot_lane_lines[:, 3] = 1 # replace the time dimension with ones to get homogeneous points
+        homogeneous_openpilot_lane_lines = flattened_openpilot_lane_lines @ tf_matrix.T
+        openpilot_lane_lines = homogeneous_openpilot_lane_lines[:, :3].reshape(2, -1, 3)
+
+        openpilot_left_lane_boundary, openpilot_right_lane_boundary = shapely.linestrings(openpilot_lane_lines)
+
         waypoints = []
         for i in range(len(openpilot_plan)):
-            if i == len(openpilot_plan) - 1:
-                # use heading of previous point - last point of last lanelet has no following point 
-                x, y, z = openpilot_plan[i]
-                x_prev, y_prev, z_prev = openpilot_plan[i-1]
-                waypoint = self.create_waypoint(shapely.Point(x, y, z), openpilot_velocity[i], global_path, previous_point=shapely.Point(x_prev, y_prev, z_prev))
-                waypoints.append(waypoint)
-            else:
-                x, y, z = openpilot_plan[i]
-                x_next, y_next, z_next = openpilot_plan[i+1]
-                waypoint = self.create_waypoint(shapely.Point(x, y, z), openpilot_velocity[i], global_path, next_point=shapely.Point(x_next, y_next, z_next))
-                waypoints.append(waypoint)
+            x, y, z = openpilot_plan[i]
+            waypoint = self.create_waypoint(shapely.Point(x, y, z), openpilot_velocity[i], global_path, openpilot_left_lane_boundary, openpilot_right_lane_boundary)
+            waypoints.append(waypoint)
 
         openpilot_local_path.waypoints = waypoints
         self.openpilot_local_path_pub.publish(openpilot_local_path)
 
-    def create_waypoint(self, current_point, openpilot_velocity, global_path, next_point=None, previous_point=None):
-        if next_point is not None:
-            heading = get_heading_between_two_points(current_point, next_point)
-        else:
-            heading = get_heading_between_two_points(previous_point, current_point)
-
+    def create_waypoint(self, current_point, openpilot_velocity, global_path, left_boundary, right_boundary):
         current_point_dist = global_path.linestring.project(current_point)
+        left_point_dist = left_boundary.project(current_point)
+        right_point_dist = right_boundary.project(current_point)
+
+        left_boundary_point = left_boundary.interpolate(left_point_dist)
+        right_boundary_point = right_boundary.interpolate(right_point_dist)
 
         waypoint = Waypoint()
         waypoint.position.x = current_point.x
         waypoint.position.y = current_point.y
         waypoint.position.z = current_point.z
         waypoint.lanechange_state = 0
-        waypoint.blinker_state = global_path.get_blinker_at_distance(current_point_dist)
-        waypoint.heading = heading
-        waypoint.speed = np.linalg.norm(openpilot_velocity[:3]) #TODO: Speed is currently in openpilot frame, should be converted to base_link
-        waypoint.left_width = self.default_left_width
-        waypoint.right_width = self.default_right_width
+        waypoint.turn_signal = int(global_path.get_turn_signal_at_distance(current_point_dist))
+        waypoint.speed = float(np.linalg.norm(openpilot_velocity[:3])) #TODO: Speed is currently in openpilot frame, should be converted to base_link
+        waypoint.left_boundary_point.x = left_boundary_point.x
+        waypoint.left_boundary_point.y = left_boundary_point.y
+        waypoint.left_boundary_point.z = current_point.z
+        waypoint.right_boundary_point.x = right_boundary_point.x
+        waypoint.right_boundary_point.y = right_boundary_point.y
+        waypoint.right_boundary_point.z = current_point.z
+        waypoint.left_boundary_type = Waypoint.VIRTUAL
+        waypoint.right_boundary_type = Waypoint.VIRTUAL
 
         return waypoint
 
     def run(self):
         rospy.spin()
-
-def float32_multiarray_to_numpy(multiarray):
-    dims = tuple(map(lambda x: x.size, multiarray.layout.dim))
-    data = multiarray.data[multiarray.layout.data_offset:]
-    return np.array(data, dtype=np.float32).reshape(dims)
 
 if __name__ == '__main__':
     rospy.init_node('openpilot_local_planner')

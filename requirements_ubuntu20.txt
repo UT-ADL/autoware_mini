@@ -1,0 +1,15 @@
+# Base Python dependencies for Autoware Mini on Ubuntu 20.04 (Focal, Python 3.8).
+# Use with requirements_cuda11.txt for GPU clustering.
+#
+#   pip install --user -r requirements_ubuntu20.txt
+#
+pyproj >= 2.6
+numpy >= 1.19, < 1.24
+shapely >= 2.0
+onnxruntime-gpu < 1.19
+simple-pid < 2.0
+mapbox-earcut
+python-dotenv
+simpleaudio
+pyclothoids
+numba==0.56.4

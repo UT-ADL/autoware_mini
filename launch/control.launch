@@ -4,11 +4,11 @@
     
     <group ns="control">
 
+        <rosparam command="load" file="$(find autoware_mini)/config/control.yaml"/>
+
         <!-- Controller -->
         <node if="$(eval controller=='pure_pursuit')" pkg="autoware_mini" type="pure_pursuit_controller.py" name="pure_pursuit_controller" output="screen" required="true" />
         <node if="$(eval controller=='stanley')" pkg="autoware_mini" type="stanley_controller.py" name="stanley_controller" output="screen" required="true" />
-
-        <rosparam command="load" file="$(find autoware_mini)/config/control.yaml"/>
 
     </group>
 

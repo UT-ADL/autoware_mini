@@ -258,7 +258,7 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: Lexus model
-      Robot Description: robot_description
+      Robot Description: vehicle/lexus_model/robot_description
       TF Prefix: ""
       Update Interval: 0
       Value: true

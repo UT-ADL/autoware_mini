@@ -1,16 +1,16 @@
 heading_angle_limit: 90.0             # degrees
-lateral_error_limit: 2.0              # m 
-blinker_lookahead_time: 3.0           # s
-blinker_min_lookahead_distance: 14.0  # m
+lateral_error_limit: 2.0              # m
+turn_signal_lookahead_time: 3.0       # s
+turn_signal_min_lookahead_distance: 14.0  # m
 stopping_speed_limit: 1.0             # m/s
 
 pure_pursuit_controller:
-  lookahead_time: 1.2 # s           # seconds of lookahead for pure pursuit
-  min_lookahead_distance: 6.0
-  simulate_cmd_delay: 0.3           # sec
-  publish_debug_info: False
+  lookahead_time: 1.2                 # seconds of lookahead for pure pursuit
+  min_lookahead_distance: 5.0
+  steer_cmd_delay: 0.3                # s
+  speed_cmd_delay: 0.0                # s
 
 stanley_controller:
-  cte_gain: 0.4     # gain for cross track error
-  simulate_cmd_delay: 0.3           # sec
-  publish_debug_info: False
+  cte_gain: 0.4                       # gain for cross track error
+  steer_cmd_delay: 0.3                # s
+  speed_cmd_delay: 0.0                # s

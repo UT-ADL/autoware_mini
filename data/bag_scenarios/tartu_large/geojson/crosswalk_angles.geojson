@@ -1,0 +1,13 @@
+{
+"type": "FeatureCollection",
+"name": "crosswalk_angles",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "label": "ego", "speed": "30", "duration": 34.0, "delay": null, "length": null, "width": null, "acceleration": null, "elevation": 43.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.725780886870236, 58.376159561951184 ], [ 26.725943139724272, 58.376297641032906 ], [ 26.72601984439839, 58.376353062815596 ], [ 26.726063001402679, 58.376377574768931 ], [ 26.726116529776206, 58.376400095859545 ], [ 26.726175884464524, 58.376416299890288 ], [ 26.726235826565901, 58.376418336876782 ], [ 26.72630509421726, 58.376415751346542 ], [ 26.726398282050042, 58.376395846333786 ], [ 26.726462539013294, 58.376366606963771 ], [ 26.726547107002819, 58.376311499809184 ] ] } },
+{ "type": "Feature", "properties": { "label": "pedestrian_1", "speed": "5", "duration": 12.0, "delay": "1", "length": "0.5", "width": "0.5", "acceleration": null, "elevation": 43.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.726261474686421, 58.376358074812515 ], [ 26.726263794730858, 58.376464183772505 ] ] } },
+{ "type": "Feature", "properties": { "label": "pedestrian_2", "speed": "5", "duration": 17.0, "delay": "5", "length": "0.5", "width": "0.5", "acceleration": null, "elevation": 43.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.726239867377874, 58.376356324754582 ], [ 26.726271859322431, 58.376459588223348 ] ] } },
+{ "type": "Feature", "properties": { "label": "pedestrian_3", "speed": "5", "duration": 22.0, "delay": "10", "length": "0.5", "width": "0.5", "acceleration": null, "elevation": 43.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.726183834904578, 58.37636128148894 ], [ 26.726282797796593, 58.37645404662652 ] ] } },
+{ "type": "Feature", "properties": { "label": "cyclist_1", "speed": "15", "duration": 25.0, "delay": "16", "length": "1.7", "width": "0.5", "acceleration": null, "elevation": 43.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.726069677769186, 58.376338728535465 ], [ 26.726297993854271, 58.376438240551018 ], [ 26.726455483800123, 58.376503879131285 ] ] } },
+{ "type": "Feature", "properties": { "label": "cyclist_2", "speed": "15", "duration": 30.0, "delay": "20", "length": "1.8", "width": "0.6", "acceleration": null, "elevation": 43.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.726108408991333, 58.376480109378164 ], [ 26.726208936829217, 58.37644080648839 ], [ 26.726298949395645, 58.376396199057332 ], [ 26.726411170377432, 58.376350232458385 ] ] } }
+]
+}

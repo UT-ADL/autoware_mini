@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "naituse_veski_3",
+"crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+"features": [
+{"type": "Feature", "properties": {"label": "ego", "speed": 30.0, "duration": 27.0, "delay": 0.0, "length": 4.0, "width": 2.0, "acceleration": 0.0, "elevation": 64.8}, "geometry": {"type": "LineString", "coordinates": [[26.710701191987315, 58.379427137553996], [26.7102988322817, 58.37934126122961], [26.710012695949672, 58.379276124873925], [26.709940678075217, 58.379250429540235], [26.709918343483245, 58.37923324464209], [26.709915771325104, 58.379199820517925], [26.709937888321463, 58.379155019187266], [26.710157636910225, 58.37889759876921]]}},
+{"type": "Feature", "properties": {"label": null, "speed": 20.0, "duration": 25.0, "delay": 0.0, "length": 4.0, "width": 2.0, "acceleration": 0.0, "elevation": 64.8}, "geometry": {"type": "LineString", "coordinates": [[26.709587817106154, 58.37957228196236], [26.709790970017437, 58.37933301415964], [26.709969486933634, 58.379117691353166], [26.7102394086601, 58.37880454228494]]}},
+{"type": "Feature", "properties": {"label": "bicycle", "speed": 15.0, "duration": 20.0, "delay": 4.5, "length": 3.0, "width": 0.75, "acceleration": 0.0, "elevation": 64.8}, "geometry": {"type": "LineString", "coordinates": [[26.710152687505996, 58.37896099067863], [26.71001234770375, 58.379121431060746], [26.709918961636177, 58.37923672654824], [26.70978064001275, 58.379405217534185], [26.70970547526289, 58.37950246686148]]}},
+{"type": "Feature", "properties": {"label": "car", "speed": 30.0, "duration": 20.0, "delay": 6.0, "length": 4.0, "width": 2.0, "acceleration": 0.0, "elevation": 64.8}, "geometry": {"type": "LineString", "coordinates": [[26.7092675732941, 58.379076472924176], [26.709617674569692, 58.37915577290692], [26.709812114261748, 58.37919902627227], [26.710031532152783, 58.37924897666947], [26.710331866311492, 58.379317285329165], [26.7105341249371, 58.379362780821346]]}},
+{"type": "Feature", "properties": {"label": "pedestrian", "speed": 4.0, "duration": 25.0, "delay": 7.0, "length": 0.5, "width": 0.5, "acceleration": 0.0, "elevation": 64.8}, "geometry": {"type": "LineString", "coordinates": [[26.70967012944329, 58.37924139143866], [26.70995721075761, 58.37930636848368]]}}
+]
+}

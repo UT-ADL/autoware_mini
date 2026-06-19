@@ -1,0 +1,52 @@
+<library path="lib/libpredicted_trajectory_rviz_plugin">
+  <class name="autoware_mini/PredictedTrajectory"
+         type="autoware_mini::PredictedTrajectoryDisplay"
+         base_class_type="rviz::Display">
+    <description>
+      Displays predicted trajectories from DetectedObjectArray messages
+      as colored ribbons or lines. Directly renders to OGRE without
+      using the ROS marker system.
+    </description>
+    <message_type>autoware_mini/DetectedObjectArray</message_type>
+  </class>
+</library>
+
+<library path="lib/libdetected_objects_rviz_plugin">
+  <class name="autoware_mini/DetectedObjects"
+         type="autoware_mini::DetectedObjectsDisplay"
+         base_class_type="rviz::Display">
+    <description>
+      Displays detected objects from DetectedObjectArray messages
+      as 3D bounding boxes, convex hulls, velocity arrows, and text labels.
+      Directly renders to OGRE without using the ROS marker system.
+    </description>
+    <message_type>autoware_mini/DetectedObjectArray</message_type>
+  </class>
+</library>
+
+<library path="lib/liblocal_path_rviz_plugin">
+  <class name="autoware_mini/LocalPath"
+         type="autoware_mini::LocalPathDisplay"
+         base_class_type="rviz::Display">
+    <description>
+      Displays the local path from LocalPath messages as a colored ribbon
+      with velocity labels and stopping point marker. Directly renders
+      to OGRE without using the ROS marker system.
+    </description>
+    <message_type>autoware_mini/LocalPath</message_type>
+  </class>
+</library>
+
+<library path="lib/libheading_aligned_ortho_view_controller">
+  <class name="autoware_mini/HeadingAlignedOrtho"
+         type="autoware_mini::HeadingAlignedOrthoViewController"
+         base_class_type="rviz::ViewController">
+    <description>
+      Top-down orthographic RViz view that tracks both the target TF
+      frame's position and its yaw rotation, so the target frame's
+      forward axis always points up on screen. Used for vehicle-aligned
+      remote assistance views.
+    </description>
+  </class>
+</library>
+

@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="monitoring_conf_path" default="$(find autoware_mini)/config/monitoring/autonomy.csv" doc="Path to the monitoring configuration file." />
+    <arg name="node_start_delay" default="6.0" doc="Determines the time (s) the nodes wait before starting." />  
+    <arg name="use_driver_monitoring" default="false" doc="Enable driver (novatel, pacmod, ssc) diagnostics monitoring from lexus_platform"/>
+    <arg name="use_diagnostics_player" default="false" doc="Enable audible feedback for diagnostics"/>
+
+    <arg name="use_ram_monitoring" default="false" doc="Enable RAM monitoring"/>
+    <arg name="use_ntp_monitoring" default="false" doc="Enable NTP monitoring"/>
+    <arg name="ntp_warn_tolerance" default="10000" doc="NTP offset warning tolerance in microseconds"/>
+    <arg name="ntp_error_tolerance" default="100000" doc="NTP offset error tolerance in microseconds"/>
+    <arg name="use_sensors_monitoring" default="false" doc="Enable PC sensors monitoring"/>
+
+    <param name="enable_statistics" value="true" />
+
+    <group ns="monitoring">
+        <node pkg="autoware_mini" type="cpu_monitor.py" name="cpu_monitor" output="screen" required="true" />
+
+        <!-- Common diagnostics -->
+        <node if="$(arg use_ram_monitoring)" pkg="diagnostic_common_diagnostics" type="ram_monitor.py" name="ram_monitor" output="screen" required="false" />
+        <node if="$(arg use_ntp_monitoring)" pkg="diagnostic_common_diagnostics" type="ntp_monitor.py" name="ntp_monitor" output="screen" required="true"
+            args="pool.ntp.org --offset-tolerance $(arg ntp_warn_tolerance) --error-offset-tolerance $(arg ntp_error_tolerance) --no-self-test"
+        />
+        <node if="$(arg use_sensors_monitoring)" pkg="diagnostic_common_diagnostics" type="sensors_monitor.py" name="sensors_monitor" output="screen" required="true" />
+
+        <node pkg="autoware_mini" type="topic_monitor.py" name="topic_monitor" output="screen" required="true" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' ">
+            <param name="monitoring_conf_path" value="$(arg monitoring_conf_path)" />
+        </node>
+
+        <node pkg="autoware_mini" type="autonomy_overlay.py" name="autonomy_overlay" output="screen" required="true" launch-prefix="nice -n 15 bash -c 'sleep $(arg node_start_delay); $0 $@' " />
+        <node pkg="autoware_mini" type="detailed_overlay.py" name="detailed_overlay" output="screen" required="true" launch-prefix="nice -n 15 bash -c 'sleep $(arg node_start_delay); $0 $@' " />
+        <node pkg="autoware_mini" type="diagnostics_overlay.py" name="diagnostics_overlay" output="screen" required="true" launch-prefix="nice -n 15 bash -c 'sleep $(arg node_start_delay); $0 $@' " />
+        <node if="$(arg use_diagnostics_player)" pkg="autoware_mini" type="diagnostics_player.py" name="diagnostics_player" output="screen" required="true" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " />
+
+        <!-- Diagnostics nodes from lexus_platform -->
+        <group if="$(arg use_driver_monitoring)">
+            <node pkg="lexus_platform" type="novatel_oem7_driver_diag.py" name="novatel_oem7_driver_diag" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " />
+            <node pkg="lexus_platform" type="pacmod_diag.py" name="pacmod_diag" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " />
+            <node pkg="lexus_platform" type="ssc_diag.py" name="ssc_diag" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " />
+            <rosparam command="load" file="$(find lexus_platform)/config/gnss.yaml" />
+        </group>
+
+        <rosparam command="load" file="$(find autoware_mini)/config/monitoring.yaml" />
+    </group>
+
+</launch>

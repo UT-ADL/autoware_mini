@@ -1,0 +1,7 @@
+scenario_name,ade_threshold,fde_threshold,collision_threshold,max_deceleration_threshold
+objects_behind_01,10,10,0,1.5
+objects_behind_02,10,10,0,1.5
+objects_behind_03,10,10,0,1.5
+objects_behind_04,10,10,0,1.5
+objects_behind_05,10,10,0,1.5
+objects_behind_06,10,10,0,1.5

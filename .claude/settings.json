@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*rosbag:*)",
+      "Bash(*roslaunch:*)",
+      "Bash(*rostopic:*)",
+      "Bash(scripts/*:*)",
+      "Bash(git status:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)"
+    ]
+  }
+}

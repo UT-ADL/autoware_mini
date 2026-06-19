@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="max_speed"           default="30" />
+    <arg name="use_wheel_velocity"  default="false" />
     <arg name="use_lidar_center"    default="false" />
     <arg name="use_lidar_front"     default="false" />
     <arg name="use_camera_fl"       default="false" />
@@ -20,6 +21,7 @@
     <!-- Lexus platform -->
     <include file="$(find lexus_platform)/launch/platform.launch">
         <arg name="use_gnss"                    value="true" />
+        <arg name="use_wheel_velocity"          value="$(arg use_wheel_velocity)"/>
         <arg name="use_dbw"                     value="true" />
         <arg name="use_ssc"                     value="true" />
         <arg name="use_lidar_center"            value="$(arg use_lidar_center)" />
@@ -46,6 +48,9 @@
         <node pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true" >
             <param name="max_speed" value="$(arg max_speed)"/>
         </node>
+
+        <!-- Teleop status (decodes PACMod CAN id 0x510 into /vehicle/teleop_enabled) -->
+        <node pkg="autoware_mini" type="teleop_status.py" name="teleop_status" output="screen" required="true" />
 
         <!-- Button panel -->
         <node pkg="autoware_mini" type="button_panel.py" name="button_panel" output="screen" required="true" />

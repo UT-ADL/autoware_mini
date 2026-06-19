@@ -164989,7 +164989,7 @@
     <nd ref="20000061" />
     <nd ref="20000062" />
     <nd ref="-28334" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2353" action="modify" visible="true">
     <nd ref="-28335" />
@@ -165005,7 +165005,7 @@
     <nd ref="20000073" />
     <nd ref="20000074" />
     <nd ref="-28339" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2356" action="modify" visible="true">
     <nd ref="-28340" />
@@ -165021,7 +165021,7 @@
     <nd ref="20000067" />
     <nd ref="20000068" />
     <nd ref="-28344" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2359" action="modify" visible="true">
     <nd ref="-28345" />
@@ -165037,7 +165037,7 @@
     <nd ref="20000058" />
     <nd ref="20000059" />
     <nd ref="-28349" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2362" action="modify" visible="true">
     <nd ref="-28350" />
@@ -165053,7 +165053,7 @@
     <nd ref="20000046" />
     <nd ref="20000047" />
     <nd ref="-28354" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2365" action="modify" visible="true">
     <nd ref="-28355" />
@@ -165069,7 +165069,7 @@
     <nd ref="20000091" />
     <nd ref="20000092" />
     <nd ref="-28359" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2368" action="modify" visible="true">
     <nd ref="-28360" />
@@ -165085,7 +165085,7 @@
     <nd ref="20000019" />
     <nd ref="20000020" />
     <nd ref="-28364" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2371" action="modify" visible="true">
     <nd ref="-28365" />
@@ -165101,7 +165101,7 @@
     <nd ref="20000100" />
     <nd ref="20000101" />
     <nd ref="-28369" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2374" action="modify" visible="true">
     <nd ref="-28370" />
@@ -165117,7 +165117,7 @@
     <nd ref="20000097" />
     <nd ref="20000098" />
     <nd ref="-28374" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2377" action="modify" visible="true">
     <nd ref="-28375" />
@@ -165133,7 +165133,7 @@
     <nd ref="20000040" />
     <nd ref="20000041" />
     <nd ref="-28379" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2380" action="modify" visible="true">
     <nd ref="-28380" />
@@ -165149,7 +165149,7 @@
     <nd ref="20000052" />
     <nd ref="20000053" />
     <nd ref="-28384" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2383" action="modify" visible="true">
     <nd ref="-28385" />
@@ -165165,7 +165165,7 @@
     <nd ref="20000118" />
     <nd ref="20000119" />
     <nd ref="-28389" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2386" action="modify" visible="true">
     <nd ref="-28390" />
@@ -165181,7 +165181,7 @@
     <nd ref="20000037" />
     <nd ref="20000038" />
     <nd ref="-28394" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2389" action="modify" visible="true">
     <nd ref="-28395" />
@@ -165197,7 +165197,7 @@
     <nd ref="20000070" />
     <nd ref="20000071" />
     <nd ref="-28399" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2392" action="modify" visible="true">
     <nd ref="-28400" />
@@ -165213,7 +165213,7 @@
     <nd ref="20000094" />
     <nd ref="20000095" />
     <nd ref="-28404" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2395" action="modify" visible="true">
     <nd ref="-28405" />
@@ -165229,7 +165229,7 @@
     <nd ref="20000106" />
     <nd ref="20000107" />
     <nd ref="-28409" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2398" action="modify" visible="true">
     <nd ref="-28410" />
@@ -165245,7 +165245,7 @@
     <nd ref="20000022" />
     <nd ref="20000023" />
     <nd ref="-28414" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2401" action="modify" visible="true">
     <nd ref="-28415" />
@@ -165261,7 +165261,7 @@
     <nd ref="20000013" />
     <nd ref="20000014" />
     <nd ref="-28419" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2404" action="modify" visible="true">
     <nd ref="-28420" />
@@ -165277,7 +165277,7 @@
     <nd ref="20000043" />
     <nd ref="20000044" />
     <nd ref="-28424" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2407" action="modify" visible="true">
     <nd ref="-28425" />
@@ -165293,7 +165293,7 @@
     <nd ref="20000115" />
     <nd ref="20000116" />
     <nd ref="-28429" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2410" action="modify" visible="true">
     <nd ref="-28430" />
@@ -165309,7 +165309,7 @@
     <nd ref="20000025" />
     <nd ref="20000026" />
     <nd ref="-28434" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2413" action="modify" visible="true">
     <nd ref="-28435" />
@@ -165325,7 +165325,7 @@
     <nd ref="20000034" />
     <nd ref="20000035" />
     <nd ref="-28439" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2416" action="modify" visible="true">
     <nd ref="-28440" />
@@ -165341,7 +165341,7 @@
     <nd ref="20000001" />
     <nd ref="20000002" />
     <nd ref="-28444" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2419" action="modify" visible="true">
     <nd ref="-28445" />
@@ -165357,7 +165357,7 @@
     <nd ref="20000088" />
     <nd ref="20000089" />
     <nd ref="-28449" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2422" action="modify" visible="true">
     <nd ref="-28450" />
@@ -165373,7 +165373,7 @@
     <nd ref="20000103" />
     <nd ref="20000104" />
     <nd ref="-28454" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2425" action="modify" visible="true">
     <nd ref="-28455" />
@@ -165389,7 +165389,7 @@
     <nd ref="20000064" />
     <nd ref="20000065" />
     <nd ref="-28459" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2428" action="modify" visible="true">
     <nd ref="-28460" />
@@ -165405,7 +165405,7 @@
     <nd ref="20000079" />
     <nd ref="20000080" />
     <nd ref="-28464" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2431" action="modify" visible="true">
     <nd ref="-28465" />
@@ -165421,7 +165421,7 @@
     <nd ref="20000010" />
     <nd ref="20000011" />
     <nd ref="-28469" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2434" action="modify" visible="true">
     <nd ref="-28470" />
@@ -165437,7 +165437,7 @@
     <nd ref="20000007" />
     <nd ref="20000008" />
     <nd ref="-28474" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2437" action="modify" visible="true">
     <nd ref="-28475" />
@@ -165453,7 +165453,7 @@
     <nd ref="20000109" />
     <nd ref="20000110" />
     <nd ref="-28479" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2440" action="modify" visible="true">
     <nd ref="-28480" />
@@ -165469,7 +165469,7 @@
     <nd ref="20000049" />
     <nd ref="20000050" />
     <nd ref="-28484" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2443" action="modify" visible="true">
     <nd ref="-28485" />
@@ -165485,7 +165485,7 @@
     <nd ref="20000031" />
     <nd ref="20000032" />
     <nd ref="-28489" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2446" action="modify" visible="true">
     <nd ref="-28490" />
@@ -165501,7 +165501,7 @@
     <nd ref="20000112" />
     <nd ref="20000113" />
     <nd ref="-28494" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2449" action="modify" visible="true">
     <nd ref="-28495" />
@@ -165517,7 +165517,7 @@
     <nd ref="20000076" />
     <nd ref="20000077" />
     <nd ref="-28499" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2452" action="modify" visible="true">
     <nd ref="-28500" />
@@ -165533,7 +165533,7 @@
     <nd ref="20000085" />
     <nd ref="20000086" />
     <nd ref="-28504" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2455" action="modify" visible="true">
     <nd ref="-28505" />
@@ -165549,7 +165549,7 @@
     <nd ref="20000121" />
     <nd ref="20000122" />
     <nd ref="-28509" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2458" action="modify" visible="true">
     <nd ref="-28510" />
@@ -165565,7 +165565,7 @@
     <nd ref="20000082" />
     <nd ref="20000083" />
     <nd ref="-28514" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2461" action="modify" visible="true">
     <nd ref="-28515" />
@@ -165581,7 +165581,7 @@
     <nd ref="20000016" />
     <nd ref="20000017" />
     <nd ref="-28519" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2464" action="modify" visible="true">
     <nd ref="-28520" />
@@ -165597,7 +165597,7 @@
     <nd ref="20000004" />
     <nd ref="20000005" />
     <nd ref="-28524" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2467" action="modify" visible="true">
     <nd ref="-28525" />
@@ -165621,7 +165621,7 @@
     <nd ref="20000055" />
     <nd ref="20000056" />
     <nd ref="-28532" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="-2471" action="modify" visible="true">
     <nd ref="-28533" />
@@ -165645,7 +165645,7 @@
     <nd ref="20000028" />
     <nd ref="20000029" />
     <nd ref="-28540" />
-    <tag k="type" v="stop_line" /><tag k="subtype" v="traffic_light" />
+    <tag k="type" v="stop_line" /><tag k="subtype" v="yield" />
   </way>
   <way id="1000" visible="true" version="1">
     <nd ref="1002" />

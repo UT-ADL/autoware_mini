@@ -31,7 +31,7 @@ A Python ROS node for interfacing with Autoware's SSC.
 | Name | Type | Description |
 | --- | --- | --- |
 | `engage` | `std_msgs/Bool` | Command to engage/disengage autonomy. |
-| `/control/vehicle_cmd` | `autoware_mini/VehicleCmd` | Command for vehicle motion. |
+| `/control/vehicle_cmd` | `autoware_mini/VehicleCommand` | Command for vehicle motion. |
 | `/ssc/module_states` | `automotive_navigation_msgs/ModuleState` | Module states feedback. Used to check the active state of SSC. |
 | `/ssc/curvature_feedback` | `automotive_platform_msgs/CurvatureFeedback` | Curvature feedback. |
 | `/ssc/throttle_feedback` | `automotive_platform_msgs/ThrottleFeedback` | Throttle feedback. |
@@ -80,7 +80,7 @@ Reacts to engage button in the car. Also logs marker button presses.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `/planning/service_lets_go` | `std_srvs/Empty` | Service to disable forced stop on stop lines. |
+| `/planning/service_confirm_drive` | `std_srvs/Empty` | Service to disable forced stop on stop lines. |
 
 ## pacmod_state_visualizer
 

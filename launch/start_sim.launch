@@ -3,49 +3,69 @@
 
     <!-- Map configuration -->
     <arg name='map_name'                default="tartu_demo"                 doc="Map name to use"/>
-    
+
+    <!-- Vehicle-in-the-loop -->
+    <arg name="use_vil"                 default="false"                      doc="Run vehicle-in-the-loop: Carla provides the world and sensors, ego pose/velocity is propagated to Carla"/>
+    <arg name="carla_host"               default="localhost"                  doc="Carla server host"/>
+    <arg name="carla_port"              default="2000"                       doc="Carla server port"/>
+
     <!-- Bag scenarios -->
     <arg name="scenario_name"           default=""                           doc="Scenario name"/>
+    <arg name="scenario_runner"         default="$(eval scenario_name != '')" doc="Run in scenario runner mode (stack stays up, bags played externally)"/>
     <arg name="scenario_bag"            default="$(find autoware_mini)/data/bag_scenarios/$(arg map_name)/$(arg scenario_name).bag" doc="Scenario name"/>
     <arg name="rate"                    default="1"                          doc="Scenario bag playback speed"/>
     <arg name="ade_csv_file"            default=""                           doc="CSV file to store ADE values"/>
     <arg name="ade_threshold"           default="10"                         doc="ADE threshold in meters"/>
+    <arg name="fde_threshold"           default="10"                         doc="FDE threshold in meters"/>
     <arg name="ade_plot_file"           default=""                           doc="File to save ADE plot"/>
-    <arg name="speed_smoothness_threshold" default="1"                       doc="Threshold for speed smoothness metric"/>
+    <arg name="collision_threshold"     default="0"                          doc="Threshold for maximum allowed collisions"/>             
+    <arg name="max_deceleration_threshold" default="1.5"                     doc="Threshold for maximum deceleration metric"/>
     
     <!-- Localization -->
     <arg name="localizer"               default="sim"                        doc="Localizer to use (novatel, carla, sim)"/>
     
     <!-- Detection -->
-    <arg name="detector"                default="$(eval 'sim' if scenario_name == '' else 'none')" doc="Detector to use (sim, none)"/>
+    <arg name="detector"                default="$(eval 'none' if scenario_runner else ('carla' if use_vil else 'sim'))" doc="Detector to use (carla, sim, none)"/>
     <arg name="use_road_area_filter"    default="$(eval 'tartu' in map_name)" doc="Use road area filter"/>
-    <arg name="tfl_detector"            default="none"                       doc="Traffic light detector to use (mqtt, none)"/>
-    <arg name="tracker"                 default="$(eval 'ema' if scenario_name != '' else 'none')" doc="Tracker to use (none, ema)"/>
-    <arg name="predictor"               default="$(eval 'map_naive' if scenario_name != '' else 'none')" doc="Predictor to use (none, naive, map, map_naive)"/>
+    <arg name="tfl_detector"            default="$(eval 'carla' if use_vil else 'none')" doc="Traffic light detector to use (carla, mqtt, none)"/>
+    <arg name="tfl_cameras"             default="mako"                       doc="Cameras to use for traffic light detection (mako, nvidia)"/>
+    <arg name="tracker"                 default="$(eval 'ema' if scenario_runner else 'none')" doc="Tracker to use (none, ema)"/>
+    <arg name="predictor"               default="$(eval 'map_naive' if (scenario_runner or use_vil) else 'none')" doc="Predictor to use (none, naive, map, map_naive)"/>
     <arg name="detection_range"         default=""                           doc="Detection range in meters (empty for default)"/>
     
     <!-- Planning -->
     <arg name="global_planner"          default="lanelet2"                   doc="Global planner to use (waypoints, lanelet2)"/>
-    <arg name="local_planner"           default="rule"                       doc="Local planner to use (rule, none)"/>
+    <arg name="local_planner"           default="rule_swerve"                doc="Local planner to use (rule_speed, rule_swerve, openpilot, none)"/>
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv"   doc="Waypoints file for waypoint planner"/>
     <arg name="use_path_smoothing"      default="true"                       doc="Enable path smoothing"/>
     <arg name="enable_goal_checker"          default="true"                  doc="Enable goal checker"/>
     <arg name="enable_object_checker"        default="true"                  doc="Enable object checker"/>
-    <arg name="enable_auto_stop_checker"     default="false"                 doc="Enable auto stop checker"/>
+    <arg name="enable_manual_yield_checker"  default="false"                 doc="Enable auto stop checker"/>
+    <arg name="enable_stop_sign_checker"      default="true"                  doc="Enable stop sign checker"/>
     <arg name="enable_traffic_light_checker" default="true"                  doc="Enable traffic light checker"/>
     <arg name="enable_crosswalk_checker"     default="true"                  doc="Enable crosswalk checker"/>
     <arg name="enable_yielding_checker"      default="true"                  doc="Enable yielding checker"/>
+    <arg name="enable_give_way_checker"      default="true"                  doc="Enable give way checker"/>
+    <arg name="enable_right_of_way_checker"  default="true"                  doc="Enable right of way checker"/>
     <arg name="enable_trajectory_checker"    default="true"                  doc="Enable trajectory checker"/>
-    
+    <arg name="enable_bus_stop_checker"      default="true"                  doc="Enable bus stop checker"/>
+    <arg name="enable_road_closures"    default="$(eval not scenario_runner)" doc="Enable road closures"/>
+    <arg name="use_waypoint_assistance"    default="false"                   doc="Enable waypoint-based remote assistance"/>
+    <arg name="use_ignored_objects_filter" default="true"                    doc="Enable filter that suppresses operator-selected objects from tracked_objects"/>
+
     <!-- Control -->
     <arg name="controller"              default="pure_pursuit"               doc="Controller to use (pure_pursuit, stanley)"/>
-    
+
     <!-- Visualization -->
     <arg name="launch_rviz"             default="true"                       doc="Determines if rviz is launched or not"/>
-    
+    <arg name="use_python_visualizers"  default="true"                       doc="Use Python visualizer nodes instead of RViz plugins"/>
+
+    <!-- Monitoring -->
+    <arg name='use_monitoring'          default='false'                      doc="Determines the usage of monitoring nodes."/>
+
     <!-- Webapp -->
     <arg name="use_webapp"              default="false"                      doc="Enable web app MQTT bridge node"/>
-    <arg name="session_id"              default=""                           doc="Session ID for the webapp bridge"/>
+    <arg name="session_id"              default=""                           doc="Session ID for the webapp bridge node."/> 
 
     <!-- Localization -->
     <include file="$(find autoware_mini)/launch/localization.launch">
@@ -53,8 +73,8 @@
         <arg name="map_name"            value="$(arg map_name)" />
     </include>
 
-    <!-- Detection -->
-    <include file="$(find autoware_mini)/launch/detection.launch">
+    <!-- Perception -->
+    <include file="$(find autoware_mini)/launch/perception.launch">
         <arg name="detector"            value="$(arg detector)" />
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
         <arg name="tracker"             value="$(arg tracker)" />
@@ -62,6 +82,8 @@
         <arg name="detection_range"     value="$(arg detection_range)" />
         <arg name="map_name"            value="$(arg map_name)" />
         <arg name="use_road_area_filter" value="$(arg use_road_area_filter)" />
+        <arg name="use_python_visualizers" value="$(arg use_python_visualizers)" />
+        <arg name="use_ignored_objects_filter" value="$(arg use_ignored_objects_filter)" />
     </include>
 
     <!-- Planning -->
@@ -73,11 +95,18 @@
         <arg name="map_name"            value="$(arg map_name)" />
         <arg name="enable_goal_checker"          value="$(arg enable_goal_checker)" />
         <arg name="enable_object_checker"        value="$(arg enable_object_checker)" />
-        <arg name="enable_auto_stop_checker"     value="$(arg enable_auto_stop_checker)" />
+        <arg name="enable_manual_yield_checker"  value="$(arg enable_manual_yield_checker)" />
+        <arg name="enable_stop_sign_checker"      value="$(arg enable_stop_sign_checker)" />
         <arg name="enable_traffic_light_checker" value="$(arg enable_traffic_light_checker)" />
         <arg name="enable_crosswalk_checker"     value="$(arg enable_crosswalk_checker)" />
         <arg name="enable_yielding_checker"      value="$(arg enable_yielding_checker)" />
+        <arg name="enable_give_way_checker"      value="$(arg enable_give_way_checker)" />
+        <arg name="enable_right_of_way_checker"  value="$(arg enable_right_of_way_checker)" />
         <arg name="enable_trajectory_checker"    value="$(arg enable_trajectory_checker)" />
+        <arg name="enable_bus_stop_checker"      value="$(arg enable_bus_stop_checker)" />
+        <arg name="enable_road_closures"         value="$(arg enable_road_closures)" />
+        <arg name="use_waypoint_assistance"      value="$(arg use_waypoint_assistance)" />
+        <arg name="use_python_visualizers"       value="$(arg use_python_visualizers)" />
     </include>
 
     <!-- Control -->
@@ -88,11 +117,28 @@
     <!-- Bicycle_model simulator -->
     <include file="$(find autoware_mini)/launch/platform/simulation.launch">
         <arg name="map_name" value="$(arg map_name)" />
+        <arg name="lexus_shadow"    value="$(arg scenario_runner)" />
+        <arg name="broadcast_tf"    value="$(eval not use_vil)" />
     </include>
+
+    <!-- Carla platform -->
+    <include if="$(arg use_vil)" file="$(find autoware_mini)/launch/platform/carla.launch">
+        <arg name="map_name"          value="$(arg map_name)" />
+        <arg name="carla_host"        value="$(arg carla_host)" />
+        <arg name="carla_port"        value="$(arg carla_port)" />
+        <arg name="use_vil"           value="true" />
+        <arg name="use_lidar"         value="$(eval 'lidar' in detector)" />
+        <arg name="use_radar"         value="$(eval 'radar' in detector)" />
+        <arg name="use_mako_cameras"  value="$(eval ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='mako')" />
+        <arg name="use_nvidia_cameras" value="$(eval ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='nvidia')" />
+        <arg name="publish_clock"     value="false" />
+    </include>
+
+    <param if="$(arg use_vil)" name="/use_sim_time" value="false" />
 
     <!-- Rviz -->
     <include if="$(arg launch_rviz)" file="$(find autoware_mini)/launch/rviz.launch">
-        <arg name="lexus_shadow"    value="$(eval scenario_name != '')" />
+        <arg name="carla_status"    value="$(arg use_vil)" />
     </include>
 
     <!-- Webapp bridge -->
@@ -100,24 +146,30 @@
         <arg name="session_id" value="$(arg session_id)" />
     </include>
 
-    <group if="$(eval scenario_name != '')">
-        <!-- Play scenario bag -->
-        <node pkg="rosbag" type="play" name="player" required="true" output="screen"
-                args="$(arg scenario_bag) --clock --queue=1 --rate=$(arg rate) --delay 2.5 --wait-for-subscribers" />
+    <!-- Monitoring -->
+    <include if="$(arg use_monitoring)" file="$(find autoware_mini)/launch/tools/monitoring.launch" />
 
+    <!-- Play scenario bag (single scenario mode only) -->
+    <node if="$(eval scenario_name != '')" pkg="rosbag" type="play" name="player" required="true" output="screen"
+            args="$(arg scenario_bag) --clock --wait-for-subscribers --rate=$(arg rate) --delay 5" />
+
+    <!-- Scenario infrastructure -->
+    <group if="$(arg scenario_runner)">
         <!-- Use simulation time from bag -->
         <param name="/use_sim_time" value="true" />
 
         <!-- Bag pausing button -->
         <node pkg="autoware_mini" type="pause_bag.py" name="pause_bag" output="screen" required="true"/>
 
-        <!-- ADE calculation -->
-        <node pkg="autoware_mini" type="scenario_metrics_calculator.py" name="scenario_metrics_calculator" output="screen" required="true" ns="vehicle">
+        <!-- Metrics calculation -->
+        <node pkg="autoware_mini" type="scenario_metrics_calculator.py" name="scenario_metrics_calculator" output="screen" respawn="true" required="false" ns="vehicle">
             <param name="scenario_name" value="$(arg scenario_name)" />
             <param name="ade_threshold" value="$(arg ade_threshold)" />
+            <param name="fde_threshold" value="$(arg fde_threshold)" />
             <param name="ade_csv_file" value="$(arg ade_csv_file)" />
             <param name="ade_plot_file" value="$(arg ade_plot_file)" />
-            <param name="speed_smoothness_threshold" value="$(arg speed_smoothness_threshold)" />
+            <param name="max_deceleration_threshold" value="$(arg max_deceleration_threshold)" />
+            <param name="collision_threshold" value="$(arg collision_threshold)" />
         </node>
     </group>
 

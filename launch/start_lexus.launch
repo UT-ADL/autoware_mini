@@ -3,43 +3,57 @@
 
     <!-- Map configuration -->
     <arg name='map_name'                default='tartu_large'                  doc="Map name to use"/>
-    
+
+    <!-- Vehicle-in-the-loop -->
+    <arg name="use_vil"                 default="false"                        doc="Run vehicle-in-the-loop: Carla provides the world and sensors, ego pose/velocity is propagated to Carla"/>
+    <arg name="carla_host"               default="localhost"                    doc="Carla server host"/>
+    <arg name="carla_port"              default="2000"                         doc="Carla server port"/>
+
     <!-- Localization -->
     <arg name="localizer"               default="novatel"                      doc="Localizer to use (novatel, carla)"/>
     <arg name="use_lane_matching"       default="false"                        doc="Enable lane boundary matching for localization"/>
+    <arg name="time_source"             default="gps"                          doc="Time source for novatel localizer: ros, gps, or auto"/>
+    <arg name="use_wheel_velocity"      default="true"                         doc="Send car's velocity to Novatel"/>
     
     <!-- Detection -->
-    <arg name="detector"                default="lidar_cluster_fast"           doc="Detector to use (lidar_cluster, lidar_cluster_fast, sim, carla)"/>
+    <arg name="detector"                default="$(eval 'carla' if use_vil else 'lidar_cluster_gpu_radar_fusion')" doc="Detector to use (carla, lidar_cluster, lidar_cluster_gpu, sim)"/>
     <arg name="use_lidar_center"        default="true"                         doc="Use velodyne lidar"/>
-    <arg name="use_lidar_front"         default="true"                         doc="Use ouster lidar"/>
+    <arg name="use_lidar_front"         default="false"                        doc="Use ouster lidar"/>
     <arg name="use_road_area_filter"    default="$(eval 'tartu' in map_name)"  doc="Use road area filter"/>
     <arg name="ground_removal"          default="naive"                        doc="Ground removal method (naive, jcp)"/>
-    <arg name="tfl_detector"            default="mqtt_camera_fusion"           doc="Traffic light detector to use (mqtt, camera, mqtt_camera_fusion)"/>
+    <arg name="tfl_detector"            default="$(eval 'carla' if use_vil else 'mqtt_yolo_fusion')" doc="Traffic light detector to use (carla, mqtt, yolo, camera, mqtt_yolo_fusion, mqtt_camera_fusion)"/>
     <arg name="tfl_cameras"             default="mako"                         doc="Cameras to use for traffic light detection (mako, nvidia)"/>
     <arg name="use_nvidia_cameras"      default="$(eval  ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='nvidia')" doc="use nvidia cameras" />
     <arg name="nvidia_encoder"          default="$(eval 'jpeg' if ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='nvidia' else 'h264')" doc="Nvidia camera encoder (h264, jpeg)"/>
-    <arg name="tracker"                 default="ema"                          doc="Tracker to use (none, ema)"/>
+    <arg name="tracker"                 default="$(eval 'none' if detector == 'radar' else 'ema')" doc="Tracker to use (none, ema)"/>
     <arg name="predictor"               default="map_naive"                    doc="Predictor to use (none, naive, map, map_naive)"/>
     <arg name="detection_range"         default=""                             doc="Detection range in meters (empty for default)"/>
     <arg name="more_visualizations"     default="false"                        doc="By default visualize only the final detections"/>
     
     <!-- Planning -->
     <arg name="global_planner"          default="lanelet2"                     doc="Global planner to use (waypoints, lanelet2)"/>
-    <arg name="local_planner"           default="rule"                         doc="Local planner to use (none, rule, openpilot)"/>
+    <arg name="local_planner"           default="rule_swerve"                  doc="Local planner to use (rule_speed, rule_swerve, openpilot, none)"/>
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv"     doc="Waypoints file for waypoint planner"/>
     <arg name="use_path_smoothing"      default="true"                         doc="Enable path smoothing"/>
     <arg name="enable_goal_checker"          default="true"                    doc="Enable goal checker"/>
     <arg name="enable_object_checker"        default="true"                    doc="Enable object checker"/>
-    <arg name="enable_auto_stop_checker"     default="true"                    doc="Enable auto stop checker"/>
+    <arg name="enable_manual_yield_checker"  default="true"                    doc="Enable auto stop checker"/>
+    <arg name="enable_stop_sign_checker"      default="true"                    doc="Enable stop sign checker"/>
     <arg name="enable_traffic_light_checker" default="true"                    doc="Enable traffic light checker"/>
     <arg name="enable_crosswalk_checker"     default="true"                    doc="Enable crosswalk checker"/>
     <arg name="enable_yielding_checker"      default="true"                    doc="Enable yielding checker"/>
+    <arg name="enable_give_way_checker"      default="true"                    doc="Enable give way checker"/>
+    <arg name="enable_right_of_way_checker"  default="true"                    doc="Enable right of way checker"/>
     <arg name="enable_trajectory_checker"    default="true"                    doc="Enable trajectory checker"/>
-    
+    <arg name="enable_bus_stop_checker"      default="false"                   doc="Enable bus stop checker"/>
+    <arg name="enable_road_closures"         default="true"                    doc="Enable road closures"/>
+    <arg name="use_waypoint_assistance"      default="true"                    doc="Enable waypoint-based remote assistance"/>
+    <arg name="use_ignored_objects_filter"   default="true"                    doc="Enable filter that suppresses operator-selected objects from tracked_objects"/>
+
     <!-- Control -->
     <arg name="controller"              default="pure_pursuit"                 doc="Controller to use (pure_pursuit, stanley)"/>
     <arg name="max_speed"               default="40"                           doc="Maximum speed in km/h"/>
-    
+
     <!-- Lexus platform specific -->
     <arg name="use_openpilot_predictions" default="$(eval 'openpilot' in local_planner or use_lane_matching)" doc="Use openpilot predictions"/>
     <arg name="use_openpilot_road_camera"   default="false"                    doc="Use openpilot road camera"/>
@@ -51,23 +65,29 @@
     <arg name="blacklist_file"          default="$(find autoware_mini)/config/record_bag/blacklist.txt" doc="File with topics to blacklist for recording"/>
     <arg name="recorded_bags_dir"       default="/media/$(env USER)/ExtremePro/$(env USER)" doc="Directory to save recorded bags"/>
     <arg name="bag_name"                default="recording"                    doc="Name of recorded bag files when car buttons are used"/>
-    
+
     <!-- Visualization -->
     <arg name="launch_rviz"             default="true"                         doc="Determines if rviz is launched or not"/>
-    
+    <arg name="use_python_visualizers"  default="true"                         doc="Use Python visualizer nodes instead of RViz plugins"/>
+
+    <!-- Monitoring -->
+    <arg name='use_monitoring'          default='true'                         doc="Determines the usage of monitoring nodes."/>
+
     <!-- Webapp -->
     <arg name="use_webapp"              default="true"                         doc="Enable web app MQTT bridge node"/>
-    <arg name="session_id"              default=""                             doc="Session ID for the webapp bridge"/>
-    
+    <arg name="session_id"              default=""                             doc="Session ID for the webapp bridge node."/>
+
     <!-- Localization -->
     <include file="$(find autoware_mini)/launch/localization.launch">
         <arg name="localizer"           value="$(arg localizer)" />
         <arg name="map_name"            value="$(arg map_name)" />
         <arg name="use_lane_matching"   value="$(arg use_lane_matching)" />
+        <arg name="time_source"         value="$(eval 'ros' if use_vil else time_source)" />
+        <arg name="broadcast_tf"        value="$(eval not use_vil)" />
     </include>
 
-    <!-- Detection -->
-    <include file="$(find autoware_mini)/launch/detection.launch">
+    <!-- Perception -->
+    <include file="$(find autoware_mini)/launch/perception.launch">
         <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
         <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
         <arg name="detector"            value="$(arg detector)" />
@@ -80,6 +100,8 @@
         <arg name="map_name"            value="$(arg map_name)" />
         <arg name="use_road_area_filter" value="$(arg use_road_area_filter)" />
         <arg name="ground_removal"      value="$(arg ground_removal)" />
+        <arg name="use_python_visualizers" value="$(arg use_python_visualizers)" />
+        <arg name="use_ignored_objects_filter" value="$(arg use_ignored_objects_filter)" />
     </include>
 
     <!-- Planning -->
@@ -91,11 +113,18 @@
         <arg name="map_name"            value="$(arg map_name)" />
         <arg name="enable_goal_checker"          value="$(arg enable_goal_checker)" />
         <arg name="enable_object_checker"        value="$(arg enable_object_checker)" />
-        <arg name="enable_auto_stop_checker"     value="$(arg enable_auto_stop_checker)" />
+        <arg name="enable_manual_yield_checker"  value="$(arg enable_manual_yield_checker)" />
+        <arg name="enable_stop_sign_checker"      value="$(arg enable_stop_sign_checker)" />
         <arg name="enable_traffic_light_checker" value="$(arg enable_traffic_light_checker)" />
         <arg name="enable_crosswalk_checker"     value="$(arg enable_crosswalk_checker)" />
         <arg name="enable_yielding_checker"      value="$(arg enable_yielding_checker)" />
+        <arg name="enable_give_way_checker"      value="$(arg enable_give_way_checker)" />
+        <arg name="enable_right_of_way_checker"  value="$(arg enable_right_of_way_checker)" />
         <arg name="enable_trajectory_checker"    value="$(arg enable_trajectory_checker)" />
+        <arg name="enable_bus_stop_checker"      value="$(arg enable_bus_stop_checker)" />
+        <arg name="enable_road_closures"         value="$(arg enable_road_closures)" />
+        <arg name="use_waypoint_assistance"      value="$(arg use_waypoint_assistance)" />
+        <arg name="use_python_visualizers"       value="$(arg use_python_visualizers)" />
     </include>
 
     <!-- Control -->
@@ -106,24 +135,40 @@
     <!-- Vehicle -->
     <include file="$(find autoware_mini)/launch/platform/lexus.launch" >
         <arg name="max_speed"           value="$(arg max_speed)" />
-        <arg name="use_lidar_center"    value="$(arg use_lidar_center)" />
-        <arg name="use_lidar_front"     value="$(arg use_lidar_front)" />
-        <arg name="use_camera_fl"       value="$(eval 'camera' in tfl_detector and tfl_cameras=='mako')" />
-        <arg name="use_camera_fr"       value="$(eval 'camera' in tfl_detector and tfl_cameras=='mako')" />
-        <arg name="use_nvidia_cameras"  value="$(arg use_nvidia_cameras)" />
+        <arg name="use_wheel_velocity"  value="$(arg use_wheel_velocity)"/>
+        <arg name="use_lidar_center"    value="$(eval use_lidar_center and not use_vil)" />
+        <arg name="use_lidar_front"     value="$(eval use_lidar_front and not use_vil)" />
+        <arg name="use_camera_fl"       value="$(eval ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='mako' and not use_vil)" />
+        <arg name="use_camera_fr"       value="$(eval ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='mako' and not use_vil)" />
+        <arg name="use_nvidia_cameras"  value="$(eval use_nvidia_cameras and not use_vil)" />
         <arg name="nvidia_encoder"      value="$(arg nvidia_encoder)" />
-        <arg name="use_radar_fc"        value="$(eval 'radar' in detector)" />
-        <arg name="use_openpilot_predictions"   value="$(arg use_openpilot_predictions)" />
-        <arg name="use_openpilot_road_camera"   value="$(arg use_openpilot_road_camera)" />
-        <arg name="use_openpilot_wide_camera"   value="$(arg use_openpilot_wide_camera)" />
-        <arg name="use_openpilot_driver_camera" value="$(arg use_openpilot_driver_camera)" />
-        <arg name="use_openpilot_qroad_camera"  value="$(arg use_openpilot_qroad_camera)" />
+        <arg name="use_radar_fc"        value="$(eval 'radar' in detector and not use_vil)" />
+        <arg name="use_openpilot_predictions"   value="$(eval use_openpilot_predictions and not use_vil)" />
+        <arg name="use_openpilot_road_camera"   value="$(eval use_openpilot_road_camera and not use_vil)" />
+        <arg name="use_openpilot_wide_camera"   value="$(eval use_openpilot_wide_camera and not use_vil)" />
+        <arg name="use_openpilot_driver_camera" value="$(eval use_openpilot_driver_camera and not use_vil)" />
+        <arg name="use_openpilot_qroad_camera"  value="$(eval use_openpilot_qroad_camera and not use_vil)" />
     </include>
+
+    <!-- Carla platform -->
+    <include if="$(arg use_vil)" file="$(find autoware_mini)/launch/platform/carla.launch">
+        <arg name="map_name"          value="$(arg map_name)" />
+        <arg name="carla_host"        value="$(arg carla_host)" />
+        <arg name="carla_port"        value="$(arg carla_port)" />
+        <arg name="use_vil"           value="true" />
+        <arg name="use_lidar"         value="$(eval 'lidar' in detector)" />
+        <arg name="use_radar"         value="$(eval 'radar' in detector)" />
+        <arg name="use_mako_cameras"  value="$(eval ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='mako')" />
+        <arg name="use_nvidia_cameras" value="$(eval ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='nvidia')" />
+        <arg name="publish_clock"     value="false" />
+    </include>
+
+    <param if="$(arg use_vil)" name="/use_sim_time" value="false" />
 
     <!-- Rviz -->
     <include if="$(arg launch_rviz)" file="$(find autoware_mini)/launch/rviz.launch">
-        <arg name="driver_status"       value="true" />
         <arg name="carla_status"        value="true" />
+        <arg name="respawn"             value="true" />
     </include>
 
     <!-- Webapp bridge -->
@@ -131,8 +176,11 @@
         <arg name="session_id" value="$(arg session_id)" />
     </include>
 
+    <!-- Monitoring -->
+    <include if="$(arg use_monitoring)" file="$(find autoware_mini)/launch/tools/monitoring.launch" />
+
     <!-- Rosbag recording -->
-    <node pkg="autoware_mini" type="record_bag.py" name="record_bag" output="screen" required="true" >
+    <node pkg="autoware_mini" type="record_bag.py" name="record_bag" output="screen" required="true" launch-prefix="nice -n 10" >
         <param name="blacklist_file"            value="$(arg blacklist_file)" />
         <param name="recorded_bags_dir"         value="$(arg recorded_bags_dir)" />
         <param name="bag_name"                  value="$(arg bag_name)"/>

@@ -16,13 +16,13 @@ A ROS node which implements the pure pursuit control algorithm. The node subscri
 | `/planning/max_deceleration`   | double | `10.0`  | Maximum deceleration (in m/s^2).                                      |
 | `heading_angle_limit`          | double | `90.0`  | The maximum heading angle difference in degrees.                        |
 | `lateral_error_limit`          | double | `2.0`   | The maximum lateral error in meters.                                   |
-| `blinker_lookahead_time`       | double | `3.0`   | Lookahead time for blinker state (multiplied with velocity).           |
-| `blinker_min_lookahead_distance` | double | `14.0` | Min lookahead distance to get blinker state (m).                      |
+| `turn_signal_lookahead_time`       | double | `3.0`   | Lookahead time for turn signal state (multiplied with velocity).           |
+| `turn_signal_min_lookahead_distance` | double | `14.0` | Min lookahead distance to get turn signal state (m).                      |
 | `stopping_speed_limit`         | double | `1.0`   | Speed threshold below which the vehicle is considered stopped (m/s).   |
 | `~lookahead_time`              | double | `1.2`   | The time in seconds to plan ahead for the lookahead distance.          |
 | `~min_lookahead_distance`      | double | `6.0`   | The minimum lookahead distance to maintain from the current position.  |
-| `~simulate_cmd_delay`          | double | `0.3`   | Time (s) to project ego vehicle forward to compensate for delay.       |
-| `~publish_debug_info`          | bool   | `False` | Whether to publish debug information.                                  |
+| `~steer_cmd_delay`     | double | `0.3`   | Time (s) to project ego vehicle forward to compensate for delay.       |
+| `~speed_cmd_delay`    | double | `0.3`   | Time (s) multiplied with ego speed gives distance at which the target velocity will be taken |
 
 #### Subscribed Topics
 
@@ -36,9 +36,9 @@ A ROS node which implements the pure pursuit control algorithm. The node subscri
 
 | Name                  | Type                         | Description                                            |
 | --------------------- | ---------------------------- | ------------------------------------------------------ |
-| `vehicle_cmd`         | `autoware_mini/VehicleCmd`   | The vehicle commands (steering angle and velocity).    |
-| `controller_markers`  | `visualization_msgs/MarkerArray` | If `publish_debug_info` is enabled: controller-specific visualization markers. |
-| `controller_debug`    | `std_msgs/Float32MultiArray` | If `publish_debug_info` is enabled: debug data including processing time, heading information, errors, and target velocity. |
+| `vehicle_cmd`         | `autoware_mini/VehicleCommand`   | The vehicle commands (steering angle and velocity).    |
+| `controller_markers`  | `visualization_msgs/MarkerArray` | Controller-specific visualization markers. |
+| `controller_debug`    | `std_msgs/Float32MultiArray` | Debug data including processing time, heading information, errors, and target velocity. |
 
 ## stanley_controller
 
@@ -54,12 +54,12 @@ A ROS node that implements the Stanley control algorithm for lateral control. Th
 | `/planning/max_deceleration`   | double | `10.0`  | Maximum deceleration (in m/s^2).                                      |
 | `heading_angle_limit`          | double | `90.0`  | The maximum heading angle difference in degrees.                        |
 | `lateral_error_limit`          | double | `2.0`   | The maximum lateral error in meters.                                   |
-| `blinker_lookahead_time`       | double | `3.0`   | Lookahead time for blinker state (multiplied with velocity).           |
-| `blinker_min_lookahead_distance` | double | `14.0` | Min lookahead distance to get blinker state (m).                      |
+| `turn_signal_lookahead_time`       | double | `3.0`   | Lookahead time for turn signal state (multiplied with velocity).           |
+| `turn_signal_min_lookahead_distance` | double | `14.0` | Min lookahead distance to get turn signal state (m).                      |
 | `stopping_speed_limit`         | double | `1.0`   | Speed threshold below which the vehicle is considered stopped (m/s).   |
 | `~cte_gain`                    | double | `0.4`   | Gain for cross-track error.                                           |
-| `~simulate_cmd_delay`          | double | `0.3`   | Time (s) to project ego vehicle forward to compensate for delay.       |
-| `~publish_debug_info`          | bool   | `False` | Whether to publish debug information.                                  |
+| `~steer_cmd_delay`     | double | `0.3`   | Time (s) to project ego vehicle forward to compensate for delay.       |
+| `~speed_cmd_delay`    | double | `0.3`   | Time (s) multiplied with ego speed gives distance at which the target velocity will be taken |
 
 #### Subscribed Topics
 
@@ -73,6 +73,6 @@ A ROS node that implements the Stanley control algorithm for lateral control. Th
 
 | Name                  | Type                         | Description                                            |
 | --------------------- | ---------------------------- | ------------------------------------------------------ |
-| `vehicle_cmd`         | `autoware_mini/VehicleCmd`   | The vehicle commands (steering angle and velocity).    |
-| `controller_markers`  | `visualization_msgs/MarkerArray` | If `publish_debug_info` is enabled: controller-specific visualization markers. |
-| `controller_debug`    | `std_msgs/Float32MultiArray` | If `publish_debug_info` is enabled: debug data including processing time, heading information, errors, and target velocity. |
+| `vehicle_cmd`         | `autoware_mini/VehicleCommand`   | The vehicle commands (steering angle and velocity).    |
+| `controller_markers`  | `visualization_msgs/MarkerArray` | Controller-specific visualization markers. |
+| `controller_debug`    | `std_msgs/Float32MultiArray` | Debug data including processing time, heading information, errors, and target velocity. |

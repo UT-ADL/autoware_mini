@@ -19,7 +19,7 @@ class ButtonPanelNode:
         self.engage_pub = rospy.Publisher("engage", Bool, queue_size=10, tcp_nodelay=True)
         self.marker_pub = rospy.Publisher("/log/markers", Marker, queue_size=10, tcp_nodelay=True)
 
-        self.service_lets_go = rospy.ServiceProxy('/planning/service_lets_go', Empty)
+        self.service_confirm_drive = rospy.ServiceProxy('/planning/service_confirm_drive', Empty)
         self.service_cancel_route = rospy.ServiceProxy('/planning/cancel_route', Empty)
         self.service_cancel_pose = rospy.ServiceProxy('/localization/cancel_pose', Empty)
         self.service_start_record = rospy.ServiceProxy('/dashboard/start_record', Empty)
@@ -51,9 +51,9 @@ class ButtonPanelNode:
             else:
                 # Disables forced stop on the stop lines
                 try:
-                    response = self.service_lets_go()
+                    response = self.service_confirm_drive()
                 except rospy.ServiceException as e:
-                    rospy.logerr("%s - service_lets_go call failed: %s", rospy.get_name(), e)
+                    rospy.logerr("%s - service_confirm_drive call failed: %s", rospy.get_name(), e)
 
         elif msg.buttons[1] == 1:
             try:

@@ -1,0 +1,4 @@
+scenario_name,ade_score,ade_rating,fde_score,fde_rating,collision_score,collision_rating,max_deceleration,max_deceleration_rating
+give_way_bus_01,50.74,FAILURE,74.3,FAILURE,0.0,SUCCESS,1.27,SUCCESS
+give_way_bus_02,19.86,FAILURE,29.28,FAILURE,0.25,FAILURE,2.98,FAILURE
+AVERAGE,35.30,0.00,51.79,0.00,0.12,0.50,2.12,0.50

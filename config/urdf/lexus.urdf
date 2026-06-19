@@ -57,14 +57,14 @@
   <joint name="lidar_front/os_sensor" type="fixed" >
     <parent link="lidar_center" />
     <child link="lidar_front/os_sensor" />
-    <origin xyz="0.8559 0.0642 -0.4051" rpy="0.003995038 -0.009182 0.8641542"/>
+    <origin xyz="0.836345 0.040888 -0.331192" rpy="0.00454586 -0.00575471 0.86421998"/>
   </joint>
 
   <!-- Car front -->
   <joint name="car_front" type="fixed" >
-    <parent link="radar_fc" />
+    <parent link="base_link" />
     <child link="car_front" />
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="4 0 0" rpy="0 0 0" />
   </joint>
 
   <!-- Front Center Radar -->
@@ -83,15 +83,15 @@
 
   <!-- Mako Cameras -->
   <joint name="camera_fr" type="fixed" >
-    <parent link="interfaceb_link0" />
+    <parent link="lidar_center" />
     <child link="camera_fr" />
-    <origin xyz="0.254 0.184 0.190" rpy="0.22484 0.24415 -0.02373" />
+    <origin xyz="1.121888 -0.199951 -0.667152" rpy="-1.38838484  0.03734213 -1.79882734" />
   </joint>
 
   <joint name="camera_fl" type="fixed" >
-    <parent link="interfaceb_link0" />
+    <parent link="lidar_center" />
     <child link="camera_fl" />
-    <origin xyz="-0.200 0.201 0.160" rpy="0.19831 -0.12529 -0.07869" />
+    <origin xyz="0.99275 0.247618 -0.680161" rpy="-1.42242691 -0.02834945 -1.42077736" />
   </joint> 
 
   <!-- Nvidia Cameras -->
@@ -99,35 +99,35 @@
   <joint name="interfaceb_link0" type="fixed" >
     <parent link="lidar_center" />
     <child link="interfaceb_link0" />
-    <origin xyz="0.89 0.09 -0.34" rpy="-1.6083209 0.02426008 -1.5470598" />
+    <origin xyz="0.887872  0.062405 -0.447933" rpy="-1.59443758 0.01572688 -1.5383455" />
   </joint> 
 
   <!-- left 120 -->
   <joint name="interfacea_link0" type="fixed" >
-    <parent link="interfaceb_link0" />
+    <parent link="lidar_center" />
     <child link="interfacea_link0" />
-    <origin xyz="-0.568 0.010 -0.123" rpy="-0.020944 -1.338668 -0.01239184" />
+    <origin xyz="0.752668 0.639622 -0.440855" rpy="-1.58953774 0.0195086 -0.20545299" />
   </joint>
 
   <!-- right 120 -->
   <joint name="interfacea_link1" type="fixed" >
-    <parent link="interfaceb_link0" />
+    <parent link="lidar_center" />
     <child link="interfacea_link1" />
-    <origin xyz="0.620 0.001 -0.074" rpy="0.0 1.3000958 0.0471239" />
+    <origin xyz="0.852014 -0.551593 -0.457512" rpy="-1.64241657 0.01970571 -2.8256634" />
   </joint>
 
   <!-- front 120 -->
   <joint name="interfacea_link2" type="fixed" >
-    <parent link="interfaceb_link0" />
+    <parent link="lidar_center" />
     <child link="interfacea_link2" />
-    <origin xyz="0.043 0.003 0.002" rpy="-0.01501 -0.00390 0.01019" />
+    <origin xyz="0.91435 0.022596 -0.449033" rpy="-1.61129197 0.02612985 -1.53739803" />
   </joint>
 
   <!-- back 120 -->
   <joint name="interfacea_link3" type="fixed" >
-    <parent link="interfaceb_link0" />
+    <parent link="lidar_center" />
     <child link="interfacea_link3" />
-    <origin xyz="0.080 0.03 -1.752" rpy="3.0490902 0.0523599 3.117158" />
+    <origin xyz="-0.852275 -0.084102 -0.273743" rpy="-1.63024231 -0.00547998  1.65116742" />
   </joint>
 
   <joint name="camera0" type="fixed" >

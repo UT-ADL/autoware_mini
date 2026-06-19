@@ -79,7 +79,7 @@ class GoalPublisher:
         self.scenario_status_publisher.publish(self.current_scenario_status)
             
     def global_path_callback(self, msg):
-        if len(msg.waypoints) > 0:
+        if msg.waypoints:
             # Set scenario runner status to RUNNING (green) only when a global path was found for the prevous goal point
             if not self.previous_goal_failed:
                 self.current_scenario_status = CarlaScenarioRunnerStatus.RUNNING

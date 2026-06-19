@@ -2,8 +2,10 @@ icon_include_package: jsk_rviz_plugins
 
 rviz_service_call:
     buttons:
-    - {service_name: "/planning/cancel_route", text: "Cancel Route"}
-    - {service_name: "/localization/cancel_pose", text: "Cancel Pose"}
-    - {service_name: "/planning/service_lets_go", text: "Let's go!"}
-    - {service_name: "/dashboard/start_record", text: "Start rec"}
-    - {service_name: "/dashboard/stop_record", text: "Stop rec"}
+    - {service_name: "/planning/cancel_route", text: "Cancel\nRoute"}
+    - {service_name: "/localization/cancel_pose", text: "Cancel\nPose"}
+    - {service_name: "/planning/service_confirm_drive", text: "Confirm\nDrive"}
+    - {service_name: "/planning/service_start_assistance", text: "Start\nAssistance"}
+    - {service_name: "/planning/service_proceed_driving", text: "Proceed\nDriving"}
+    - {service_name: "/planning/service_finish_assistance", text: "Finish\nAssistance"}
+    - {service_name: "/perception/service_ignore_object", text: "Ignore\nObject"}

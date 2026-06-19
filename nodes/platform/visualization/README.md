@@ -39,7 +39,7 @@ ROS node for visualizing vehicle state information in RViz using overlay texts a
 | Name | Type | Description |
 | ----- | ----- | ------------ |
 | `/vehicle/vehicle_status` | `autoware_mini/VehicleStatus` | Vehicle status information. |
-| `/control/vehicle_cmd` | `autoware_mini/VehicleCmd` | Vehicle command information, including turn signals. |
+| `/control/vehicle_cmd` | `autoware_mini/VehicleCommand` | Vehicle command information, including turn signals. |
 
 
 #### Published Topics
@@ -48,7 +48,31 @@ ROS node for visualizing vehicle state information in RViz using overlay texts a
 | ----- | ----- | ------------ |
 | `vehicle_drivemode` | `jsk_rviz_plugins/OverlayText` | Overlay text displaying the current drive mode (AUTONOMOUS/MANUAL). |
 | `steering_wheel` | `sensor_msgs/Image` | Rotated image of a steering wheel showing the current steering angle. |
-| `right_blinker_cmd` | `jsk_rviz_plugins/OverlayText` | Overlay text showing right turn signal command. |
-| `right_blinker_arrow` | `jsk_rviz_plugins/OverlayText` | Overlay text showing right turn signal status. |
-| `left_blinker_cmd` | `jsk_rviz_plugins/OverlayText` | Overlay text showing left turn signal command. |
-| `left_blinker_arrow` | `jsk_rviz_plugins/OverlayText` | Overlay text showing left turn signal status. |
+| `right_turn_signal` | `jsk_rviz_plugins/OverlayText` | Overlay text showing right turn signal command. |
+| `right_turn_status` | `jsk_rviz_plugins/OverlayText` | Overlay text showing right turn signal status. |
+| `left_turn_signal` | `jsk_rviz_plugins/OverlayText` | Overlay text showing left turn signal command. |
+| `left_turn_status` | `jsk_rviz_plugins/OverlayText` | Overlay text showing left turn signal status. |
+
+
+## logger
+
+The `Logger` node is responsible for throttling and formatting log messages for visualization in RViz.
+
+#### Parameters
+
+| Name | Type | Default Value | Description |
+| ----- | ----- | ------------- | ------------ |
+| `~throttle` | float | `2.0` | Seconds to wait before publishing the same message again. |
+| `~history_length` | int | `5` | Number of log messages to keep in the history for display. |
+
+#### Subscribed Topics
+
+| Name | Type | Description |
+| ----- | ----- | ------------ |
+| `log_message` | `autoware_mini/Log` | Receives log messages to be processed. |
+
+#### Published Topics
+
+| Name | Type | Description |
+| ----- | ----- | ------------ |
+| `log_text` | `jsk_rviz_plugins/OverlayText` | Publishes formatted log messages for RViz. |

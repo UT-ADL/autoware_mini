@@ -18,6 +18,8 @@ from jsk_rviz_plugins.msg import OverlayText
 
 from autoware_mini.path import PathWrapper
 from autoware_mini.transform import transform_point
+from autoware_mini.messages import float32_multiarray_to_numpy
+from autoware_mini.shapely import linesubstring
 
 class LaneBoundaryMatcher:
 
@@ -38,9 +40,9 @@ class LaneBoundaryMatcher:
         self.current_pose = None
         self.global_path = None
 
-        self.x_correction = 0
-        self.y_correction = 0
-        self.z_correction = 0
+        self.x_correction = 0.0
+        self.y_correction = 0.0
+        self.z_correction = 0.0
         self.transform_matrix = np.eye(4)
         
         self.tf_broadcaster = tf2_ros.StaticTransformBroadcaster()
@@ -98,10 +100,10 @@ class LaneBoundaryMatcher:
                 rospy.logwarn("%s - %s", rospy.get_name(), e)
                 return
             
-            current_pose_openpilot = transform_point(Point(0, 0, 0), transform_openpilot)
+            current_pose_openpilot = transform_point(transform_openpilot, Point(x=0.0, y=0.0, z=0.0))
             
             if self.enable_height_correction:
-                current_pose_footprint = transform_point(Point(0, 0, 0), transform_footprint)
+                current_pose_footprint = transform_point(transform_footprint, Point(x=0.0, y=0.0, z=0.0))
                 current_pos_dist = global_path.linestring.project(shapely.Point(current_pose_footprint.x, current_pose_footprint.y, current_pose_footprint.z))
                 self.z_correction = global_path.get_elevation_at_distance(current_pos_dist) - current_pose_footprint.z
 
@@ -118,12 +120,8 @@ class LaneBoundaryMatcher:
             right_end_dist = min(right_cur_pos_dist + self.lookahead_distance, global_path.right_boundary.length)
 
             # cut out the relevant sections from the global path boundaries
-            map_left_lane_boundary = shapely.ops.substring(global_path.left_boundary, left_cur_pos_dist, left_end_dist)
-            map_right_lane_boundary = shapely.ops.substring(global_path.right_boundary, right_cur_pos_dist, right_end_dist)
-
-            # return if one boundary given by substring is not a LineString type
-            if not isinstance(map_left_lane_boundary, shapely.LineString) or not isinstance(map_right_lane_boundary, shapely.LineString):
-                return
+            map_left_lane_boundary = linesubstring(global_path.left_boundary, left_cur_pos_dist, left_end_dist)
+            map_right_lane_boundary = linesubstring(global_path.right_boundary, right_cur_pos_dist, right_end_dist)
             
             ##################################################################
             # Transform openpilot lane boundaries and create linestrings
@@ -143,8 +141,8 @@ class LaneBoundaryMatcher:
             openpilot_left_end_dist = min(global_path.left_boundary.length - left_cur_pos_dist,  self.lookahead_distance)
             openpilot_right_end_dist = min(global_path.right_boundary.length - right_cur_pos_dist,  self.lookahead_distance)
 
-            openpilot_left_lane_boundary = shapely.ops.substring(openpilot_left_lane_boundary, 0, openpilot_left_end_dist)
-            openpilot_right_lane_boundary = shapely.ops.substring(openpilot_right_lane_boundary, 0, openpilot_right_end_dist)
+            openpilot_left_lane_boundary = linesubstring(openpilot_left_lane_boundary, 0, openpilot_left_end_dist)
+            openpilot_right_lane_boundary = linesubstring(openpilot_right_lane_boundary, 0, openpilot_right_end_dist)
 
             ##################################################################
             # Perform matching
@@ -194,14 +192,14 @@ class LaneBoundaryMatcher:
             rospy.logerr_throttle(10, "%s - Exception in callback: %s", rospy.get_name(), traceback.format_exc())
 
     def global_path_callback(self, msg):
-        if len(msg.waypoints) == 0:
+        if not msg.waypoints:
             self.global_path = None
             return
         
-        self.global_path = PathWrapper(msg.waypoints, boundaries=True)
+        self.global_path = PathWrapper(msg.waypoints)
 
     def find_average_distance(self, map_left_lane_boundary, map_right_lane_boundary, openpilot_left_lane_boundary, openpilot_right_lane_boundary, probs=(1,1)):
-        sample_point_count = len(openpilot_left_lane_boundary.coords)
+        sample_point_count = shapely.get_num_points(openpilot_left_lane_boundary)
         dists = np.linspace(0, self.lookahead_distance, sample_point_count)
 
         map_left_points = map_left_lane_boundary.interpolate(dists)
@@ -212,7 +210,7 @@ class LaneBoundaryMatcher:
 
         diffs_left = np.mean(shapely.get_coordinates(map_left_points) - shapely.get_coordinates(openpilot_left_points), axis=0)
         diffs_right = np.mean(shapely.get_coordinates(map_right_points) - shapely.get_coordinates(openpilot_right_points), axis=0)
-        diffs_x, diffs_y = (probs[0]*diffs_left + probs[1]*diffs_right) / (probs[0] + probs[1])
+        diffs_x, diffs_y = ((probs[0]*diffs_left + probs[1]*diffs_right) / (probs[0] + probs[1])).tolist()
 
         return diffs_x, diffs_y
 
@@ -268,11 +266,6 @@ class LaneBoundaryMatcher:
 
     def run(self):
         rospy.spin()
-
-def float32_multiarray_to_numpy(multiarray):
-    dims = tuple(map(lambda x: x.size, multiarray.layout.dim))
-    data = multiarray.data[multiarray.layout.data_offset:]
-    return np.array(data, dtype=np.float32).reshape(dims)
 
 if __name__ == '__main__':
     rospy.init_node('lane_boundary_matcher')

@@ -1,7 +1,6 @@
 import math
 import cv2
 import numpy as np
-from autoware_mini.geometry import get_heading_from_vector
 
 def create_hull(obj):
 
@@ -73,7 +72,7 @@ def get_axis_oriented_bounding_box(obj):
 
 def update_object_position_dimensions(obj):
     """
-    Update width, length and position of the object, based on object's velocity vector aligned bounding box
+    Update width, length and position of the object, based on heading-aligned bounding box
     :param obj: DetectedObject
     """
 
@@ -81,11 +80,9 @@ def update_object_position_dimensions(obj):
     points = np.array(obj.convex_hull).reshape(-1, 3)[:, :2]
     center = np.array([obj.center.x, obj.center.y])
 
-    heading_angle = get_heading_from_vector(obj.velocity)
-
     # Create rotation matrix
-    cos_angle = math.cos(-heading_angle)
-    sin_angle = math.sin(-heading_angle)
+    cos_angle = math.cos(-obj.heading)
+    sin_angle = math.sin(-obj.heading)
     rotation_matrix = np.array([
         [cos_angle, -sin_angle],
         [sin_angle, cos_angle]
@@ -95,34 +92,22 @@ def update_object_position_dimensions(obj):
     points -= center
     points = points @ rotation_matrix.T
 
-    # Calculate bounds in the rotated coordinate system
-    minx, miny = points.min(axis=0)
-    maxx, maxy = points.max(axis=0)
-    width = (maxy - miny)
-    length = (maxx - minx)
-    center_x = (minx + maxx) / 2
-    center_y = (miny + maxy) / 2
+    # Calculate bounds, dimensions and center in the rotated coordinate system
+    mins = points.min(axis=0)
+    maxs = points.max(axis=0)
+    dims = maxs - mins
+    rotated_center = (mins + maxs) / 2
 
-    # bounding box center
-    target_point = np.array([center_x, center_y])
-
-    # Create inverse rotation matrix
-    # sin(-a) = -sin(a), cos(-a) = cos(a)
+    # Rotate center back to original coordinate system
+    # Inverse rotation: sin(-a) = -sin(a), cos(-a) = cos(a)
     inverse_rotation_matrix = np.array([
         [cos_angle, sin_angle],
         [-sin_angle, cos_angle]
     ])
+    original_center = rotated_center @ inverse_rotation_matrix.T + center
 
-    # Apply inverse rotation to target points, then translation
-    target_point = target_point @ inverse_rotation_matrix.T
-    target_point += center
-
-    obj.center.x = target_point[0]
-    obj.center.y = target_point[1]
-    obj.dimensions.x = length
-    obj.dimensions.y = width
-    obj.heading = heading_angle 
-
+    obj.center.x, obj.center.y = original_center.tolist()
+    obj.dimensions.x, obj.dimensions.y = dims.tolist()
 
 if __name__ == '__main__':
     boxes1 = np.array([[0, 0, 10, 10], [10, 10, 20, 20]])

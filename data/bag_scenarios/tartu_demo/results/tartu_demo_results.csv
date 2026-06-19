@@ -1,5 +1,5 @@
-scenario_name,ade_score,ade_rating,speed_smoothness,speed_smoothness_rating
-tartu_demo_01,5.76,SUCCESS,0.39,SUCCESS
-tartu_demo_02,4.84,SUCCESS,0.27,SUCCESS
-tartu_demo_03,28.92,FAILURE,0.41,SUCCESS
-AVERAGE,13.17,0.67,0.36,1.00
+scenario_name,ade_score,ade_rating,fde_score,fde_rating,collision_score,collision_rating,max_deceleration,max_deceleration_rating
+tartu_demo_01,5.59,SUCCESS,16.28,FAILURE,0.04,FAILURE,1.54,FAILURE
+tartu_demo_02,5.43,SUCCESS,12.55,FAILURE,0.0,SUCCESS,4.6,FAILURE
+tartu_demo_03,25.45,FAILURE,65.09,FAILURE,0.06,FAILURE,5.0,FAILURE
+AVERAGE,12.16,0.67,31.31,0.00,0.03,0.33,3.71,0.00

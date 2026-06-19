@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "right_hand_rule_2",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "label": "car1", "speed": 30.0, "duration": 15.0, "delay": null, "length": 4.0, "width": 2.0, "acceleration": 0.0, "elevation": 50.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.737956157854466, 58.388587643095683 ], [ 26.737729174966432, 58.388667658147398 ], [ 26.73752428496147, 58.388745529098429 ], [ 26.737133701996441, 58.388889168803921 ] ] } },
+{ "type": "Feature", "properties": { "label": "ego", "speed": 30.0, "duration": 16.0, "delay": null, "length": null, "width": null, "acceleration": null, "elevation": 50.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.737148075533643, 58.388446883516529 ], [ 26.73802334164013, 58.388933549663165 ] ] } },
+{ "type": "Feature", "properties": { "label": "car2_a", "speed": 27.0, "duration": 8.0, "delay": 0.0, "length": 4.0, "width": 2.0, "acceleration": -1.0, "elevation": 50.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.737011806892671, 58.388902915081701 ], [ 26.737411785256636, 58.388757404367198 ] ] } },
+{ "type": "Feature", "properties": { "label": "car2_b", "speed": 0.0, "duration": 16.0, "delay": 8.0, "length": 4.0, "width": 2.0, "acceleration": 1.0, "elevation": 50.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.737411785256636, 58.388757404365187 ], [ 26.737656953857915, 58.388665867004875 ], [ 26.737939699873174, 58.388566843492654 ] ] } }
+]
+}

@@ -1,1 +1,14 @@
-tartu_demo.yaml
+utm_origin_lat: 58.385345
+utm_origin_lon: 26.726272
+
+# Optional
+initial_position:
+  position:
+    x: 1682.685791015625
+    y: 1405.773681640625
+    z: 60.47057301622559
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: -0.9800422470297495
+    w: 0.19878932073147024

@@ -3,7 +3,7 @@
 usage() {
     echo "Usage: $0 <path_to_csv_file> <path_to_bag_file_source_directory> [--copy_from_source <src_dir> [--no_cleanup]]"
     echo " "
-    echo "Example: $0 ~/autoware_mini_ws/src/autoware_mini/data/bag_scenarios/tartu_large/crosswalks_bags.csv /data/Bolt/bagfiles"
+    echo "Example: $0 ~/autoware_mini_ws/src/autoware_mini/data/bag_scenarios/tartu_large/crosswalks_bags.csv /data/bag_cache"
     echo "This script will rerecord the bag with new detection (cluster and sfa) and then convert it to a scenario."
     echo "  - bags must be present in the provided folder"
     echo "  - final scenarios will be saved in the same folder as the csv file"
@@ -60,7 +60,7 @@ if [ -z "$CSV_FILE" ] || [ -z "$BAG_DIR" ]; then
 fi
 
 END_TO_GOAL_TIME=10
-DETECTORS=("lidar_cluster") # lidar_sfa,lidar_vella,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion
+DETECTORS=("lidar_cluster") # lidar_sfa,radar,lidar_cluster_radar_fusion,lidar_sfa_radar_fusion
 
 # Derive parameters from the CSV filename (remove the path and extension)
 SCENARIO_TYPE=$(basename "$CSV_FILE" .csv)
@@ -89,7 +89,7 @@ read_params() {
             # Copy files from SRC_DIR to BAG_DIR if SRC_DIR is specified
             if [[ -n "$SRC_DIR" ]]; then
                 echo "Copying $BAG_FILE from $SRC_DIR to $BAG_DIR..."
-                rsync -ah --progress "$SRC_DIR/$BAG_FILE" "$BAG_DIR/"
+                rsync -ah --no-perms --progress "$SRC_DIR/$BAG_FILE" "$BAG_DIR/"
                 if [ $? -ne 0 ]; then
                     echo "Error: Failed to copy $BAG_FILE from $SRC_DIR to $BAG_DIR"
                     exit 1
@@ -155,16 +155,13 @@ process_bag() {
 
     # Step 2: Run the scenario creation script
     echo "  Creating scenario ${OUTPUT_FILE}"
-    $AUTOWARE_MINI_DIR/scripts/bag_scenarios/create_scenario_bag.py $AUTOWARE_MINI_DIR/data/bags/${OUTPUT_FILE} ${OUTPUT_FILE} \
+    $AUTOWARE_MINI_DIR/scripts/bag_scenarios/create_scenario_bag.py $BAG_DIR/${OUTPUT_FILE} ${SCENARIO_DIR}/${OUTPUT_FILE} \
     $ARGS < /dev/null
 
     # Step 3: Remove the rerecorded bag file after processing
-    rm $AUTOWARE_MINI_DIR/data/bags/${OUTPUT_FILE}
+    rm $BAG_DIR/${OUTPUT_FILE}
 
-    # Step 4: Move the scenario file to the bag_scenarios directory
-    mv ./${OUTPUT_FILE} ${SCENARIO_DIR}
-
-    # Step 5: Remove the copied files if --no_cleanup is not set
+    # Step 4: Remove the copied files if --no_cleanup is not set
     if [ "$NO_CLEANUP" = false ]; then
         for FILE in "${COPIED_FILES[@]}"; do
             echo "Cleaning up copied file: $FILE"

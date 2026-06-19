@@ -31,9 +31,11 @@ The local planner uses a rule-based approach that identifies potential collision
 - **Automatic Stop Checker**: Detects stop lines and manages stops until manual override.
 - **Object Collision Checker**: Identifies potential collisions with obstacles on the path.
 - **Pedestrian Crosswalk Checker**: Handles crosswalks and checks for crossing pedestrians.
-- **Traffic Light Stopline Checker**: Monitors traffic light states and creates collision points at red lights.
+- **Traffic Light Stop line Checker**: Monitors traffic light states and creates collision points at red lights.
 - **Trajectory Collision Checker**: Checks for potential collisions with other vehicles' predicted trajectories.
 - **Yielding Checker**: Handles yielding situations at yield signs or intersections.
+- **Stop Sign Checker**: Forces ego vehicle to do brief stop before the stop sign stop lines.
+- **Give Way Checker**: Gives way to other vehicles if ego vehicle is doing the turn and trajectories intersect.
 - **Collision Points Merger**: Merges all collision points from various checkers into a single point cloud.
 - **Speed Planner**: Generates the final trajectory by adjusting speeds based on all collision points.
 
@@ -51,7 +53,7 @@ As an alternative to the rule-based approach, Autoware Mini also supports a loca
 
 - Component receives position and velocity predictions from Openpilot end-to-end neural network
 - Transforms predictions into the appropriate coordinate frame
-- Constructs waypoints with proper position, heading, velocity, and blinker states
+- Constructs waypoints with proper position, heading, velocity, and turn signal states
 - Outputs a final collision-free trajectory that preserves Openpilot's motion planning characteristics
 
 ## Data Flow

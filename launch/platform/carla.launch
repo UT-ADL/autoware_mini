@@ -4,6 +4,8 @@
   <arg name="map_name" />
   <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
   <arg name="spawn_point"         default="$(eval '0,0,36,0,0,-98' if 'tartu' in map_name else '')" />
+  <!-- Vehicle-in-the-loop mode: no TFs or control from Carla, ego pose/velocity propagated instead -->
+  <arg name="use_vil"             default="false"/>
   <!-- Module type -->
   <arg name="use_lidar"           default="false"/>
   <arg name="use_radar"           default="false"/>
@@ -12,8 +14,8 @@
   <arg name="use_mako_cameras"                default="false" />
   <arg name="use_nvidia_cameras"              default="false" />
   <!-- Carla Server parameters -->
-  <arg name='host'                default='localhost' />
-  <arg name='port'                default='2000' />
+  <arg name='carla_host'          default='localhost' />
+  <arg name='carla_port'          default='2000' />
   <arg name='timeout'             default='100' />
   <!-- Scenario Runner args -->
   <arg name='use_scenario_runner' default='false'/>
@@ -22,24 +24,25 @@
   <!-- Other -->
   <arg name='use_manual_control'  default='false' /><!-- Toggle manual control-->
   <arg name='generate_traffic'    default='false'/><!-- Generate Traffic -->
-  <!-- CARLA Rosbridge synchronous_mode, only set to false while running route scenario-->
-  <arg name="synchronous_mode"    default="true" />
-  <arg name='fixed_delta_seconds' default='$(eval 0 if use_manual_control else 0.05)' />
+  <arg name="publish_clock"       default="true"  doc="Let the Carla bridge publish /clock; disable when an external source (e.g. bag) provides /clock" />
+  <!-- CARLA Rosbridge synchronous_mode: run async with variable time step in vehicle-in-the-loop and manual control -->
+  <arg name="synchronous_mode"    default="$(eval not (use_vil or use_manual_control))" />
+  <arg name='fixed_delta_seconds' default='$(eval 0 if (use_vil or use_manual_control) else 0.05)' />
   <arg name="passive"             default="$(eval use_scenario_runner and type(route_id) == int)" />
-  
+
   <!--
     ################
     ## Static TFs ##
     ################
     -->
-  <include file="$(find autoware_mini)/launch/platform/tf.launch" />
+  <include unless="$(arg use_vil)" file="$(find autoware_mini)/launch/platform/tf.launch" />
 
   <!--
-    ###################
-    ## Carla Sensors ##
-    ###################
+    ##################
+    ## Carla Bridge ##
+    ##################
     -->
-  <include file="$(find autoware_mini)/launch/platform/carla/carla_sensors.launch">
+  <include file="$(find autoware_mini)/launch/platform/carla/carla_bridge.launch">
     <arg name="map_name"                                          value="$(arg map_name)" />
     <arg name="spawn_point"                                       value="$(arg spawn_point)" />
     <arg name="use_lidar"                                         value="$(arg use_lidar)" />
@@ -47,12 +50,14 @@
     <arg name="use_gnss"                                          value="$(arg use_gnss)" />
     <arg name="use_mako_cameras"                                  value="$(arg use_mako_cameras)" />
     <arg name="use_nvidia_cameras"                                value="$(arg use_nvidia_cameras)" />
-    <arg name="host"                                              value="$(arg host)" />
-    <arg name="port"                                              value="$(arg port)" />
+    <arg name="use_vil"                                           value="$(arg use_vil)" />
+    <arg name="carla_host"                                        value="$(arg carla_host)" />
+    <arg name="carla_port"                                        value="$(arg carla_port)" />
     <arg name="timeout"                                           value="$(arg timeout)" />
     <arg name="synchronous_mode"                                  value="$(arg synchronous_mode)" />
     <arg name='fixed_delta_seconds'                               value='$(arg fixed_delta_seconds)'/>
     <arg name="passive"                                           value="$(arg passive)" />
+    <arg name="publish_clock"                                     value="$(arg publish_clock)" />
   </include>
 
   <!--
@@ -60,8 +65,7 @@
     ## Carla Control ##
     ###################
     -->
-  <include file="$(find autoware_mini)/launch/platform/carla/carla_control.launch">
-    <arg name="map_name"              value="$(arg map_name)" />
+  <include unless="$(arg use_vil)" file="$(find autoware_mini)/launch/platform/carla/carla_control.launch">
     <arg name="use_manual_control"    value="$(arg use_manual_control)" />
   </include>
 
@@ -72,7 +76,7 @@
     -->
 
   <!-- If traffic is enabled then run traffic generator -->
-  <node if="$(arg generate_traffic)" pkg="autoware_mini" type="carla_traffic_generator.sh" name="carla_traffic_generator" args="$(arg host) $(arg port)" output="screen" required="true" />  
+  <node if="$(arg generate_traffic)" pkg="autoware_mini" type="carla_traffic_generator.sh" name="carla_traffic_generator" args="$(arg carla_host) $(arg carla_port)" output="screen" required="true" />  
 
  <!--
     ###########################
@@ -80,11 +84,26 @@
     ###########################
     -->
   <include if="$(arg use_scenario_runner)" file="$(find autoware_mini)/launch/platform/carla/carla_scenario_runner.launch">
-    <arg name="host"                                value="$(arg host)" />
-    <arg name="port"                                value="$(arg port)" />
+    <arg name="carla_host"                          value="$(arg carla_host)" />
+    <arg name="carla_port"                          value="$(arg carla_port)" />
     <arg name='map_name'                            value='$(arg map_name)'/>
     <arg name="scenario_name"                       value="$(arg scenario_name)" />
     <arg name="route_id"                            value="$(arg route_id)" />
   </include>
+
+  <!--
+    ##################
+    ## Carla Config ##
+    ##################
+    -->
+  <rosparam command="load" file="$(find autoware_mini)/config/carla.yaml" />
+
+  <group ns="vehicle">
+    <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />
+  </group>
+
+  <!-- Patch controller params because simulation does not have delay -->
+  <rosparam param="simulate_cmd_delay" ns="control/pure_pursuit_controller">0.0</rosparam>
+  <rosparam param="simulate_cmd_delay" ns="control/stanley_controller">0.0</rosparam>
 
 </launch>

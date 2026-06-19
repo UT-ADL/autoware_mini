@@ -3,7 +3,7 @@
 
 ## novatel_oem7_localizer
 
-This ROS node transforms GNSS coordinates provided by [NovAtel Oem7 ROS driver](http://wiki.ros.org/novatel_oem7_driver) and converts them to local map coordinates using either UTM or Lest97 transformations. The azimuth angle adjustment taking into consideration the meridian convergence is also added. This node publishes the vehicle's current pose, velocity and odometry.
+This ROS node transforms GNSS coordinates provided by [NovAtel Oem7 ROS driver](http://wiki.ros.org/novatel_oem7_driver) and converts them to local map coordinates using UTM transformation. The azimuth angle adjustment taking into consideration the meridian convergence is also added. This node publishes the vehicle's current pose, velocity and odometry.
 
 
 #### Parameters
@@ -11,23 +11,18 @@ This ROS node transforms GNSS coordinates provided by [NovAtel Oem7 ROS driver](
 | Name                    | Type    | Default Value | Description                                                  |
 | -----------------------| ------- | ------------- | ------------------------------------------------------------ |
 | `parent_frame`          | string  | -             | The name of the parent frame of the published transform. |
-| `coordinate_transformer`| string  | "utm"         | The name of the coordinate transformer to use. Possible values: "utm" and "lest97" |
 | `use_custom_origin`     | bool    | true          | Flag to determine whether to use custom origin or not. If true, origin values in the cartesian coordinate system are subtracted from the coordinates. |
-| `utm_origin_lat`        | float   | 0.0           | Latitude of UTM origin point. Required when `coordinate_transformer` is "utm". |
-| `utm_origin_lon`        | float   | 0.0           | Longitude of UTM origin point. Required when `coordinate_transformer` is "utm". |
-| `lest97_origin_northing`| float   | 6465000.0     | Northing of Lest97 origin point. Required when `coordinate_transformer` is "lest97". |
-| `lest97_origin_easting` | float   | 650000.0      | Easting of Lest97 origin point. Required when `coordinate_transformer` is "lest97". |
+| `utm_origin_lat`        | float   | 0.0           | Latitude of UTM origin point. |
+| `utm_origin_lon`        | float   | 0.0           | Longitude of UTM origin point. |
 | `use_msl_height`        | bool    | true          | Flag to determine whether to use mean sea level height or ellipsoid height. |
 | `offline_height`        | float   | 34.5          | Height value in meters to use when GNSS data is unavailable. |
 | `offline_azimuth`       | float   | 185.0         | Azimuth value in degrees to use when GNSS data is unavailable. |
 | `offline_lat`           | float   | 58.3854       | Latitude value to use when GNSS data is unavailable. |
 | `offline_lon`           | float   | 26.7264       | Longitude value to use when GNSS data is unavailable. |
 | `child_frame`           | string  | "base_link"   | The name of the child frame of the published transform. |
-
-
-`coordinate_transformer`:
-  * `utm` - Universal Transverse Mercator projection. `WGS84ToUTMTransformer.py` file from src/localization is used to create the coordinate transformer. Internally UtmProjector class from [Lanelet2](https://github.com/fzi-forschungszentrum-informatik/Lanelet2/tree/master/lanelet2_projection) library is used. The origin point is defined in the `localization.yaml` file
-  * `lest97` - Estonian national coordinate system - [read more](https://epsg.io/3301), uses `WGS84ToLest97Transformer.py` from src/localization. Origin northing and easting are defined in the `localization.yaml` file
+| `time_source`           | string  | "auto"        | Time source mode: "ros" (use ROS header time), "gps" (use GPS time), or "auto" (auto-detect based on time sync). |
+| `gps_time_leap_seconds` | int     | 18            | GPS leap seconds offset used when converting GPS time to ROS time. |
+| `gps_time_sync_threshold`| float  | 1.0           | Max allowed difference (seconds) between GPS and header time for auto-detection. |
 
 
 #### Subscribed Topics

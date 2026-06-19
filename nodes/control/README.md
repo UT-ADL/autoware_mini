@@ -11,7 +11,7 @@ The control module takes inputs from:
 - **Localization module**: Provides current vehicle position, orientation, and velocity
 
 It produces outputs:
-- **Vehicle commands**: Steering angle, velocity, acceleration, and blinker states forwarded to the vehicle control interface
+- **Vehicle commands**: Steering angle, speed, acceleration, and turn signal states forwarded to the vehicle control interface
 
 ## Available Controllers
 

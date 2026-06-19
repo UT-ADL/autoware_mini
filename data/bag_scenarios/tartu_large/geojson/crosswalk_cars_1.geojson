@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "crosswalk_cars_1",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "label": "car_1", "speed": 20.0, "duration": 10.0, "delay": 0.0, "length": 4.0, "width": 2.0, "acceleration": null, "elevation": 70.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.701926620681579, 58.365619717964854 ], [ 26.701756057912487, 58.365542882865789 ], [ 26.701709115792802, 58.36552417982189 ], [ 26.701686231835968, 58.36551733847098 ], [ 26.701672931308174, 58.365515408521084 ], [ 26.701655765507908, 58.365514527992872 ], [ 26.701641878194241, 58.365515236741885 ], [ 26.701617676423655, 58.36551865195802 ], [ 26.70155498924688, 58.365531313843263 ], [ 26.701506401008832, 58.365546026988852 ], [ 26.701477708674222, 58.365559489483147 ], [ 26.70145371568837, 58.365579349054023 ], [ 26.701368440886156, 58.365664504478744 ] ] } },
+{ "type": "Feature", "properties": { "label": "car_2", "speed": 45.0, "duration": 15.0, "delay": 5.0, "length": null, "width": null, "acceleration": null, "elevation": 70.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.702196190581407, 58.365697842451866 ], [ 26.701261860580487, 58.36531401023673 ] ] } },
+{ "type": "Feature", "properties": { "label": "ego", "speed": 40.0, "duration": 16.0, "delay": null, "length": null, "width": null, "acceleration": null, "elevation": 70.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.702786567695235, 58.365976716091005 ], [ 26.70171537371289, 58.365537178710376 ], [ 26.701576192433251, 58.365519668619548 ], [ 26.701477708674222, 58.365559489483147 ], [ 26.701287217610254, 58.365744183272511 ] ] } },
+{ "type": "Feature", "properties": { "label": "car_3", "speed": 40.0, "duration": 16.0, "delay": 6.2, "length": null, "width": null, "acceleration": null, "elevation": 70.5 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.70139245308938, 58.365284705914455 ], [ 26.702040682316127, 58.365587514783726 ] ] } }
+]
+}

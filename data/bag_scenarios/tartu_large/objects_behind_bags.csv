@@ -1,0 +1,7 @@
+# bag_name, start, duration, scenario_number, regenerate
+2023-10-13-12-51-29_tiksoja_ride_01.bag, 2573, 26, 01, true
+2023-10-16-15-23-20_tiksoja_ride_08_cluster.bag, 339, 23, 02, true
+2023-10-30-14-28-38_tiksoja_ride_12_sfa_split_1.bag, 215, 26, 03, true
+2023-11-03-13-42-01_tiksoja_ride_20_sfa_split_1.bag, 409, 23, 04, true
+2024-03-21-14-52-57_test_drive_car_demo_branch_Soola.bag, 541, 21, 05, true
+2025-04-10-13-03-30_demo_april.bag, 195, 35, 06, true

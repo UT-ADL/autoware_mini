@@ -8,7 +8,7 @@ To generate documentation properly, make sure you have:
 - Python (`.py`) files containing your ROS nodes
 - A template file named `node_README_example.md` 
 - A `README.md` file to be updated (or create a new file if needed)
-- YAML file(s) (e.g., `detection.yaml`) containing parameter defaults
+- YAML file(s) (e.g., `perception.yaml`) containing parameter defaults
 
 ## VS Code Instructions
 

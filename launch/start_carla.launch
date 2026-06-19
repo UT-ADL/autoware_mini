@@ -9,39 +9,45 @@
     <arg name="use_lane_matching"       default="false"                        doc="Enable lane boundary matching for localization"/>
     
     <!-- Detection -->
-    <arg name="detector"                default="carla"                        doc="Detector to use (lidar_cluster, lidar_cluster_fast, lidar_sfa, sim, carla)"/>
+    <arg name="detector"                default="carla"                        doc="Detector to use (lidar_cluster, lidar_cluster_gpu, lidar_sfa, sim, carla)"/>
     <arg name="use_lidar_center"        default='true'                         doc="Use velodyne lidar"/>
     <arg name="use_lidar_front"         default='false'                        doc="Use ouster lidar"/>
     <arg name="use_road_area_filter"    default="$(eval 'tartu' in map_name)"  doc="Use road area filter"/>
     <arg name="ground_removal"          default="naive"                        doc="Ground removal method (naive, jcp)"/>
-    <arg name="tfl_detector"            default="carla"                        doc="Traffic light detector to use (carla, camera, mqtt_camera_fusion)"/>
+    <arg name="tfl_detector"            default="carla"                        doc="Traffic light detector to use (carla, yolo, camera, mqtt_yolo_fusion, mqtt_camera_fusion)"/>
     <arg name="tfl_cameras"             default="mako"                         doc="Cameras to use for traffic light detection (mako, nvidia)"/>
-    <arg name="tracker"                 default="$(eval 'ema' if detector != 'carla' else 'none')" doc="Tracker to use (none, ema)"/>
+    <arg name="tracker"                 default="$(eval 'none' if detector in ('carla', 'radar') else 'ema')" doc="Tracker to use (none, ema)"/>
     <arg name="predictor"               default="map_naive"                    doc="Predictor to use (none, naive, map, map_naive)"/>
     <arg name="detection_range"         default=""                             doc="Detection range in meters (empty for default)"/>
     
     <!-- Planning -->
     <arg name="global_planner"          default="lanelet2"                     doc="Global planner to use (waypoints, lanelet2)"/>
-    <arg name="local_planner"           default="rule"                         doc="Local planner to use (rule, none)"/>
+    <arg name="local_planner"           default="rule_swerve"                  doc="Local planner to use (rule_speed, rule_swerve, openpilot, none)"/>
     <arg name="waypoints_file"          default="waypoints_erm_utm_1m.csv"     doc="Waypoints file for waypoint planner"/>
     <arg name="use_path_smoothing"      default="true"                         doc="Enable path smoothing"/>
     <arg name="enable_goal_checker"          default="true"                    doc="Enable goal checker"/>
     <arg name="enable_object_checker"        default="true"                    doc="Enable object checker"/>
-    <arg name="enable_auto_stop_checker"     default="false"                   doc="Enable auto stop checker"/>
+    <arg name="enable_manual_yield_checker"  default="false"                   doc="Enable auto stop checker"/>
+    <arg name="enable_stop_sign_checker"      default="true"                    doc="Enable stop sign checker"/>
     <arg name="enable_traffic_light_checker" default="true"                    doc="Enable traffic light checker"/>
     <arg name="enable_crosswalk_checker"     default="true"                    doc="Enable crosswalk checker"/>
     <arg name="enable_yielding_checker"      default="true"                    doc="Enable yielding checker"/>
+    <arg name="enable_give_way_checker"      default="true"                    doc="Enable give way checker"/>
+    <arg name="enable_right_of_way_checker"  default="true"                    doc="Enable right of way checker"/>
     <arg name="enable_trajectory_checker"    default="true"                    doc="Enable trajectory checker"/>
-    
+    <arg name="enable_bus_stop_checker"      default="true"                    doc="Enable bus stop checker"/>
+    <arg name="enable_road_closures"    default="true"                         doc="Enable road closures"/>
+
     <!-- Control -->
     <arg name="controller"              default="pure_pursuit"                 doc="Controller to use (pure_pursuit, stanley)"/>
     
     <!-- Visualization -->
     <arg name="launch_rviz"             default='true'                         doc="Determines if rviz is launched or not"/>
-    
+    <arg name="use_python_visualizers"  default="true"                         doc="Use Python visualizer nodes instead of RViz plugins"/>
+
     <!-- Carla specific -->
-    <arg name='host'                    default='localhost' />
-    <arg name='port'                    default='2000' />
+    <arg name='carla_host'              default='localhost' />
+    <arg name='carla_port'              default='2000' />
     <arg name="use_scenario_runner"     default='false'                        doc="Use Scenario Runner with Carla"/>
     <arg name="scenario_name"           default=""                             doc="Scenario name for Scenario Runner"/>
     <arg name="route_id"                default=""                             doc="Route ID to follow for running route scenario"/>
@@ -55,8 +61,8 @@
         <arg name="use_lane_matching"   value="$(arg use_lane_matching)" />
     </include>
 
-    <!-- Detection -->
-    <include file="$(find autoware_mini)/launch/detection.launch">
+    <!-- Perception -->
+    <include file="$(find autoware_mini)/launch/perception.launch">
         <arg name="detector"            value="$(arg detector)" />
         <arg name="tfl_detector"        value="$(arg tfl_detector)" />
         <arg name="tfl_cameras"         value="$(arg tfl_cameras)" />
@@ -68,6 +74,7 @@
         <arg name="map_name"            value="$(arg map_name)" />
         <arg name="use_road_area_filter" value="$(arg use_road_area_filter)" />
         <arg name="ground_removal"      value="$(arg ground_removal)" />
+        <arg name="use_python_visualizers" value="$(arg use_python_visualizers)" />
     </include>
 
     <!-- Planning -->
@@ -80,11 +87,17 @@
         <arg name="load_goals"          value="$(eval not use_scenario_runner)" />
         <arg name="enable_goal_checker"          value="$(arg enable_goal_checker)" />
         <arg name="enable_object_checker"        value="$(arg enable_object_checker)" />
-        <arg name="enable_auto_stop_checker"     value="$(arg enable_auto_stop_checker)" />
+        <arg name="enable_manual_yield_checker"  value="$(arg enable_manual_yield_checker)" />
+        <arg name="enable_stop_sign_checker"      value="$(arg enable_stop_sign_checker)" />
         <arg name="enable_traffic_light_checker" value="$(arg enable_traffic_light_checker)" />
         <arg name="enable_crosswalk_checker"     value="$(arg enable_crosswalk_checker)" />
         <arg name="enable_yielding_checker"      value="$(arg enable_yielding_checker)" />
+        <arg name="enable_give_way_checker"      value="$(arg enable_give_way_checker)" />
+        <arg name="enable_right_of_way_checker"  value="$(arg enable_right_of_way_checker)" />
         <arg name="enable_trajectory_checker"    value="$(arg enable_trajectory_checker)" />
+        <arg name="enable_bus_stop_checker"      value="$(arg enable_bus_stop_checker)" />
+        <arg name="enable_road_closures"         value="$(arg enable_road_closures)" />
+        <arg name="use_python_visualizers"       value="$(arg use_python_visualizers)" />
     </include>
 
     <!-- Control -->
@@ -94,10 +107,10 @@
 
     <!-- Carla platform -->
     <include file="$(find autoware_mini)/launch/platform/carla.launch">
-        <arg name='host'                                value='$(arg host)'/>
-        <arg name='port'                                value='$(arg port)'/>
+        <arg name='carla_host'                          value='$(arg carla_host)'/>
+        <arg name='carla_port'                          value='$(arg carla_port)'/>
         <arg name='map_name'                            value='$(arg map_name)'/>
-        <arg name="use_lidar"                           value="$(eval 'lidar' in detector and detector != 'lidar_vella')" />
+        <arg name="use_lidar"                           value="$(eval 'lidar' in detector)" />
         <arg name="use_radar"                           value="$(eval 'radar' in detector)" />
         <arg name="use_gnss"                            value="$(eval localizer == 'novatel')" />
         <arg name="use_mako_cameras"                    value="$(eval ('camera' in tfl_detector or 'yolo' in tfl_detector) and tfl_cameras=='mako')" />

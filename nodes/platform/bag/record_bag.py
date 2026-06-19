@@ -53,7 +53,7 @@ class RecordBag:
             self.recording_process = subprocess.Popen(cmd, shell=True, executable="/bin/bash", cwd=self.recorded_bags_dir)
             rospy.loginfo(f"Started recording {self.output_file}")
             self.publish_recording_symbol(RED)
-            self.log_message_pub.publish(Log(message = f"Started recording {self.output_file}", color = "white"))
+            self.log_message_pub.publish(Log(message = f"Started recording {self.output_file}", color = "white", instant = True))
 
         elif msg.command == RecordCommand.RECORD_STOP and self.recording_process is not None:
             self.recording_process.terminate()
@@ -62,7 +62,7 @@ class RecordBag:
 
             rospy.loginfo(f"Stopped recording {self.output_file}")
             self.publish_recording_symbol(GRAY)
-            self.log_message_pub.publish(Log(message = f"Stopped recording {self.output_file}", color = "white"))
+            self.log_message_pub.publish(Log(message = f"Stopped recording {self.output_file}", color = "white", instant = True))
 
     def publish_recording_symbol(self, color):
         recording_symbol = OverlayText()

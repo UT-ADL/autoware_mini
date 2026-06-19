@@ -11,7 +11,7 @@
     <include if="$(arg use_tf)" file="$(find autoware_mini)/launch/platform/tf.launch" />
 
     <!-- Launch lexus platform to publish nvidia camera images -->
-    <include if="$(arg use_nvidia_cameras)" file="$(find lexus_platform)/launch/platform.launch">
+    <include if="$(eval use_nvidia_cameras or repub_camera_info)" file="$(find lexus_platform)/launch/platform.launch">
         <arg name="use_nvidia_cameras"          value="$(arg use_nvidia_cameras)" />
         <arg name="nvidia_encoder"              value="$(arg nvidia_encoder)" />
         <!-- Don't run remote nvidia driver in Bag mode -->
@@ -29,6 +29,9 @@
         <node if="$(arg use_ssc)" pkg="autoware_mini" type="ssc_interface.py" name="ssc_interface" output="screen" required="true" >
             <param name="max_speed" value="$(arg max_speed)"/>
         </node>
+
+        <!-- Teleop status (decodes PACMod CAN id 0x510 into /vehicle/teleop_enabled) -->
+        <node if="$(arg use_ssc)" pkg="autoware_mini" type="teleop_status.py" name="teleop_status" output="screen" required="true" />
 
         <rosparam command="load" file="$(find autoware_mini)/config/vehicle.yaml" />
     </group>

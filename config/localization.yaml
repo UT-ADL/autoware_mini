@@ -1,9 +1,6 @@
-coordinate_transformer: utm         # utm, lest97
 use_custom_origin: True
 utm_origin_lat: 0.0
 utm_origin_lon: 0.0
-lest97_origin_northing: 6465000.0
-lest97_origin_easting: 650000.0
 
 novatel_oem7_localizer:
   use_msl_height: True
@@ -12,6 +9,8 @@ novatel_oem7_localizer:
   offline_lat: 58.3854    # degrees
   offline_lon: 26.7264    # degrees
   child_frame: base_link
+  gps_time_leap_seconds: 18     # seconds
+  gps_time_sync_threshold: 0.05  # seconds, max allowed difference between GPS and header time for auto-detection
 
 lane_boundary_matcher:
   lookahead_distance: 3.5
@@ -25,3 +24,5 @@ lane_boundary_matcher:
   alpha: 0.03
   no_correction_weight: 0.4
   
+constant_localizer:
+  publish_rate: 20 # Hz

@@ -1,0 +1,12 @@
+# GPU acceleration (cuML) for Ubuntu 20.04 / CUDA 11 (RAPIDS 23.4).
+#
+#   pip install --user -r requirements_cuda11.txt
+#
+--extra-index-url https://pypi.nvidia.com/
+cubinlinker-cu11==0.3.0.post1
+ptxcompiler-cu11==0.7.0.post1
+cuda-python==11.8.2
+cuml-cu11==23.4.1
+numexpr==2.7.3
+pandas==1.5
+importlib-metadata==6.6.0

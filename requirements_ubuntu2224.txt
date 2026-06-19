@@ -1,0 +1,17 @@
+# Base Python dependencies for Autoware Mini on Ubuntu 22.04+ / CUDA 12.
+# Works on both Ubuntu 22.04 (Jammy, Python 3.10) and 24.04 (Noble, Python 3.12).
+# Use with requirements_cuda12.txt for GPU clustering.
+#
+#   Ubuntu 22.04:  pip install --user -r requirements_ubuntu2224.txt
+#   Ubuntu 24.04:  pip install --user --break-system-packages -r requirements_ubuntu2224.txt
+#
+pyproj >= 2.6
+numpy >= 1.19, < 2
+shapely >= 2.0
+onnxruntime-gpu >= 1.23
+simple-pid < 2.0
+mapbox-earcut
+python-dotenv
+simpleaudio
+pyclothoids
+numba

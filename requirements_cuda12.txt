@@ -1,0 +1,10 @@
+# GPU acceleration (cuML) for Ubuntu 22.04+ / CUDA 12 (RAPIDS 26.x).
+# Requires system CUDA 12 and cuDNN 9 (installed via apt, see INSTALL_ubuntu2224.md).
+#
+#   Ubuntu 22.04:  pip install --user -r requirements_cuda12.txt
+#   Ubuntu 24.04:  pip install --user --break-system-packages -r requirements_cuda12.txt
+#
+--extra-index-url https://pypi.nvidia.com/
+numpy < 2
+cupy-cuda12x
+cuml-cu12

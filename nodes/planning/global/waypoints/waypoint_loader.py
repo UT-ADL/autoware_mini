@@ -2,7 +2,6 @@
 
 import rospy
 import csv
-import math
 
 from autoware_mini.msg import Path, Waypoint
 
@@ -12,8 +11,6 @@ class WaypointLoader:
         # Parameters
         self.waypoints_file = rospy.get_param("~waypoints_file")
         self.output_frame = rospy.get_param("~output_frame")
-        self.default_left_width = rospy.get_param("default_left_width")
-        self.default_right_width = rospy.get_param("default_right_width")
 
         # Publishers
         self.waypoints_pub = rospy.Publisher('global_path', Path, queue_size=10, latch=True, tcp_nodelay=True)
@@ -42,17 +39,11 @@ class WaypointLoader:
                 waypoint.position.y = float(row[1])
                 waypoint.position.z = float(row[2])
 
-                # convert the heading in waypoints file to radians
-                waypoint.heading = math.radians(float(row[3]))
                 # set waypoint velocity
                 waypoint.speed = float(row[4])
 
                 # set waypoint flags
-                waypoint.blinker_state = int(row[6])
-
-                # set waypoint width
-                waypoint.left_width = self.default_left_width
-                waypoint.right_width = self.default_right_width
+                waypoint.turn_signal = int(row[6])
 
                 waypoints.append(waypoint)
 
@@ -74,7 +65,7 @@ class WaypointLoader:
         waypoints = self.load_waypoints(self.waypoints_file)
         self.publish_waypoints(waypoints)
 
-        if len(waypoints) == 0:
+        if not waypoints:
             rospy.logerr("%s - no waypoints found in file: %s ", rospy.get_name(), self.waypoints_file)
         else:
             rospy.loginfo("%s - %i waypoints published from file: %s", rospy.get_name(), len(waypoints), self.waypoints_file)

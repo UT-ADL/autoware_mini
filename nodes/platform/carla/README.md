@@ -190,11 +190,10 @@ ROS node that detects traffic lights from the Carla simulator and publishes the 
 
 | Name | Type | Default value | Description |
 | ---- | ---- | ------------- | ----------- |
-| `/localization/coordinate_transformer` | `string` | `utm` | The coordinate transformer used to load the map. Only "utm" is currently supported. |
+| `/localization/use_custom_origin` | `bool` | `True` | Whether to use a custom origin. |
 | `/localization/utm_origin_lat` | `float` | `0.0` | The latitude of the UTM origin. |
 | `/localization/utm_origin_lon` | `float` | `0.0` | The longitude of the UTM origin. |
 | `~lanelet2_map_path` | `string` | - | Path of the Lanelet2 map file to load. |
-| `/localization/use_custom_origin` | `bool` | `True` | Whether to use a custom origin. |
 
 
 #### Subscribed Topics
@@ -208,7 +207,7 @@ ROS node that detects traffic lights from the Carla simulator and publishes the 
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| `traffic_light_status` | `autoware_mini/TrafficLightResultArray` | The Autoware traffic light status topic. |
+| `traffic_light_status` | `autoware_mini/StopLineStatusArray` | The Autoware traffic light status topic. |
 
 
 
@@ -228,7 +227,7 @@ This node receives Autoware messages and Carla messages, and publishes Ackermann
 
 | Name                     | Type                              | Description                                    |
 | ------------------------| ----------------------------------| -----------------------------------------------|
-| `/control/vehicle_cmd`   | `autoware_mini/VehicleCmd`        | The control message containing vehicle commands |
+| `/control/vehicle_cmd`   | `autoware_mini/VehicleCommand`    | The control message containing vehicle commands |
 | `/carla/ego_vehicle/vehicle_info` | `carla_msgs/CarlaEgoVehicleInfo` | The information message containing vehicle information |
 | `/carla/ego_vehicle/vehicle_status` | `carla_msgs/CarlaEgoVehicleStatus` | The status message containing vehicle status |
 | `/carla/ego_vehicle/vehicle_control_manual_override` | `std_msgs/Bool` | Message indicating whether the vehicle is under manual control |
@@ -244,7 +243,7 @@ This node receives Autoware messages and Carla messages, and publishes Ackermann
 
 
 
-## carla_waypoints_publisher
+## carla_global_planner
 
 Receive a path from carla_ros_waypoint_publisher and convert it to Autoware format.
 
@@ -257,9 +256,6 @@ Receive a path from carla_ros_waypoint_publisher and convert it to Autoware form
 | `distance_to_goal_limit` | `float` | - | Distance threshold to determine if the goal has been reached. |
 | `speed_limit` | `float` | - | Speed limit for the waypoints in the path. |
 | `ego_vehicle_stopped_speed_limit` | `float` | - | Speed threshold to determine if the vehicle is stopped. |
-| `/localization/use_custom_origin` | `bool` | `True` | Whether to use a custom origin for UTM coordinates. |
-| `/localization/utm_origin_lat` | `float` | `0.0` | Latitude of the custom origin for UTM coordinates. |
-| `/localization/utm_origin_lon` | `float` | `0.0` | Longitude of the custom origin for UTM coordinates. |
 
 
 #### Subscribed Topics

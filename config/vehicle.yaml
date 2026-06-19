@@ -21,4 +21,4 @@ bicycle_simulation:
 
 scenario_metrics_calculator:
   metrics_frequency: 10
-  transform_timeout: 0.06
+  transform_timeout: 0.2

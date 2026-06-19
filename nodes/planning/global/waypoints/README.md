@@ -15,8 +15,7 @@ x, y, z, yaw, velocity, change_flag, steering_flag, accel_flag, stop_flag, event
 | ----- | ----- | ------------- | ------------ |
 | `waypoints_file` | string | `-` | The path to the CSV file containing the waypoints. |
 | `output_frame` | string | `"map"` | The frame ID to use for the published waypoints. |
-| `default_left_width` | float | `1.4` | The left width of the waypoints in meters. |
-| `default_right_width` | float | `1.4` | The right width of the waypoints in meters. |
+
 
 
 #### Subscribed Topics
@@ -39,7 +38,7 @@ This node saves the current position and velocity of a vehicle as waypoints in a
 * `x`, `y`, `z` - coordinates from `current_pose` message
 * `yaw` - Orientation from `current_pose` message and converted into degrees
 * `velocity` - speed from `current_velocity` message
-* `steering_flag` - used for blinker information, mapped from vehicle status lamp
+* `steering_flag` - used for turn signal information
 * Other fields are currently set to 0
 
 

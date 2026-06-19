@@ -7,4 +7,4 @@ port=$2                    # Carla port
 sleep 30
 
 # launch the script
-$CARLA_ROOT/PythonAPI/examples/generate_traffic.py --host $host --port $port --async
+exec $CARLA_ROOT/PythonAPI/examples/generate_traffic.py --host $host --port $port --async

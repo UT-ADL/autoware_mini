@@ -1,0 +1,238 @@
+output_frame: map
+
+lidar:
+  points_preprocessor_gpu:
+    filter_frame: lidar_center
+    output_frame: map
+    inner_min_x: -2.0
+    inner_max_x: 3.0
+    inner_min_y: -1.0
+    inner_max_y: 1.0
+    inner_min_z: -2.0
+    inner_max_z: 2.0
+    outer_min_x: -60.0
+    outer_max_x: 75.0
+    outer_min_y: -60.0
+    outer_max_y: 60.0
+    outer_min_z: -3.5
+    outer_max_z: 0.05
+    ground_removal_cell_size: 0.6
+    ground_removal_tolerance: 0.15
+    ground_removal_filter_size: 3
+    ground_removal_filter_iterations: 1
+    voxel_grid_filter_leaf_size: 0.08
+    voxel_grid_filter_point: centroid  # random, centroid
+    deskew_lidar_scan_time: 0.1
+    deskew_num_bins: 20
+    cluster_epsilon: 0.6
+    cluster_min_samples: 4
+    cluster_in_2d: True
+    synchronizer_queue_size: 2
+    synchronizer_slop: 0.02
+    transform_timeout: 0.06
+  center:
+    crop_box:
+      min_x: -2.0
+      max_x: 3.0
+      min_y: -1.0
+      max_y: 1.0
+      min_z: -2.0
+      max_z: 2.0
+      negative: True
+      input_frame: lidar_center
+      output_frame: lidar_center
+    naive_ground_removal:
+      min_x: -60.0
+      max_x: 75.0
+      min_y: -60.0
+      max_y: 60.0
+      min_z: -3.5
+      max_z: 0.05
+      cell_size: 0.6
+      tolerance: 0.15
+      filter: average                    # none, median, average, minimum
+      filter_size: 3
+      filter_iterations: 1
+    jcp_ground_removal:
+      range_img_width: 1024
+      range_img_height: 32
+      sensor_height: 2.11
+      delta_R: 1
+    points_deskewer:
+      output_frame: map
+      deskew_lidar_scan_time: 0.1
+      deskew_num_bins: 20
+      transform_timeout: 0.06
+  front:
+    crop_box:
+      min_x: -2.0
+      max_x: 3.0
+      min_y: -1.0
+      max_y: 1.0
+      min_z: -2.0
+      max_z: 2.0
+      negative: True
+      input_frame: lidar_center
+      output_frame: lidar_center
+    naive_ground_removal:
+      min_x: -60.0
+      max_x: 75.0
+      min_y: -60.0
+      max_y: 60.0
+      min_z: -2.0
+      max_z: 0.55
+      cell_size: 0.6
+      tolerance: 0.15
+      filter: average                    # none, median, average, minimum
+      filter_size: 3
+      filter_iterations: 1
+    jcp_ground_removal:
+      range_img_width: 1024
+      range_img_height: 128
+      sensor_height: 1.7
+      delta_R: 1
+    points_deskewer:
+      output_frame: map
+      deskew_lidar_scan_time: 0.1
+      deskew_num_bins: 20
+      transform_timeout: 0.06
+  points_concatenator:
+    synchronizer_queue_size: 2
+    synchronizer_slop: 0.06
+  voxel_grid_filter:
+    leaf_size: 0.15
+    filter_field_name: ""
+  points_clusterer:
+    cluster_epsilon: 0.6
+    cluster_min_samples: 4
+    cluster_in_2d: True
+  cluster_detector:
+    min_cluster_size: 4
+    bounding_box_type: min_area     # axis_aligned, min_area
+    transform_timeout: 0.06         # needed for Carla
+    concave_hull_area_threshold: 50.0  # m^2 - use concave hull when bounding rect area exceeds this
+    concave_hull_ratio: 0.4            # 0.0 = tightest, 1.0 = convex hull
+
+  sfa_detector:
+    min_z: -2.73
+    max_z: 1.27
+    score_thresh: 0.2
+    top_k: 50
+    transform_timeout: 0.06
+    enable_fp16: True
+
+radar:
+  radar_detector:
+    consistency_check: 2            # Number of consecutive detections over which a radar object is detected before it is published/used further
+    radar_time_offset: -0.1         # Time offset for radar data to align with other sensors (s)
+    transform_timeout: 0.06
+
+lidar_radar_fusion:
+  max_euclidean_distance: 2.0
+  angular_velocity_threshold: 0.1 # Threshold for filtering out objects based on angular velocity (rad/s)
+  radar_speed_threshold: 1.0      # Threshold for filtering out stationary unmatched radar objects based on speed (m/s)
+  synchronizer_queue_size: 4
+  synchronizer_slop: 0.06
+
+obstacle_simulation:
+  publish_rate: 10
+
+ema_tracker:
+  enable_initial_velocity_estimate: False
+  enable_initial_acceleration_estimate: False
+  enable_missed_detection_propagation: True
+  detection_counter_threshold: 4
+  missed_counter_threshold: 3
+  iou_threshold: 0.1
+  velocity_gain: 0.2
+  acceleration_gain: 0.0
+  association_method: iou   # iou, euclidean
+  max_euclidean_distance: 1.0
+  update_heading_bboxes: True
+  update_heading_bboxes_min_speed: 0.7         # m/s min speed to perform heading and bbox update
+
+naive_predictor:
+  prediction_horizon: 3.0           # s
+  prediction_interval: 3.0          # s
+  prediction_min_speed: 0.7         # m/s
+
+map_based_predictor:
+  prediction_horizon: 5.0           # s
+  prediction_interval: 0.5          # s
+  trajectories_to_predict: 1        # number of trajectories
+  distance_from_lanelet: 0.0        # m - outside of lanelet area
+  heading_difference_threshold: 30.0  # degrees - object heading and lanelet heading
+  prediction_min_speed: 1.0         # m/s
+  prediction_clipping_deceleration_limit: 2.8  # m/s2
+  max_height_difference: 3.0        # m - maximum height difference for lanelet matching
+  # Matching cost = cross_track_weight * |cross_track| / 2.0m + heading_weight * heading_diff / 30deg + speed_weight * speed_diff / 11.1m/s
+  matching_cross_track_weight: 1.0  # weight for cross-track error (normalized by 2.0 m)
+  matching_heading_weight: 2.0      # weight for heading difference (normalized by 30 deg)
+  matching_speed_weight: 0.0        # weight for speed difference (normalized by 11.1 m/s ~ 40 km/h)
+  max_prediction_length: 150        # m - maximum length of predicted trajectory
+
+road_area_filter:
+  filtering_method: centroid        # 'intersects' (has overlap with road area), 'centroid' (centroid inside road area), 'within' (object completly inside road area)
+  use_map_extraction: True         # extract smaller map area around the ego vehicle for visualization
+  map_extraction_distance: 150      # m - distance from ego vehicle to extract map data
+
+mqtt_traffic_light_detector:
+  mqtt_host: traffic.traffest.com
+  mqtt_port: 8883
+  mqtt_topic: Tartu/#
+  enable_automatic_subscribe: True
+  automatic_subscription_range: 200
+  timeout: 2.0
+  id_string: " mqtt"      # string added to traffic light result and displayed in rviz
+  publish_rate: 10        # Hz
+
+traffic_light_majority_merger:
+  id_string: " cam"      # string added to traffic light result and displayed in rviz
+  
+camera_fl:
+  camera_traffic_light_detector_left:
+    roi_width_extent: 0.65  # ROI box width extension amount in meters
+    roi_height_extent: 0.55  # ROI box heigth extension amount in meters
+    min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
+    rectify_image: False  # the distortions of Mako cameras are so small they don't matter
+    transform_timeout: 0.06
+    iou_threshold: 0.05
+    camera_delay_compensation: 0.03
+    enable_fp16: True
+    turn_distance_limit: 40.0  # m - distance along the path to look for turn signals for turn-specific traffic light classification
+
+camera_fr:
+  camera_traffic_light_detector_right:
+    roi_width_extent: 0.65  # ROI box width extension amount in meters
+    roi_height_extent: 0.55  # ROI box height extension amount in meters
+    min_roi_width: 50  # minimum ROI width in pixels, when classification makes sense
+    rectify_image: False  # the distortions of Mako cameras are so small they don't matter
+    transform_timeout: 0.06
+    iou_threshold: 0.05
+    camera_delay_compensation: 0.03
+    enable_fp16: True
+    turn_distance_limit: 40.0  # m - distance along the path to look for turn signals for turn-specific traffic light classification
+
+interfacea_link1:
+  camera_traffic_light_detector_link1:
+    roi_width_extent: 0.65  # ROI box width extension amount in meters
+    roi_height_extent: 0.55  # ROI box height extension amount in meters
+    min_roi_width: 15  # minimum ROI width in pixels, when classification makes sense
+    rectify_image: False  # the distortions of Nvidia cameras are significant and rectification should be done by image_proc, since PinHoleCameraModel python doesn't have FishEye distortion model
+    transform_timeout: 0.06
+    iou_threshold: 0.05
+    camera_delay_compensation: 0.2
+    enable_fp16: True
+    turn_distance_limit: 40.0  # m - distance along the path to look for turn signals for turn-specific traffic light classification
+
+interfacea_link2:
+  camera_traffic_light_detector_link2:
+    roi_width_extent: 0.65  # ROI box width extension amount in meters
+    roi_height_extent: 0.55  # ROI box height extension amount in meters
+    min_roi_width: 15  # minimum ROI width in pixels, when classification makes sense
+    rectify_image: False  # the distortions of Nvidia cameras are significant and rectification should be done by image_proc, since PinHoleCameraModel python doesn't have FishEye distortion model
+    transform_timeout: 0.06
+    iou_threshold: 0.05
+    camera_delay_compensation: 0.2
+    enable_fp16: True
+    turn_distance_limit: 40.0  # m - distance along the path to look for turn signals for turn-specific traffic light classification

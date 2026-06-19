@@ -3,7 +3,7 @@
 
 ## global_path_visualizer
 
-ROS node that visualizes the global path with markers in RViz. It displays path waypoints as colored arrows (based on blinker state), adds velocity labels, and triangulates the path for better visibility.
+ROS node that visualizes the global path with markers in RViz. It displays path waypoints as colored arrows (based on turn signal), adds velocity labels, and triangulates the path for better visibility.
 
 
 #### Parameters

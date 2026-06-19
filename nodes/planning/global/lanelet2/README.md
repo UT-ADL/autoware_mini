@@ -81,7 +81,6 @@ ROS node for visualizing Lanelet2 map elements including road boundaries, center
 | Name | Type | Default Value | Description |
 |------|------|---------|-------------|
 | `~lanelet2_map_path` | string | `-` | Path to the Lanelet2 map file |
-| `~enable_auto_stop_checker` | bool | `-` | Whether to enable the automatic stop checker functionality |
 | `~use_map_extraction` | bool | `False` | Extract smaller map area around the ego vehicle for visualization |
 | `~map_extraction_distance` | float | `500` | Distance from ego vehicle to extract map data (m) |
 | `local_path_length` | float | `100` | Length of the local path (m) |
@@ -91,8 +90,8 @@ ROS node for visualizing Lanelet2 map elements including road boundaries, center
 
 | Name | Type | Description |
 |------|------|-------------|
-| `/detection/traffic_light_status` | `autoware_mini/TrafficLightResultArray` | Status of traffic lights |
-| `/planning/lets_go` | `std_msgs/Int32` | Signal to proceed at yield stop lines |
+| `/perception/traffic_light_status` | `autoware_mini/StopLineStatusArray` | Status of traffic lights |
+| `/planning/confirm_drive` | `std_msgs/Int32` | Signal to proceed at yield stop lines |
 | `/localization/current_pose` | `geometry_msgs/PoseStamped` | The current position of the ego vehicle (when use_map_extraction is true) |
 
 

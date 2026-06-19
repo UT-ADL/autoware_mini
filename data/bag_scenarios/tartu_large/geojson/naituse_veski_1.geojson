@@ -1,0 +1,10 @@
+{
+"type": "FeatureCollection",
+"name": "naituse_veski_1",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "label": "ego", "speed": 30.0, "duration": 28.0, "delay": 0.0, "length": 4.0, "width": 2.0, "acceleration": 0.0, "elevation": 64.8 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.710701191987315, 58.379427137553996 ], [ 26.710298832281701, 58.379341261229612 ], [ 26.709640715635683, 58.379191278766839 ], [ 26.709240806283638, 58.37910095552067 ], [ 26.708905147200483, 58.379048792492725 ] ] } },
+{ "type": "Feature", "properties": { "label": null, "speed": 20.0, "duration": 25.0, "delay": 0.0, "length": 4.0, "width": 2.0, "acceleration": 0.0, "elevation": 64.8 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.709587817106154, 58.379572281962361 ], [ 26.709790970017437, 58.379333014159641 ], [ 26.709969486933634, 58.379117691353166 ], [ 26.710239408660101, 58.378804542284939 ] ] } },
+{ "type": "Feature", "properties": { "label": "bicycle", "speed": 15.0, "duration": 20.0, "delay": 3.5, "length": 3.0, "width": 0.75, "acceleration": 0.0, "elevation": 64.8 }, "geometry": { "type": "LineString", "coordinates": [ [ 26.710152687505996, 58.378960990678628 ], [ 26.710012347703749, 58.379121431060746 ], [ 26.709918961636177, 58.379236726548243 ], [ 26.709780640012749, 58.379405217534185 ], [ 26.70970547526289, 58.379502466861481 ] ] } }
+]
+}

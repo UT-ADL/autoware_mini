@@ -1,0 +1,3 @@
+scenario_name,ade_threshold,fde_threshold,collision_threshold,max_deceleration_threshold
+give_way_bus_01,10,10,0,1.5
+give_way_bus_02,10,10,0,1.5

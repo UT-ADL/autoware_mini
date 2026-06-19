@@ -25,7 +25,7 @@ ROS node that implements a simple bicycle model for testing waypoint following c
 | ---- | ---- | ----------- |
 | `/initialpose` | `geometry_msgs/PoseWithCovarianceStamped` | Initial location and orientation of the vehicle. Use the 2D Pose Estimate button in Rviz to set it. |
 | `/initialvelocity` | `geometry_msgs/TwistStamped` | Initial velocity of the vehicle. |
-| `/control/vehicle_cmd` | `autoware_mini/VehicleCmd` | Velocity is taken from `ctrl_cmd.linear_velocity` and steering angle from `ctrl_cmd.steering_angle`. Blinker state from `lamp_cmd.l` and `lamp_cmd.r` is retained for publishing in `vehicle_status`. |
+| `/control/vehicle_cmd` | `autoware_mini/VehicleCommand` | Speed, steering angle, and turn signal are taken from the command and retained for publishing in `vehicle_status`. |
 
 
 #### Published Topics
@@ -34,7 +34,7 @@ ROS node that implements a simple bicycle model for testing waypoint following c
 | ---- | ---- | ----------- |
 | `/localization/current_pose` | `geometry_msgs/PoseStamped` | Current pose of the vehicle according to the bicycle model. |
 | `/localization/current_velocity` | `geometry_msgs/TwistStamped` | Current velocity of the vehicle based on the bicycle model. |
-| `vehicle_status` | `autoware_mini/VehicleStatus` | Vehicle status including speed, steering angle, and lamp (blinker) states. |
+| `vehicle_status` | `autoware_mini/VehicleStatus` | Vehicle status including speed, steering angle, and turn signal state. |
 | `bicycle_markers` | `visualization_msgs/MarkerArray` | Bicycle model visualization for debugging. |
 
 

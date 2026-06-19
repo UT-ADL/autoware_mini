@@ -13,16 +13,16 @@ class CarlaStatusVisualizer:
     def vehicle_status_callback(self, vehicle_status):
         carla_status = CarlaEgoVehicleStatus()
         carla_status.header = vehicle_status.header
-        carla_status.velocity = vehicle_status.speed / 3.6
+        carla_status.velocity = vehicle_status.speed
         #carla_status.acceleration = ...
         #carla_status.orientation = ...
         carla_status.control.header = vehicle_status.header
-        carla_status.control.throttle = vehicle_status.drivepedal / 1000
+        carla_status.control.throttle = vehicle_status.drivepedal
         carla_status.control.steer = vehicle_status.angle
-        carla_status.control.brake = vehicle_status.brakepedal / 1000
+        carla_status.control.brake = vehicle_status.brakepedal
         carla_status.control.hand_brake = False
         carla_status.control.reverse = False
-        carla_status.control.gear = vehicle_status.current_gear.gear
+        carla_status.control.gear = vehicle_status.gear
         carla_status.control.manual_gear_shift = False
         self.carla_status_pub.publish(carla_status)
 
