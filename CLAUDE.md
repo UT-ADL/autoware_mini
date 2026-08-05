@@ -17,6 +17,38 @@ Autoware Mini is a minimalistic Python-based autonomous vehicle software stack b
 - **GitHub mirror**: `UT-ADL/autoware_mini` - main branch: `release`
 - **Merge requests**: Unless specified otherwise, create merge requests for merging into `main` branch (GitLab)
 
+## Releasing to GitHub
+
+Public releases go to the GitHub mirror (`upstream` remote, `UT-ADL/autoware_mini`) on the
+`release` branch. The `release` branch is a **squashed, disjoint history** from GitLab `main`: each
+"Release X" is a single commit whose tree equals the then-current `main`, with the previous release
+tip as its only parent. This keeps the public repo small. Releases use a simple sequential scheme
+(`v0.1`, `v0.2`, …), independent of `package.xml`'s version.
+
+To cut a release:
+
+```bash
+git fetch upstream                              # get the current release tip (may have direct PRs)
+git checkout release && git reset --hard upstream/release
+COMMIT=$(git commit-tree 'main^{tree}' -p HEAD -m "Release X.Y")
+git reset --hard "$COMMIT"
+git diff --stat main                            # GATE: must be EMPTY (release tree == main tree)
+git tag vX.Y
+git push upstream release && git push upstream vX.Y
+git checkout main
+gh release create vX.Y --repo UT-ADL/autoware_mini --title "Release X.Y" --notes-file <notes>
+```
+
+- **Build the commit on the current `upstream/release` tip**, not the local `release` branch (which
+  is often stale). The empty `git diff --stat main` is the critical correctness gate.
+- **Watch for release-branch-only commits**: community PRs are sometimes merged directly to the
+  GitHub `release` branch and are absent from `main`. A raw squash of `main` reverts them. Fix such
+  changes in `main` first (commit + push to GitLab), then squash — do not patch only the release commit.
+- **Release notes**: group into `## Major changes` and `## Minor improvements`, one concise sentence
+  each, ~10 total. Keep terse; don't name the app/medium unless it matters (e.g. monitoring is
+  RViz-based — describe what it monitors, not "web dashboard"). Derive notes from the merged feature
+  branches in `<prev-release-source>..main` (`git log --merges`).
+
 ## Build Commands
 
 ```bash

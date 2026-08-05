@@ -25,9 +25,9 @@
   <arg name='use_manual_control'  default='false' /><!-- Toggle manual control-->
   <arg name='generate_traffic'    default='false'/><!-- Generate Traffic -->
   <arg name="publish_clock"       default="true"  doc="Let the Carla bridge publish /clock; disable when an external source (e.g. bag) provides /clock" />
-  <!-- CARLA Rosbridge synchronous_mode: run async with variable time step in vehicle-in-the-loop and manual control -->
-  <arg name="synchronous_mode"    default="$(eval not (use_vil or use_manual_control))" />
-  <arg name='fixed_delta_seconds' default='$(eval 0 if (use_vil or use_manual_control) else 0.05)' />
+  <!-- CARLA Rosbridge synchronous_mode: run async with variable time step except when running scenarios or using sensors. VIL and manual control always run in asynch mode -->
+  <arg name="synchronous_mode"    default="$(eval (use_scenario_runner or use_lidar or use_radar or use_gnss or use_mako_cameras or use_nvidia_cameras) and not use_vil and not use_manual_control)" />
+  <arg name='fixed_delta_seconds' default='$(eval 0.05 if synchronous_mode else 0.0)' />
   <arg name="passive"             default="$(eval use_scenario_runner and type(route_id) == int)" />
 
   <!--

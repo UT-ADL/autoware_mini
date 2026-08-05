@@ -91,6 +91,7 @@
          /clock so it does not fight the external one, and stamp bridge TF/messages with ROS time. -->
     <arg name="publish_clock"       value="$(arg publish_clock)" />
     <arg name="use_ros_timestamp"   value="$(eval not publish_clock)" />
+    <arg name="register_all_sensors" value="false" />
   </include>
 
   <!-- ====================================================================================================== -->

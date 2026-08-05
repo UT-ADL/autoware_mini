@@ -6,16 +6,8 @@
             "id": "traffic_lights"
         },
         {
-            "type": "sensor.pseudo.objects",
-            "id": "objects"
-        },
-        {
             "type": "sensor.pseudo.actor_list",
             "id": "actor_list"
-        },
-        {
-            "type": "sensor.pseudo.markers",
-            "id": "markers"
         },
         {
             "type": "sensor.pseudo.opendrive_map",

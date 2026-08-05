@@ -143,21 +143,21 @@ class Lanelet2MapVisualizer:
                 right_of_way_lanelet_border = get_polygon_from_lanelet(lanelet)
                 right_of_way_lanelet_points.extend(triangulate_polygon(right_of_way_lanelet_border))
 
-        left_boundary_marker = linelist_to_marker(left_boundary_points, "Left boundary", 0, DARK_GREY, 0.1, stamp)
-        right_boundary_marker = linelist_to_marker(right_boundary_points, "Right boundary", 0, DARK_GREY, 0.1, stamp)
-        centerline_marker = triangles_to_marker(centerline_points, "Centerline", 0, CYAN, 1.0, stamp)
-        bus_lane_marker = triangles_to_marker(bus_lane_points, "Bus lane", 0, DARK_BLUE, 1.0, stamp)
-        bicycle_lane_marker = triangles_to_marker(bicycle_lane_points, "Bicycle lane", 0, LIGHT_BLUE, 1.0, stamp)
-        crosswalk_marker = triangles_to_marker(crosswalk_points, "Crosswalk", 0, ORANGE, 1.0, stamp)
-        right_of_way_marker = triangles_to_marker(right_of_way_lanelet_points, "Right of way area", 0, INDIGO, 1.0, stamp)
-
-        marker_array.markers.append(left_boundary_marker)
-        marker_array.markers.append(right_boundary_marker)
-        marker_array.markers.append(centerline_marker)
-        marker_array.markers.append(bus_lane_marker)
-        marker_array.markers.append(bicycle_lane_marker)
-        marker_array.markers.append(crosswalk_marker)
-        marker_array.markers.append(right_of_way_marker)
+        # skip markers without points, RViz reports them as errors
+        if left_boundary_points:
+            marker_array.markers.append(linelist_to_marker(left_boundary_points, "Left boundary", 0, DARK_GREY, 0.1, stamp))
+        if right_boundary_points:
+            marker_array.markers.append(linelist_to_marker(right_boundary_points, "Right boundary", 0, DARK_GREY, 0.1, stamp))
+        if centerline_points:
+            marker_array.markers.append(triangles_to_marker(centerline_points, "Centerline", 0, CYAN, 1.0, stamp))
+        if bus_lane_points:
+            marker_array.markers.append(triangles_to_marker(bus_lane_points, "Bus lane", 0, DARK_BLUE, 1.0, stamp))
+        if bicycle_lane_points:
+            marker_array.markers.append(triangles_to_marker(bicycle_lane_points, "Bicycle lane", 0, LIGHT_BLUE, 1.0, stamp))
+        if crosswalk_points:
+            marker_array.markers.append(triangles_to_marker(crosswalk_points, "Crosswalk", 0, ORANGE, 1.0, stamp))
+        if right_of_way_lanelet_points:
+            marker_array.markers.append(triangles_to_marker(right_of_way_lanelet_points, "Right of way area", 0, INDIGO, 1.0, stamp))
 
         return marker_array
 
@@ -221,8 +221,10 @@ class Lanelet2MapVisualizer:
                 else:
                     stop_line_points.extend(points)
 
-        marker_array.markers.append(linelist_to_marker(stop_line_points, "Stop lines", 0, WHITE, 0.3, rospy.Time.now()))
-        marker_array.markers.append(linelist_to_marker(speed_bump_points, "Speed bumps", 0, LIGHT_GREY, 0.3, rospy.Time.now()))
+        if stop_line_points:
+            marker_array.markers.append(linelist_to_marker(stop_line_points, "Stop lines", 0, WHITE, 0.3, rospy.Time.now()))
+        if speed_bump_points:
+            marker_array.markers.append(linelist_to_marker(speed_bump_points, "Speed bumps", 0, LIGHT_GREY, 0.3, rospy.Time.now()))
 
         return marker_array
     
@@ -255,7 +257,8 @@ class Lanelet2MapVisualizer:
                     marker_array.markers.append(polygon_text_marker(polygon_points, "Road closure labels", label_id, text, rospy.Time.now()))
                     label_id += 1
 
-        marker_array.markers.append(triangles_to_marker(road_closure_polygon_points, "Road closures", 0, PINK, 1.0, rospy.Time.now()))
+        if road_closure_polygon_points:
+            marker_array.markers.append(triangles_to_marker(road_closure_polygon_points, "Road closures", 0, PINK, 1.0, rospy.Time.now()))
 
         return marker_array
 
